@@ -1,0 +1,1 @@
+"C:\Share\My Dropbox\Private\Tools\Development\SWIG\swig.exe" -c++ -java -package jp.ac.waseda.cs.washi *.i

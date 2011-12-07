@@ -1,0 +1,136 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.Windows.Forms;
+using Code2Xml.Core.CodeToXmls;
+using Code2Xml.Languages.C.CodeToXmls;
+using Code2Xml.Languages.Java.CodeToXmls;
+using Code2Xml.Languages.Python2.CodeToXmls;
+using Code2Xml.Languages.Python3.CodeToXmls;
+using Occf.Core.CoverageCode;
+using Occf.Core.CoverageInfos;
+using Occf.Tools.Core;
+using Paraiba.Core;
+using Paraiba.IO;
+
+namespace Occf.Tools.Window {
+	public partial class MainForm : Form {
+		private ProgressForm _progressForm;
+
+		public MainForm() {
+			InitializeComponent();
+		}
+
+		private ProgressForm ProgressForm {
+			get { return _progressForm ?? (_progressForm = new ProgressForm()); }
+		}
+
+		private void MainFormLoad(object sender, EventArgs e) {
+			var exeDir = Path.GetDirectoryName(Application.ExecutablePath);
+			txtOutput.Text =
+				Path.GetFullPath(Path.Combine(exeDir, "..", "codes", "output"));
+			cmbLanguage.SelectedIndex = 0;
+		}
+
+		private void MainForm_DragEnter(object sender, DragEventArgs e) {
+			e.Effect = DragDropEffects.All;
+		}
+
+		private void MainFormDragDrop(object sender, DragEventArgs e) {
+			if (e.Data.GetDataPresent(DataFormats.FileDrop)) {
+				var filePathes = ((string[])e.Data.GetData(DataFormats.FileDrop));
+
+				txtBase.Text = Path.GetDirectoryName(filePathes[0]);
+				var basePath = txtBase.Text.AddIfNotEndsWith('\\');
+
+				var files = filePathes.SelectMany(path => EnumerateFiles(path, "*"))
+					.Select(path => XPath.GetRelativePath(path, basePath));
+
+				clbFiles.Items.Clear();
+				foreach (var file in files) {
+					clbFiles.Items.Add(file);
+				}
+				SetFileCheckedWithCombBox();
+			}
+		}
+
+		private static IEnumerable<string> EnumerateFiles(string path, string pattern) {
+			if (Directory.Exists(path)) {
+				var subPathes = Directory.GetFiles(path, pattern,
+					SearchOption.AllDirectories);
+				foreach (var subPath in subPathes) {
+					yield return subPath;
+				}
+			} else if (File.Exists(path)) {
+				yield return path;
+			}
+		}
+
+		private void BtnStartClick(object sender, EventArgs e) {
+			var files = clbFiles.CheckedItems.Cast<string>();
+			var basePath = txtBase.Text.AddIfNotEndsWith('\\');
+			var outDirPath = txtOutput.Text.AddIfNotEndsWith('\\');
+
+			var filePathList = files.ToList();
+			var langName = cmbLanguage.Text;
+
+			Action action = () => {
+				var profile = ScriptCoverageProfile.Load(langName);
+				var info = new CoverageInfo(basePath, profile.Name, SharingMethod.File);
+				foreach (var filePath in filePathList) {
+					CoverageCodeGenerator.WriteCoveragedCode(profile, info, filePath, outDirPath);
+				}
+				using (
+					var fs = new FileStream(Path.Combine(outDirPath, "coverageinfo"),
+						FileMode.Create)) {
+					var formatter = new BinaryFormatter();
+					formatter.Serialize(fs, info);
+				}
+			};
+			ProgressForm.Start(this, filePathList.Count, action);
+		}
+
+		private void CmbLanguageSelectedIndexChanged(object sender, EventArgs e) {
+			SetFileCheckedWithCombBox();
+		}
+
+		private void SetFileCheckedWithCombBox() {
+			switch (cmbLanguage.Text) {
+			case "C":
+				SetItemCheckedWithAstGenerator(CCodeToXml.Instance);
+				break;
+			case "Java":
+				SetItemCheckedWithAstGenerator(JavaCodeToXml.Instance);
+				break;
+			case "Python2":
+				SetItemCheckedWithAstGenerator(Python2CodeToXml.Instance);
+				break;
+			case "Python3":
+				SetItemCheckedWithAstGenerator(Python3CodeToXml.Instance);
+				break;
+			}
+		}
+
+		private void SetItemCheckedWithAstGenerator(CodeToXml xmlGenerator) {
+			var extensions = xmlGenerator.TargetExtensions;
+			var count = clbFiles.Items.Count;
+			for (int i = 0; i < count; i++) {
+				var relativePath = clbFiles.Items[i] as string;
+				var isTargetFile =
+					extensions.Contains(Path.GetExtension(relativePath).ToLower());
+				clbFiles.SetItemChecked(i, isTargetFile);
+			}
+		}
+
+		private void btnReporter_Click(object sender, EventArgs e) {
+			var info = new ProcessStartInfo {
+				FileName = "OpenCodeCoverageFramework.Reporter.exe",
+				Arguments = Path.Combine(txtOutput.Text, "coverageinfo"),
+			};
+			Process.Start(info);
+		}
+	}
+}

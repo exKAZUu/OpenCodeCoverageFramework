@@ -1,0 +1,9 @@
+LIBRARY Occf.Writer.SharedMemory.dll
+
+EXPORTS
+	Initialize
+	Release
+	Read
+	Write
+	WriteStatement
+	WritePredicate

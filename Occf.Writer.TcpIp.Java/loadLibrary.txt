@@ -1,0 +1,4 @@
+  static {
+    System.loadLibrary("Occf.Writer.TcpIp.Java");
+  }
+

@@ -1,0 +1,5 @@
+LIBRARY Occf.Writer.TcpIp.dll
+
+EXPORTS
+	WriteStatement
+	WritePredicate

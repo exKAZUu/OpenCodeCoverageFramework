@@ -1,0 +1,3 @@
+  static {
+    System.loadLibrary("Occf.Writer.SharedMemory.Java");
+  }

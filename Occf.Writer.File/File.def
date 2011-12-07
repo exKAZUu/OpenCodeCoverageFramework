@@ -1,0 +1,8 @@
+LIBRARY Occf.Writer.File.dll
+
+EXPORTS
+	Initialize
+	Release
+	Write
+	WriteStatement
+	WritePredicate
