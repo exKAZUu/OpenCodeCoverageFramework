@@ -39,12 +39,11 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\NUnit.2.5.10.11092\lib\nunit.mocks.dll</HintPath>
     </Reference>
-    <Reference Include="Paraiba">
-      <HintPath>..\lib\Paraiba.dll</HintPath>
+    <Reference Include="Paraiba, Version=1.0.0.10, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Paraiba.1.0.0.10\lib\net40\Paraiba.dll</HintPath>
     </Reference>
-    <Reference Include="Paraiba.Experiment, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL" />
-    <Reference Include="Paraiba.IO">
-      <HintPath>..\lib\Paraiba.IO.dll</HintPath>
+    <Reference Include="Paraiba.Experiment, Version=1.0.0.11, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Paraiba.Experiment.1.0.0.11\lib\net40\Paraiba.Experiment.dll</HintPath>
     </Reference>
     <Reference Include="pnunit.framework, Version=1.0.4109.34242, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>

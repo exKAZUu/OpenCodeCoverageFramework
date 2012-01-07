@@ -100,11 +100,11 @@
     <Reference Include="NDesk.Options">
       <HintPath>..\lib\NDesk.Options.dll</HintPath>
     </Reference>
-    <Reference Include="Paraiba">
-      <HintPath>..\lib\Paraiba.dll</HintPath>
+    <Reference Include="Paraiba, Version=1.0.0.10, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Paraiba.1.0.0.10\lib\net40\Paraiba.dll</HintPath>
     </Reference>
-    <Reference Include="Paraiba.Experiment">
-      <HintPath>..\lib\Paraiba.Experiment.dll</HintPath>
+    <Reference Include="Paraiba.Experiment, Version=1.0.0.11, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Paraiba.Experiment.1.0.0.11\lib\net40\Paraiba.Experiment.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -139,6 +139,9 @@
       <Project>{C16C169D-A313-45CA-A0CB-1C86B71F08EC}</Project>
       <Name>Occf.Tools.Core</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

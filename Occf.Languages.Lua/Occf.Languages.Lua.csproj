@@ -34,17 +34,21 @@
     <Reference Include="Antlr3.Runtime, Version=3.4.1.9004, Culture=neutral, PublicKeyToken=eb42632606e9261f, processorArchitecture=MSIL">
       <HintPath>..\lib\Antlr3.Runtime.dll</HintPath>
     </Reference>
-    <Reference Include="Code2Xml.Core, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\lib\Code2Xml.Core.dll</HintPath>
+    <Reference Include="Code2Xml.Core, Version=1.0.0.12, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Code2Xml.Core.1.0.0.12\lib\net40\Code2Xml.Core.dll</HintPath>
     </Reference>
-    <Reference Include="Code2Xml.Languages.Lua">
-      <HintPath>..\lib\Code2Xml.Languages.Lua.dll</HintPath>
+    <Reference Include="Code2Xml.Languages.Lua, Version=1.0.0.10, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Code2Xml.Languages.Lua.1.0.0.10\lib\net40\Code2Xml.Languages.Lua.dll</HintPath>
     </Reference>
-    <Reference Include="Paraiba">
-      <HintPath>..\lib\Paraiba.dll</HintPath>
+    <Reference Include="Paraiba, Version=1.0.0.10, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Paraiba.1.0.0.10\lib\net40\Paraiba.dll</HintPath>
     </Reference>
-    <Reference Include="Paraiba.Experiment">
-      <HintPath>..\lib\Paraiba.Experiment.dll</HintPath>
+    <Reference Include="Paraiba.Experiment, Version=1.0.0.11, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Paraiba.Experiment.1.0.0.11\lib\net40\Paraiba.Experiment.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -57,6 +61,9 @@
   <ItemGroup>
     <Compile Include="Operators\Selectors\LuaElements.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

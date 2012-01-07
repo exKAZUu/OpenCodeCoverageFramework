@@ -31,17 +31,20 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Code2Xml.Core, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\lib\Code2Xml.Core.dll</HintPath>
+    <Reference Include="Code2Xml.Core, Version=1.0.0.12, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Code2Xml.Core.1.0.0.12\lib\net40\Code2Xml.Core.dll</HintPath>
     </Reference>
     <Reference Include="Code2Xml.Languages.Python3">
       <HintPath>..\lib\Code2Xml.Languages.Python3.dll</HintPath>
     </Reference>
-    <Reference Include="Paraiba">
-      <HintPath>..\lib\Paraiba.dll</HintPath>
+    <Reference Include="Paraiba, Version=1.0.0.10, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Paraiba.1.0.0.10\lib\net40\Paraiba.dll</HintPath>
     </Reference>
-    <Reference Include="Paraiba.Experiment">
-      <HintPath>..\lib\Paraiba.Experiment.dll</HintPath>
+    <Reference Include="Paraiba.Experiment, Version=1.0.0.11, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Paraiba.Experiment.1.0.0.11\lib\net40\Paraiba.Experiment.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -67,6 +70,12 @@
       <Project>{E2C3E1ED-7C87-4F50-9786-1CB9DA7FEB93}</Project>
       <Name>Occf.Core</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+    <None Include="ParserScripts\Python3\st2xml.py">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

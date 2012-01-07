@@ -26,19 +26,6 @@ namespace Occf.Tools.Cui {
 		}
 		
 		private static bool Run(string[] args) {
-			if (args.Length < 1) {
-				args = new[] {
-						"ins",
-						@"C:\Users\exKAZUu\Dropbox\Linux\Coverage\BTree-Python",
-						@"-l",
-						@"Python2",
-				};
-			}
-			//args = new[] {
-			//        "ins",
-			//        @"C:\Users\exKAZUu\Dropbox\Linux\Coverage\QuickSort-Java",
-			//        @"C:\Users\exKAZUu\Dropbox\Linux\Coverage\QuickSort-Java\src\test",
-			//};
 			if (args.Length < 1)
 				return Print(Usage);
 
