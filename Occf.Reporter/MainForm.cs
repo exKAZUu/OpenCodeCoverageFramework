@@ -5,7 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Windows.Forms;
-using Occf.Core.CoverageInfos;
+using Occf.Core.CoverageInformation;
 using Occf.Reader.SharedMemory;
 using Paraiba.IO;
 using Paraiba.Linq;
@@ -115,7 +115,7 @@ namespace Occf.Reporter {
 			}
 
 			// タグを構成要素に分解して再構成する
-			var tagSet = _info.TargetList.Select(t => t.Tag).ToHashSet();
+			var tagSet = _info.Targets.Select(t => t.Tag).ToHashSet();
 			var newTagSet = new SortedSet<string>();
 
 			foreach (var tag in tagSet) {
@@ -135,7 +135,7 @@ namespace Occf.Reporter {
 
 			switch (_info.SharingMethod) {
 			case SharingMethod.SharedMemory:
-				SharedMemoryReporter.Initialize(_info.TargetList.Count);
+				SharedMemoryReporter.Initialize(_info.Targets.Count);
 				break;
 			case SharingMethod.TcpIp:
 				break;
@@ -160,10 +160,10 @@ namespace Occf.Reporter {
 		}
 
 		private void BtnMeasureClick(object sender, EventArgs e) {
-			var coverageElements = _info.TargetList;
+			var coverageElements = _info.Targets;
 			var count = coverageElements.Count;
 			for (int i = 0; i < count; i++) {
-				coverageElements[i].UpdateState(null, SharedMemoryReporter.Read(i));
+				coverageElements[i].UpdateState(SharedMemoryReporter.Read(i));
 			}
 
 			_lbTag.SelectAll();

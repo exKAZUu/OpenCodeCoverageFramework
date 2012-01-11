@@ -2,7 +2,7 @@
 using System.Diagnostics.Contracts;
 using System.IO;
 
-namespace Occf.Core.CodeInformations {
+namespace Occf.Core.CodeInformation {
 	[Serializable]
 	public struct CodePosition : IEquatable<CodePosition> {
 		public int EndLine;

@@ -11,7 +11,7 @@ using Code2Xml.Languages.Java.CodeToXmls;
 using Code2Xml.Languages.Python2.CodeToXmls;
 using Code2Xml.Languages.Python3.CodeToXmls;
 using Occf.Core.CoverageCode;
-using Occf.Core.CoverageInfos;
+using Occf.Core.CoverageInformation;
 using Occf.Tools.Core;
 using Paraiba.Core;
 using Paraiba.IO;

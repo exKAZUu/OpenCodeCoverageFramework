@@ -1,11 +1,11 @@
 ﻿using System;
 
-namespace Occf.Core.CoverageInfos {
+namespace Occf.Core.CoverageInformation {
 	[Flags]
 	public enum CoverageState {
 		None = 0,
-		TrueOnly = 1,
-		FalseOnly = 2,
+		FalseOnly = 1,
+		TrueOnly = 2,
 		Done = 3,
 	}
 }

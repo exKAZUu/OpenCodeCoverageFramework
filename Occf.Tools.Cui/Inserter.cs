@@ -6,7 +6,7 @@ using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using NDesk.Options;
 using Occf.Core.CoverageCode;
-using Occf.Core.CoverageInfos;
+using Occf.Core.CoverageInformation;
 using Occf.Core.Extensions;
 using Occf.Core.TestInfos;
 using Occf.Tools.Core;
@@ -129,7 +129,7 @@ namespace Occf.Tools.Cui {
 			CopyLibraries(profile, workDirPath);
 		}
 
-		private static void RemoveExistingLibraries(ScriptCoverageProfile profile, string dirPath) {
+		private static void RemoveExistingLibraries(CoverageProfile profile, string dirPath) {
 			foreach (var name in profile.LibraryNames) {
 				var dstPath = Path.Combine(dirPath, name);
 				File.Delete(dstPath);

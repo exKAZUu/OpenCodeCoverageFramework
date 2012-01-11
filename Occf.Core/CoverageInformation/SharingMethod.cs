@@ -1,4 +1,4 @@
-﻿namespace Occf.Core.CoverageInfos {
+﻿namespace Occf.Core.CoverageInformation {
 	public enum SharingMethod {
 		SharedMemory,
 		TcpIp,

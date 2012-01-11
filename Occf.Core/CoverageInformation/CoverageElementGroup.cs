@@ -1,11 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Occf.Core.CodeInformations;
+using Occf.Core.CodeInformation;
 
-namespace Occf.Core.CoverageInfos {
+namespace Occf.Core.CoverageInformation {
 	[Serializable]
 	public class CoverageElementGroup : ICoverageElement {
+        /// <summary>
+        /// Initializes a instance for one coverage element.
+        /// For example, 
+        /// </summary>
+        /// <param name="parentElement"></param>
+		public CoverageElementGroup(CoverageElement parentElement) {
+			ParentElement = parentElement;
+			Targets = new List<CoverageElement>();
+		}
+
 		public CoverageElementGroup(CoverageElement parentElement,
 		                            IList<CoverageElement> targets) {
 			ParentElement = parentElement;

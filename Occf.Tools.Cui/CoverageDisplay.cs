@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using NDesk.Options;
-using Occf.Core.CoverageInfos;
+using Occf.Core.CoverageInformation;
 using Occf.Tools.Core;
 using Paraiba.Linq;
 
@@ -231,7 +231,7 @@ namespace Occf.Tools.Cui {
 
 		private static SortedSet<string> ReconstructTags(CoverageInfo info) {
 			// タグを構成要素に分解して再構成する
-			var tagSet = info.TargetList.Select(t => t.Tag).ToHashSet();
+			var tagSet = info.Targets.Select(t => t.Tag).ToHashSet();
 			var newTagSet = new SortedSet<string>();
 
 			foreach (var tag in tagSet) {

@@ -50,20 +50,21 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CodeInformations\CodePosition.cs" />
-    <Compile Include="CodeInformations\CodePositionFactory.cs" />
+    <Compile Include="CodeInformation\CodePosition.cs" />
+    <Compile Include="CodeInformation\CodePositionFactory.cs" />
     <Compile Include="CoverageCode\CoverageCodeGenerator.cs" />
-    <Compile Include="CoverageInfos\LoopCoverageElement.cs" />
-    <Compile Include="CoverageInfos\CoverageDataReader.cs" />
-    <Compile Include="CoverageInfos\CoverageElement.cs" />
-    <Compile Include="CoverageInfos\CoverageElementGroup.cs" />
-    <Compile Include="CoverageInfos\CoverageState.cs" />
-    <Compile Include="CoverageInfos\ICoverageElement.cs" />
-    <Compile Include="CoverageInfos\SharingMethod.cs" />
-    <Compile Include="CoverageInfos\CoverageInfo.cs" />
+    <Compile Include="CoverageInformation\ForeachCoverageElement.cs" />
+    <Compile Include="CoverageInformation\CoverageDataReader.cs" />
+    <Compile Include="CoverageInformation\CoverageElement.cs" />
+    <Compile Include="CoverageInformation\CoverageElementGroup.cs" />
+    <Compile Include="CoverageInformation\CoverageState.cs" />
+    <Compile Include="CoverageInformation\ICoverageElement.cs" />
+    <Compile Include="CoverageInformation\SharingMethod.cs" />
+    <Compile Include="CoverageInformation\CoverageInfo.cs" />
     <Compile Include="Extensions\CoverageProfile.cs" />
     <Compile Include="Operators\Inserters\AntlrNodeInserter.cs" />
     <Compile Include="Operators\Inserters\CoverageInserter.cs" />
+    <Compile Include="Operators\Inserters\Instrumenter.cs" />
     <Compile Include="Operators\Inserters\ElementType.cs" />
     <Compile Include="Operators\Inserters\NodeInserter.cs" />
     <Compile Include="Operators\Inserters\TestCaseInserter.cs" />

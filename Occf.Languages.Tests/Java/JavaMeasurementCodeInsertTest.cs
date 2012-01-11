@@ -1,7 +1,6 @@
 ﻿using System.IO;
 using NUnit.Framework;
 using Occf.Core.CoverageCode;
-using Occf.Core.CoverageInfos;
 using Occf.Core.Tests;
 using Occf.Tools.Core;
 

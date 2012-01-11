@@ -1,6 +1,6 @@
-﻿using Occf.Core.CodeInformations;
+﻿using Occf.Core.CodeInformation;
 
-namespace Occf.Core.CoverageInfos {
+namespace Occf.Core.CoverageInformation {
 	public interface ICoverageElement {
 		CodePosition Position { get; }
 		CoverageState State { get; }

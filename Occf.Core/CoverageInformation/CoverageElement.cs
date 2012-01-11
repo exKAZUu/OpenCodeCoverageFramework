@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Xml.Linq;
-using Occf.Core.CodeInformations;
+using Occf.Core.CodeInformation;
 using Occf.Core.Operators.Taggers;
 
-namespace Occf.Core.CoverageInfos {
+namespace Occf.Core.CoverageInformation {
 	[Serializable]
 	public class CoverageElement : ICoverageElement {
 		public CoverageElement(string relativePath, XElement node, Tagger tagger) {
@@ -23,7 +23,7 @@ namespace Occf.Core.CoverageInfos {
 
 		public string RelativePath { get; private set; }
 
-		public virtual void UpdateState(CoverageElement lastElement, CoverageState state) {
+		public virtual void UpdateState(CoverageState state) {
 			State |= state;
 		}
 

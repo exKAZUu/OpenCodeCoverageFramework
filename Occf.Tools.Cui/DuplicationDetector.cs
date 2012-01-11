@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using NDesk.Options;
-using Occf.Core.CoverageInfos;
+using Occf.Core.CoverageInformation;
 using Occf.Core.TestInfos;
 using Occf.Tools.Core;
 using Paraiba.Collections.Generic;

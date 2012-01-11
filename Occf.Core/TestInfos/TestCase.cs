@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Xml.Linq;
-using Occf.Core.CodeInformations;
+using Occf.Core.CodeInformation;
 
 namespace Occf.Core.TestInfos {
 	[Serializable]

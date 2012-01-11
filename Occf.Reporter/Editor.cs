@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
-using Occf.Core.CoverageInfos;
+using Occf.Core.CoverageInformation;
 using Paraiba.Windows.Forms;
 
 namespace Occf.Reporter {

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
-using Occf.Core.CoverageInfos;
+using Occf.Core.CoverageInformation;
 using Occf.Core.TestInfos;
 using Occf.Tools.Core;
 
@@ -62,7 +62,7 @@ namespace Occf.Tools.Cui {
 			foreach (var testCase in testInfo.TestCases) {
 				Console.WriteLine(
 						"**** " + testCase.RelativePath + ": " + testCase.Name + " ****");
-				var stmts = testCase.Paths.Select(i => covInfo.TargetList[i]);
+				var stmts = testCase.Paths.Select(i => covInfo.Targets[i]);
 				foreach (var stmt in stmts) {
 					Console.WriteLine(stmt.RelativePath + ": " + stmt.Position.SmartLine);
 				}

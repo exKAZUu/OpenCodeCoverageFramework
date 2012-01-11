@@ -52,9 +52,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Operators\Inserters\JavaNodeInserter.cs" />
+    <Compile Include="Operators\Selectors\JavaMethodNameSelector.cs" />
     <Compile Include="Operators\Selectors\JavaForeachTailSelector.cs" />
     <Compile Include="Operators\Selectors\JavaForeachHeadSelector.cs" />
     <Compile Include="Operators\Selectors\JavaCatchBlockSelector.cs" />
+    <Compile Include="Operators\Selectors\JavaMethodSelector.cs" />
     <Compile Include="Operators\Selectors\JavaTrySelector.cs" />
     <Compile Include="Operators\Selectors\JavaForeachSelector.cs" />
     <Compile Include="Operators\Selectors\JavaCaseLabelTailSelector.cs" />

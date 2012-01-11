@@ -21,6 +21,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Occf.Writer.TcpIp.Java", "O
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Occf.Writer.File.CSharp", "Occf.Writer.File.CSharp\Occf.Writer.File.CSharp.vcxproj", "{D383B733-A8A8-4E9B-AD4B-D5D27AC5E0C0}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Occf.Writer.UM", "Occf.Writer.UM\Occf.Writer.UM.vcxproj", "{D18A520F-93C4-4896-ADBC-ACF81D1BB000}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -172,6 +174,18 @@ Global
 		{D383B733-A8A8-4E9B-AD4B-D5D27AC5E0C0}.Release|Win32.Build.0 = Release|Win32
 		{D383B733-A8A8-4E9B-AD4B-D5D27AC5E0C0}.Release|x64.ActiveCfg = Release|x64
 		{D383B733-A8A8-4E9B-AD4B-D5D27AC5E0C0}.Release|x64.Build.0 = Release|x64
+		{D18A520F-93C4-4896-ADBC-ACF81D1BB000}.Debug|Any CPU.ActiveCfg = Debug|Win32
+		{D18A520F-93C4-4896-ADBC-ACF81D1BB000}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
+		{D18A520F-93C4-4896-ADBC-ACF81D1BB000}.Debug|Mixed Platforms.Build.0 = Debug|Win32
+		{D18A520F-93C4-4896-ADBC-ACF81D1BB000}.Debug|Win32.ActiveCfg = Debug|Win32
+		{D18A520F-93C4-4896-ADBC-ACF81D1BB000}.Debug|Win32.Build.0 = Debug|Win32
+		{D18A520F-93C4-4896-ADBC-ACF81D1BB000}.Debug|x64.ActiveCfg = Debug|Win32
+		{D18A520F-93C4-4896-ADBC-ACF81D1BB000}.Release|Any CPU.ActiveCfg = Release|Win32
+		{D18A520F-93C4-4896-ADBC-ACF81D1BB000}.Release|Mixed Platforms.ActiveCfg = Release|Win32
+		{D18A520F-93C4-4896-ADBC-ACF81D1BB000}.Release|Mixed Platforms.Build.0 = Release|Win32
+		{D18A520F-93C4-4896-ADBC-ACF81D1BB000}.Release|Win32.ActiveCfg = Release|Win32
+		{D18A520F-93C4-4896-ADBC-ACF81D1BB000}.Release|Win32.Build.0 = Release|Win32
+		{D18A520F-93C4-4896-ADBC-ACF81D1BB000}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

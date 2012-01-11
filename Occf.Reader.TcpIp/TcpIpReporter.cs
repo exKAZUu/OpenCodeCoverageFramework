@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Net;
 using System.Net.Sockets;
-using Occf.Core.CoverageInfos;
+using Occf.Core.CoverageInformation;
 
 namespace Occf.Reader.TcpIp {
 	public class TcpIpReporter {
@@ -20,7 +20,7 @@ namespace Occf.Reader.TcpIp {
 							var value = stream.ReadByte();
 							if (value == -1)
 								break;
-							info.TargetList[index].UpdateState(null, (CoverageState)value);
+							info.Targets[index].UpdateState((CoverageState)value);
 						}
 					}
 				};

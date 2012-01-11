@@ -1,5 +1,5 @@
 ﻿using System.IO;
-using Occf.Core.CoverageInfos;
+using Occf.Core.CoverageInformation;
 using Occf.Core.Extensions;
 using Occf.Core.Operators.Inserters;
 using Occf.Core.TestInfos;
@@ -67,13 +67,12 @@ namespace Occf.Core.CoverageCode {
 
 			// 測定用コードの埋め込み
 			var path = relativePath;
-			CoverageInserter.InsertStatementAndBranchAndCondition(
+			CoverageInserter.InstrumentStatementAndPredicate(
 					info, ast, coverageProfile, path);
-			//CoverageInserter.InsertStatement(
+			//CoverageInserter.InstrumentStatement(
 			//        info, ast, coverageProfile, path);
-			//CoverageInserter.InsertBranchAndCondition(
+			//CoverageInserter.InsertPredicate(
 			//        info, ast, coverageProfile, path);
-			CoverageInserter.InsertImport(ast, nodeIns);
 
 			// コード生成
 			return coverageProfile.XmlToCode.Generate(ast);

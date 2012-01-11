@@ -3,7 +3,7 @@ using System.Linq;
 using System.Xml.Linq;
 using Paraiba.Core;
 
-namespace Occf.Core.CodeInformations {
+namespace Occf.Core.CodeInformation {
 	public static class CodePositionFactory {
 		public static CodePosition Create(XElement element) {
 			return Create(element.DescendantsAndSelf(),
