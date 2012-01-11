@@ -44,13 +44,19 @@ namespace Occf.Sample {
                     inputDir, "*", SearchOption.AllDirectories);
             foreach (var filePath in filePaths) {
                 var relativePath = XPath.GetRelativePath(filePath, inputDir);
-                if (regex.IsMatch(filePath)
-                    && !filePath.StartsWith(excludeInDir)) {
-                    instrumenter.WriteInstrumentedCode(profile, relativePath);
+                if (regex.IsMatch(filePath)) {
+                    if (!filePath.StartsWith(excludeInDir)) {
+                        instrumenter.WriteInstrumentedProductionCode(
+                                profile, relativePath);
+                    } else {
+                        instrumenter.WriteInstrumentedTestCode(
+                                profile, relativePath);
+                    }
                 } else {
                     instrumenter.CopyFile(relativePath);
                 }
             }
+            instrumenter.CopyLibraries(profile);
         }
     }
 }

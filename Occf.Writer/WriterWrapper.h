@@ -22,3 +22,8 @@ int WriteStatement(int id, int type, int value)
 {
 	return WritePredicate(id, type, value);
 }
+
+int WriteTestCase(int id, int type, int value)
+{
+	return WritePredicate(id, type, value);
+}

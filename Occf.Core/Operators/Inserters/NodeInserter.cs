@@ -46,8 +46,8 @@ namespace Occf.Core.Operators.Inserters {
 
 		public abstract void SupplementDefaultConstructor(XElement root);
 
-		public abstract TestCase InsertTestCaseId(
-				XElement target, int id, string s);
+	    public abstract TestCase InsertTestCaseId(
+	            XElement target, int id, string relativePath);
 
 		public static void ReplaceSafely(
 				IEnumerable<XElement> nodes,

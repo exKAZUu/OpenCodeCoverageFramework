@@ -14,6 +14,11 @@ namespace Occf.Core.Operators.Inserters {
 		protected abstract XmlToCode XmlToCode { get; }
 		protected abstract Func<TParser, XParserRuleReturnScope> ParseStatementFunc { get; }
 
+		protected virtual string CreateTestCaseIdentifierCode(
+				XElement target, int id, int value, ElementType type) {
+			return MethodPrefix + "WriteTestCase(" + id + "," + (int)type + "," + value + ");";
+		}
+
 		protected virtual string CreateStatementCoverageCode(
 				XElement target, int id, int value, ElementType type) {
 			return MethodPrefix + "WriteStatement(" + id + "," + (int)type + "," + value + ");";

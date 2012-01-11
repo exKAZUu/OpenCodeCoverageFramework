@@ -60,12 +60,43 @@ namespace Occf.Core.Operators.Inserters {
 		protected abstract int RegisterBranch(
 				int fileId, int funcId, CodePosition position);
 
+	    /// <summary>
+	    /// Registers a test case and returns the test case id.
+	    /// </summary>
+		/// <param name="fileId"> A file id which contains the function. </param>
+	    /// <returns>The test case id.</returns>
+	    protected abstract int RegisterTestCase(int fileId);
+
 		/// <summary>
-		/// Instruments for measuring code coverage and returns the modifieid code.
+		/// Instruments test code for measuring code coverage and returns the modifieid code.
 		/// </summary>
 		/// <param name="profile">A profile to measure coverage.</param>
 		/// <param name="filePath">A file to be instrumented.</param>
-		/// <returns>The modified code.</returns>
+		/// <returns>The modified test code.</returns>
+		public string InstrumentTestCase(CoverageProfile profile, string filePath) {
+			var root = profile.CodeToXml.GenerateFromFile(filePath);
+			var inserter = profile.NodeInserter;
+
+			var fileId = RegisterFile(filePath);
+
+			var targets = profile.TestCaseLabelTailSelector.Select(root);
+			foreach (var target in targets) {
+			    var testCaseId = RegisterTestCase(fileId);
+				inserter.InsertTestCaseId(target, testCaseId, filePath);
+			}
+
+			// Add import for loggin executed items
+			inserter.InsertImport(root);
+
+			return profile.XmlToCode.Generate(root);
+		}
+
+		/// <summary>
+		/// Instruments production code for measuring code coverage and returns the modifieid code.
+		/// </summary>
+		/// <param name="profile">A profile to measure coverage.</param>
+		/// <param name="filePath">A file to be instrumented.</param>
+		/// <returns>The modified production code.</returns>
 		public string InstrumentStatementAndPredicate(
 				CoverageProfile profile, string filePath) {
 			var root = profile.CodeToXml.GenerateFromFile(filePath);

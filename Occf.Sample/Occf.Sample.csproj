@@ -65,6 +65,11 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Library\CoverageWriter.UM.jar" />
+    <Content Include="Library\junit-4.8.2.jar">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Library\Occf.Writer.UM.Java.dll" />
     <Content Include="profiles\C.py">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

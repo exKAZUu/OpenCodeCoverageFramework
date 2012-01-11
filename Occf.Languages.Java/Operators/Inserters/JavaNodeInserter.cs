@@ -62,7 +62,7 @@ namespace Occf.Languages.Java.Operators.Inserters {
 				XElement target, int id, string relativePath) {
 			var testCase = new TestCase(relativePath, target.NthElement(2).Value, target);
 			var blockElement = target.Element("block").NthElement(1);
-			var code = CreateStatementCoverageCode(target, id, 2, ElementType.TestCase);
+			var code = CreateTestCaseIdentifierCode(target, id, 2, ElementType.TestCase);
 			var node = JavaCodeToXml.Instance.Generate(code, p => p.statement());
 			if (blockElement.Name.LocalName == "blockStatement") {
 				blockElement.AddFirst(node);

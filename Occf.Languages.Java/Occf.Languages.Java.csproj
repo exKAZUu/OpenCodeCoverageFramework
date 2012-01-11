@@ -66,7 +66,7 @@
     <Compile Include="Operators\Selectors\JavaConditionSelector.cs" />
     <Compile Include="Operators\Selectors\JavaElements.cs" />
     <Compile Include="Operators\Selectors\JavaStatementSelector.cs" />
-    <Compile Include="Operators\Selectors\JavaTestCaseSelector.cs" />
+    <Compile Include="Operators\Selectors\JavaTestCaseLabelTailSelector.cs" />
     <Compile Include="Operators\Taggers\JavaTagger.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
