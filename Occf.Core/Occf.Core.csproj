@@ -51,7 +51,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CodeInformation\CodePosition.cs" />
-    <Compile Include="CodeInformation\CodePositionFactory.cs" />
+    <Compile Include="CodeInformation\CodePositionParser.cs" />
     <Compile Include="CoverageCode\CoverageCodeGenerator.cs" />
     <Compile Include="CoverageInformation\ForeachCoverageElement.cs" />
     <Compile Include="CoverageInformation\CoverageDataReader.cs" />

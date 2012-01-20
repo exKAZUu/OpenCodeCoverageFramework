@@ -8,7 +8,7 @@ namespace Occf.Core.CoverageInformation {
 	public class CoverageElement : ICoverageElement {
 		public CoverageElement(string relativePath, XElement node, Tagger tagger) {
 			RelativePath = relativePath;
-			Position = CodePositionFactory.Create(node);
+			Position = CodePositionParser.Create(node);
 			var tag = relativePath.Replace('\\', '>') + '>' + tagger.Generate(node);
 			Tag = tag.EndsWith(">") ? tag : tag + ">";
 		}

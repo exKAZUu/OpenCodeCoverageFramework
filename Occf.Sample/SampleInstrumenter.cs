@@ -66,7 +66,7 @@ namespace Occf.Sample
 			return Id++;
 		}
 
-		protected override int RegisterFunction(int fileId, string functionName) {
+		protected override int RegisterFunction(int fileId, string functionName, CodePosition position) {
 			Console.WriteLine("Function name: " + functionName);
 			return Id++;
 		}
