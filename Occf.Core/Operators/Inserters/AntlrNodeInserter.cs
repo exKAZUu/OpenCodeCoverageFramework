@@ -12,7 +12,7 @@ namespace Occf.Core.Operators.Inserters {
 		protected abstract string MethodPrefix { get; }
 		protected abstract AntlrCodeToXml<TParser> CodeToXml { get; }
 		protected abstract XmlToCode XmlToCode { get; }
-		protected abstract Func<TParser, XParserRuleReturnScope> ParseStatementFunc { get; }
+		protected abstract Func<TParser, XAstParserRuleReturnScope> ParseStatementFunc { get; }
 
 		protected virtual string CreateTestCaseIdentifierCode(
 				XElement target, int id, int value, ElementType type) {

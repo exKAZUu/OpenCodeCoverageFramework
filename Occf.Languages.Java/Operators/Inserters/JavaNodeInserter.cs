@@ -29,7 +29,7 @@ namespace Occf.Languages.Java.Operators.Inserters {
 			get { return JavaXmlToCode.Instance; }
 		}
 
-		protected override Func<JavaParser, XParserRuleReturnScope> ParseStatementFunc {
+		protected override Func<JavaParser, XAstParserRuleReturnScope> ParseStatementFunc {
 			get { return p => p.statement(); }
 		}
 

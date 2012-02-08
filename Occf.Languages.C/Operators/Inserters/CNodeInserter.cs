@@ -29,7 +29,7 @@ namespace Occf.Languages.C.Operators.Inserters {
 			get { return CXmlToCode.Instance; }
 		}
 
-		protected override Func<CParser, XParserRuleReturnScope> ParseStatementFunc {
+		protected override Func<CParser, XAstParserRuleReturnScope> ParseStatementFunc {
 			get { return p => p.statement(); }
 		}
 
