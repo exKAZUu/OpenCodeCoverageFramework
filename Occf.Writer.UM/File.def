@@ -1,0 +1,8 @@
+LIBRARY Occf.Writer.UM.dll
+
+EXPORTS
+	Initialize
+	Release
+	WriteStatement
+	WritePredicate
+	WriteTestCase
