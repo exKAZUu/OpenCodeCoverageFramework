@@ -46,35 +46,32 @@ namespace Occf.Tools.Cui {
 			}
 
 			var iArgs = 0;
-			var rootPath = args[iArgs++];
-			if (!Directory.Exists(rootPath)) {
-				return Program.Print("root directory doesn't exist.\nroot:" + rootPath);
-			}
-			rootPath = Path.GetFullPath(rootPath);
-
-			var covPath = args.Count >= iArgs + 1 ? args[iArgs++] : null;
-			if (!File.Exists(covPath)) {
-				covPath = PathFinder.FindCoverageDataPath(covPath);
-			}
-			if (!File.Exists(covPath)) {
-				covPath = PathFinder.FindCoverageDataPath(rootPath);
-			}
-			if (!File.Exists(covPath)) {
+			var rootDir = new DirectoryInfo(args[iArgs++]);
+			if (!rootDir.Exists) {
 				return
-						Program.Print("coverage data file doesn't exist.\ncoverage:" + covPath);
+						Program.Print(
+								"Root directory doesn't exist.\nroot:" + rootDir.FullName);
 			}
-			covPath = Path.GetFullPath(covPath);
 
-			return Detect(rootPath, covPath, criterion);
+			var covDataFile = args.Count >= iArgs + 1
+			                  		? new FileInfo(args[iArgs++]) : null;
+			covDataFile = PathFinder.FindCoverageDataPath(covDataFile, rootDir);
+			if (!covDataFile.SafeExists()) {
+				return
+						Program.Print(
+								"Coverage data file doesn't exist.\ncoverage:" + covDataFile.FullName);
+			}
+
+			return Detect(rootDir, covDataFile, criterion);
 		}
 
 		private static bool Detect(
-				string rootPath, string covPath, string criterion) {
+				DirectoryInfo rootDir, FileInfo covDataFile, string criterion) {
 			var formatter = new BinaryFormatter();
-			var testInfoPath = PathFinder.FindTestInfoPath(rootPath);
+			var testInfoPath = PathFinder.FindTestInfoPath(rootDir);
 			var testInfo = InfoReader.ReadTestInfo(testInfoPath, formatter);
 			testInfo.InitializeForStoringData();
-			CoverageDataReader.ReadFile(testInfo, covPath);
+			CoverageDataReader.ReadFile(testInfo, covDataFile);
 			var testCases = testInfo.TestCases;
 
 			Func<TestCase, TestCase, bool> isDuplicated = null;

@@ -1,4 +1,22 @@
-﻿using System;
+﻿#region License
+
+// Copyright (C) 2009-2012 Kazunori Sakamoto
+// 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#endregion
+
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -21,14 +39,15 @@ namespace Occf.Tools.Cui.Tests {
 		[TestCase("GetMid3", "GetMid3Test")]
 		public void InsertMeasurementCode(string projectName, string testTargetNames) {
 			var outDirPath = Fixture.CleanOuputPath();
+			var outDir = new DirectoryInfo(Fixture.CleanOuputPath());
 			var inDirPath = Fixture.GetProjectInputPath(projectName);
 			var expDirPath = Fixture.GetProjectExpectationPath(projectName);
 			FileUtility.CopyRecursively(inDirPath, outDirPath);
 
 			var profile = ScriptCoverageProfile.Load("Java");
 			Inserter.InsertMeasurementCode(
-					outDirPath,
-					Path.Combine(outDirPath, "test"), outDirPath, profile);
+					outDir, new DirectoryInfo(Path.Combine(outDirPath, "test")), outDir,
+					profile);
 
 			// jarとdllファイルが存在するか
 			var jar = Path.Combine(outDirPath, "CoverageWriter.File.jar");

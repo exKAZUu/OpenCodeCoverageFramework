@@ -1,10 +1,27 @@
-﻿using System;
+﻿#region License
+
+// Copyright (C) 2009-2012 Kazunori Sakamoto
+// 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#endregion
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using Occf.Core.CoverageInformation;
-using Occf.Core.TestInfos;
 using Occf.Tools.Core;
 
 namespace Occf.Tools.Cui {
@@ -25,39 +42,36 @@ namespace Occf.Tools.Cui {
 				"";
 
 		public static bool Run(IList<string> args) {
-			if (args.Count < 1)
+			if (args.Count < 1) {
 				return Program.Print(Usage);
+			}
 			var iArgs = 0;
-			var rootPath = args[iArgs++];
-			if (!Directory.Exists(rootPath)) {
-				return Program.Print("root directory doesn't exist.\nroot:" + rootPath);
-			}
-			rootPath = Path.GetFullPath(rootPath);
-
-			var covPath = args.Count >= iArgs + 1 ? args[iArgs++] : null;
-			if (!File.Exists(covPath)) {
-				covPath = PathFinder.FindCoverageDataPath(covPath);
-			}
-			if (!File.Exists(covPath)) {
-				covPath = PathFinder.FindCoverageDataPath(rootPath);
-			}
-			if (!File.Exists(covPath)) {
+			var rootDir = new DirectoryInfo(args[iArgs++]);
+			if (!rootDir.Exists) {
 				return
-						Program.Print("coverage data file doesn't exist.\ncoverage:" + covPath);
+						Program.Print(
+								"Root directory doesn't exist.\nroot:" + rootDir.FullName);
 			}
-			covPath = Path.GetFullPath(covPath);
+			var covDataFile = args.Count >= iArgs + 1
+			                  		? new FileInfo(args[iArgs++]) : null;
+			covDataFile = PathFinder.FindCoverageDataPath(covDataFile, rootDir);
+			if (!covDataFile.SafeExists()) {
+				return
+						Program.Print(
+								"Coverage data file doesn't exist.\ncoverage:" + covDataFile.FullName);
+			}
 
-			return Analyze(rootPath, covPath);
+			return Analyze(rootDir, covDataFile);
 		}
 
-		private static bool Analyze(string rootPath, string covPath) {
+		private static bool Analyze(DirectoryInfo rootDir, FileInfo covDataFile) {
 			var formatter = new BinaryFormatter();
-			var covInfoPath = PathFinder.FindCoverageInfoPath(rootPath);
-			var testInfoPath = PathFinder.FindTestInfoPath(rootPath);
-			var covInfo = InfoReader.ReadCoverageInfo(covInfoPath, formatter);
-			var testInfo = InfoReader.ReadTestInfo(testInfoPath, formatter);
+			var covInfoFile = PathFinder.FindCoverageInfoPath(rootDir);
+			var testInfoFile = PathFinder.FindTestInfoPath(rootDir);
+			var covInfo = InfoReader.ReadCoverageInfo(covInfoFile, formatter);
+			var testInfo = InfoReader.ReadTestInfo(testInfoFile, formatter);
 			testInfo.InitializeForStoringData();
-			CoverageDataReader.ReadFile(testInfo, covPath);
+			CoverageDataReader.ReadFile(testInfo, covDataFile);
 
 			foreach (var testCase in testInfo.TestCases) {
 				Console.WriteLine(

@@ -1,4 +1,22 @@
-﻿using System;
+﻿#region License
+
+// Copyright (C) 2009-2012 Kazunori Sakamoto
+// 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#endregion
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.IO;
@@ -7,7 +25,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using NDesk.Options;
 using Occf.Core.CoverageCode;
 using Occf.Core.CoverageInformation;
-using Occf.Core.CoverageProfile;
+using Occf.Core.CoverageProfiles;
 using Occf.Core.TestInfos;
 using Occf.Tools.Core;
 
@@ -51,12 +69,9 @@ namespace Occf.Tools.Cui {
 				return Program.Print(Usage);
 			}
 
-			if (args.Count < 1)
+			if (args.Count < 1) {
 				return Program.Print(Usage);
-			var rootDirPath = args[0];
-			var testDirPath = "";
-			if (args.Count >= 2)
-				testDirPath = args[1];
+			}
 
 			ScriptCoverageProfile profile;
 			try {
@@ -68,143 +83,143 @@ namespace Occf.Tools.Cui {
 								+ languageName);
 			}
 
-			if (!Directory.Exists(rootDirPath)) {
+			var rootDir = new DirectoryInfo(args[0]);
+			if (!rootDir.Exists) {
 				return
 						Program.Print(
-								"error: root directory doesn't exist.\nroot:" + rootDirPath);
+								"Root directory doesn't exist.\nroot:" + rootDir.FullName);
 			}
-			rootDirPath = Path.GetFullPath(rootDirPath);
 
-			if (!string.IsNullOrEmpty(testDirPath)) {
-				if (!Directory.Exists(testDirPath)) {
+			DirectoryInfo testDir = null;
+			if (args.Count >= 2) {
+				testDir = new DirectoryInfo(args[1]);
+				if (!testDir.Exists) {
 					return
 							Program.Print(
-									"error: test code directory doesn't exist.\ntest:" + testDirPath);
+									"Error: test code directory doesn't exist.\ntest:" + testDir.FullName);
 				}
-				testDirPath = Path.GetFullPath(testDirPath);
-			} else {
-				testDirPath = null;
 			}
 
+			var workDir = rootDir;
 			if (!string.IsNullOrEmpty(workDirPath)) {
-				if (!Directory.Exists(workDirPath)) {
+				workDir = new DirectoryInfo(workDirPath);
+				if (!workDir.Exists) {
 					return
 							Program.Print(
-									"error: working directory doesn't exist.\nwork:" + workDirPath);
+									"Error: working directory doesn't exist.\nwork:" + workDir.FullName);
 				}
-				workDirPath = Path.GetFullPath(workDirPath);
-			} else {
-				workDirPath = rootDirPath;
 			}
 
-			InsertMeasurementCode(rootDirPath, testDirPath, workDirPath, profile);
+			InsertMeasurementCode(rootDir, testDir, workDir, profile);
 			return true;
 		}
 
 		public static void InsertMeasurementCode(
-				string rootDirPath, string testDirPath, string workDirPath,
+				DirectoryInfo rootDir, DirectoryInfo testDir, DirectoryInfo workDir,
 				ScriptCoverageProfile profile) {
-			Contract.Requires<ArgumentException>(Directory.Exists(rootDirPath));
+			Contract.Requires<ArgumentException>(rootDir.Exists);
 			Contract.Requires<ArgumentException>(
-					string.IsNullOrEmpty(testDirPath) || Directory.Exists(testDirPath));
-			Contract.Requires<ArgumentException>(Directory.Exists(workDirPath));
+					testDir == null || testDir.Exists);
+			Contract.Requires<ArgumentException>(workDir.Exists);
 			Contract.Requires<ArgumentNullException>(profile != null);
 
 			var covInfo = new CoverageInfo(
-					rootDirPath, profile.Name, SharingMethod.File);
-			var testInfo = !string.IsNullOrEmpty(testDirPath)
-			               		? new TestInfo(0, rootDirPath)
+					rootDir.FullName, profile.Name, SharingMethod.File);
+			var testInfo = testDir != null
+			               		? new TestInfo(0, rootDir.FullName)
 			               		: null;
 
-			RemoveExistingCoverageDataFiles(rootDirPath, workDirPath);
+			RemoveExistingCoverageDataFiles(rootDir, workDir);
 
-			RemoveExistingLibraries(profile, workDirPath);
+			RemoveExistingLibraries(profile, workDir);
 
-			WriteProductionCodeFiles(rootDirPath, testDirPath, profile, covInfo);
-			if (testInfo != null)
-				WriteTestCodeFiles(rootDirPath, testDirPath, profile, testInfo);
+			WriteProductionCodeFiles(rootDir, testDir, profile, covInfo);
+			if (testInfo != null) {
+				WriteTestCodeFiles(rootDir, testDir, profile, testInfo);
+			}
 
-			WriteInfos(rootDirPath, covInfo, testInfo);
+			WriteInfos(rootDir, covInfo, testInfo);
 
-			CopyLibraries(profile, workDirPath);
+			CopyLibraries(profile, workDir);
 		}
 
-		private static void RemoveExistingLibraries(CoverageProfile profile, string dirPath) {
+		private static void RemoveExistingLibraries(
+				CoverageProfile profile, DirectoryInfo directory) {
 			foreach (var name in profile.LibraryNames) {
-				var dstPath = Path.Combine(dirPath, name);
+				var dstPath = Path.Combine(directory.FullName, name);
 				File.Delete(dstPath);
 			}
 		}
 
-		private static void CopyLibraries(CoverageProfile profile, string dirPath) {
+		private static void CopyLibraries(
+				CoverageProfile profile, DirectoryInfo directory) {
 			foreach (var name in profile.LibraryNames) {
 				var srcPath = Path.Combine(Names.Library, name);
-				var dstPath = Path.Combine(dirPath, name);
+				var dstPath = Path.Combine(directory.FullName, name);
 				File.Copy(srcPath, dstPath, true);
 			}
 		}
 
 		private static void RemoveExistingCoverageDataFiles(
-				string rootDirPath, string workDirPath) {
-			var targets = Directory.EnumerateFiles(
-					rootDirPath, Names.CoverageData, SearchOption.AllDirectories);
-			if (!string.IsNullOrEmpty(workDirPath))
+				DirectoryInfo rootDir, DirectoryInfo workDir) {
+			var targets = rootDir.EnumerateFiles(
+					Names.CoverageData, SearchOption.AllDirectories);
+			if (workDir != null) {
 				targets =
-						targets.Concat(Directory.EnumerateFiles(workDirPath, Names.CoverageData));
-			foreach (var target in targets) {
-				File.Delete(target);
+						targets.Concat(workDir.EnumerateFiles(Names.CoverageData));
+			}
+			foreach (var target in targets.ToList()) {
+				target.Delete();
 			}
 		}
 
 		private static void WriteProductionCodeFiles(
-				string rootDirPath,
-				string testDirPath,
-				CoverageProfile prof,
+				DirectoryInfo rootDir, DirectoryInfo testDir, CoverageProfile prof,
 				CoverageInfo info) {
-			var paths = Directory.EnumerateFiles(
-					rootDirPath, prof.FilePattern, SearchOption.AllDirectories);
+			var files = rootDir.EnumerateFiles(
+					prof.FilePattern, SearchOption.AllDirectories);
 			// ignore test code in the directory of production code
-			if (!string.IsNullOrEmpty(testDirPath)) {
-				paths = paths.Where(s => !s.StartsWith(testDirPath));
+			if (testDir != null) {
+				files = files.Where(f => !f.FullName.StartsWith(testDir.FullName));
 			}
 
-			foreach (var path in paths.ToList()) {
-				var bakPath = path + Names.BackupSuffix;
-				File.Copy(path, bakPath, true);
+			foreach (var file in files.ToList()) {
+				var bakPath = file + Names.BackupSuffix;
+				file.CopyTo(bakPath, true);
 				var outPath = CoverageCodeGenerator.WriteCoveragedCode(
-						prof, info, path, rootDirPath);
+						prof, info, file, rootDir);
 				Console.WriteLine("wrote:" + outPath);
 			}
 		}
 
 		private static void WriteTestCodeFiles(
-				string rootDirPath,
-				string testDirPath, CoverageProfile prof,
+				DirectoryInfo rootDir, DirectoryInfo testDir, CoverageProfile prof,
 				TestInfo info) {
-			var paths = Directory.EnumerateFiles(
-					testDirPath, prof.FilePattern, SearchOption.AllDirectories);
+			var paths = testDir.EnumerateFiles(
+					prof.FilePattern, SearchOption.AllDirectories);
 
 			foreach (var path in paths.ToList()) {
 				var bakPath = path + Names.BackupSuffix;
-				File.Copy(path, bakPath, true);
+				path.CopyTo(bakPath, true);
 				var outPath = CoverageCodeGenerator.WriteIdentifiedTest(
-						prof, info, path, rootDirPath);
+						prof, info, path, rootDir);
 				Console.WriteLine("wrote:" + outPath);
 			}
 		}
 
 		private static void WriteInfos(
-				string rootDirPath, CoverageInfo covInfo, TestInfo testInfo) {
+				DirectoryInfo rootDir, CoverageInfo covInfo, TestInfo testInfo) {
 			var formatter = new BinaryFormatter();
 
-			var covPath = Path.Combine(rootDirPath, Names.CoverageInfo);
+			var covPath = Path.Combine(rootDir.FullName, Names.CoverageInfo);
 			using (var fs = new FileStream(covPath, FileMode.Create)) {
 				formatter.Serialize(fs, covInfo);
 			}
 
-			if (testInfo == null)
+			if (testInfo == null) {
 				return;
-			var testPath = Path.Combine(rootDirPath, Names.TestInfo);
+			}
+			var testPath = Path.Combine(rootDir.FullName, Names.TestInfo);
 			using (var fs = new FileStream(testPath, FileMode.Create)) {
 				formatter.Serialize(fs, testInfo);
 			}

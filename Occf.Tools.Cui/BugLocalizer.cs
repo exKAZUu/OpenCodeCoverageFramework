@@ -1,6 +1,6 @@
 ﻿#region License
 
-// Copyright (C) 2011-2012 The Unicoen Project
+// Copyright (C) 2009-2012 Kazunori Sakamoto
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -55,49 +55,45 @@ namespace Occf.Tools.Cui {
 			}
 
 			var iArgs = 0;
-			var rootPath = args[iArgs++];
-			if (!Directory.Exists(rootPath)) {
-				return Program.Print("root directory doesn't exist.\nroot:" + rootPath);
-			}
-			rootPath = Path.GetFullPath(rootPath);
-
-			var retPath = args[iArgs++];
-			if (!Directory.Exists(rootPath)) {
+			var rootDir = new DirectoryInfo(args[iArgs++]);
+			if (!rootDir.Exists) {
 				return
 						Program.Print(
-								"error: test result file doesn't exist.\nresult:" + retPath);
+								"Root directory doesn't exist.\nroot:" + rootDir.FullName);
 			}
-			retPath = Path.GetFullPath(retPath);
 
-			var covPath = args.Count >= iArgs + 1 ? args[iArgs++] : null;
-			if (!File.Exists(covPath)) {
-				covPath = PathFinder.FindCoverageDataPath(covPath);
-			}
-			if (!File.Exists(covPath)) {
-				covPath = PathFinder.FindCoverageDataPath(rootPath);
-			}
-			if (!File.Exists(covPath)) {
+			var resultFile = new FileInfo(args[iArgs++]);
+			if (!resultFile.Exists) {
 				return
-						Program.Print("coverage data file doesn't exist.\ncoverage:" + covPath);
+						Program.Print(
+								"Error: test result file doesn't exist.\nresult:" + resultFile.FullName);
 			}
-			covPath = Path.GetFullPath(covPath);
 
-			Localize(rootPath, covPath, retPath);
+			var covDataFile = args.Count >= iArgs + 1
+			                  		? new FileInfo(args[iArgs++]) : null;
+			covDataFile = PathFinder.FindCoverageDataPath(covDataFile, rootDir);
+			if (!covDataFile.SafeExists()) {
+				return
+						Program.Print(
+								"Coverage data file doesn't exist.\ncoverage:" + covDataFile.FullName);
+			}
+
+			Localize(rootDir, resultFile, covDataFile);
 
 			return true;
 		}
 
-		public static void Localize(
-				string rootPath, string covPath, string retPath) {
+		private static void Localize(
+				DirectoryInfo rootDir, FileInfo resultFile, FileInfo covDataFile) {
 			var formatter = new BinaryFormatter();
-			var covInfoPath = PathFinder.FindCoverageInfoPath(rootPath);
-			var testInfoPath = PathFinder.FindTestInfoPath(rootPath);
-			var covInfo = InfoReader.ReadCoverageInfo(covInfoPath, formatter);
-			var testInfo = InfoReader.ReadTestInfo(testInfoPath, formatter);
+			var covInfoFile = PathFinder.FindCoverageInfoPath(rootDir);
+			var testInfoFile = PathFinder.FindTestInfoPath(rootDir);
+			var covInfo = InfoReader.ReadCoverageInfo(covInfoFile, formatter);
+			var testInfo = InfoReader.ReadTestInfo(testInfoFile, formatter);
 
 			testInfo.InitializeForStoringData();
-			ReadTestResult(retPath, testInfo);
-			CoverageDataReader.ReadFile(testInfo, covPath);
+			ReadTestResult(resultFile, testInfo);
+			CoverageDataReader.ReadFile(testInfo, covDataFile);
 
 			var engine = Python.CreateEngine();
 			var scope = engine.CreateScope();
@@ -140,10 +136,11 @@ namespace Occf.Tools.Cui {
 			return (++index) + ") ";
 		}
 
-		private static readonly Regex regex = new Regex(@"([\w\d]*)(?:\[\d*\])?\(([\w\d.]*)\)");
+		private static readonly Regex regex =
+				new Regex(@"([\w\d]*)(?:\[\d*\])?\(([\w\d.]*)\)");
 
-		public static void ReadTestResult(string resultFilePath, TestInfo testInfo) {
-			using (var reader = new StreamReader(resultFilePath)) {
+		public static void ReadTestResult(FileInfo resultFile, TestInfo testInfo) {
+			using (var reader = new StreamReader(resultFile.FullName)) {
 				var failedTestIndex = 0;
 				var prefix = GetFailedTestCasePrefix(ref failedTestIndex);
 				while (true) {

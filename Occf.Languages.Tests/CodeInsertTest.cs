@@ -15,7 +15,7 @@ namespace Occf.Languages.Tests {
 			var info = new CoverageInfo(Fixture.GetCoverageInputPath(),
 				profile.Name, SharingMethod.SharedMemory);
 			var inPath = Path.Combine(Fixture.GetCoverageInputPath(), fileName);
-			var code = CoverageCodeGenerator.GetCoveragedCode(inPath, info,
+			var code = CoverageCodeGenerator.GetCoveragedCode(new FileInfo(inPath), info,
 				profile);
 
 			var expPath = Path.Combine(Fixture.GetCoverageExpectationPath(), fileName);

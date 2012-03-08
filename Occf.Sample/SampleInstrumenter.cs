@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using Code2Xml.Core.Position;
-using Occf.Core.CoverageProfile;
+using Occf.Core.CoverageProfiles;
 using Occf.Core.Operators.Inserters;
 using Occf.Tools.Core;
 using Paraiba.IO;

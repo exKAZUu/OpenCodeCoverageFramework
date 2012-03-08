@@ -6,15 +6,15 @@ using Occf.Core.TestInfos;
 namespace Occf.Tools.Core {
 	public static class InfoReader {
 		public static CoverageInfo ReadCoverageInfo(
-				string path, BinaryFormatter formatter) {
-			using (var fs = new FileStream(path, FileMode.Open)) {
+				FileInfo coverageInfoFile, BinaryFormatter formatter) {
+			using (var fs = new FileStream(coverageInfoFile.FullName, FileMode.Open)) {
 				return (CoverageInfo)formatter.Deserialize(fs);
 			}
 		}
 
 		public static TestInfo ReadTestInfo(
-				string path, BinaryFormatter formatter) {
-			using (var fs = new FileStream(path, FileMode.Open)) {
+				FileInfo testInfoFile, BinaryFormatter formatter) {
+			using (var fs = new FileStream(testInfoFile.FullName, FileMode.Open)) {
 				return (TestInfo)formatter.Deserialize(fs);
 			}
 		}

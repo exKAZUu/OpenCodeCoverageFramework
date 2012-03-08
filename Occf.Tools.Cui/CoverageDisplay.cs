@@ -1,4 +1,22 @@
-﻿using System;
+﻿#region License
+
+// Copyright (C) 2009-2012 Kazunori Sakamoto
+// 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#endregion
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -41,41 +59,39 @@ namespace Occf.Tools.Cui {
 				return Program.Print(Usage);
 			}
 
-			if (args.Count < 1)
+			if (args.Count < 1) {
 				return Program.Print(Usage);
+			}
 
 			var iArgs = 0;
-			var rootPath = args[iArgs++];
-			if (!Directory.Exists(rootPath)) {
-				return Program.Print("root directory doesn't exist.\nroot:" + rootPath);
+			var rootDir = new DirectoryInfo(args[iArgs++]);
+			if (!rootDir.Exists) {
+				return Program.Print(
+						"Root directory doesn't exist.\nroot:" + rootDir.FullName);
 			}
-			rootPath = Path.GetFullPath(rootPath);
 
-			var covPath = args.Count >= iArgs + 1 ? args[iArgs++] : null;
-			if (!File.Exists(covPath)) {
-				covPath = PathFinder.FindCoverageDataPath(covPath);
-			}
-			if (!File.Exists(covPath)) {
-				covPath = PathFinder.FindCoverageDataPath(rootPath);
-			}
-			if (!File.Exists(covPath)) {
+			var covDataFile = args.Count >= iArgs + 1
+			                  		? new FileInfo(args[iArgs++]) : null;
+			covDataFile = PathFinder.FindCoverageDataPath(covDataFile, rootDir);
+			if (!covDataFile.SafeExists()) {
 				return
-						Program.Print("coverage data file doesn't exist.\ncoverage:" + covPath);
+						Program.Print(
+								"Coverage data file doesn't exist.\ncoverage:" + covDataFile.FullName);
 			}
-			covPath = Path.GetFullPath(covPath);
 
-			return Analyze(rootPath, covPath, detail);
+			return Analyze(rootDir, covDataFile, detail);
 		}
 
-		private static bool Analyze(string rootPath, string covPath, bool detail) {
+		private static bool Analyze(
+				DirectoryInfo rootDir, FileInfo covDataFile, bool detail) {
 			// カバレッジ情報（母数）の取得
 			var formatter = new BinaryFormatter();
-			var covInfoPath = PathFinder.FindCoverageInfoPath(rootPath);
+			var covInfoPath = PathFinder.FindCoverageInfoPath(rootDir);
 			var covInfo = InfoReader.ReadCoverageInfo(covInfoPath, formatter);
-			CoverageDataReader.ReadFile(covInfo, covPath);
+			CoverageDataReader.ReadFile(covInfo, covDataFile);
 
 			var tags = ReconstructTags(covInfo);
-			foreach (var tag in tags/*.Where(t => !t.Contains("class "))*/) {
+			foreach (var tag in tags /*.Where(t => !t.Contains("class "))*/) {
 				Console.WriteLine(tag);
 				{
 					var checkedLine = new HashSet<Tuple<string, int>>();
@@ -142,8 +158,9 @@ namespace Occf.Tools.Cui {
 							nExe += 2;
 						} else {
 							notExecuted.Add(t);
-							if (t.State != CoverageState.None)
+							if (t.State != CoverageState.None) {
 								nExe++;
+							}
 						}
 					}
 					Console.WriteLine(
@@ -183,8 +200,9 @@ namespace Occf.Tools.Cui {
 								nExe += 2;
 							} else {
 								notExecuted.Add(t);
-								if (t.State != CoverageState.None)
+								if (t.State != CoverageState.None) {
 									nExe++;
+								}
 							}
 						} else {
 							foreach (var t2 in t.Targets) {
@@ -193,8 +211,9 @@ namespace Occf.Tools.Cui {
 									nExe += 2;
 								} else {
 									notExecuted.Add(t2);
-									if (t2.State != CoverageState.None)
+									if (t2.State != CoverageState.None) {
 										nExe++;
+									}
 								}
 							}
 						}

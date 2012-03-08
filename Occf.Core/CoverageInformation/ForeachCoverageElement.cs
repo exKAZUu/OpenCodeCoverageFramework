@@ -1,6 +1,6 @@
 ﻿#region License
 
-// Copyright (C) 2011-2012 Kazunori Sakamoto
+// Copyright (C) 2009-2012 Kazunori Sakamoto
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,30 +21,30 @@ using System.Xml.Linq;
 using Occf.Core.Operators.Taggers;
 
 namespace Occf.Core.CoverageInformation {
-    [Serializable]
-    public class ForeachCoverageElement : CoverageElement {
-        private CoverageState _lastState;
+	[Serializable]
+	public class ForeachCoverageElement : CoverageElement {
+		private CoverageState _lastState;
 
-        public ForeachCoverageElement(
-                string relativePath, XElement node, Tagger tagger)
-                : base(relativePath, node, tagger) {}
+		public ForeachCoverageElement(
+				string relativePath, XElement node, Tagger tagger)
+				: base(relativePath, node, tagger) {}
 
-        /// <summary>
-        ///   Updates <c>State</c> property if
-        /// </summary>
-        /// <param name="state"> </param>
-        public override void UpdateState(CoverageState state) {
-            // DummyRecord(TrueOnly)
-            // foreach() {
-            //   Record(FalseOnly) ループ判定成立
-            //   statement;
-            //   DummyRecord(TrueOnly)
-            // }
-            // Record(TrueOnly)    ループ判定不成立（TrueOnlyが連続すれば）
-            if (state == CoverageState.FalseOnly || _lastState == state) {
-                State |= state;
-            }
-            _lastState = state;
-        }
-    }
+		/// <summary>
+		///   Updates <c>State</c> property if
+		/// </summary>
+		/// <param name="state"> </param>
+		public override void UpdateState(CoverageState state) {
+			// DummyRecord(TrueOnly)
+			// foreach() {
+			//   Record(FalseOnly) ループ判定成立
+			//   statement;
+			//   DummyRecord(TrueOnly)
+			// }
+			// Record(TrueOnly)    ループ判定不成立（TrueOnlyが連続すれば）
+			if (state == CoverageState.FalseOnly || _lastState == state) {
+				State |= state;
+			}
+			_lastState = state;
+		}
+	}
 }

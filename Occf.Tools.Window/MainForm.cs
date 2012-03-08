@@ -1,4 +1,22 @@
-﻿using System;
+﻿#region License
+
+// Copyright (C) 2009-2012 Kazunori Sakamoto
+// 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#endregion
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -31,7 +49,7 @@ namespace Occf.Tools.Window {
 		private void MainFormLoad(object sender, EventArgs e) {
 			var exeDir = Path.GetDirectoryName(Application.ExecutablePath);
 			txtOutput.Text =
-				Path.GetFullPath(Path.Combine(exeDir, "..", "codes", "output"));
+					Path.GetFullPath(Path.Combine(exeDir, "..", "codes", "output"));
 			cmbLanguage.SelectedIndex = 0;
 		}
 
@@ -47,7 +65,7 @@ namespace Occf.Tools.Window {
 				var basePath = txtBase.Text.AddIfNotEndsWith('\\');
 
 				var files = filePathes.SelectMany(path => EnumerateFiles(path, "*"))
-					.Select(path => XPath.GetRelativePath(path, basePath));
+						.Select(path => XPath.GetRelativePath(path, basePath));
 
 				clbFiles.Items.Clear();
 				foreach (var file in files) {
@@ -59,8 +77,9 @@ namespace Occf.Tools.Window {
 
 		private static IEnumerable<string> EnumerateFiles(string path, string pattern) {
 			if (Directory.Exists(path)) {
-				var subPathes = Directory.GetFiles(path, pattern,
-					SearchOption.AllDirectories);
+				var subPathes = Directory.GetFiles(
+						path, pattern,
+						SearchOption.AllDirectories);
 				foreach (var subPath in subPathes) {
 					yield return subPath;
 				}
@@ -80,12 +99,15 @@ namespace Occf.Tools.Window {
 			Action action = () => {
 				var profile = ScriptCoverageProfile.Load(langName);
 				var info = new CoverageInfo(basePath, profile.Name, SharingMethod.File);
+				var outDir = new DirectoryInfo(outDirPath);
 				foreach (var filePath in filePathList) {
-					CoverageCodeGenerator.WriteCoveragedCode(profile, info, filePath, outDirPath);
+					CoverageCodeGenerator.WriteCoveragedCode(
+							profile, info, new FileInfo(filePath), outDir);
 				}
 				using (
-					var fs = new FileStream(Path.Combine(outDirPath, "coverageinfo"),
-						FileMode.Create)) {
+						var fs = new FileStream(
+								Path.Combine(outDirPath, "coverageinfo"),
+								FileMode.Create)) {
 					var formatter = new BinaryFormatter();
 					formatter.Serialize(fs, info);
 				}
@@ -120,15 +142,15 @@ namespace Occf.Tools.Window {
 			for (int i = 0; i < count; i++) {
 				var relativePath = clbFiles.Items[i] as string;
 				var isTargetFile =
-					extensions.Contains(Path.GetExtension(relativePath).ToLower());
+						extensions.Contains(Path.GetExtension(relativePath).ToLower());
 				clbFiles.SetItemChecked(i, isTargetFile);
 			}
 		}
 
 		private void btnReporter_Click(object sender, EventArgs e) {
 			var info = new ProcessStartInfo {
-				FileName = "OpenCodeCoverageFramework.Reporter.exe",
-				Arguments = Path.Combine(txtOutput.Text, "coverageinfo"),
+					FileName = "OpenCodeCoverageFramework.Reporter.exe",
+					Arguments = Path.Combine(txtOutput.Text, "coverageinfo"),
 			};
 			Process.Start(info);
 		}

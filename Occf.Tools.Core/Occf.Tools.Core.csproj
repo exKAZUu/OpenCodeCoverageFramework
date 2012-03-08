@@ -150,6 +150,7 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="FileSystemInfoExtensions.cs" />
     <Compile Include="InfoReader.cs" />
     <Compile Include="Names.cs" />
     <Compile Include="PathFinder.cs" />
