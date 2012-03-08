@@ -10,7 +10,11 @@ package jp.ac.waseda.cs.washi;
 
 public class CoverageWriter {
   static {
-    System.loadLibrary("Occf.Writer.File.Java");
+    if ("x86".equals(System.getProperty("os.arch"))) {
+      System.loadLibrary("Occf.Writer.File.x86.Java");
+    } else {
+      System.loadLibrary("Occf.Writer.File.x64.Java");
+    }
   }
 
   public static boolean WriteTestCase(int id, int type, int value) {

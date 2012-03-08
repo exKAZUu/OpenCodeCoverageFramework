@@ -21,7 +21,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 using Occf.Core.CoverageInformation;
-using Occf.Core.Extensions;
 using Paraiba.Collections.Generic;
 
 namespace Occf.Core.Operators.Inserters {
@@ -31,7 +30,7 @@ namespace Occf.Core.Operators.Inserters {
         public const int Done = ((int)CoverageState.Done) - 1;
 
         public static void InstrumentStatement(
-                CoverageInfo info, XElement root, CoverageProfile profile,
+                CoverageInfo info, XElement root, CoverageProfile.CoverageProfile profile,
                 string relativePath) {
             // ステートメントを挿入できるようにブロックを補う
             profile.NodeInserter.SupplementBlock(root);
@@ -44,7 +43,7 @@ namespace Occf.Core.Operators.Inserters {
         }
 
         public static void InstrumentPredicate(
-                CoverageInfo info, XElement root, CoverageProfile profile,
+                CoverageInfo info, XElement root, CoverageProfile.CoverageProfile profile,
                 string relativePath) {
             // switch文を正しく測定できるようにdefault節を追加する
             profile.NodeInserter.SupplementDefaultCase(root);
@@ -58,7 +57,7 @@ namespace Occf.Core.Operators.Inserters {
         }
 
         public static void InstrumentStatementAndPredicate(
-                CoverageInfo info, XElement root, CoverageProfile profile,
+                CoverageInfo info, XElement root, CoverageProfile.CoverageProfile profile,
                 string relativePath) {
             // ステートメントを挿入できるようにブロックを補う
             profile.NodeInserter.SupplementBlock(root);
@@ -78,7 +77,7 @@ namespace Occf.Core.Operators.Inserters {
         }
 
         private static void AddIntoVariableInitializer(
-                CoverageInfo info, XElement root, CoverageProfile profile,
+                CoverageInfo info, XElement root, CoverageProfile.CoverageProfile profile,
                 string relativePath) {
             var statemetIndex = info.Targets.Count;
             var nodeList = profile.InitializerSelector.Select(root).ToList();
@@ -96,7 +95,7 @@ namespace Occf.Core.Operators.Inserters {
         }
 
         private static void AddIntoStatement(
-                CoverageInfo info, XElement root, CoverageProfile profile,
+                CoverageInfo info, XElement root, CoverageProfile.CoverageProfile profile,
                 string relativePath) {
             var statemetIndex = info.Targets.Count;
             var nodeList = profile.StatementSelector.Select(root).ToList();
@@ -114,7 +113,7 @@ namespace Occf.Core.Operators.Inserters {
         }
 
         private static void AddIntoForeach(
-                CoverageInfo info, XElement node, CoverageProfile profile,
+                CoverageInfo info, XElement node, CoverageProfile.CoverageProfile profile,
                 string relativePath) {
             var startBranchIndex = info.Targets.Count;
             var startBranchConditionIndex = info.TargetGroups.Count;
@@ -157,7 +156,7 @@ namespace Occf.Core.Operators.Inserters {
         }
 
         private static void AddIntoSwitchCase(
-                CoverageInfo info, XElement node, CoverageProfile profile,
+                CoverageInfo info, XElement node, CoverageProfile.CoverageProfile profile,
                 string relativePath) {
             var startSwitchIndex = info.TargetGroups.Count;
             var switchNodes = profile.SwitchSelector.Select(node);
@@ -188,7 +187,7 @@ namespace Occf.Core.Operators.Inserters {
         }
 
         private static void AddIntoBranchAndCondition(
-                CoverageInfo info, XElement node, CoverageProfile profile,
+                CoverageInfo info, XElement node, CoverageProfile.CoverageProfile profile,
                 string relativePath) {
             var branchNodeList = profile.BranchSelector.Select(node).ToList();
             var startBranchIndex = info.Targets.Count;
@@ -225,7 +224,7 @@ namespace Occf.Core.Operators.Inserters {
         }
 
         private static void AddIntoBranch(
-                CoverageInfo info, XElement node, CoverageProfile profile,
+                CoverageInfo info, XElement node, CoverageProfile.CoverageProfile profile,
                 string relativePath) {
             var branchNodeList = profile.BranchSelector.Select(node).ToList();
             var startBranchIndex = info.Targets.Count;
@@ -245,7 +244,7 @@ namespace Occf.Core.Operators.Inserters {
 
         private static List<CoverageElement> InsertConditionCoverage(
                 CoverageInfo info, ICollection<XElement> condNodeList,
-                CoverageProfile profile, string relativePath) {
+                CoverageProfile.CoverageProfile profile, string relativePath) {
             return condNodeList
                     .SelectToList(
                             node => {

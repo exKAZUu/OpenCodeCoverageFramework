@@ -10,6 +10,7 @@ using Code2Xml.Languages.Java.XmlToCodes;
 using Occf.Core.Operators.Inserters;
 using Occf.Core.TestInfos;
 using Occf.Languages.Java.Operators.Selectors;
+using Occf.Languages.Java.Operators.Taggers;
 using Paraiba.Xml.Linq;
 
 namespace Occf.Languages.Java.Operators.Inserters {
@@ -60,7 +61,7 @@ namespace Occf.Languages.Java.Operators.Inserters {
 
 		public override TestCase InsertTestCaseId(
 				XElement target, int id, string relativePath) {
-			var testCase = new TestCase(relativePath, target.NthElement(2).Value, target);
+			var testCase = new TestCase(relativePath, string.Join(".", JavaTagger.GetTag(target)), target);
 			var blockElement = target.Element("block").NthElement(1);
 			var code = CreateTestCaseIdentifierCode(target, id, 2, ElementType.TestCase);
 			var node = JavaCodeToXml.Instance.Generate(code, p => p.statement());

@@ -1,9 +1,28 @@
-﻿using System;
+﻿#region License
+
+// Copyright (C) 2011-2012 The Unicoen Project
+// 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#endregion
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Text.RegularExpressions;
 using IronPython.Hosting;
 using Occf.Core.CoverageInformation;
 using Occf.Core.TestInfos;
@@ -31,8 +50,9 @@ namespace Occf.Tools.Cui {
 				"";
 
 		public static bool Run(IList<string> args) {
-			if (args.Count < 2)
+			if (args.Count < 2) {
 				return Program.Print(Usage);
+			}
 
 			var iArgs = 0;
 			var rootPath = args[iArgs++];
@@ -75,9 +95,8 @@ namespace Occf.Tools.Cui {
 			var covInfo = InfoReader.ReadCoverageInfo(covInfoPath, formatter);
 			var testInfo = InfoReader.ReadTestInfo(testInfoPath, formatter);
 
-			ReadTestResult(retPath, testInfo);
-
 			testInfo.InitializeForStoringData();
+			ReadTestResult(retPath, testInfo);
 			CoverageDataReader.ReadFile(testInfo, covPath);
 
 			var engine = Python.CreateEngine();
@@ -117,23 +136,36 @@ namespace Occf.Tools.Cui {
 			}
 		}
 
+		private static string GetFailedTestCasePrefix(ref int index) {
+			return (++index) + ") ";
+		}
+
+		private static readonly Regex regex = new Regex(@"([\w\d]*)(?:\[\d*\])?\(([\w\d.]*)\)");
+
 		public static void ReadTestResult(string resultFilePath, TestInfo testInfo) {
 			using (var reader = new StreamReader(resultFilePath)) {
+				var failedTestIndex = 0;
+				var prefix = GetFailedTestCasePrefix(ref failedTestIndex);
 				while (true) {
-					var relativePath = reader.ReadLine();
 					var line = reader.ReadLine();
-					if (line == null)
-						break;
-
-					var testCases = testInfo.TestCases
-							.SkipWhile(tc => tc.RelativePath != relativePath)
-							.TakeWhile(tc => tc.RelativePath == relativePath);
-					var isPasseds = line
-							.Select(s => s == '.')
-							.ToList();
-					foreach (var t in testCases.Zip(isPasseds, Tuple.Create)) {
-						t.Item1.Passed = t.Item2;
+					if (line == null) {
+						return;
 					}
+					if (!line.StartsWith(prefix)) {
+						continue;
+					}
+					var match = regex.Match(line.Substring(prefix.Length));
+					if (!match.Success) {
+						continue;
+					}
+					var name = match.Groups[2] + "." + match.Groups[1];
+					// TODO: O(n^2)
+					var testCase = testInfo.TestCases.FirstOrDefault(t => t.Name == name);
+					if (testCase != null) {
+						testCase.Passed = false;
+					}
+
+					prefix = GetFailedTestCasePrefix(ref failedTestIndex);
 				}
 			}
 		}

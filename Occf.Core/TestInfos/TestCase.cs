@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Xml.Linq;
-using Occf.Core.CodeInformation;
+using Code2Xml.Core.Position;
 
 namespace Occf.Core.TestInfos {
 	[Serializable]
 	public class TestCase {
 		public TestCase(string relativePath, string name, XElement node)
-			: this(relativePath, name, CodePositionParser.Create(node)) {}
+			: this(relativePath, name, CodePositionAnalyzer.Create(node)) {}
 
 		private TestCase(string relativePath, string name, CodePosition pos) {
 			RelativePath = relativePath;
@@ -28,12 +28,19 @@ namespace Occf.Core.TestInfos {
 		public List<int> Paths { get; private set; }
 
 		public void InitializeForStoringData() {
+			// These properties weren't initialized in inserting due to performance
 			Statements = new HashSet<int>();
 			Decisions = new HashSet<int>();
 			Conditions = new HashSet<int>();
 			ConditionDecisions = new HashSet<int>();
 			StatementConditionDecisions = new HashSet<int>();
 			Paths = new List<int>();
+			// Assume all testcases are passed without testresult.txt
+			Passed = true;
+		}
+
+		public override string ToString() {
+			return Name;
 		}
 
 		//		public static TestCase Reader(BinaryReader reader) {

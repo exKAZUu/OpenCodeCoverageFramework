@@ -78,12 +78,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\OpenCodeCoverageFramework\Occf.Reader.SharedMemory\SharedMemory.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="SharedMemory.h" />
     <ClInclude Include="Stdafx.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\OpenCodeCoverageFramework\Occf.Reader.SharedMemory\SharedMemory.cpp" />
+    <ClCompile Include="SharedMemory.cpp" />
     <ClCompile Include="AssemblyInfo.cpp" />
     <ClCompile Include="Stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

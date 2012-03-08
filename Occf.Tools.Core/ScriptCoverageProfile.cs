@@ -26,7 +26,7 @@ using Code2Xml.Core.CodeToXmls;
 using Code2Xml.Core.XmlToCodes;
 using IronPython.Hosting;
 using Microsoft.Scripting.Hosting;
-using Occf.Core.Extensions;
+using Occf.Core.CoverageProfile;
 using Occf.Core.Operators.Inserters;
 using Occf.Core.Operators.Selectors;
 using Occf.Core.Operators.Taggers;

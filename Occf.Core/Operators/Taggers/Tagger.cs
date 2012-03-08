@@ -2,6 +2,6 @@
 
 namespace Occf.Core.Operators.Taggers {
 	public abstract class Tagger {
-		public abstract string Generate(XElement elements);
+		public abstract string Tag(XElement elements);
 	}
 }

@@ -1,4 +1,4 @@
-﻿using Occf.Core.CodeInformation;
+﻿using Code2Xml.Core.Position;
 
 namespace Occf.Core.CoverageInformation {
 	public interface ICoverageElement {

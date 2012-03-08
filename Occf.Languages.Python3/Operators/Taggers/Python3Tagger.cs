@@ -5,7 +5,7 @@ using Paraiba.Xml.Linq;
 
 namespace Occf.Languages.Python3.Operators.Taggers {
 	public class Python3Tagger : Tagger {
-		public override string Generate(XElement elements) {
+		public override string Tag(XElement elements) {
 			var tag = "";
 			var classNodes = elements.Ancestors()
 				.Where(e => e.Name.LocalName == "classdef");

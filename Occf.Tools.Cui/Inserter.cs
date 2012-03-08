@@ -7,7 +7,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using NDesk.Options;
 using Occf.Core.CoverageCode;
 using Occf.Core.CoverageInformation;
-using Occf.Core.Extensions;
+using Occf.Core.CoverageProfile;
 using Occf.Core.TestInfos;
 using Occf.Tools.Core;
 

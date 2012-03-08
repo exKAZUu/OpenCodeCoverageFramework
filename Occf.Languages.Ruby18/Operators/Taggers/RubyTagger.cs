@@ -3,7 +3,7 @@ using Occf.Core.Operators.Taggers;
 
 namespace Occf.Languages.Ruby18.Operators.Taggers {
 	public class RubyTagger : Tagger {
-		public override string Generate(XElement elements) {
+		public override string Tag(XElement elements) {
 			var tag = "";
 			//var classNodes = elements.Parents()
 			//    .Where(e => e.Name.LocalName == "classdef");

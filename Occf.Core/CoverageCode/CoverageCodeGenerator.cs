@@ -1,6 +1,5 @@
 ﻿using System.IO;
 using Occf.Core.CoverageInformation;
-using Occf.Core.Extensions;
 using Occf.Core.Operators.Inserters;
 using Occf.Core.TestInfos;
 using Paraiba.IO;
@@ -9,7 +8,7 @@ using Paraiba.Text;
 namespace Occf.Core.CoverageCode {
 	public static class CoverageCodeGenerator {
 		public static string WriteIdentifiedTest(
-				CoverageProfile coverageProfile,
+				CoverageProfile.CoverageProfile coverageProfile,
 				TestInfo info,
 				string fullPath, string outDirPath) {
 			string relativePath;
@@ -21,13 +20,13 @@ namespace Occf.Core.CoverageCode {
 
 		public static string GetIdentifiedTest(
 				string fullPath, TestInfo info,
-				CoverageProfile coverageProfile) {
+				CoverageProfile.CoverageProfile coverageProfile) {
 			return GetIdentifiedTest(fullPath, info, coverageProfile, out fullPath);
 		}
 
 		public static string GetIdentifiedTest(
 				string fullPath, TestInfo info,
-				CoverageProfile coverageProfile,
+				CoverageProfile.CoverageProfile coverageProfile,
 				out string relativePath) {
 			relativePath = XPath.GetRelativePath(fullPath, info.BasePath);
 			var ast = coverageProfile.CodeToXml.GenerateFromFile(fullPath);
@@ -42,7 +41,7 @@ namespace Occf.Core.CoverageCode {
 		}
 
 		public static string WriteCoveragedCode(
-				CoverageProfile coverageProfile,
+				CoverageProfile.CoverageProfile coverageProfile,
 				CoverageInfo info,
 				string fullPath, string outDirPath) {
 			string relativePath;
@@ -53,13 +52,13 @@ namespace Occf.Core.CoverageCode {
 
 		public static string GetCoveragedCode(
 				string fullPath, CoverageInfo info,
-				CoverageProfile coverageProfile) {
+				CoverageProfile.CoverageProfile coverageProfile) {
 			return GetCoveragedCode(fullPath, info, coverageProfile, out fullPath);
 		}
 
 		public static string GetCoveragedCode(
 				string fullPath, CoverageInfo info,
-				CoverageProfile coverageProfile,
+				CoverageProfile.CoverageProfile coverageProfile,
 				out string relativePath) {
 			relativePath = XPath.GetRelativePath(fullPath, info.BasePath);
 			var ast = coverageProfile.CodeToXml.GenerateFromFile(fullPath);

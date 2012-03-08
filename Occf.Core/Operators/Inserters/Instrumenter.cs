@@ -17,8 +17,8 @@
 #endregion
 
 using System.Linq;
-using Occf.Core.CodeInformation;
-using Occf.Core.Extensions;
+using System.Xml.Linq;
+using Code2Xml.Core.Position;
 
 namespace Occf.Core.Operators.Inserters {
     /// <summary>
@@ -76,7 +76,7 @@ namespace Occf.Core.Operators.Inserters {
         /// <param name="filePath"> A file to be instrumented. </param>
         /// <returns> The modified test code. </returns>
         public string InstrumentTestCase(
-                CoverageProfile profile, string filePath) {
+                CoverageProfile.CoverageProfile profile, string filePath) {
             var root = profile.CodeToXml.GenerateFromFile(filePath);
             var inserter = profile.NodeInserter;
 
@@ -88,7 +88,7 @@ namespace Occf.Core.Operators.Inserters {
                 inserter.InsertTestCaseId(target, testCaseId, filePath);
             }
 
-            // Add import for loggin executed items
+            // Add import for logging executed items
             inserter.InsertImport(root);
 
             return profile.XmlToCode.Generate(root);
@@ -101,7 +101,7 @@ namespace Occf.Core.Operators.Inserters {
         /// <param name="filePath"> A file to be instrumented. </param>
         /// <returns> The modified production code. </returns>
         public string InstrumentStatementAndPredicate(
-                CoverageProfile profile, string filePath) {
+                CoverageProfile.CoverageProfile profile, string filePath) {
             var root = profile.CodeToXml.GenerateFromFile(filePath);
             var inserter = profile.NodeInserter;
 
@@ -119,34 +119,41 @@ namespace Occf.Core.Operators.Inserters {
                         .First()
                         .Value;
                 var funcId = RegisterFunction(
-                        fileId, funcName, CodePositionParser.Create(func));
+                        fileId, funcName, CodePositionAnalyzer.Create(func));
 
-                var stmts = profile.StatementSelector.Select(func);
-                foreach (var stmt in stmts) {
-                    var position = CodePositionParser.Create(stmt);
-                    // 登録
-                    var stmtId = RegisterStatement(fileId, funcId, position);
-                    // 測定用コードの挿入
-                    inserter.InsertStatementBefore(
-                            stmt, stmtId, CoverageInserter.Done,
-                            ElementType.Statement);
-                }
-
-                var branches = profile.BranchSelector.Select(func);
-                foreach (var branch in branches) {
-                    var position = CodePositionParser.Create(branch);
-                    // 登録
-                    var branchId = RegisterBranch(fileId, funcId, position);
-                    // 測定用コードの挿入
-                    inserter.InsertPredicate(
-                            branch, branchId, ElementType.Decision);
-                }
+                InstrumentStatement(profile, fileId, funcId, inserter, func);
+            	InstrumentBranch(profile, fileId, funcId, inserter, func);
             }
 
-            // Add import for loggin executed items
+            // Add import for logging executed items
             inserter.InsertImport(root);
 
             return profile.XmlToCode.Generate(root);
         }
+
+    	private void InstrumentStatement(
+    			CoverageProfile.CoverageProfile profile, int fileId, int funcId, NodeInserter inserter,
+    			XElement func) {
+    		var stmts = profile.StatementSelector.Select(func);
+    		foreach (var stmt in stmts) {
+    			var position = CodePositionAnalyzer.Create(stmt);
+    			var stmtId = RegisterStatement(fileId, funcId, position);
+    			inserter.InsertStatementBefore(
+    					stmt, stmtId, CoverageInserter.Done,
+    					ElementType.Statement);
+    		}
+    	}
+
+    	private void InstrumentBranch(
+    			CoverageProfile.CoverageProfile profile, int fileId, int funcId, NodeInserter inserter,
+    			XElement func) {
+    		var branches = profile.BranchSelector.Select(func);
+    		foreach (var branch in branches) {
+    			var position = CodePositionAnalyzer.Create(branch);
+    			var branchId = RegisterBranch(fileId, funcId, position);
+    			inserter.InsertPredicate(
+    					branch, branchId, ElementType.Decision);
+    		}
+    	}
     }
 }

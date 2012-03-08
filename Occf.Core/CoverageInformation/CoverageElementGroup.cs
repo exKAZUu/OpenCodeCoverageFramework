@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Occf.Core.CodeInformation;
+using Code2Xml.Core.Position;
 
 namespace Occf.Core.CoverageInformation {
 	[Serializable]

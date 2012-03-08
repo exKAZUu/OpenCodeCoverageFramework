@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Xml.Linq;
-using Occf.Core.CodeInformation;
+using Code2Xml.Core.Position;
 using Occf.Core.Operators.Taggers;
 
 namespace Occf.Core.CoverageInformation {
@@ -8,8 +8,8 @@ namespace Occf.Core.CoverageInformation {
 	public class CoverageElement : ICoverageElement {
 		public CoverageElement(string relativePath, XElement node, Tagger tagger) {
 			RelativePath = relativePath;
-			Position = CodePositionParser.Create(node);
-			var tag = relativePath.Replace('\\', '>') + '>' + tagger.Generate(node);
+			Position = CodePositionAnalyzer.Create(node);
+			var tag = relativePath.Replace('\\', '>') + '>' + tagger.Tag(node);
 			Tag = tag.EndsWith(">") ? tag : tag + ">";
 		}
 

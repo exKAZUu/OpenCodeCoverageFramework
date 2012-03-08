@@ -16,6 +16,7 @@
 
 #endregion
 
+using System;
 using System.IO;
 using System.Text.RegularExpressions;
 using Occf.Tools.Core;
