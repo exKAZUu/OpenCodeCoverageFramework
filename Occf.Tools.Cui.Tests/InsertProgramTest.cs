@@ -35,6 +35,11 @@ namespace Occf.Tools.Cui.Tests {
 		private const string JavacPath = "javac";
 
 		[Test]
+		public void RunChangingOhterEnvironment() {
+			
+		}
+
+		[Test]
 		[TestCase("GetMid", "GetMidTest")]
 		[TestCase("GetMid3", "GetMid3Test")]
 		public void InsertMeasurementCode(string projectName, string testTargetNames) {
@@ -44,6 +49,10 @@ namespace Occf.Tools.Cui.Tests {
 			var expDirPath = Fixture.GetProjectExpectationPath(projectName);
 			FileUtility.CopyRecursively(inDirPath, outDirPath);
 
+			VerifyMeasureAndLocalize(testTargetNames, inDirPath, expDirPath, outDir, outDirPath);
+		}
+
+		private static void VerifyMeasureAndLocalize(string testTargetNames, string inDirPath, string expDirPath, DirectoryInfo outDir, string outDirPath) {
 			var profile = ScriptCoverageProfile.Load("Java");
 			Inserter.InsertMeasurementCode(
 					outDir, new DirectoryInfo(Path.Combine(outDirPath, "test")), outDir,

@@ -1,6 +1,6 @@
 ﻿#region License
 
-// Copyright (C) 2009-2012 Kazunori Sakamoto
+// Copyright (C) 2012 Kazunori Sakamoto
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,34 +21,30 @@ using System.Linq;
 
 namespace Occf.Tools.Core {
 	public static class PathFinder {
-		public static FileInfo FindCoverageInfoPath(FileSystemInfo fileOrDirInfo) {
-			return FindPath(fileOrDirInfo, Names.CoverageInfo);
+		public static FileInfo FindCoverageInfoPath(DirectoryInfo dirInfo) {
+			return FindPath(dirInfo, Names.CoverageInfo);
 		}
 
-		public static FileInfo FindTestInfoPath(FileSystemInfo fileOrDirInfo) {
-			return FindPath(fileOrDirInfo, Names.TestInfo);
+		public static FileInfo FindTestInfoPath(DirectoryInfo dirInfo) {
+			return FindPath(dirInfo, Names.TestInfo);
 		}
 
 		public static FileInfo FindCoverageDataPath(
 				FileInfo covFileInfo, DirectoryInfo rootDirInfo) {
-			if (!covFileInfo.SafeExists()) {
-				covFileInfo = FindPath(covFileInfo, Names.CoverageData);
+			if (covFileInfo.SafeExists()) {
+				return covFileInfo;
 			}
-			if (!covFileInfo.SafeExists()) {
-				covFileInfo = FindPath(rootDirInfo, Names.CoverageData);
-			}
-			return covFileInfo;
+			return FindPath(rootDirInfo, Names.CoverageData);
 		}
 
-		private static FileInfo FindPath(FileSystemInfo fileOrDirInfo, string pattern) {
-			if (fileOrDirInfo.SafeDirectoryExists()) {
-				var path = Directory.EnumerateFiles(fileOrDirInfo.FullName, pattern)
-						.OrderByDescending(p => p.Count(c => c == Path.PathSeparator))
-						.FirstOrDefault();
-				return path != null ? new FileInfo(path) : null;
+		private static FileInfo FindPath(DirectoryInfo dirInfo, string pattern) {
+			if (!dirInfo.SafeExists()) {
+				return null;
 			}
-			return fileOrDirInfo.SafeFileExists()
-			       		? new FileInfo(fileOrDirInfo.FullName) : null;
+			var path = Directory.EnumerateFiles(dirInfo.FullName, pattern)
+					.OrderByDescending(p => p.Count(c => c == Path.PathSeparator))
+					.FirstOrDefault();
+			return path != null ? new FileInfo(path) : null;
 		}
 	}
 }
