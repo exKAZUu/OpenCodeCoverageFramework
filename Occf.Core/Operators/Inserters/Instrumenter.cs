@@ -1,6 +1,6 @@
 ﻿#region License
 
-// Copyright (C) 2009-2012 Kazunori Sakamoto
+// Copyright (C) 2011-2012 Kazunori Sakamoto
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,10 +16,12 @@
 
 #endregion
 
+using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 using Code2Xml.Core.Position;
 using Occf.Core.CoverageProfiles;
+using Paraiba.IO;
 
 namespace Occf.Core.Operators.Inserters {
 	/// <summary>
@@ -27,11 +29,11 @@ namespace Occf.Core.Operators.Inserters {
 	/// </summary>
 	public abstract class Instrumenter {
 		/// <summary>
-		///   Registers a file with the specified path and returns the file id.
+		///   Registers a file with the specified <c>FileInfo</c> instance and returns the file id.
 		/// </summary>
-		/// <param name="filePath"> A file path to be instrumented. </param>
+		/// <param name="fileInfo"> A <c>FileInfo</c> instance to be instrumented. </param>
 		/// <returns> The file id. </returns>
-		protected abstract int RegisterFile(string filePath);
+		protected abstract int RegisterFile(FileInfo fileInfo);
 
 		/// <summary>
 		///   Registers a function with the specified name and returns the function id.
@@ -73,20 +75,24 @@ namespace Occf.Core.Operators.Inserters {
 		/// <summary>
 		///   Instruments test code for measuring code coverage and returns the modifieid code.
 		/// </summary>
-		/// <param name="profile"> A profile to measure coverage. </param>
-		/// <param name="filePath"> A file to be instrumented. </param>
-		/// <returns> The modified test code. </returns>
+		/// <param name="profile">A profile to measure coverage.</param>
+		/// <param name="fileInfo">A <c>FileInfo</c> instance to be instrumented.</param>
+		/// <param name="baseDirInfo">A <c>DirectoryInfo</c> instance of base directory.</param>
+		/// <returns>The modified test code.</returns>
 		public string InstrumentTestCase(
-				CoverageProfile profile, string filePath) {
-			var root = profile.CodeToXml.GenerateFromFile(filePath);
+				CoverageProfile profile, FileInfo fileInfo, DirectoryInfo baseDirInfo) {
+			var relativePath = XPath.GetRelativePath(
+					fileInfo.FullName, baseDirInfo.FullName);
+
+			var root = profile.CodeToXml.GenerateFromFile(fileInfo.FullName);
 			var inserter = profile.NodeInserter;
 
-			var fileId = RegisterFile(filePath);
+			var fileId = RegisterFile(fileInfo);
 
 			var targets = profile.TestCaseLabelTailSelector.Select(root);
 			foreach (var target in targets) {
 				var testCaseId = RegisterTestCase(fileId);
-				inserter.InsertTestCaseId(target, testCaseId, filePath);
+				inserter.InsertTestCaseId(target, testCaseId, relativePath);
 			}
 
 			// Add import for logging executed items
@@ -98,15 +104,15 @@ namespace Occf.Core.Operators.Inserters {
 		/// <summary>
 		///   Instruments production code for measuring code coverage and returns the modifieid code.
 		/// </summary>
-		/// <param name="profile"> A profile to measure coverage. </param>
-		/// <param name="filePath"> A file to be instrumented. </param>
-		/// <returns> The modified production code. </returns>
+		/// <param name="profile">A profile to measure coverage.</param>
+		/// <param name="fileInfo">A <c>FileInfo</c> instance to be instrumented.</param>
+		/// <returns>The modified production code.</returns>
 		public string InstrumentStatementAndPredicate(
-				CoverageProfile profile, string filePath) {
-			var root = profile.CodeToXml.GenerateFromFile(filePath);
+				CoverageProfile profile, FileInfo fileInfo) {
+			var root = profile.CodeToXml.GenerateFromFile(fileInfo.FullName);
 			var inserter = profile.NodeInserter;
 
-			var fileId = RegisterFile(filePath);
+			var fileId = RegisterFile(fileInfo);
 
 			// ステートメントを挿入できるようにブロックを補う
 			inserter.SupplementBlock(root);

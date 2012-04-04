@@ -16,48 +16,38 @@
 
 #endregion
 
-using System;
 using System.IO;
 using System.Text.RegularExpressions;
 using Occf.Tools.Core;
-using Paraiba.IO;
 
 namespace Occf.Sample {
-    internal class Program {
-        private static void Main(string[] args) {
-            var outDir = @"C:\coverage";
-            var inputDir = @"..\..\..\fixture\project\input\GetMid";
-            var excludeInDir = @"..\..\..\fixture\project\input\GetMid\test";
+	internal class Program {
+		private static void Main(string[] args) {
+			var outDirInfo = new DirectoryInfo(@"C:\coverage");
+			var inputDirInfo = new DirectoryInfo(
+					@"..\..\..\fixture\project\input\GetMid");
+			var excludeInDirInfo =
+					new DirectoryInfo(@"..\..\..\fixture\project\input\GetMid\test");
 
-            outDir = Path.GetFullPath(outDir);
-            inputDir = Path.GetFullPath(inputDir);
-            excludeInDir = Path.GetFullPath(excludeInDir);
+			var instrumenter = new SampleInstrumenter(outDirInfo, inputDirInfo);
+			var profile = ScriptCoverageProfile.Load("Java");
+			var regex =
+					new Regex(profile.FilePattern.Replace("*", ".*").Replace("?", "."));
 
-            var instrumenter = new SampleInstrumenter(outDir, inputDir);
-            var profile = ScriptCoverageProfile.Load("Java");
-            var regex =
-                    new Regex(
-                            profile.FilePattern.Replace("*", ".*").Replace(
-                                    "?", "."));
-
-            Directory.CreateDirectory(outDir);
-            var filePaths = Directory.EnumerateFiles(
-                    inputDir, "*", SearchOption.AllDirectories);
-            foreach (var filePath in filePaths) {
-                var relativePath = XPath.GetRelativePath(filePath, inputDir);
-                if (regex.IsMatch(filePath)) {
-                    if (!filePath.StartsWith(excludeInDir)) {
-                        instrumenter.WriteInstrumentedProductionCode(
-                                profile, relativePath);
-                    } else {
-                        instrumenter.WriteInstrumentedTestCode(
-                                profile, relativePath);
-                    }
-                } else {
-                    instrumenter.CopyFile(relativePath);
-                }
-            }
-            instrumenter.CopyLibraries(profile);
-        }
-    }
+			outDirInfo.Create();
+			var fileInfos = inputDirInfo.EnumerateFiles("*", SearchOption.AllDirectories);
+			foreach (var fileInfo in fileInfos) {
+				if (regex.IsMatch(fileInfo.FullName)) {
+					if (!fileInfo.FullName.StartsWith(excludeInDirInfo.FullName)) {
+						instrumenter.WriteInstrumentedProductionCode(profile, fileInfo);
+					} else {
+						instrumenter.WriteInstrumentedTestCode(profile, fileInfo);
+					}
+				} else {
+					instrumenter.CopyFile(fileInfo);
+				}
+			}
+			instrumenter.CopyLibraries(profile);
+		}
+	}
 }

@@ -18,6 +18,7 @@
 
 using System.IO;
 using System.Linq;
+using Paraiba.IO;
 
 namespace Occf.Tools.Core {
 	public static class PathFinder {

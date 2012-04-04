@@ -24,6 +24,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using NDesk.Options;
 using Occf.Core.CoverageInformation;
 using Occf.Tools.Core;
+using Paraiba.IO;
 using Paraiba.Linq;
 
 namespace Occf.Tools.Cui {

@@ -27,6 +27,7 @@ using IronPython.Hosting;
 using Occf.Core.CoverageInformation;
 using Occf.Core.TestInfos;
 using Occf.Tools.Core;
+using Paraiba.IO;
 
 namespace Occf.Tools.Cui {
 	public class BugLocalizer {

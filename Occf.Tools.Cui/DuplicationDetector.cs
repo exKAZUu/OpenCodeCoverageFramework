@@ -8,6 +8,7 @@ using Occf.Core.CoverageInformation;
 using Occf.Core.TestInfos;
 using Occf.Tools.Core;
 using Paraiba.Collections.Generic;
+using Paraiba.IO;
 
 namespace Occf.Tools.Cui {
 	public class DuplicationDetector {

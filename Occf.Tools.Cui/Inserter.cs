@@ -21,6 +21,7 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.Serialization.Formatters.Binary;
 using NDesk.Options;
 using Occf.Core.CoverageCode;
@@ -28,6 +29,7 @@ using Occf.Core.CoverageInformation;
 using Occf.Core.CoverageProfiles;
 using Occf.Core.TestInfos;
 using Occf.Tools.Core;
+using Paraiba.IO;
 
 namespace Occf.Tools.Cui {
 	public class Inserter {
@@ -123,6 +125,8 @@ namespace Occf.Tools.Cui {
 			Contract.Requires<ArgumentException>(workDir.Exists);
 			Contract.Requires<ArgumentNullException>(profile != null);
 
+			Environment.CurrentDirectory = "C:\\";
+
 			var covInfo = new CoverageInfo(
 					rootDir.FullName, profile.Name, SharingMethod.File);
 			var testInfo = testDir != null
@@ -154,7 +158,7 @@ namespace Occf.Tools.Cui {
 		private static void CopyLibraries(
 				CoverageProfile profile, DirectoryInfo directory) {
 			foreach (var name in profile.LibraryNames) {
-				var srcPath = Path.Combine(Names.Library, name);
+				var srcPath = Path.Combine(Assembly.GetExecutingAssembly().Location, Names.Library, name);
 				var dstPath = Path.Combine(directory.FullName, name);
 				File.Copy(srcPath, dstPath, true);
 			}
@@ -176,18 +180,18 @@ namespace Occf.Tools.Cui {
 		private static void WriteProductionCodeFiles(
 				DirectoryInfo rootDir, DirectoryInfo testDir, CoverageProfile prof,
 				CoverageInfo info) {
-			var files = rootDir.EnumerateFiles(
+			var paths = rootDir.EnumerateFiles(
 					prof.FilePattern, SearchOption.AllDirectories);
 			// ignore test code in the directory of production code
 			if (testDir != null) {
-				files = files.Where(f => !f.FullName.StartsWith(testDir.FullName));
+				paths = paths.Where(f => !f.FullName.StartsWith(testDir.FullName));
 			}
 
-			foreach (var file in files.ToList()) {
-				var bakPath = file + Names.BackupSuffix;
-				file.CopyTo(bakPath, true);
+			foreach (var path in paths.ToList()) {
+				var bakPath = rootDir.GetFile(path + Names.BackupSuffix).FullName;
+				path.CopyTo(bakPath, true);
 				var outPath = CoverageCodeGenerator.WriteCoveragedCode(
-						prof, info, file, rootDir);
+						prof, info, path, rootDir);
 				Console.WriteLine("wrote:" + outPath);
 			}
 		}
@@ -199,7 +203,7 @@ namespace Occf.Tools.Cui {
 					prof.FilePattern, SearchOption.AllDirectories);
 
 			foreach (var path in paths.ToList()) {
-				var bakPath = path + Names.BackupSuffix;
+				var bakPath = rootDir.GetFile(path + Names.BackupSuffix).FullName;
 				path.CopyTo(bakPath, true);
 				var outPath = CoverageCodeGenerator.WriteIdentifiedTest(
 						prof, info, path, rootDir);

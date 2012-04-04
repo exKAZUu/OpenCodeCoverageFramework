@@ -23,6 +23,7 @@ using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using Occf.Core.CoverageInformation;
 using Occf.Tools.Core;
+using Paraiba.IO;
 
 namespace Occf.Tools.Cui {
 	public class PathAnalyzer {
