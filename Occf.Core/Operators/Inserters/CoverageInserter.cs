@@ -21,7 +21,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 using Occf.Core.CoverageInformation;
-using Occf.Core.CoverageProfiles;
+using Occf.Core.Profiles;
 using Paraiba.Collections.Generic;
 
 namespace Occf.Core.Operators.Inserters {
@@ -66,11 +66,16 @@ namespace Occf.Core.Operators.Inserters {
 			// switch文を正しく測定できるようにdefault節を追加する
 			profile.NodeInserter.SupplementDefaultCase(root);
 
+			AddIntoStatement(info, root, profile, relativePath);
 			AddIntoBranchAndCondition(info, root, profile, relativePath);
+
+			// Add the measurement code as a statement into switch and foreach
+			// after inserting the measurement code into statements
 			AddIntoSwitchCase(info, root, profile, relativePath);
 			AddIntoForeach(info, root, profile, relativePath);
 
-			AddIntoStatement(info, root, profile, relativePath);
+			// Add the measurement code as a prediction into variable initializers
+			// after inserting the measurement code into predictions
 			AddIntoVariableInitializer(info, root, profile, relativePath);
 
 			// Add import for loggin executed items
@@ -127,15 +132,15 @@ namespace Occf.Core.Operators.Inserters {
 						profile.ForeachTailSelector.Select(foreachNode).First();
 				// 同じid( = count)を共有
 				var id = info.Targets.Count;
-				// DummyRecord(TrueOnly)
+				// Record(TrueOnly)    _lastState = TrueOnly
 				// foreach() {
-				//   Record(FalseOnly) ループ判定成立
+				//   Record(FalseOnly) ループ判定成立 (State |= FalseOnly)
 				//   statement;
-				//   DummyRecord(TrueOnly)
+				//   Record(TrueOnly)  _lastState = TrueOnly
 				// }
-				// Record(TrueOnly)    ループ判定不成立（TrueOnlyが連続して）
+				// Record(TrueOnly)    ループ判定不成立 (State |= TrueOnly if _lastState == TrueOnly)
 				profile.NodeInserter.InsertStatementBefore(
-						head, id, TrueOnly, ElementType.DecisionAndCondition);
+						foreachNode, id, TrueOnly, ElementType.DecisionAndCondition);
 				profile.NodeInserter.InsertStatementAfter(
 						head, id, FalseOnly, ElementType.DecisionAndCondition);
 				profile.NodeInserter.InsertStatementBefore(

@@ -1,6 +1,6 @@
 ﻿#region License
 
-// Copyright (C) 2011-2012 Kazunori Sakamoto
+// Copyright (C) 2009-2012 Kazunori Sakamoto
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 using Code2Xml.Core.Position;
-using Occf.Core.CoverageProfiles;
+using Occf.Core.Profiles;
 using Paraiba.IO;
 
 namespace Occf.Core.Operators.Inserters {
@@ -33,7 +33,7 @@ namespace Occf.Core.Operators.Inserters {
 		/// </summary>
 		/// <param name="fileInfo"> A <c>FileInfo</c> instance to be instrumented. </param>
 		/// <returns> The file id. </returns>
-		protected abstract int RegisterFile(FileInfo fileInfo);
+		protected abstract long RegisterFile(FileInfo fileInfo);
 
 		/// <summary>
 		///   Registers a function with the specified name and returns the function id.
@@ -42,8 +42,8 @@ namespace Occf.Core.Operators.Inserters {
 		/// <param name="functionName"> A function name to be registered. </param>
 		/// <param name="position"> The position of the function. </param>
 		/// <returns> The function id. </returns>
-		protected abstract int RegisterFunction(
-				int fileId, string functionName, CodePosition position);
+		protected abstract long RegisterFunction(
+				long fileId, string functionName, CodePosition position);
 
 		/// <summary>
 		///   Registers a statement with the specified file and function id which contains the statement and returns the branch id.
@@ -52,8 +52,8 @@ namespace Occf.Core.Operators.Inserters {
 		/// <param name="funcId"> A function id which contains the branch. </param>
 		/// <param name="position"> The position of the statement. </param>
 		/// <returns> The statement id. </returns>
-		protected abstract int RegisterStatement(
-				int fileId, int funcId, CodePosition position);
+		protected abstract long RegisterStatement(
+				long fileId, long funcId, CodePosition position);
 
 		/// <summary>
 		///   Registers a branch such as if, while, do-while, for and ? (ternary expression) with the specified file and function id which contains the branch and returns the branch id.
@@ -62,15 +62,15 @@ namespace Occf.Core.Operators.Inserters {
 		/// <param name="funcId"> A function id which contains the branch. </param>
 		/// <param name="position"> The position of the branch. </param>
 		/// <returns> The branch id. </returns>
-		protected abstract int RegisterBranch(
-				int fileId, int funcId, CodePosition position);
+		protected abstract long RegisterBranch(
+				long fileId, long funcId, CodePosition position);
 
 		/// <summary>
 		///   Registers a test case and returns the test case id.
 		/// </summary>
 		/// <param name="fileId"> A file id which contains the function. </param>
 		/// <returns> The test case id. </returns>
-		protected abstract int RegisterTestCase(int fileId);
+		protected abstract long RegisterTestCase(long fileId);
 
 		/// <summary>
 		///   Instruments test code for measuring code coverage and returns the modifieid code.
@@ -126,7 +126,7 @@ namespace Occf.Core.Operators.Inserters {
 						.First()
 						.Value;
 				var funcId = RegisterFunction(
-						fileId, funcName, CodePositionAnalyzer.Create(func));
+						fileId, funcName, CodePositions.New(func));
 
 				InstrumentStatement(profile, fileId, funcId, inserter, func);
 				InstrumentBranch(profile, fileId, funcId, inserter, func);
@@ -139,11 +139,11 @@ namespace Occf.Core.Operators.Inserters {
 		}
 
 		private void InstrumentStatement(
-				CoverageProfile profile, int fileId, int funcId, NodeInserter inserter,
+				CoverageProfile profile, long fileId, long funcId, NodeInserter inserter,
 				XElement func) {
 			var stmts = profile.StatementSelector.Select(func);
 			foreach (var stmt in stmts) {
-				var position = CodePositionAnalyzer.Create(stmt);
+				var position = CodePositions.New(stmt);
 				var stmtId = RegisterStatement(fileId, funcId, position);
 				inserter.InsertStatementBefore(
 						stmt, stmtId, CoverageInserter.Done,
@@ -152,11 +152,11 @@ namespace Occf.Core.Operators.Inserters {
 		}
 
 		private void InstrumentBranch(
-				CoverageProfile profile, int fileId, int funcId, NodeInserter inserter,
+				CoverageProfile profile, long fileId, long funcId, NodeInserter inserter,
 				XElement func) {
 			var branches = profile.BranchSelector.Select(func);
 			foreach (var branch in branches) {
-				var position = CodePositionAnalyzer.Create(branch);
+				var position = CodePositions.New(branch);
 				var branchId = RegisterBranch(fileId, funcId, position);
 				inserter.InsertPredicate(
 						branch, branchId, ElementType.Decision);

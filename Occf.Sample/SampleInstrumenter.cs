@@ -1,6 +1,6 @@
 ﻿#region License
 
-// Copyright (C) 2011-2012 Kazunori Sakamoto
+// Copyright (C) 2009-2012 Kazunori Sakamoto
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,16 +19,15 @@
 using System;
 using System.IO;
 using Code2Xml.Core.Position;
-using Occf.Core.CoverageProfiles;
 using Occf.Core.Operators.Inserters;
-using Occf.Tools.Core;
+using Occf.Core.Profiles;
 using Paraiba.IO;
 
 namespace Occf.Sample {
 	public class SampleInstrumenter : Instrumenter {
 		public DirectoryInfo OutDirInfo { get; set; }
 		public DirectoryInfo BaseDirInfo { get; set; }
-		public int Id { get; private set; }
+		public long Id { get; private set; }
 		public int TestCaseId { get; private set; }
 
 		/// <summary>
@@ -62,13 +61,6 @@ namespace Occf.Sample {
 			File.WriteAllText(outFileInfo.FullName, code);
 		}
 
-		public void CopyLibraries(CoverageProfile profile) {
-			foreach (var name in profile.LibraryNames) {
-				var srcPath = Path.Combine(Names.Library, name);
-				File.Copy(srcPath, OutDirInfo.GetFile(name).FullName, true);
-			}
-		}
-
 		public void CopyFile(FileInfo inFileInfo) {
 			var relativePath = XPath.GetRelativePath(
 					inFileInfo.FullName, BaseDirInfo.FullName);
@@ -77,32 +69,32 @@ namespace Occf.Sample {
 			inFileInfo.CopyTo(outFileInfo.FullName, true);
 		}
 
-		protected override int RegisterFile(FileInfo fileInfo) {
+		protected override long RegisterFile(FileInfo fileInfo) {
 			var relativePath = XPath.GetRelativePath(
 					fileInfo.FullName, BaseDirInfo.FullName);
 			Console.WriteLine("Relative path: " + relativePath);
 			return Id++;
 		}
 
-		protected override int RegisterFunction(
-				int fileId, string functionName, CodePosition position) {
-			Console.WriteLine("Function name: " + functionName);
+		protected override long RegisterFunction(
+				long fileId, string functionName, CodePosition position) {
+			Console.WriteLine("Function name: " + functionName + ", pos: " + position);
 			return Id++;
 		}
 
-		protected override int RegisterStatement(
-				int fileId, int funcId, CodePosition position) {
-			Console.WriteLine("Statement position: " + position.SmartPosition);
+		protected override long RegisterStatement(
+				long fileId, long funcId, CodePosition position) {
+			Console.WriteLine("Statement position: " + position);
 			return Id++;
 		}
 
-		protected override int RegisterBranch(
-				int fileId, int funcId, CodePosition position) {
-			Console.WriteLine("Branch position: " + position.SmartPosition);
+		protected override long RegisterBranch(
+				long fileId, long funcId, CodePosition position) {
+			Console.WriteLine("Branch position: " + position.SmartPositionString);
 			return Id++;
 		}
 
-		protected override int RegisterTestCase(int fileId) {
+		protected override long RegisterTestCase(long fileId) {
 			Console.WriteLine("TestCase (fileId: " + fileId + ")");
 			return TestCaseId++;
 		}

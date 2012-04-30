@@ -1,4 +1,22 @@
-﻿using System;
+﻿#region License
+
+// Copyright (C) 2009-2012 Kazunori Sakamoto
+// 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#endregion
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
@@ -16,7 +34,9 @@ using Paraiba.Xml.Linq;
 namespace Occf.Languages.Java.Operators.Inserters {
 	public class JavaNodeInserter : AntlrNodeInserter<JavaParser> {
 		private readonly JavaSwitchSelector _switchSelector = new JavaSwitchSelector();
-		private readonly JavaCaseLabelTailSelector _caseLabelTailSelector = new JavaCaseLabelTailSelector();
+
+		private readonly JavaCaseLabelTailSelector _caseLabelTailSelector =
+				new JavaCaseLabelTailSelector();
 
 		protected override string MethodPrefix {
 			get { return "jp.ac.waseda.cs.washi.CoverageWriter."; }
@@ -30,7 +50,8 @@ namespace Occf.Languages.Java.Operators.Inserters {
 			get { return JavaXmlToCode.Instance; }
 		}
 
-		protected override Func<JavaParser, XAstParserRuleReturnScope> ParseStatementFunc {
+		protected override Func<JavaParser, XAstParserRuleReturnScope>
+			ParseStatementFunc {
 			get { return p => p.statement(); }
 		}
 
@@ -39,18 +60,18 @@ namespace Occf.Languages.Java.Operators.Inserters {
 		public override void SupplementDefaultCase(XElement root) {
 			var targets = GetLackingDefaultCaseNodes(root);
 			foreach (var target in targets) {
-				var node = JavaCodeToXml.Instance.Generate(
-						"default:", p => p.switchLabel());
+				var node = JavaCodeToXml.Instance.GenerateWithoutPosition(
+						"default:", p => p.switchBlockStatementGroup());
 				target.AddAfterSelf(node);
 			}
 		}
 
 		private IEnumerable<XElement> GetLackingDefaultCaseNodes(XElement root) {
-			foreach(var switchNode in _switchSelector.Select(root)) {
-				var last = _caseLabelTailSelector.Select(switchNode).LastOrDefault();
+			foreach (var switchNode in _switchSelector.Select(root)) {
 				// ケース文がないときは分岐していないと見なす
+				var last = _caseLabelTailSelector.Select(switchNode).LastOrDefault();
 				if (last != null && last.Parent.FirstElement().Value != "default") {
-					yield return last.Parent;
+					yield return last.Parent.Parent;
 				}
 			}
 		}
@@ -60,11 +81,12 @@ namespace Occf.Languages.Java.Operators.Inserters {
 		}
 
 		public override TestCase InsertTestCaseId(
-				XElement target, int id, string relativePath) {
-			var testCase = new TestCase(relativePath, string.Join(".", JavaTagger.GetTag(target)), target);
+				XElement target, long id, string relativePath) {
+			var testCase = new TestCase(
+					relativePath, string.Join(".", JavaTagger.GetTag(target)), target);
 			var blockElement = target.Element("block").NthElement(1);
 			var code = CreateTestCaseIdentifierCode(target, id, 2, ElementType.TestCase);
-			var node = JavaCodeToXml.Instance.Generate(code, p => p.statement());
+			var node = JavaCodeToXml.Instance.GenerateWithoutPosition(code, p => p.statement());
 			if (blockElement.Name.LocalName == "blockStatement") {
 				blockElement.AddFirst(node);
 			} else {
@@ -78,9 +100,12 @@ namespace Occf.Languages.Java.Operators.Inserters {
 					.Where(e => e.Elements().Any(e2 => e2.Value == "void"))
 					.Select(e => e.Element("block"))
 					.Where(e => e != null)
-					.Where(e => !(e.Descendants("statement").Any() && e.Descendants("statement").Last().FirstElement().Value == "throw"))
+					.Where(
+							e =>
+							!(e.Descendants("statement").Any()
+							  && e.Descendants("statement").Last().FirstElement().Value == "throw"))
 					.Select(e => e.LastElement());
-			var node = JavaCodeToXml.Instance.Generate("return;", p => p.statement());
+			var node = JavaCodeToXml.Instance.GenerateWithoutPosition("return;", p => p.statement());
 			foreach (var method in methods) {
 				method.AddBeforeSelf(node);
 			}

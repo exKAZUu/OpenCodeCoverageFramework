@@ -15,13 +15,7 @@ static int predStrLen;
 static char stmtStr[256];
 static char predStr[256];
 
-static int testVectorId;
-static int testPatternId;
-
 int Initialize() {
-	testVectorId = 1;
-	testPatternId = 1;
-
 	stmtFile = fopen("statement_result.txt", "w"); 
 	predFile = fopen("predicate_result.txt", "w");
 
@@ -29,8 +23,8 @@ int Initialize() {
 		fprintf(stderr, "Error: failed to open files.");
 		return 0;
 	}
-	fprintf(stmtFile, "$TP;%d;\n", testPatternId);
-	fprintf(predFile, "$TP;%d;\n", testPatternId);
+	fputs("$SC;1;", stmtFile);
+	fputs("$BC;1;", predFile);
 	initialized = 1;
 	return 1;
 }
@@ -50,7 +44,7 @@ int WritePredicate(int id, int type, int value) {
 		char *log = value ? "T" : "F";
 		predStrLen += sprintf(predStr, "%d:%s;", id, log);
 		if (MAX_STR_LENGTH < predStrLen) {
-			predStrLen = sprintf(predStr, "\n$BCS;%d;%d:%s;", testVectorId, id, log);
+			predStrLen = sprintf(predStr, "\n$BCS;1;%d:%s;", id, log);
 		}
 		fprintf(predFile, predStr);
 	}
@@ -61,7 +55,7 @@ int WriteStatement(int id, int type, int value) {
 	if (initialized || Initialize()) {
 		stmtStrLen += sprintf(stmtStr, "%d;", id);
 		if (MAX_STR_LENGTH < stmtStrLen) {
-			stmtStrLen = sprintf(stmtStr, "\n$SCS;%d;%d;", testVectorId, id);
+			stmtStrLen = sprintf(stmtStr, "\n$SCS;1;%d;", id);
 		}
 		fprintf(stmtFile, stmtStr);
 	}
@@ -69,14 +63,5 @@ int WriteStatement(int id, int type, int value) {
 }
 
 int WriteTestCase(int id, int type, int value) {
-	if (initialized || Initialize()) {
-		stmtStrLen = sprintf(stmtStr, "\n$SC;%d;", testVectorId);
-		fprintf(stmtFile, stmtStr);
-	
-		predStrLen = sprintf(predStr, "\n$BC;%d;", testVectorId);
-		fprintf(predFile, predStr);
-	
-		testVectorId++;
-	}
 	return value;
 }

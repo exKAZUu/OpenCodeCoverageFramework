@@ -34,13 +34,13 @@ namespace Occf.Core.CoverageInformation {
 		/// </summary>
 		/// <param name="state"> </param>
 		public override void UpdateState(CoverageState state) {
-			// DummyRecord(TrueOnly)
+			// Record(TrueOnly)    _lastState = TrueOnly
 			// foreach() {
-			//   Record(FalseOnly) ループ判定成立
+			//   Record(FalseOnly) ループ判定成立 (State |= FalseOnly)
 			//   statement;
-			//   DummyRecord(TrueOnly)
+			//   Record(TrueOnly)  _lastState = TrueOnly
 			// }
-			// Record(TrueOnly)    ループ判定不成立（TrueOnlyが連続すれば）
+			// Record(TrueOnly)    ループ判定不成立 (State |= TrueOnly if _lastState == TrueOnly)
 			if (state == CoverageState.FalseOnly || _lastState == state) {
 				State |= state;
 			}

@@ -33,19 +33,19 @@ namespace Occf.Core.Operators.Inserters {
 		protected abstract Func<TParser, XAstParserRuleReturnScope> ParseStatementFunc { get; }
 
 		protected virtual string CreateTestCaseIdentifierCode(
-				XElement target, int id, int value, ElementType type) {
+				XElement target, long id, int value, ElementType type) {
 			return MethodPrefix + "WriteTestCase(" + id + "," + (int)type + "," + value
 			       + ");";
 		}
 
 		protected virtual string CreateStatementCoverageCode(
-				XElement target, int id, int value, ElementType type) {
+				XElement target, long id, int value, ElementType type) {
 			return MethodPrefix + "WriteStatement(" + id + "," + (int)type + "," + value
 			       + ");";
 		}
 
 		protected virtual Tuple<string, string> CreatePredicateCoverageCode(
-				XElement target, int id, ElementType type) {
+				XElement target, long id, ElementType type) {
 			return
 					Tuple.Create(
 							MethodPrefix + "WritePredicate(" + id + "," + (int)type + ",",
@@ -53,7 +53,7 @@ namespace Occf.Core.Operators.Inserters {
 		}
 
 		protected virtual Tuple<string, string, string> CreateInitializerCoverageCode(
-				XElement target, int id, ElementType type) {
+				XElement target, long id, ElementType type) {
 			var stmt = CreateStatementCoverageCode(target, id, 2, type);
 			return
 					Tuple.Create(
@@ -63,14 +63,14 @@ namespace Occf.Core.Operators.Inserters {
 		}
 
 		protected override IEnumerable<XElement> CreateStatementNode(
-				XElement target, int id, int value, ElementType type) {
+				XElement target, long id, int value, ElementType type) {
 			var code = CreateStatementCoverageCode(target, id, value, type);
 			var node = CodeToXml.Generate(code, ParseStatementFunc);
 			yield return node;
 		}
 
 		public override void InsertPredicate(
-				XElement target, int id, ElementType type) {
+				XElement target, long id, ElementType type) {
 			var code = CreatePredicateCoverageCode(target, id, type);
 			var node = AntlrNodeGenerator.GenerateWrappedNode(
 					target,
@@ -81,7 +81,7 @@ namespace Occf.Core.Operators.Inserters {
 		}
 
 		public override void InsertInitializer(
-				XElement target, int id, ElementType type) {
+				XElement target, long id, ElementType type) {
 			var code = CreateInitializerCoverageCode(target, id, type);
 			var node = AntlrNodeGenerator.GenerateWrappedNode(
 					target,

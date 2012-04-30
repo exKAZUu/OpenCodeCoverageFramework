@@ -26,7 +26,7 @@ namespace Occf.Core.CoverageInformation {
 	public class CoverageElement : ICoverageElement {
 		public CoverageElement(string relativePath, XElement node, Tagger tagger) {
 			RelativePath = relativePath;
-			Position = CodePositionAnalyzer.Create(node);
+			Position = CodePositions.New(node);
 			var tag = relativePath.Replace('\\', '>') + '>' + tagger.Tag(node);
 			Tag = tag.EndsWith(">") ? tag : tag + ">";
 		}

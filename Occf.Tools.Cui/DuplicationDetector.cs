@@ -1,4 +1,22 @@
-﻿using System;
+﻿#region License
+
+// Copyright (C) 2009-2012 Kazunori Sakamoto
+// 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#endregion
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -6,7 +24,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using NDesk.Options;
 using Occf.Core.CoverageInformation;
 using Occf.Core.TestInfos;
-using Occf.Tools.Core;
+using Occf.Core.Utils;
 using Paraiba.Collections.Generic;
 using Paraiba.IO;
 
@@ -24,7 +42,7 @@ namespace Occf.Tools.Cui {
 				S + "<root>".PadRight(W)
 				+ "path of root directory (including source and test code)" + "\n" +
 				S + "<coverage>".PadRight(W) + "path of coverage data whose name is "
-				+ Names.CoverageData + "\n" +
+				+ OccfNames.CoverageData + "\n" +
 				S + "-c, -criterion <name>".PadRight(W)
 				+
 				"a detection criterion. <name> can be statement(default), branch, condition, branch/condition, subpath, path."
@@ -32,8 +50,9 @@ namespace Occf.Tools.Cui {
 				"";
 
 		public static bool Run(IList<string> args) {
-			if (args.Count < 2)
+			if (args.Count < 2) {
 				return Program.Print(Usage);
+			}
 
 			var criterion = "";
 			// parse options
@@ -107,12 +126,13 @@ namespace Occf.Tools.Cui {
 				var dups = testInfo.TestCases
 						.Where(tc2 => tc2 != tc && isDuplicated(tc, tc2));
 				var tcStr = Environment.NewLine + tc.Name +
-							"(" + tc.RelativePath + ":" + tc.Position.SmartLine + ")" +
-							" is duplicated with:" + Environment.NewLine;
-	
+				            "(" + tc.RelativePath + ":" + tc.Position.SmartLineString + ")" +
+				            " is duplicated with:" + Environment.NewLine;
+
 				foreach (var dup in dups) {
 					var dupStr = dup.Name +
-					             "(" + dup.RelativePath + ":" + dup.Position.SmartLine + ")";
+					             "(" + dup.RelativePath + ":" + dup.Position.SmartLineString
+					             + ")";
 					Console.WriteLine(tcStr + "  " + dupStr);
 					tcStr = "";
 				}

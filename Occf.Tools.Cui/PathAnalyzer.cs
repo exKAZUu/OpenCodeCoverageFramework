@@ -22,7 +22,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using Occf.Core.CoverageInformation;
-using Occf.Tools.Core;
+using Occf.Core.Utils;
 using Paraiba.IO;
 
 namespace Occf.Tools.Cui {
@@ -39,7 +39,7 @@ namespace Occf.Tools.Cui {
 				S + "<root>".PadRight(W)
 				+ "path of root directory (including source and test code)" + "\n" +
 				S + "<coverage>".PadRight(W) + "path of coverage data whose name is "
-				+ Names.CoverageData + "\n" +
+				+ OccfNames.CoverageData + "\n" +
 				"";
 
 		public static bool Run(IList<string> args) {
@@ -79,7 +79,7 @@ namespace Occf.Tools.Cui {
 						"**** " + testCase.RelativePath + ": " + testCase.Name + " ****");
 				var stmts = testCase.Paths.Select(i => covInfo.Targets[i]);
 				foreach (var stmt in stmts) {
-					Console.WriteLine(stmt.RelativePath + ": " + stmt.Position.SmartLine);
+					Console.WriteLine(stmt.RelativePath + ": " + stmt.Position.SmartLineString);
 				}
 				Console.WriteLine();
 				Console.WriteLine();

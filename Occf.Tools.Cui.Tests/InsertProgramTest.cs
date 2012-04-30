@@ -23,8 +23,10 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using NUnit.Framework;
+using Occf.Core;
+using Occf.Core.Profiles;
 using Occf.Core.Tests;
-using Occf.Tools.Core;
+using Occf.Core.Utils;
 using Paraiba.Core;
 using Paraiba.IO;
 
@@ -35,25 +37,32 @@ namespace Occf.Tools.Cui.Tests {
 		private const string JavacPath = "javac";
 
 		[Test]
-		public void RunChangingOhterEnvironment() {
-			
-		}
+		public void RunChangingOhterEnvironment() {}
 
 		[Test]
 		[TestCase("GetMid", "GetMidTest")]
 		[TestCase("GetMid3", "GetMid3Test")]
 		public void InsertMeasurementCode(string projectName, string testTargetNames) {
+			OccfGlobal.SaveCurrentDirectory();
+
 			var outDirPath = Fixture.CleanOuputPath();
 			var outDir = new DirectoryInfo(Fixture.CleanOuputPath());
 			var inDirPath = Fixture.GetProjectInputPath(projectName);
 			var expDirPath = Fixture.GetProjectExpectationPath(projectName);
 			FileUtility.CopyRecursively(inDirPath, outDirPath);
 
-			VerifyMeasureAndLocalize(testTargetNames, inDirPath, expDirPath, outDir, outDirPath);
+			VerifyMeasureAndLocalize(
+					testTargetNames, inDirPath, expDirPath, outDir, outDirPath);
 		}
 
-		private static void VerifyMeasureAndLocalize(string testTargetNames, string inDirPath, string expDirPath, DirectoryInfo outDir, string outDirPath) {
-			var profile = ScriptCoverageProfile.Load("Java");
+		private static void VerifyMeasureAndLocalize(
+				string testTargetNames, string inDirPath, string expDirPath,
+				DirectoryInfo outDir, string outDirPath) {
+
+			// カレントディレクトリを途中で変更しても動作するか検証
+			Environment.CurrentDirectory = "C:\\";
+
+			var profile = CoverageProfiles.GetCoverageProfileByClassName("Java");
 			Inserter.InsertMeasurementCode(
 					outDir, new DirectoryInfo(Path.Combine(outDirPath, "test")), outDir,
 					profile);
@@ -64,15 +73,15 @@ namespace Occf.Tools.Cui.Tests {
 			var dll = Path.Combine(outDirPath, "Occf.Writer.File.Java.dll");
 			Assert.That(File.Exists(dll), Is.True);
 
-			var covinfo = Path.Combine(outDirPath, Names.CoverageInfo);
-			var testinfo = Path.Combine(outDirPath, Names.TestInfo);
+			var covinfo = Path.Combine(outDirPath, OccfNames.CoverageInfo);
+			var testinfo = Path.Combine(outDirPath, OccfNames.TestInfo);
 
 			var targets = Directory.EnumerateFiles(
 					expDirPath, "*.java",
 					SearchOption.AllDirectories)
 					.Concat(
 							Directory.EnumerateFiles(
-									expDirPath, Names.BackupSuffix,
+									expDirPath, OccfNames.BackupSuffix,
 									SearchOption.AllDirectories))
 					.Concat(new[] { covinfo, testinfo });
 			foreach (var target in targets) {
@@ -127,12 +136,14 @@ namespace Occf.Tools.Cui.Tests {
 					FileName = JavaPath,
 					Arguments = args.JoinString(" "),
 					CreateNoWindow = true,
+					RedirectStandardOutput = true,
 					UseShellExecute = false,
 					WorkingDirectory = outDirPath,
 			};
 			try {
-				using (var p = Process.Start(info)) {
-					p.WaitForExit();
+				using (var p = Process.Start(info))
+				using (var fs = new StreamWriter(Path.Combine(outDirPath, "testresult.txt"))) {
+					fs.WriteFromStream(p.StandardOutput);
 				}
 			} catch (Win32Exception e) {
 				throw new InvalidOperationException("Failed to launch 'java'.", e);

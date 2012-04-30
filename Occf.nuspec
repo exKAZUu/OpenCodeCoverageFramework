@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package>
+  <metadata>
+    <id>OpenCodeCoverageFramework</id>
+    <version>1.0.8.28</version>
+    <title>OpenCodeCoverageFramework</title>
+    <authors>Kazunori Sakamoto</authors>
+    <owners>Kazunori Sakamoto</owners>
+    <licenseUrl>http://www.apache.org/licenses/LICENSE-2.0</licenseUrl>
+    <projectUrl>http://code.google.com/p/open-code-coverage-framework/</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>OpenCodeCoverageFramework is a framework for measurement of test coverage supporting multiple programming languages.</description>
+    <releaseNotes>Release the first NuGet version.</releaseNotes>
+    <copyright>Copyright (C) Kazunori Sakamoto 2009-2012</copyright>
+    <tags>Test Coverage CodeCoverage TestCoverage Programming Language</tags>
+    <dependencies>
+      <dependency id="Paraiba.Experiment" version="1.0.1" />
+      <dependency id="Code2Xml" version="1.3.8" />
+    </dependencies>
+  </metadata>
+</package>

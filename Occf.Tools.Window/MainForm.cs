@@ -30,7 +30,7 @@ using Code2Xml.Languages.Python2.CodeToXmls;
 using Code2Xml.Languages.Python3.CodeToXmls;
 using Occf.Core.CoverageCode;
 using Occf.Core.CoverageInformation;
-using Occf.Tools.Core;
+using Occf.Core.Profiles;
 using Paraiba.Core;
 using Paraiba.IO;
 
@@ -97,7 +97,7 @@ namespace Occf.Tools.Window {
 			var langName = cmbLanguage.Text;
 
 			Action action = () => {
-				var profile = ScriptCoverageProfile.Load(langName);
+				var profile = CoverageProfiles.GetCoverageProfileByClassName(langName);
 				var info = new CoverageInfo(basePath, profile.Name, SharingMethod.File);
 				var outDir = new DirectoryInfo(outDirPath);
 				foreach (var filePath in filePathList) {

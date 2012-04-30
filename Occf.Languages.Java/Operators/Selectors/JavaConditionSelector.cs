@@ -1,6 +1,6 @@
 ﻿#region License
 
-// Copyright (C) 2011-2012 Kazunori Sakamoto
+// Copyright (C) 2009-2012 Kazunori Sakamoto
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,23 +21,23 @@ using System.Xml.Linq;
 using Occf.Core.Operators.Selectors;
 
 namespace Occf.Languages.Java.Operators.Selectors {
-    public class JavaConditionSelector : ConditionSelector {
-        private static readonly string[] TargetNames = {
-                "conditionalOrExpression", "conditionalAndExpression",
-        };
+	public class JavaConditionSelector : ConditionSelector {
+		private static readonly string[] TargetNames = {
+				"conditionalOrExpression", "conditionalAndExpression",
+		};
 
-        private static readonly string[] ParentNames = {
-                "conditionalOrExpression", "conditionalAndExpression",
-                "parExpression",
-        };
+		private static readonly string[] ParentNames = {
+				"conditionalOrExpression", "conditionalAndExpression",
+				"parExpression",
+		};
 
-        protected override bool IsConditionalTerm(XElement element) {
-            return TargetNames.Contains(element.Name.LocalName);
-        }
+		protected override bool IsConditionalTerm(XElement element) {
+			return TargetNames.Contains(element.Name.LocalName);
+		}
 
-        protected override bool IsAllowableParent(XElement element) {
-            return element.Elements().Count() == 1 ||
-                   ParentNames.Contains(element.Name.LocalName);
-        }
-    }
+		protected override bool IsAllowableParent(XElement element) {
+			return element.Elements().Count() == 1 ||
+			       ParentNames.Contains(element.Name.LocalName);
+		}
+	}
 }

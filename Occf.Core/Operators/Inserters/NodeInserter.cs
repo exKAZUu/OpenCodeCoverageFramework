@@ -29,33 +29,33 @@ namespace Occf.Core.Operators.Inserters {
 		public abstract void InsertImport(XElement target);
 
 		protected abstract IEnumerable<XElement> CreateStatementNode(
-				XElement target, int id, int value, ElementType type);
+				XElement target, long id, int value, ElementType type);
 
 		public void InsertStatementFirstChildren(
-				XElement target, int id, int value, ElementType type) {
+				XElement target, long id, int value, ElementType type) {
 			target.AddFirst(CreateStatementNode(target, id, value, type));
 		}
 
 		public void InsertStatementLastChildren(
-				XElement target, int id, int value, ElementType type) {
+				XElement target, long id, int value, ElementType type) {
 			target.Add(CreateStatementNode(target, id, value, type));
 		}
 
 		public void InsertStatementBefore(
-				XElement target, int id, int value, ElementType type) {
+				XElement target, long id, int value, ElementType type) {
 			target.AddBeforeSelf(CreateStatementNode(target, id, value, type));
 		}
 
 		public void InsertStatementAfter(
-				XElement target, int id, int value, ElementType type) {
+				XElement target, long id, int value, ElementType type) {
 			target.AddAfterSelf(CreateStatementNode(target, id, value, type));
 		}
 
 		public abstract void InsertPredicate(
-				XElement target, int id, ElementType type);
+				XElement target, long id, ElementType type);
 
 		public abstract void InsertInitializer(
-				XElement target, int id, ElementType type);
+				XElement target, long id, ElementType type);
 
 		public abstract void SupplementBlock(XElement root);
 
@@ -64,7 +64,7 @@ namespace Occf.Core.Operators.Inserters {
 		public abstract void SupplementDefaultConstructor(XElement root);
 
 		public abstract TestCase InsertTestCaseId(
-				XElement target, int id, string relativePath);
+				XElement target, long id, string relativePath);
 
 		public static void ReplaceSafely(
 				IEnumerable<XElement> nodes,

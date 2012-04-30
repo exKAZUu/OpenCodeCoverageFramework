@@ -1,4 +1,22 @@
-﻿using System;
+﻿#region License
+
+// Copyright (C) 2009-2012 Kazunori Sakamoto
+// 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#endregion
+
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -17,7 +35,7 @@ namespace Occf.Reporter {
 		private Point _lastMouseLocation;
 
 		public MainForm()
-			: this(null) {}
+				: this(null) {}
 
 		public MainForm(string[] args) {
 			InitializeComponent();
@@ -28,17 +46,18 @@ namespace Occf.Reporter {
 
 		private void BtnAnalyzeClick(object sender, EventArgs e) {
 			var robustTags = _lbTag.SelectedItems
-				.Cast<object>()
-				.Select(item => _lbTag.GetItemText(item))
-				.ToList();
+					.Cast<object>()
+					.Select(item => _lbTag.GetItemText(item))
+					.ToList();
 			// 包含関係にあるタグの最適化
 			var tags = robustTags
-				.Where(t1 => robustTags.All(t2 => t1 == t2 || !t1.StartsWith(t2)))
-				.ToList();
+					.Where(t1 => robustTags.All(t2 => t1 == t2 || !t1.StartsWith(t2)))
+					.ToList();
 
 			// 命令網羅
-			AnalyzeCoverage(_info.StatementTargets, tags, _lvStatement, _pgbStatement,
-				_lbStatement);
+			AnalyzeCoverage(
+					_info.StatementTargets, tags, _lvStatement, _pgbStatement,
+					_lbStatement);
 
 			// 分岐網羅
 			AnalyzeCoverage(_info.BranchTargets, tags, _lvBranch, _pgbBranch, _lbBranch);
@@ -48,12 +67,12 @@ namespace Occf.Reporter {
 		}
 
 		private static void AnalyzeCoverage(
-			IEnumerable<ICoverageElement> coverageTargets, IEnumerable<string> tags,
-			ListView listView, ProgressBar pgbResult, Label lbResult) {
+				IEnumerable<ICoverageElement> coverageTargets, IEnumerable<string> tags,
+				ListView listView, ProgressBar pgbResult, Label lbResult) {
 			listView.Items.Clear();
 			int nAll = 0, nCoveraged = 0;
 			var targets = coverageTargets
-				.Where(target => tags.Any(tag => target.Tag.StartsWith(tag)));
+					.Where(target => tags.Any(tag => target.Tag.StartsWith(tag)));
 			foreach (var target in targets) {
 				nAll++;
 				if (target.State == CoverageState.Done) {
@@ -63,21 +82,22 @@ namespace Occf.Reporter {
 					listView.Items.Add(new CoverageListViewItem("N", target));
 				}
 			}
-			if (nAll == 0)
+			if (nAll == 0) {
 				pgbResult.Value = 100;
-			else
+			} else {
 				pgbResult.Value = 100 * nCoveraged / nAll;
+			}
 			lbResult.Text = pgbResult.Value + "% : " + nCoveraged + " / " + nAll;
 		}
 
 		private void AnalyzeBranchConditionCoverage(
-			IEnumerable<CoverageElementGroup> coverageTargets, IEnumerable<string> tags) {
+				IEnumerable<CoverageElementGroup> coverageTargets, IEnumerable<string> tags) {
 			_lvCondition.Items.Clear();
 			_lvBranchCond.Items.Clear();
 
 			int nAll = 0, nCoveragedCondition = 0, nCoveragedBranchCond = 0;
 			var targets = coverageTargets
-				.Where(target => tags.Any(tag => target.Tag.StartsWith(tag)));
+					.Where(target => tags.Any(tag => target.Tag.StartsWith(tag)));
 			foreach (var target in targets) {
 				nAll++;
 				if (target.StateChildrenOrParent == CoverageState.Done) {
@@ -119,8 +139,9 @@ namespace Occf.Reporter {
 			var newTagSet = new SortedSet<string>();
 
 			foreach (var tag in tagSet) {
-				var tagElements = tag.Split(new[] { '>' },
-					StringSplitOptions.RemoveEmptyEntries);
+				var tagElements = tag.Split(
+						new[] { '>' },
+						StringSplitOptions.RemoveEmptyEntries);
 				var newTag = string.Empty;
 				foreach (var tagEelment in tagElements) {
 					newTag += tagEelment + '>';
@@ -151,8 +172,9 @@ namespace Occf.Reporter {
 		}
 
 		private void MainForm_DragDrop(object sender, DragEventArgs e) {
-			if (!e.Data.GetDataPresent(DataFormats.FileDrop))
+			if (!e.Data.GetDataPresent(DataFormats.FileDrop)) {
 				return;
+			}
 			foreach (var fileName in (string[])e.Data.GetData(DataFormats.FileDrop)) {
 				LoadCoverageInfomation(fileName);
 				break;
@@ -172,13 +194,15 @@ namespace Occf.Reporter {
 
 		private void LvStatementDoubleClick(object sender, EventArgs e) {
 			var item =
-				(CoverageListViewItem)
-				_lvStatement.GetItemAt(_lastMouseLocation.X, _lastMouseLocation.Y);
+					(CoverageListViewItem)
+					_lvStatement.GetItemAt(_lastMouseLocation.X, _lastMouseLocation.Y);
 			var element = item.Element;
 			var path = XPath.GetFullPath(element.RelativePath, _info.BasePath);
-			new Editor(path, _info.StatementTargets
-				.Where(elm => elm.RelativePath == element.RelativePath
-				              && elm.State != CoverageState.Done)).Show();
+			new Editor(
+					path, _info.StatementTargets
+					      		.Where(
+					      				elm => elm.RelativePath == element.RelativePath
+					      				       && elm.State != CoverageState.Done)).Show();
 		}
 
 		private void LvStatementMouseDown(object sender, MouseEventArgs e) {
@@ -191,11 +215,11 @@ namespace Occf.Reporter {
 			private readonly ICoverageElement _element;
 
 			public CoverageListViewItem(string coveragedText, ICoverageElement element)
-				: base(
-					new[] {
-						coveragedText, element.RelativePath, element.Position.SmartLine,
-						element.Position.SmartPosition
-					}) {
+					: base(
+							new[] {
+									coveragedText, element.RelativePath, element.Position.SmartLineString,
+									element.Position.SmartPositionString
+							}) {
 				_element = element;
 			}
 

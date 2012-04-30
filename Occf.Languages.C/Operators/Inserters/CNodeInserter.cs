@@ -1,4 +1,22 @@
-﻿using System;
+﻿#region License
+
+// Copyright (C) 2009-2012 Kazunori Sakamoto
+// 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#endregion
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
@@ -15,7 +33,9 @@ using Paraiba.Xml.Linq;
 namespace Occf.Languages.C.Operators.Inserters {
 	public class CNodeInserter : AntlrNodeInserter<CParser> {
 		private readonly CSwitchSelector _switchSelector = new CSwitchSelector();
-		private readonly CCaseLabelTailSelector _caseLabelTailSelector = new CCaseLabelTailSelector();
+
+		private readonly CCaseLabelTailSelector _caseLabelTailSelector =
+				new CCaseLabelTailSelector();
 
 		protected override string MethodPrefix {
 			get { return ""; }
@@ -47,8 +67,7 @@ namespace Occf.Languages.C.Operators.Inserters {
 			}
 		}
 
-		public override void SupplementDefaultConstructor(XElement root) {
-		}
+		public override void SupplementDefaultConstructor(XElement root) {}
 
 		protected override IEnumerable<XElement> GetLackingBlockNodes(XElement root) {
 			var loops = CElements.Loop(root)
@@ -60,7 +79,7 @@ namespace Occf.Languages.C.Operators.Inserters {
 		}
 
 		private IEnumerable<XElement> GetLackingDefaultCaseNodes(XElement root) {
-			foreach(var switchNode in _switchSelector.Select(root)) {
+			foreach (var switchNode in _switchSelector.Select(root)) {
 				var last = _caseLabelTailSelector.Select(switchNode).LastOrDefault();
 				// ケース文がないときは分岐していないと見なす
 				if (last != null && last.Parent.FirstElement().Value != "default") {
@@ -70,7 +89,7 @@ namespace Occf.Languages.C.Operators.Inserters {
 		}
 
 		public override TestCase InsertTestCaseId(
-				XElement target, int id, string relativePath) {
+				XElement target, long id, string relativePath) {
 			throw new NotImplementedException();
 		}
 	}

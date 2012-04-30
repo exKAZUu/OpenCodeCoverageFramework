@@ -1,6 +1,6 @@
 ﻿#region License
 
-// Copyright (C) 2011-2012 Kazunori Sakamoto
+// Copyright (C) 2009-2012 Kazunori Sakamoto
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,11 +22,11 @@ using System.Xml.Linq;
 using Occf.Core.Operators.Selectors;
 
 namespace Occf.Languages.Java.Operators.Selectors {
-    public class JavaInitializerSelector : Selector {
-        public override IEnumerable<XElement> Select(XElement root) {
-            return root.Descendants("variableDeclarator")
-                    .SelectMany(e => e.Elements("variableInitializer"))
-                    .SelectMany(e => e.Elements("expression"));
-        }
-    }
+	public class JavaInitializerSelector : Selector {
+		public override IEnumerable<XElement> Select(XElement root) {
+			return root.Descendants("variableDeclarator")
+					.SelectMany(e => e.Elements("variableInitializer"))
+					.SelectMany(e => e.Elements("expression"));
+		}
+	}
 }

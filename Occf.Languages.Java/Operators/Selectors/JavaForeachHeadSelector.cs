@@ -1,6 +1,6 @@
 ﻿#region License
 
-// Copyright (C) 2011-2012 Kazunori Sakamoto
+// Copyright (C) 2009-2012 Kazunori Sakamoto
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,9 +23,9 @@ using Occf.Core.Operators.Selectors;
 using Paraiba.Xml.Linq;
 
 namespace Occf.Languages.Java.Operators.Selectors {
-    public class JavaForeachHeadSelector : Selector {
-        public override IEnumerable<XElement> Select(XElement root) {
-            yield return root.Descendants("block").First().FirstElement();
-        }
-    }
+	public class JavaForeachHeadSelector : Selector {
+		public override IEnumerable<XElement> Select(XElement root) {
+			yield return root.Descendants("block").First().FirstElement();
+		}
+	}
 }

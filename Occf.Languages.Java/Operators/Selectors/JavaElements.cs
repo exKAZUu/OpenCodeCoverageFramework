@@ -1,6 +1,6 @@
 ﻿#region License
 
-// Copyright (C) 2011-2012 Kazunori Sakamoto
+// Copyright (C) 2009-2012 Kazunori Sakamoto
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,44 +22,44 @@ using System.Xml.Linq;
 using Paraiba.Xml.Linq;
 
 namespace Occf.Languages.Java.Operators.Selectors {
-    public static class JavaElements {
-        public static IEnumerable<XElement> Statement(XElement root) {
-            return root.Descendants("statement");
-        }
+	public static class JavaElements {
+		public static IEnumerable<XElement> Statement(XElement root) {
+			return root.Descendants("statement");
+		}
 
-        public static IEnumerable<XElement> If(XElement root) {
-            return root.Descendants("statement")
-                    .Where(e => e.FirstElement().Value == "if");
-        }
+		public static IEnumerable<XElement> If(XElement root) {
+			return root.Descendants("statement")
+					.Where(e => e.FirstElement().Value == "if");
+		}
 
-        public static IEnumerable<XElement> IfAndElseProcesses(XElement root) {
-            return root.Elements("statement");
-        }
+		public static IEnumerable<XElement> IfAndElseProcesses(XElement root) {
+			return root.Elements("statement");
+		}
 
-        public static IEnumerable<XElement> While(XElement root) {
-            return root.Descendants("statement")
-                    .Where(e => e.FirstElement().Value == "while");
-        }
+		public static IEnumerable<XElement> While(XElement root) {
+			return root.Descendants("statement")
+					.Where(e => e.FirstElement().Value == "while");
+		}
 
-        public static XElement WhileProcess(XElement element) {
-            return element.NthElement(2);
-        }
+		public static XElement WhileProcess(XElement element) {
+			return element.NthElement(2);
+		}
 
-        public static IEnumerable<XElement> DoWhile(XElement root) {
-            return root.Descendants("statement")
-                    .Where(e => e.FirstElement().Value == "do");
-        }
+		public static IEnumerable<XElement> DoWhile(XElement root) {
+			return root.Descendants("statement")
+					.Where(e => e.FirstElement().Value == "do");
+		}
 
-        public static XElement DoWhileProcess(XElement element) {
-            return element.NthElement(1);
-        }
+		public static XElement DoWhileProcess(XElement element) {
+			return element.NthElement(1);
+		}
 
-        public static IEnumerable<XElement> For(XElement root) {
-            return root.Descendants("forstatement");
-        }
+		public static IEnumerable<XElement> For(XElement root) {
+			return root.Descendants("forstatement");
+		}
 
-        public static XElement ForProcess(XElement element) {
-            return element.Element("statement");
-        }
-    }
+		public static XElement ForProcess(XElement element) {
+			return element.Element("statement");
+		}
+	}
 }

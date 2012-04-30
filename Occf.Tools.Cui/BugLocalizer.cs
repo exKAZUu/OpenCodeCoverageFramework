@@ -17,16 +17,14 @@
 #endregion
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text.RegularExpressions;
-using IronPython.Hosting;
 using Occf.Core.CoverageInformation;
 using Occf.Core.TestInfos;
-using Occf.Tools.Core;
+using Occf.Core.Utils;
 using Paraiba.IO;
 
 namespace Occf.Tools.Cui {
@@ -47,7 +45,7 @@ namespace Occf.Tools.Cui {
 				"path of test result file which contains indexes of failed test case with csv"
 				+ "\n" +
 				S + "<coverage>".PadRight(W) + "path of coverage data whose name is "
-				+ Names.CoverageData + "\n" +
+				+ OccfNames.CoverageData + "\n" +
 				"";
 
 		public static bool Run(IList<string> args) {
@@ -93,15 +91,8 @@ namespace Occf.Tools.Cui {
 			var testInfo = InfoReader.ReadTestInfo(testInfoFile, formatter);
 
 			testInfo.InitializeForStoringData();
-			ReadTestResult(resultFile, testInfo);
+			ReadJUnitResult(resultFile, testInfo);
 			CoverageDataReader.ReadFile(testInfo, covDataFile);
-
-			var engine = Python.CreateEngine();
-			var scope = engine.CreateScope();
-			engine.ExecuteFile("BugLocalization.py", scope);
-			var calcMetricFunc =
-					scope.GetVariable<Func<double, double, double, double, IEnumerable>>(
-							"CalculateMetric");
 
 			// Targeting only statement
 			foreach (var stmt in covInfo.StatementIndexAndTargets) {
@@ -116,7 +107,7 @@ namespace Occf.Tools.Cui {
 				var passedCount = passedTestCases.Count();
 				var executedAndFailedCount = executedAndFailedTestCases.Count();
 				var failedCount = failedTestCases.Count();
-				var metrics = calcMetricFunc(
+				var metrics = CalculateMetric(
 						executedAndPassedCount,
 						passedCount,
 						executedAndFailedCount,
@@ -124,23 +115,37 @@ namespace Occf.Tools.Cui {
 				var metricsString = "";
 				var delimiter = "";
 				foreach (var metric in metrics) {
-					metricsString += (delimiter + ((double)metric).ToString("f3"));
+					metricsString += (delimiter + (metric).ToString("f3"));
 					delimiter = ", ";
 				}
 
-				var tag = stmt.Item2.Tag + ": " + stmt.Item2.Position.SmartLine;
+				var tag = stmt.Item2.Tag + ": " + stmt.Item2.Position.SmartLineString;
 				Console.WriteLine(tag.PadRight(45) + ": " + metricsString);
 			}
+		}
+
+		private static IEnumerable<double> CalculateMetric(
+				int executedAndPassedCount, int passedCount, int executedAndFailedCount,
+				int failedCount) {
+			if (passedCount == 0) {
+				return new[] { 0.0 };
+			}
+			if (failedCount == 0) {
+				return new[] { 1.0 };
+			}
+			var p = (double)executedAndPassedCount / passedCount;
+			var f = (double)executedAndFailedCount / failedCount;
+			return new[] { p / (p + f), p, f };
 		}
 
 		private static string GetFailedTestCasePrefix(ref int index) {
 			return (++index) + ") ";
 		}
 
-		private static readonly Regex regex =
+		private static readonly Regex FailedTestLineRegex =
 				new Regex(@"([\w\d]*)(?:\[\d*\])?\(([\w\d.]*)\)");
 
-		public static void ReadTestResult(FileInfo resultFile, TestInfo testInfo) {
+		public static void ReadJUnitResult(FileInfo resultFile, TestInfo testInfo) {
 			using (var reader = new StreamReader(resultFile.FullName)) {
 				var failedTestIndex = 0;
 				var prefix = GetFailedTestCasePrefix(ref failedTestIndex);
@@ -152,7 +157,7 @@ namespace Occf.Tools.Cui {
 					if (!line.StartsWith(prefix)) {
 						continue;
 					}
-					var match = regex.Match(line.Substring(prefix.Length));
+					var match = FailedTestLineRegex.Match(line.Substring(prefix.Length));
 					if (!match.Success) {
 						continue;
 					}

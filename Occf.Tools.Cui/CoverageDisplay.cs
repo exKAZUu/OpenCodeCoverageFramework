@@ -23,7 +23,7 @@ using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using NDesk.Options;
 using Occf.Core.CoverageInformation;
-using Occf.Tools.Core;
+using Occf.Core.Utils;
 using Paraiba.IO;
 using Paraiba.Linq;
 
@@ -41,7 +41,7 @@ namespace Occf.Tools.Cui {
 				S + "<root>".PadRight(W)
 				+ "path of root directory (including source and test code)" + "\n" +
 				S + "<coverage>".PadRight(W) + "path of coverage data whose name is "
-				+ Names.CoverageData + "\n" +
+				+ OccfNames.CoverageData + "\n" +
 				S + "-d, -detail <name>".PadRight(W)
 				+
 				"show all not executed elements."
@@ -109,7 +109,7 @@ namespace Occf.Tools.Cui {
 							+ nAll);
 					if (detail) {
 						foreach (var element in executedAndNot.Item2) {
-							Console.Write(element.Position.SmartPosition);
+							Console.Write(element.Position.SmartPositionString);
 						}
 					}
 				}
@@ -124,7 +124,7 @@ namespace Occf.Tools.Cui {
 							+ nAll);
 					if (detail) {
 						foreach (var element in executedAndNot.Item2) {
-							Console.Write(element.Position.SmartPosition);
+							Console.Write(element.Position.SmartPositionString);
 						}
 					}
 				}
@@ -139,7 +139,7 @@ namespace Occf.Tools.Cui {
 							+ nAll);
 					if (detail) {
 						foreach (var element in executedAndNot.Item2) {
-							Console.Write(element.Position.SmartPosition);
+							Console.Write(element.Position.SmartPositionString);
 						}
 					}
 				}
@@ -169,7 +169,7 @@ namespace Occf.Tools.Cui {
 							+ " / " + nAll);
 					if (detail) {
 						foreach (var element in notExecuted) {
-							Console.Write(element.Position.SmartPosition);
+							Console.Write(element.Position.SmartPositionString);
 						}
 					}
 				}
@@ -184,7 +184,7 @@ namespace Occf.Tools.Cui {
 							+ nAll);
 					if (detail) {
 						foreach (var element in executedAndNot.Item2) {
-							Console.Write(element.Position.SmartPosition);
+							Console.Write(element.Position.SmartPositionString);
 						}
 					}
 				}
@@ -225,7 +225,7 @@ namespace Occf.Tools.Cui {
 							+ nAll);
 					if (detail) {
 						foreach (var element in notExecuted) {
-							Console.Write(element.Position.SmartPosition);
+							Console.Write(element.Position.SmartPositionString);
 						}
 					}
 				}
@@ -240,7 +240,7 @@ namespace Occf.Tools.Cui {
 							+ " / " + nAll);
 					if (detail) {
 						foreach (var element in executedAndNot.Item2) {
-							Console.Write(element.Position.SmartPosition);
+							Console.Write(element.Position.SmartPositionString);
 						}
 					}
 				}

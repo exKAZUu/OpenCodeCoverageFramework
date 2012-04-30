@@ -1,6 +1,6 @@
 ﻿#region License
 
-// Copyright (C) 2011-2012 Kazunori Sakamoto
+// Copyright (C) 2009-2012 Kazunori Sakamoto
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,12 +20,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 using Occf.Core.Operators.Selectors;
-using Paraiba.Xml.Linq;
 
 namespace Occf.Languages.Java.Operators.Selectors {
-    public class JavaMethodNameSelector : Selector {
-        public override IEnumerable<XElement> Select(XElement root) {
-            return Enumerable.Repeat(root.NthElement(2), 1);
-        }
-    }
+	public class JavaMethodNameSelector : Selector {
+		public override IEnumerable<XElement> Select(XElement root) {
+			return Enumerable.Repeat(root.Element("IDENTIFIER"), 1);
+		}
+	}
 }

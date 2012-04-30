@@ -21,14 +21,13 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.Serialization.Formatters.Binary;
 using NDesk.Options;
 using Occf.Core.CoverageCode;
 using Occf.Core.CoverageInformation;
-using Occf.Core.CoverageProfiles;
+using Occf.Core.Profiles;
 using Occf.Core.TestInfos;
-using Occf.Tools.Core;
+using Occf.Core.Utils;
 using Paraiba.IO;
 
 namespace Occf.Tools.Cui {
@@ -75,9 +74,9 @@ namespace Occf.Tools.Cui {
 				return Program.Print(Usage);
 			}
 
-			ScriptCoverageProfile profile;
+			CoverageProfile profile;
 			try {
-				profile = ScriptCoverageProfile.Load(languageName);
+				profile = CoverageProfiles.GetCoverageProfileByClassName(languageName);
 			} catch {
 				return
 						Program.Print(
@@ -118,14 +117,12 @@ namespace Occf.Tools.Cui {
 
 		public static void InsertMeasurementCode(
 				DirectoryInfo rootDir, DirectoryInfo testDir, DirectoryInfo workDir,
-				ScriptCoverageProfile profile) {
+				CoverageProfile profile) {
 			Contract.Requires<ArgumentException>(rootDir.Exists);
 			Contract.Requires<ArgumentException>(
 					testDir == null || testDir.Exists);
 			Contract.Requires<ArgumentException>(workDir.Exists);
 			Contract.Requires<ArgumentNullException>(profile != null);
-
-			Environment.CurrentDirectory = "C:\\";
 
 			var covInfo = new CoverageInfo(
 					rootDir.FullName, profile.Name, SharingMethod.File);
@@ -148,29 +145,22 @@ namespace Occf.Tools.Cui {
 		}
 
 		private static void RemoveExistingLibraries(
-				CoverageProfile profile, DirectoryInfo directory) {
-			foreach (var name in profile.LibraryNames) {
-				var dstPath = Path.Combine(directory.FullName, name);
-				File.Delete(dstPath);
-			}
+				CoverageProfile profile, DirectoryInfo dirInfo) {
+			profile.RemoveLibraries(dirInfo);
 		}
 
 		private static void CopyLibraries(
-				CoverageProfile profile, DirectoryInfo directory) {
-			foreach (var name in profile.LibraryNames) {
-				var srcPath = Path.Combine(Assembly.GetExecutingAssembly().Location, Names.Library, name);
-				var dstPath = Path.Combine(directory.FullName, name);
-				File.Copy(srcPath, dstPath, true);
-			}
+				CoverageProfile profile, DirectoryInfo dirInfo) {
+			profile.CopyLibraries(dirInfo);
 		}
 
 		private static void RemoveExistingCoverageDataFiles(
 				DirectoryInfo rootDir, DirectoryInfo workDir) {
 			var targets = rootDir.EnumerateFiles(
-					Names.CoverageData, SearchOption.AllDirectories);
+					OccfNames.CoverageData, SearchOption.AllDirectories);
 			if (workDir != null) {
 				targets =
-						targets.Concat(workDir.EnumerateFiles(Names.CoverageData));
+						targets.Concat(workDir.EnumerateFiles(OccfNames.CoverageData));
 			}
 			foreach (var target in targets.ToList()) {
 				target.Delete();
@@ -180,15 +170,16 @@ namespace Occf.Tools.Cui {
 		private static void WriteProductionCodeFiles(
 				DirectoryInfo rootDir, DirectoryInfo testDir, CoverageProfile prof,
 				CoverageInfo info) {
-			var paths = rootDir.EnumerateFiles(
-					prof.FilePattern, SearchOption.AllDirectories);
+			var paths = prof.FilePatterns.SelectMany(
+					pattern => rootDir.EnumerateFiles(
+							pattern, SearchOption.AllDirectories));
 			// ignore test code in the directory of production code
 			if (testDir != null) {
 				paths = paths.Where(f => !f.FullName.StartsWith(testDir.FullName));
 			}
 
 			foreach (var path in paths.ToList()) {
-				var bakPath = rootDir.GetFile(path + Names.BackupSuffix).FullName;
+				var bakPath = rootDir.GetFile(path + OccfNames.BackupSuffix).FullName;
 				path.CopyTo(bakPath, true);
 				var outPath = CoverageCodeGenerator.WriteCoveragedCode(
 						prof, info, path, rootDir);
@@ -199,11 +190,11 @@ namespace Occf.Tools.Cui {
 		private static void WriteTestCodeFiles(
 				DirectoryInfo rootDir, DirectoryInfo testDir, CoverageProfile prof,
 				TestInfo info) {
-			var paths = testDir.EnumerateFiles(
-					prof.FilePattern, SearchOption.AllDirectories);
-
+			var paths = prof.FilePatterns.SelectMany(
+					pattern => testDir.EnumerateFiles(
+							pattern, SearchOption.AllDirectories));
 			foreach (var path in paths.ToList()) {
-				var bakPath = rootDir.GetFile(path + Names.BackupSuffix).FullName;
+				var bakPath = rootDir.GetFile(path + OccfNames.BackupSuffix).FullName;
 				path.CopyTo(bakPath, true);
 				var outPath = CoverageCodeGenerator.WriteIdentifiedTest(
 						prof, info, path, rootDir);
@@ -215,7 +206,7 @@ namespace Occf.Tools.Cui {
 				DirectoryInfo rootDir, CoverageInfo covInfo, TestInfo testInfo) {
 			var formatter = new BinaryFormatter();
 
-			var covPath = Path.Combine(rootDir.FullName, Names.CoverageInfo);
+			var covPath = Path.Combine(rootDir.FullName, OccfNames.CoverageInfo);
 			using (var fs = new FileStream(covPath, FileMode.Create)) {
 				formatter.Serialize(fs, covInfo);
 			}
@@ -223,7 +214,7 @@ namespace Occf.Tools.Cui {
 			if (testInfo == null) {
 				return;
 			}
-			var testPath = Path.Combine(rootDir.FullName, Names.TestInfo);
+			var testPath = Path.Combine(rootDir.FullName, OccfNames.TestInfo);
 			using (var fs = new FileStream(testPath, FileMode.Create)) {
 				formatter.Serialize(fs, testInfo);
 			}

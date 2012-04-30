@@ -18,8 +18,8 @@
 
 using System.IO;
 using Occf.Core.CoverageInformation;
-using Occf.Core.CoverageProfiles;
 using Occf.Core.Operators.Inserters;
+using Occf.Core.Profiles;
 using Occf.Core.TestInfos;
 using Paraiba.IO;
 using Paraiba.Text;

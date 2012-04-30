@@ -1,6 +1,6 @@
 ﻿#region License
 
-// Copyright (C) 2011-2012 Kazunori Sakamoto
+// Copyright (C) 2009-2012 Kazunori Sakamoto
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,11 +23,11 @@ using Occf.Core.Operators.Selectors;
 using Paraiba.Xml.Linq;
 
 namespace Occf.Languages.Java.Operators.Selectors {
-    public class JavaCatchBlockSelector : Selector {
-        public override IEnumerable<XElement> Select(XElement root) {
-            return root.Elements("catches")
-                    .SelectMany(e => e.Elements("catchClause"))
-                    .Select(e => e.Element("block").FirstElement());
-        }
-    }
+	public class JavaCatchBlockSelector : Selector {
+		public override IEnumerable<XElement> Select(XElement root) {
+			return root.Elements("catches")
+					.SelectMany(e => e.Elements("catchClause"))
+					.Select(e => e.Element("block").FirstElement());
+		}
+	}
 }
