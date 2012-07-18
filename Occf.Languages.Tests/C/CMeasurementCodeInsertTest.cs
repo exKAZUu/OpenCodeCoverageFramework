@@ -27,7 +27,11 @@ namespace Occf.Languages.Tests.C {
 		}
 
 		[Test]
-		[TestCase("Block1.c")]
+        [TestCase("mul_mv.c")]
+        [TestCase("mul_mv2.c")]
+        //[TestCase("bubblesort.c")]
+        //[TestCase("quicksort_p.c")]
+        [TestCase("Block1.c")]
 		[TestCase("Block2.c")]
 		[TestCase("Block3.c")]
 		public void Should_Insert_Measurement_Code_In_C_Code(string fileName) {
