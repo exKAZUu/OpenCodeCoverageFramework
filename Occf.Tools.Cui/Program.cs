@@ -18,6 +18,7 @@
 
 using System;
 using System.Linq;
+using Occf.Core.Profiles;
 
 namespace Occf.Tools.Cui {
 	public class Program {
@@ -49,6 +50,7 @@ namespace Occf.Tools.Cui {
 		}
 
 		private static bool Run(string[] args) {
+			var profile = CoverageProfiles.GetCoverageProfileByClassName("Java");
 			if (args.Length < 1) {
 				return Print(Usage);
 			}

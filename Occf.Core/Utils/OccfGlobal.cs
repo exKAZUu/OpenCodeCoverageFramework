@@ -1,6 +1,6 @@
 ﻿#region License
 
-// Copyright (C) 2011-2012 Kazunori Sakamoto
+// Copyright (C) 2009-2012 Kazunori Sakamoto
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,13 +17,24 @@
 #endregion
 
 using System;
+using System.Diagnostics;
 
 namespace Occf.Core.Utils {
 	public class OccfGlobal {
-		public static string CurrentDirectory { get; private set; }
+		private static string _currentDirectory;
+
+		public static string CurrentDirectory {
+			get {
+				if (_currentDirectory == null) {
+					_currentDirectory = Environment.CurrentDirectory;
+					Debug.WriteLine("Warning: SaveCurrentDirectory doesn't have been executed yet.");
+				}
+				return _currentDirectory;
+			}
+		}
 
 		public static void SaveCurrentDirectory() {
-			CurrentDirectory = Environment.CurrentDirectory;
+			_currentDirectory = Environment.CurrentDirectory;
 		}
 	}
 }

@@ -25,6 +25,10 @@ using Paraiba.IO;
 namespace Occf.Languages.Java.Profiles {
 	[Export(typeof(CoverageProfile))]
 	public class JavaUnitMasterCoverageProfile : JavaCoverageProfile {
+		public override string Name {
+			get { return "JavaForUM"; }
+		}
+
 		public override void CopyLibraries(DirectoryInfo outDirInfo) {
 			ParaibaFile.WriteIfDifferentSize(
 					Path.Combine(outDirInfo.FullName, "CoverageWriter.UM.jar"),
