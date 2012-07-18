@@ -124,13 +124,16 @@
   <data name="junit_4_8_2" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Library\junit-4.8.2.jar;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="Occf_Writer_File_Java" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Library\Occf.Writer.File.Java.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
   <data name="CoverageWriter_UM" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\library\coveragewriter.um.jar;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="Occf_Writer_UM_Java" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\library\occf.writer.um.java.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Occf_Writer_File_Java_x64" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Library\Occf.Writer.File.Java.x64.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Occf_Writer_File_Java_x86" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Library\Occf.Writer.File.Java.x86.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
 </root>

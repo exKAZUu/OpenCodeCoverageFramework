@@ -16,6 +16,7 @@
 
 #endregion
 
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
@@ -156,8 +157,11 @@ namespace Occf.Languages.Java.Profiles {
 					Path.Combine(outDirInfo.FullName, "junit-4.8.2.jar"),
 					Resources.junit_4_8_2);
 			ParaibaFile.WriteIfDifferentSize(
-					Path.Combine(outDirInfo.FullName, "Occf.Writer.File.Java.dll"),
-					Resources.Occf_Writer_File_Java);
+					Path.Combine(
+							outDirInfo.FullName, "Occf.Writer.File.Java.dll"),
+					Environment.Is64BitOperatingSystem
+							? Resources.Occf_Writer_File_Java_x64
+							: Resources.Occf_Writer_File_Java_x86);
 		}
 
 		public override void RemoveLibraries(DirectoryInfo outDirInfo) {

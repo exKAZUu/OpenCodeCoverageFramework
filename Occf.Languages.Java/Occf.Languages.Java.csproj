@@ -131,13 +131,15 @@
     <Content Include="Library\CoverageWriter.File.jar" />
     <Content Include="Library\CoverageWriter.UM.jar" />
     <Content Include="Library\junit-4.8.2.jar" />
-    <Content Include="Library\Occf.Writer.File.Java.dll" />
+    <Content Include="Library\Occf.Writer.File.Java.x64.dll" />
+    <Content Include="Library\Occf.Writer.File.Java.x86.dll" />
     <Content Include="Library\Occf.Writer.UM.Java.dll" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
