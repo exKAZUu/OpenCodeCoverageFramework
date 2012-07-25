@@ -23,7 +23,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using NUnit.Framework;
-using Occf.Core;
 using Occf.Core.Profiles;
 using Occf.Core.Tests;
 using Occf.Core.Utils;
@@ -32,16 +31,15 @@ using Paraiba.IO;
 
 namespace Occf.Tools.Cui.Tests {
 	[TestFixture]
-	public class InsertProgramTest {
-		private const string JavaPath = "java";
+	public class InsertProgramForCTest {
+		private const string GccCommand = "gcc";
 		private const string JavacPath = "javac";
 
 		[Test]
 		public void RunChangingOhterEnvironment() {}
 
 		[Test]
-		[TestCase("GetMid", "GetMidTest")]
-		[TestCase("GetMid3", "GetMid3Test")]
+		[TestCase("Block", "GetMidTest")]
 		public void InsertMeasurementCode(string projectName, string testTargetNames) {
 			OccfGlobal.SaveCurrentDirectory();
 
@@ -58,26 +56,27 @@ namespace Occf.Tools.Cui.Tests {
 		private static void VerifyMeasureAndLocalize(
 				string testTargetNames, string inDirPath, string expDirPath,
 				DirectoryInfo outDir, string outDirPath) {
-
 			// カレントディレクトリを途中で変更しても動作するか検証
 			Environment.CurrentDirectory = "C:\\";
 
-			var profile = CoverageProfiles.GetCoverageProfileByClassName("Java");
+			var profile = CoverageProfiles.GetCoverageProfileByClassName("C");
 			Inserter.InsertMeasurementCode(
 					outDir, new DirectoryInfo(Path.Combine(outDirPath, "test")), outDir,
 					profile);
 
-			// jarとdllファイルが存在するか
-			var jar = Path.Combine(outDirPath, "CoverageWriter.File.jar");
-			Assert.That(File.Exists(jar), Is.True);
-			var dll = Path.Combine(outDirPath, "Occf.Writer.File.Java.dll");
-			Assert.That(File.Exists(dll), Is.True);
+			// .cと.hファイルが存在するか
+			Assert.That(
+					File.Exists(Path.Combine(outDirPath, "covman.c")),
+					Is.True);
+			Assert.That(
+					File.Exists(Path.Combine(outDirPath, "covman.h")),
+					Is.True);
 
 			var covinfo = Path.Combine(outDirPath, OccfNames.CoverageInfo);
 			var testinfo = Path.Combine(outDirPath, OccfNames.TestInfo);
 
 			var targets = Directory.EnumerateFiles(
-					expDirPath, "*.java",
+					expDirPath, "*.c",
 					SearchOption.AllDirectories)
 					.Concat(
 							Directory.EnumerateFiles(
@@ -91,12 +90,12 @@ namespace Occf.Tools.Cui.Tests {
 			Compile(outDirPath);
 			RunTest(outDirPath, testTargetNames);
 
-			var ret = BugLocalizer.Run(
-					new[] {
-							outDirPath,
-							Path.Combine(outDirPath, "testresult.txt")
-					});
-			Assert.That(ret, Is.True);
+			//var ret = BugLocalizer.Run(
+			//        new[] {
+			//                outDirPath,
+			//                Path.Combine(outDirPath, "testresult.txt")
+			//        });
+			//Assert.That(ret, Is.True);
 		}
 
 		private static void Compile(string outDirPath) {
@@ -133,7 +132,7 @@ namespace Occf.Tools.Cui.Tests {
 					testTargetNames,
 			};
 			var info = new ProcessStartInfo {
-					FileName = JavaPath,
+					FileName = GccCommand,
 					Arguments = args.JoinString(" "),
 					CreateNoWindow = true,
 					RedirectStandardOutput = true,
@@ -142,7 +141,8 @@ namespace Occf.Tools.Cui.Tests {
 			};
 			try {
 				using (var p = Process.Start(info))
-				using (var fs = new StreamWriter(Path.Combine(outDirPath, "testresult.txt"))) {
+				using (var fs = new StreamWriter(Path.Combine(outDirPath, "testresult.txt"))
+						) {
 					fs.WriteFromStream(p.StandardOutput);
 				}
 			} catch (Win32Exception e) {
