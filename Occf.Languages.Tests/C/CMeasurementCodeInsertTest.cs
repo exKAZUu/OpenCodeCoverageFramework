@@ -29,6 +29,8 @@ namespace Occf.Languages.Tests.C {
 		[Test]
         [TestCase("mul_mv.c")]
         [TestCase("mul_mv2.c")]
+        [TestCase("mersenne.c")]
+        [TestCase("multi.h")]
         //[TestCase("bubblesort.c")]
         //[TestCase("quicksort_p.c")]
         [TestCase("Block1.c")]
