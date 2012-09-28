@@ -75,21 +75,21 @@ namespace Occf.Core.Operators.Inserters {
 		/// <summary>
 		///   Instruments test code for measuring code coverage and returns the modifieid code.
 		/// </summary>
-		/// <param name="profile">A profile to measure coverage.</param>
+		/// <param name="mode">A mode to measure coverage.</param>
 		/// <param name="fileInfo">A <c>FileInfo</c> instance to be instrumented.</param>
 		/// <param name="baseDirInfo">A <c>DirectoryInfo</c> instance of base directory.</param>
 		/// <returns>The modified test code.</returns>
 		public string InstrumentTestCase(
-				CoverageProfile profile, FileInfo fileInfo, DirectoryInfo baseDirInfo) {
+				CoverageMode mode, FileInfo fileInfo, DirectoryInfo baseDirInfo) {
 			var relativePath = XPath.GetRelativePath(
 					fileInfo.FullName, baseDirInfo.FullName);
 
-			var root = profile.CodeToXml.GenerateFromFile(fileInfo.FullName);
-			var inserter = profile.NodeInserter;
+			var root = mode.CodeToXml.GenerateFromFile(fileInfo.FullName);
+			var inserter = mode.NodeInserter;
 
 			var fileId = RegisterFile(fileInfo);
 
-			var targets = profile.TestCaseLabelTailSelector.Select(root);
+			var targets = mode.TestCaseLabelTailSelector.Select(root);
 			foreach (var target in targets) {
 				var testCaseId = RegisterTestCase(fileId);
 				inserter.InsertTestCaseId(target, testCaseId, relativePath);
@@ -98,19 +98,19 @@ namespace Occf.Core.Operators.Inserters {
 			// Add import for logging executed items
 			inserter.InsertImport(root);
 
-			return profile.XmlToCode.Generate(root);
+			return mode.XmlToCode.Generate(root);
 		}
 
 		/// <summary>
 		///   Instruments production code for measuring code coverage and returns the modifieid code.
 		/// </summary>
-		/// <param name="profile">A profile to measure coverage.</param>
+		/// <param name="mode">A mode to measure coverage.</param>
 		/// <param name="fileInfo">A <c>FileInfo</c> instance to be instrumented.</param>
 		/// <returns>The modified production code.</returns>
 		public string InstrumentStatementAndPredicate(
-				CoverageProfile profile, FileInfo fileInfo) {
-			var root = profile.CodeToXml.GenerateFromFile(fileInfo.FullName);
-			var inserter = profile.NodeInserter;
+				CoverageMode mode, FileInfo fileInfo) {
+			var root = mode.CodeToXml.GenerateFromFile(fileInfo.FullName);
+			var inserter = mode.NodeInserter;
 
 			var fileId = RegisterFile(fileInfo);
 
@@ -120,28 +120,28 @@ namespace Occf.Core.Operators.Inserters {
 			// switch文を正しく測定できるようにdefault節を追加する
 			inserter.SupplementDefaultCase(root);
 
-			var funcs = profile.FunctionSelector.Select(root);
+			var funcs = mode.FunctionSelector.Select(root);
 			foreach (var func in funcs) {
-				var funcName = profile.FunctionNameSelector.Select(func)
+				var funcName = mode.FunctionNameSelector.Select(func)
 						.First()
 						.Value;
 				var funcId = RegisterFunction(
 						fileId, funcName, CodePositions.New(func));
 
-				InstrumentStatement(profile, fileId, funcId, inserter, func);
-				InstrumentBranch(profile, fileId, funcId, inserter, func);
+				InstrumentStatement(mode, fileId, funcId, inserter, func);
+				InstrumentBranch(mode, fileId, funcId, inserter, func);
 			}
 
 			// Add import for logging executed items
 			inserter.InsertImport(root);
 
-			return profile.XmlToCode.Generate(root);
+			return mode.XmlToCode.Generate(root);
 		}
 
 		private void InstrumentStatement(
-				CoverageProfile profile, long fileId, long funcId, NodeInserter inserter,
+				CoverageMode mode, long fileId, long funcId, NodeInserter inserter,
 				XElement func) {
-			var stmts = profile.StatementSelector.Select(func);
+			var stmts = mode.StatementSelector.Select(func);
 			foreach (var stmt in stmts) {
 				var position = CodePositions.New(stmt);
 				var stmtId = RegisterStatement(fileId, funcId, position);
@@ -152,9 +152,9 @@ namespace Occf.Core.Operators.Inserters {
 		}
 
 		private void InstrumentBranch(
-				CoverageProfile profile, long fileId, long funcId, NodeInserter inserter,
+				CoverageMode mode, long fileId, long funcId, NodeInserter inserter,
 				XElement func) {
-			var branches = profile.BranchSelector.Select(func);
+			var branches = mode.BranchSelector.Select(func);
 			foreach (var branch in branches) {
 				var position = CodePositions.New(branch);
 				var branchId = RegisterBranch(fileId, funcId, position);

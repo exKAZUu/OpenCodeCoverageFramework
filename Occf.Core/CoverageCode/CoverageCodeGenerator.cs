@@ -27,69 +27,67 @@ using Paraiba.Text;
 namespace Occf.Core.CoverageCode {
 	public static class CoverageCodeGenerator {
 		public static string WriteIdentifiedTest(
-				CoverageProfile coverageProfile, TestInfo info, FileInfo fullPath,
+				CoverageMode mode, TestInfo info, FileInfo fullPath,
 				DirectoryInfo outDirPath) {
 			string relativePath;
-			var code = GetIdentifiedTest(
-					fullPath, info, coverageProfile,
-					out relativePath);
+			var code = GetIdentifiedTest(fullPath, info, mode, out relativePath);
 			return WriteCode(relativePath, outDirPath, code);
 		}
 
 		public static string GetIdentifiedTest(
-				FileInfo testFile, TestInfo info, CoverageProfile coverageProfile) {
+				FileInfo testFile, TestInfo info, CoverageMode mode) {
 			string relativePath;
-			return GetIdentifiedTest(testFile, info, coverageProfile, out relativePath);
+			return GetIdentifiedTest(testFile, info, mode, out relativePath);
 		}
 
 		public static string GetIdentifiedTest(
-				FileInfo testFile, TestInfo info, CoverageProfile coverageProfile,
+				FileInfo testFile, TestInfo info, CoverageMode mode,
 				out string relativePath) {
 			relativePath = XPath.GetRelativePath(testFile.FullName, info.BasePath);
-			var ast = coverageProfile.CodeToXml.GenerateFromFile(testFile.FullName);
+			var ast = mode.CodeToXml.GenerateFromFile(testFile.FullName);
 
 			// テストケース識別用コードの埋め込み
 			TestCaseInserter.Insert(
-					info, ast, coverageProfile.TestCaseLabelTailSelector,
-					coverageProfile.NodeInserter, relativePath);
+					info, ast, mode.TestCaseLabelTailSelector,
+					mode.NodeInserter, relativePath);
 
 			// コード生成
-			return coverageProfile.XmlToCode.Generate(ast);
+			return mode.XmlToCode.Generate(ast);
 		}
 
 		public static string WriteCoveragedCode(
-				CoverageProfile coverageProfile, CoverageInfo info, FileInfo codeFile,
+				CoverageMode mode, CoverageInfo info, FileInfo codeFile,
 				DirectoryInfo outDir) {
 			string relativePath;
 			var code = GetCoveragedCode(
-					codeFile, info, coverageProfile, out relativePath);
+					codeFile, info, mode, out relativePath);
 			return WriteCode(relativePath, outDir, code);
 		}
 
 		public static string GetCoveragedCode(
-				FileInfo codeFile, CoverageInfo info, CoverageProfile coverageProfile) {
+				FileInfo codeFile, CoverageInfo info, CoverageMode mode) {
 			string relativePath;
-			return GetCoveragedCode(codeFile, info, coverageProfile, out relativePath);
+			return GetCoveragedCode(codeFile, info, mode, out relativePath);
 		}
 
 		public static string GetCoveragedCode(
-				FileInfo codeFile, CoverageInfo info, CoverageProfile coverageProfile,
+				FileInfo codeFile, CoverageInfo info, CoverageMode mode,
 				out string relativePath) {
 			relativePath = XPath.GetRelativePath(codeFile.FullName, info.BasePath);
-			var ast = coverageProfile.CodeToXml.GenerateFromFile(codeFile.FullName);
-			var nodeIns = coverageProfile.NodeInserter;
+			var ast = mode.CodeToXml.GenerateFromFile(codeFile.FullName);
+			var nodeIns = mode.NodeInserter;
 
 			// 測定用コードの埋め込み
 			var path = relativePath;
 			CoverageInserter.InstrumentStatementAndPredicate(
-					info, ast, coverageProfile, path);
+					info, ast, mode, path);
 			//CoverageInserter.InstrumentStatement(
-			//        info, ast, coverageProfile, path);
+			//        info, ast, CoverageMode, path);
 			//CoverageInserter.InsertPredicate(
-			//        info, ast, coverageProfile, path);
+			//        info, ast, CoverageMode, path);
 
 			// コード生成
-			return coverageProfile.XmlToCode.Generate(ast);
+			return mode.XmlToCode.Generate(ast);
 		}
 
 		private static string WriteCode(

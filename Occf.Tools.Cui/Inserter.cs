@@ -22,6 +22,7 @@ using System.Diagnostics.Contracts;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
+using Code2Xml.Core.Position;
 using NDesk.Options;
 using Occf.Core.CoverageCode;
 using Occf.Core.CoverageInformation;
@@ -74,9 +75,9 @@ namespace Occf.Tools.Cui {
 				return Program.Print(Usage);
 			}
 
-			CoverageProfile profile;
+			CoverageMode mode;
 			try {
-				profile = CoverageProfiles.GetCoverageProfileByClassName(languageName);
+				mode = CoverageProfiles.GetCoverageProfileByClassName(languageName);
 			} catch {
 				return
 						Program.Print(
@@ -111,47 +112,51 @@ namespace Occf.Tools.Cui {
 				}
 			}
 
-			InsertMeasurementCode(rootDir, testDir, workDir, profile);
+			InsertMeasurementCode(rootDir, testDir, workDir, mode);
 			return true;
 		}
 
 		public static void InsertMeasurementCode(
 				DirectoryInfo rootDir, DirectoryInfo testDir, DirectoryInfo workDir,
-				CoverageProfile profile) {
+				CoverageMode mode) {
 			Contract.Requires<ArgumentException>(rootDir.Exists);
 			Contract.Requires<ArgumentException>(
 					testDir == null || testDir.Exists);
 			Contract.Requires<ArgumentException>(workDir.Exists);
-			Contract.Requires<ArgumentNullException>(profile != null);
+			Contract.Requires<ArgumentNullException>(mode != null);
 
 			var covInfo = new CoverageInfo(
-					rootDir.FullName, profile.Name, SharingMethod.File);
+					rootDir.FullName, mode.Name, SharingMethod.File);
 			var testInfo = testDir != null
-			               		? new TestInfo(0, rootDir.FullName)
-			               		: null;
+					               ? new TestInfo(rootDir.FullName)
+					               : null;
 
 			RemoveExistingCoverageDataFiles(rootDir, workDir);
 
-			RemoveExistingLibraries(profile, workDir);
+			RemoveExistingLibraries(mode, workDir);
 
-			WriteProductionCodeFiles(rootDir, testDir, profile, covInfo);
+			WriteProductionCodeFiles(rootDir, testDir, mode, covInfo);
 			if (testInfo != null) {
-				WriteTestCodeFiles(rootDir, testDir, profile, testInfo);
+				WriteTestCodeFiles(rootDir, testDir, mode, testInfo);
+			} else {
+				// Initialize test information with empty contents
+				testInfo = new TestInfo(rootDir.FullName);
+				testInfo.TestCases.Add(new TestCase("nothing", "nothing", new CodePosition()));
 			}
 
 			WriteInfos(rootDir, covInfo, testInfo);
 
-			CopyLibraries(profile, workDir);
+			CopyLibraries(mode, workDir);
 		}
 
 		private static void RemoveExistingLibraries(
-				CoverageProfile profile, DirectoryInfo dirInfo) {
-			profile.RemoveLibraries(dirInfo);
+				CoverageMode mode, DirectoryInfo dirInfo) {
+			mode.RemoveLibraries(dirInfo);
 		}
 
 		private static void CopyLibraries(
-				CoverageProfile profile, DirectoryInfo dirInfo) {
-			profile.CopyLibraries(dirInfo);
+				CoverageMode mode, DirectoryInfo dirInfo) {
+			mode.CopyLibraries(dirInfo);
 		}
 
 		private static void RemoveExistingCoverageDataFiles(
@@ -168,7 +173,7 @@ namespace Occf.Tools.Cui {
 		}
 
 		private static void WriteProductionCodeFiles(
-				DirectoryInfo rootDir, DirectoryInfo testDir, CoverageProfile prof,
+				DirectoryInfo rootDir, DirectoryInfo testDir, CoverageMode prof,
 				CoverageInfo info) {
 			var paths = prof.FilePatterns.SelectMany(
 					pattern => rootDir.EnumerateFiles(
@@ -188,7 +193,7 @@ namespace Occf.Tools.Cui {
 		}
 
 		private static void WriteTestCodeFiles(
-				DirectoryInfo rootDir, DirectoryInfo testDir, CoverageProfile prof,
+				DirectoryInfo rootDir, DirectoryInfo testDir, CoverageMode prof,
 				TestInfo info) {
 			var paths = prof.FilePatterns.SelectMany(
 					pattern => testDir.EnumerateFiles(

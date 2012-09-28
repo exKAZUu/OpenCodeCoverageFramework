@@ -30,11 +30,11 @@ namespace Occf.Core.Profiles {
 		private static CoverageProfiles _instance;
 
 #pragma warning disable 649
-		[ImportMany] private IEnumerable<CoverageProfile> _coverageProfiles;
+		[ImportMany] private IEnumerable<CoverageMode> _coverageProfiles;
 
 #pragma warning restore 649
 
-		public static IEnumerable<CoverageProfile> Profile {
+		public static IEnumerable<CoverageMode> Profile {
 			get { return Instance._coverageProfiles; }
 		}
 
@@ -53,14 +53,14 @@ namespace Occf.Core.Profiles {
 			get { return _instance ?? (_instance = new CoverageProfiles()); }
 		}
 
-		public static CoverageProfile GetCoverageProfileByName(string name) {
+		public static CoverageMode GetCoverageProfileByName(string name) {
 			var lowerName = name.ToLower();
 			return Profile
 					.Where(p => p.Name.ToLower().Contains(lowerName))
 					.MinElementOrDefault(p => Math.Abs(p.Name.Length - name.Length));
 		}
 
-		public static CoverageProfile GetCoverageProfileByClassName(string className) {
+		public static CoverageMode GetCoverageProfileByClassName(string className) {
 			var lowerName = className.ToLower();
 			return Profile
 					.Where(p => p.GetType().Name.ToLower().Contains(lowerName))

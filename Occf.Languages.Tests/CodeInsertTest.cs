@@ -24,30 +24,20 @@ using Occf.Core.Profiles;
 using Occf.Core.Tests;
 
 namespace Occf.Languages.Tests {
-    public static class CodeInsertTest {
-        public static void VerifyCodeInsertion(
-                CoverageProfile profile, string fileName) {
-            var info = new CoverageInfo(
-                    Fixture.GetCoverageInputPath(),
-                    profile.Name, SharingMethod.SharedMemory);
-            string inPath = Path.Combine(
-                    Fixture.GetCoverageInputPath(), fileName);
-            string code = CoverageCodeGenerator.GetCoveragedCode(
-                    new FileInfo(inPath), info,
-                    profile);
-
-            string expPath = Path.Combine(
-                    Fixture.GetCoverageExpectationPath(), fileName);
-            try {
-                using (var reader = new StreamReader(expPath)) {
-                    string expected = reader.ReadToEnd();
-                    Assert.That(code, Is.EqualTo(expected));
-                }
-            } catch {
-                string path = Fixture.GetOutputPath(fileName);
-                File.WriteAllText(path, code);
-                throw;
-            }
-        }
-    }
+	public static class CodeInsertTest {
+		public static void VerifyCodeInsertion(
+				CoverageMode mode, string fileName) {
+			var info = new CoverageInfo(
+					Fixture.GetCoverageInputPath(), mode.Name, SharingMethod.SharedMemory);
+			var inPath = Path.Combine(Fixture.GetCoverageInputPath(), fileName);
+			var code = CoverageCodeGenerator.GetCoveragedCode(
+					new FileInfo(inPath), info, mode);
+			File.WriteAllText(Fixture.GetOutputPath(fileName), code);
+			var expPath = Path.Combine(Fixture.GetCoverageExpectationPath(), fileName);
+			using (var reader = new StreamReader(expPath)) {
+				var expected = reader.ReadToEnd();
+				Assert.That(code, Is.EqualTo(expected));
+			}
+		}
+	}
 }

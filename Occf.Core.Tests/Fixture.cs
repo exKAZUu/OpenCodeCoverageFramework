@@ -46,8 +46,10 @@ namespace Occf.Core.Tests {
 		}
 
 		public static string GetOutputPath(params string[] names) {
-			return Path.Combine(FixturePath, Output)
+			var path = Path.Combine(FixturePath, Output)
 					.GetFullPathAddingSubNames(names);
+			Directory.CreateDirectory(Path.GetDirectoryName(path));
+			return path;
 		}
 
 		public static string GetCoverageInputPath(params string[] names) {

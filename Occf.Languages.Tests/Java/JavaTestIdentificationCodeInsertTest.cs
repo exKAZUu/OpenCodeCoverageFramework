@@ -29,7 +29,7 @@ namespace Occf.Languages.Tests.Java {
 		[Test]
 		[TestCase("FizzBuzzTest.java")]
 		public void Should_Insert_Measurement_Code_In_JUnit4_Code(string fileName) {
-			var info = new TestInfo(0, Fixture.GetTestInputPath());
+			var info = new TestInfo(Fixture.GetTestInputPath());
 			var inPath = Path.Combine(Fixture.GetTestInputPath(), fileName);
 			var code = CoverageCodeGenerator.GetIdentifiedTest(
 					new FileInfo(inPath), info,

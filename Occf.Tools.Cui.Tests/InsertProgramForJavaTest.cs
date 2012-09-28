@@ -37,9 +37,6 @@ namespace Occf.Tools.Cui.Tests {
 		private const string JavacCommand = "javac";
 
 		[Test]
-		public void RunChangingOhterEnvironment() {}
-
-		[Test]
 		[TestCase("GetMid", "GetMidTest")]
 		[TestCase("GetMid3", "GetMid3Test")]
 		public void InsertMeasurementCode(string projectName, string testTargetNames) {

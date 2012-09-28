@@ -22,12 +22,17 @@ using System.Collections.Generic;
 namespace Occf.Core.TestInfos {
 	[Serializable]
 	public class TestInfo {
+		/// <summary>
+		/// A base path for relative paths in <see cref="TestCase"/> class.
+		/// </summary>
 		public string BasePath;
-		public int Id;
+
+		/// <summary>
+		/// A list of test case information.
+		/// </summary>
 		public List<TestCase> TestCases;
 
-		public TestInfo(int id, string basePath) {
-			Id = id;
+		public TestInfo(string basePath) {
 			TestCases = new List<TestCase>();
 			BasePath = basePath;
 		}

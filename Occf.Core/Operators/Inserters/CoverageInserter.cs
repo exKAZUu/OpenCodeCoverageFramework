@@ -31,69 +31,69 @@ namespace Occf.Core.Operators.Inserters {
 		public const int Done = ((int)CoverageState.Done) - 1;
 
 		public static void InstrumentStatement(
-				CoverageInfo info, XElement root, CoverageProfile profile,
+				CoverageInfo info, XElement root, CoverageMode mode,
 				string relativePath) {
 			// ステートメントを挿入できるようにブロックを補う
-			profile.NodeInserter.SupplementBlock(root);
+			mode.NodeInserter.SupplementBlock(root);
 
-			AddIntoStatement(info, root, profile, relativePath);
-			AddIntoVariableInitializer(info, root, profile, relativePath);
+			AddIntoStatement(info, root, mode, relativePath);
+			AddIntoVariableInitializer(info, root, mode, relativePath);
 
 			// Add import for loggin executed items
-			profile.NodeInserter.InsertImport(root);
+			mode.NodeInserter.InsertImport(root);
 		}
 
 		public static void InstrumentPredicate(
-				CoverageInfo info, XElement root, CoverageProfile profile,
+				CoverageInfo info, XElement root, CoverageMode mode,
 				string relativePath) {
 			// switch文を正しく測定できるようにdefault節を追加する
-			profile.NodeInserter.SupplementDefaultCase(root);
+			mode.NodeInserter.SupplementDefaultCase(root);
 
-			AddIntoBranchAndCondition(info, root, profile, relativePath);
-			AddIntoSwitchCase(info, root, profile, relativePath);
-			AddIntoForeach(info, root, profile, relativePath);
+			AddIntoBranchAndCondition(info, root, mode, relativePath);
+			AddIntoSwitchCase(info, root, mode, relativePath);
+			AddIntoForeach(info, root, mode, relativePath);
 
 			// Add import for loggin executed items
-			profile.NodeInserter.InsertImport(root);
+			mode.NodeInserter.InsertImport(root);
 		}
 
 		public static void InstrumentStatementAndPredicate(
-				CoverageInfo info, XElement root, CoverageProfile profile,
+				CoverageInfo info, XElement root, CoverageMode mode,
 				string relativePath) {
 			// ステートメントを挿入できるようにブロックを補う
-			profile.NodeInserter.SupplementBlock(root);
+			mode.NodeInserter.SupplementBlock(root);
 
 			// switch文を正しく測定できるようにdefault節を追加する
-			profile.NodeInserter.SupplementDefaultCase(root);
+			mode.NodeInserter.SupplementDefaultCase(root);
 
-			AddIntoStatement(info, root, profile, relativePath);
-			AddIntoBranchAndCondition(info, root, profile, relativePath);
+			AddIntoStatement(info, root, mode, relativePath);
+			AddIntoBranchAndCondition(info, root, mode, relativePath);
 
 			// Add the measurement code as a statement into switch and foreach
 			// after inserting the measurement code into statements
-			AddIntoSwitchCase(info, root, profile, relativePath);
-			AddIntoForeach(info, root, profile, relativePath);
+			AddIntoSwitchCase(info, root, mode, relativePath);
+			AddIntoForeach(info, root, mode, relativePath);
 
 			// Add the measurement code as a prediction into variable initializers
 			// after inserting the measurement code into predictions
-			AddIntoVariableInitializer(info, root, profile, relativePath);
+			AddIntoVariableInitializer(info, root, mode, relativePath);
 
 			// Add import for loggin executed items
-			profile.NodeInserter.InsertImport(root);
+			mode.NodeInserter.InsertImport(root);
 		}
 
 		private static void AddIntoVariableInitializer(
-				CoverageInfo info, XElement root, CoverageProfile profile,
+				CoverageInfo info, XElement root, CoverageMode mode,
 				string relativePath) {
 			var statemetIndex = info.Targets.Count;
-			var nodeList = profile.InitializerSelector.Select(root).ToList();
+			var nodeList = mode.InitializerSelector.Select(root).ToList();
 			foreach (var node in nodeList) {
 				// ステートメントに測定用コードを埋め込む
-				profile.NodeInserter.InsertInitializer(
+				mode.NodeInserter.InsertInitializer(
 						node, info.Targets.Count, ElementType.Statement);
 				// カバレッジ情報を生成
 				var covElem = new CoverageElement(
-						relativePath, node, profile.Tagger);
+						relativePath, node, mode.Tagger);
 				info.Targets.Add(covElem);
 			}
 			info.StatementRanges.Add(
@@ -101,17 +101,17 @@ namespace Occf.Core.Operators.Inserters {
 		}
 
 		private static void AddIntoStatement(
-				CoverageInfo info, XElement root, CoverageProfile profile,
+				CoverageInfo info, XElement root, CoverageMode mode,
 				string relativePath) {
 			var statemetIndex = info.Targets.Count;
-			var nodeList = profile.StatementSelector.Select(root).ToList();
+			var nodeList = mode.StatementSelector.Select(root).ToList();
 			foreach (var node in nodeList) {
 				// ステートメントに測定用コードを埋め込む
-				profile.NodeInserter.InsertStatementBefore(
+				mode.NodeInserter.InsertStatementBefore(
 						node, info.Targets.Count, Done, ElementType.Statement);
 				// カバレッジ情報を生成
 				var covElem = new CoverageElement(
-						relativePath, node, profile.Tagger);
+						relativePath, node, mode.Tagger);
 				info.Targets.Add(covElem);
 			}
 			info.StatementRanges.Add(
@@ -119,17 +119,17 @@ namespace Occf.Core.Operators.Inserters {
 		}
 
 		private static void AddIntoForeach(
-				CoverageInfo info, XElement node, CoverageProfile profile,
+				CoverageInfo info, XElement node, CoverageMode mode,
 				string relativePath) {
 			var startBranchIndex = info.Targets.Count;
 			var startBranchConditionIndex = info.TargetGroups.Count;
-			var foreachNodes = profile.ForeachSelector.Select(node);
+			var foreachNodes = mode.ForeachSelector.Select(node);
 			foreach (var foreachNode in foreachNodes) {
 				// ステートメントに測定用コードを埋め込む
 				var head =
-						profile.ForeachHeadSelector.Select(foreachNode).First();
+						mode.ForeachHeadSelector.Select(foreachNode).First();
 				var tail =
-						profile.ForeachTailSelector.Select(foreachNode).First();
+						mode.ForeachTailSelector.Select(foreachNode).First();
 				// 同じid( = count)を共有
 				var id = info.Targets.Count;
 				// Record(TrueOnly)    _lastState = TrueOnly
@@ -139,17 +139,17 @@ namespace Occf.Core.Operators.Inserters {
 				//   Record(TrueOnly)  _lastState = TrueOnly
 				// }
 				// Record(TrueOnly)    ループ判定不成立 (State |= TrueOnly if _lastState == TrueOnly)
-				profile.NodeInserter.InsertStatementBefore(
+				mode.NodeInserter.InsertStatementBefore(
 						foreachNode, id, TrueOnly, ElementType.DecisionAndCondition);
-				profile.NodeInserter.InsertStatementAfter(
+				mode.NodeInserter.InsertStatementAfter(
 						head, id, FalseOnly, ElementType.DecisionAndCondition);
-				profile.NodeInserter.InsertStatementBefore(
+				mode.NodeInserter.InsertStatementBefore(
 						tail, id, TrueOnly, ElementType.DecisionAndCondition);
-				profile.NodeInserter.InsertStatementAfter(
+				mode.NodeInserter.InsertStatementAfter(
 						tail, id, TrueOnly, ElementType.DecisionAndCondition);
 				// カバレッジ情報を生成
 				var covElem = new ForeachCoverageElement(
-						relativePath, foreachNode, profile.Tagger);
+						relativePath, foreachNode, mode.Tagger);
 				info.Targets.Add(covElem);
 				var elementGroup = new CoverageElementGroup(covElem);
 				info.TargetGroups.Add(elementGroup);
@@ -162,27 +162,27 @@ namespace Occf.Core.Operators.Inserters {
 		}
 
 		private static void AddIntoSwitchCase(
-				CoverageInfo info, XElement node, CoverageProfile profile,
+				CoverageInfo info, XElement node, CoverageMode mode,
 				string relativePath) {
 			var startSwitchIndex = info.TargetGroups.Count;
-			var switchNodes = profile.SwitchSelector.Select(node);
+			var switchNodes = mode.SwitchSelector.Select(node);
 			foreach (var switchNode in switchNodes) {
 				var caseElements = new List<CoverageElement>();
-				var caseNodes = profile.CaseLabelTailSelector.Select(switchNode);
+				var caseNodes = mode.CaseLabelTailSelector.Select(switchNode);
 				foreach (var caseNode in caseNodes) {
 					// ステートメントに測定用コードを埋め込む
-					profile.NodeInserter.InsertStatementAfter(
+					mode.NodeInserter.InsertStatementAfter(
 							caseNode, info.Targets.Count, Done,
 							ElementType.SwitchCase);
 					// カバレッジ情報を生成
 					var covElem = new CoverageElement(
-							relativePath, caseNode, profile.Tagger);
+							relativePath, caseNode, mode.Tagger);
 					info.Targets.Add(covElem);
 					caseElements.Add(covElem);
 				}
 				// switchのカバレッジ情報を生成
 				var element = new CoverageElement(
-						relativePath, switchNode, profile.Tagger);
+						relativePath, switchNode, mode.Tagger);
 				// 条件分岐と論理項のカバレッジ情報をまとめる
 				var elementGroup = new CoverageElementGroup(
 						element, caseElements);
@@ -193,29 +193,29 @@ namespace Occf.Core.Operators.Inserters {
 		}
 
 		private static void AddIntoBranchAndCondition(
-				CoverageInfo info, XElement node, CoverageProfile profile,
+				CoverageInfo info, XElement node, CoverageMode mode,
 				string relativePath) {
-			var branchNodeList = profile.BranchSelector.Select(node).ToList();
+			var branchNodeList = mode.BranchSelector.Select(node).ToList();
 			var startBranchIndex = info.Targets.Count;
 			var startBranchConditionIndex = info.TargetGroups.Count;
 			foreach (var branchNode in branchNodeList) {
 				// 全ての論理項を列挙
 				var condNodeList =
-						profile.ConditionSelector.Select(branchNode).ToList();
+						mode.ConditionSelector.Select(branchNode).ToList();
 				// 論理項に測定用コードを埋め込み，カバレッジ情報を生成
 				var condElements = InsertConditionCoverage(
-						info, condNodeList, profile, relativePath);
+						info, condNodeList, mode, relativePath);
 
 				// 条件分岐のカバレッジ情報を生成
 				var element = new CoverageElement(
-						relativePath, branchNode, profile.Tagger);
+						relativePath, branchNode, mode.Tagger);
 				// 条件分岐と論理項のカバレッジ情報をまとめる
 				var elementGroup = new CoverageElementGroup(
 						element, condElements);
 				info.TargetGroups.Add(elementGroup);
 
 				// 論理項を含む条件式か否かを判断
-				profile.NodeInserter.InsertPredicate(
+				mode.NodeInserter.InsertPredicate(
 						branchNode, info.Targets.Count,
 						elementGroup.Targets.Count > 0
 								? ElementType.Decision
@@ -230,18 +230,18 @@ namespace Occf.Core.Operators.Inserters {
 		}
 
 		private static void AddIntoBranch(
-				CoverageInfo info, XElement node, CoverageProfile profile,
+				CoverageInfo info, XElement node, CoverageMode mode,
 				string relativePath) {
-			var branchNodeList = profile.BranchSelector.Select(node).ToList();
+			var branchNodeList = mode.BranchSelector.Select(node).ToList();
 			var startBranchIndex = info.Targets.Count;
 			foreach (var branchNode in branchNodeList) {
-				profile.NodeInserter.InsertPredicate(
+				mode.NodeInserter.InsertPredicate(
 						branchNode, info.Targets.Count,
 						ElementType.Decision);
 
 				// 条件分岐のカバレッジ情報を生成
 				var element = new CoverageElement(
-						relativePath, branchNode, profile.Tagger);
+						relativePath, branchNode, mode.Tagger);
 				info.Targets.Add(element);
 			}
 			info.BranchRanges.Add(
@@ -250,16 +250,16 @@ namespace Occf.Core.Operators.Inserters {
 
 		private static List<CoverageElement> InsertConditionCoverage(
 				CoverageInfo info, ICollection<XElement> condNodeList,
-				CoverageProfile profile, string relativePath) {
+				CoverageMode mode, string relativePath) {
 			return condNodeList
 					.SelectToList(
 							node => {
-								profile.NodeInserter.InsertPredicate(
+								mode.NodeInserter.InsertPredicate(
 										node, info.Targets.Count,
 										ElementType.Condition);
 
 								var covElem = new CoverageElement(
-										relativePath, node, profile.Tagger);
+										relativePath, node, mode.Tagger);
 								info.Targets.Add(covElem);
 								return covElem;
 							});

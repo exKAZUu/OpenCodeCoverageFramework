@@ -27,7 +27,7 @@ namespace Occf.Core.TestInfos {
 		public TestCase(string relativePath, string name, XElement node)
 				: this(relativePath, name, CodePositions.New(node)) {}
 
-		private TestCase(string relativePath, string name, CodePosition pos) {
+		public TestCase(string relativePath, string name, CodePosition pos) {
 			RelativePath = relativePath;
 			Name = name;
 			Position = pos;

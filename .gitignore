@@ -1,4 +1,3 @@
-
 #ignore thumbnails created by windows
 Thumbs.db
 #Ignore files build by Visual Studio
@@ -19,6 +18,7 @@ Thumbs.db
 *.log
 [Bb]in
 [Dd]ebug*/
+*.lib
 *.sbr
 obj/
 [Rr]elease*/
@@ -28,7 +28,13 @@ _ReSharper*/
 *.sdf
 ipch/
 target
-output
-download
+*.swp
+
+.nuget
 *.docstates
 *.dotCover
+nuspec
+packages
+
+output
+download

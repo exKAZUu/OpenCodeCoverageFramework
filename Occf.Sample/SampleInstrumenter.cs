@@ -42,21 +42,21 @@ namespace Occf.Sample {
 		}
 
 		public void WriteInstrumentedProductionCode(
-				CoverageProfile profile, FileInfo inFileInfo) {
+				CoverageMode mode, FileInfo inFileInfo) {
 			var relativePath = XPath.GetRelativePath(
 					inFileInfo.FullName, BaseDirInfo.FullName);
 			var outFileInfo = OutDirInfo.GetFile(relativePath);
-			var code = InstrumentStatementAndPredicate(profile, inFileInfo);
+			var code = InstrumentStatementAndPredicate(mode, inFileInfo);
 			outFileInfo.Directory.Create();
 			File.WriteAllText(outFileInfo.FullName, code);
 		}
 
 		public void WriteInstrumentedTestCode(
-				CoverageProfile profile, FileInfo inFileInfo) {
+				CoverageMode mode, FileInfo inFileInfo) {
 			var relativePath = XPath.GetRelativePath(
 					inFileInfo.FullName, BaseDirInfo.FullName);
 			var outFileInfo = OutDirInfo.GetFile(relativePath);
-			var code = InstrumentTestCase(profile, inFileInfo, BaseDirInfo);
+			var code = InstrumentTestCase(mode, inFileInfo, BaseDirInfo);
 			outFileInfo.Directory.Create();
 			File.WriteAllText(outFileInfo.FullName, code);
 		}

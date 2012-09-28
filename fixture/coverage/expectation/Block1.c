@@ -29,7 +29,7 @@
 	while ( WritePredicate ( 19 , 3 , i != 0 ) ) ;
 	WriteStatement ( 10 , 0 , 2 ) ;
 	for ( i = 0 ;
-	WritePredicate ( 20 , 3 , i < 0 ) ;
+	WritePredicate ( 20 , 3 , i <= 1 ) ;
 	i ++ ) {
 		WriteStatement ( 11 , 0 , 2 ) ;
 		printf ( "test" ) ;

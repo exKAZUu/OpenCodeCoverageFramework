@@ -33,14 +33,11 @@ namespace Occf.Tools.Cui.Tests {
 	[TestFixture]
 	public class InsertProgramForCTest {
 		private const string GccCommand = "gcc";
-		private const string JavacPath = "javac";
 
 		[Test]
-		public void RunChangingOhterEnvironment() {}
-
-		[Test]
-		[TestCase("Block", "GetMidTest")]
-		public void InsertMeasurementCode(string projectName, string testTargetNames) {
+		[TestCase("Block1")]
+		[TestCase("sort")]
+		public void InsertMeasurementCode(string projectName) {
 			OccfGlobal.SaveCurrentDirectory();
 
 			var outDirPath = Fixture.CleanOuputPath();
@@ -49,20 +46,16 @@ namespace Occf.Tools.Cui.Tests {
 			var expDirPath = Fixture.GetProjectExpectationPath(projectName);
 			FileUtility.CopyRecursively(inDirPath, outDirPath);
 
-			VerifyMeasureAndLocalize(
-					testTargetNames, inDirPath, expDirPath, outDir, outDirPath);
+			VerifyMeasureAndLocalize(inDirPath, expDirPath, outDir, outDirPath);
 		}
 
-		private static void VerifyMeasureAndLocalize(
-				string testTargetNames, string inDirPath, string expDirPath,
+		private static void VerifyMeasureAndLocalize(string inDirPath, string expDirPath,
 				DirectoryInfo outDir, string outDirPath) {
 			// カレントディレクトリを途中で変更しても動作するか検証
 			Environment.CurrentDirectory = "C:\\";
 
 			var profile = CoverageProfiles.GetCoverageProfileByClassName("C");
-			Inserter.InsertMeasurementCode(
-					outDir, new DirectoryInfo(Path.Combine(outDirPath, "test")), outDir,
-					profile);
+			Inserter.InsertMeasurementCode(outDir, null, outDir, profile);
 
 			// .cと.hファイルが存在するか
 			Assert.That(
@@ -88,28 +81,21 @@ namespace Occf.Tools.Cui.Tests {
 			}
 
 			Compile(outDirPath);
-			RunTest(outDirPath, testTargetNames);
+			RunTest(outDirPath);
 
-			//var ret = BugLocalizer.Run(
-			//        new[] {
-			//                outDirPath,
-			//                Path.Combine(outDirPath, "testresult.txt")
-			//        });
-			//Assert.That(ret, Is.True);
+			var ret = BugLocalizer.Run(
+			        new[] {
+			                outDirPath,
+			                Path.Combine(outDirPath, "testresult.txt")
+			        });
+			Assert.That(ret, Is.True);
 		}
 
 		private static void Compile(string outDirPath) {
-			var args = new[] {
-					"-cp",
-					".;CoverageWriter.File.jar;junit-4.8.2.jar",
-					"-sourcepath",
-					"src",
-					"-d",
-					".",
-					@"test\*.java"
-			};
+			var args = Directory.EnumerateFiles(
+					outDirPath, "*.c", SearchOption.TopDirectoryOnly);
 			var info = new ProcessStartInfo {
-					FileName = JavacPath,
+					FileName = GccCommand,
 					Arguments = args.JoinString(" "),
 					CreateNoWindow = true,
 					UseShellExecute = false,
@@ -120,33 +106,27 @@ namespace Occf.Tools.Cui.Tests {
 					p.WaitForExit();
 				}
 			} catch (Win32Exception e) {
-				throw new InvalidOperationException("Failed to launch 'javac'.", e);
+				throw new InvalidOperationException("Failed to launch " + info.FileName + ".", e);
 			}
 		}
 
-		private static void RunTest(string outDirPath, string testTargetNames) {
-			var args = new List<string> {
-					"-cp",
-					".;CoverageWriter.File.jar;junit-4.8.2.jar",
-					"org.junit.runner.JUnitCore",
-					testTargetNames,
-			};
+		private static void RunTest(string outDirPath) {
 			var info = new ProcessStartInfo {
-					FileName = GccCommand,
-					Arguments = args.JoinString(" "),
+					FileName = Path.Combine(outDirPath, "a.exe"),
+					Arguments = new string[0].JoinString(" "),
 					CreateNoWindow = true,
 					RedirectStandardOutput = true,
 					UseShellExecute = false,
 					WorkingDirectory = outDirPath,
 			};
 			try {
-				using (var p = Process.Start(info))
-				using (var fs = new StreamWriter(Path.Combine(outDirPath, "testresult.txt"))
-						) {
-					fs.WriteFromStream(p.StandardOutput);
+				// TODO
+				File.WriteAllText(Path.Combine(outDirPath, "testresult.txt"), "");
+				using (var p = Process.Start(info)) {
+					p.WaitForExit();
 				}
 			} catch (Win32Exception e) {
-				throw new InvalidOperationException("Failed to launch 'java'.", e);
+				throw new InvalidOperationException("Failed to launch " + info.FileName + ".", e);
 			}
 		}
 
