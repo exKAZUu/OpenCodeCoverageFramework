@@ -23,17 +23,17 @@ using Code2Xml.Core.CodeToXmls;
 using Code2Xml.Core.XmlToCodes;
 using Code2Xml.Languages.C.CodeToXmls;
 using Code2Xml.Languages.C.XmlToCodes;
+using Occf.Core.Modes;
 using Occf.Core.Operators.Inserters;
 using Occf.Core.Operators.Selectors;
 using Occf.Core.Operators.Taggers;
-using Occf.Core.Profiles;
 using Occf.Languages.C.Operators.Inserters;
 using Occf.Languages.C.Operators.Selectors;
 using Occf.Languages.C.Operators.Taggers;
 using Occf.Languages.C.Properties;
 using Paraiba.IO;
 
-namespace Occf.Languages.C.Profiles {
+namespace Occf.Languages.C.Modes {
 	[Export(typeof(CoverageMode))]
 	public class CCoverageMode : CoverageMode {
 		private IEnumerable<string> _filePatterns;

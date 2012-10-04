@@ -26,7 +26,7 @@ using Code2Xml.Core.Position;
 using NDesk.Options;
 using Occf.Core.CoverageCode;
 using Occf.Core.CoverageInformation;
-using Occf.Core.Profiles;
+using Occf.Core.Modes;
 using Occf.Core.TestInfos;
 using Occf.Core.Utils;
 using Paraiba.IO;
@@ -37,8 +37,7 @@ namespace Occf.Tools.Cui {
 		private const int W = 20;
 
 		private static readonly string Usage =
-				"Occf 1.0.0" + "\n" +
-				"Copyright (C) 2011 Kazunori SAKAMOTO" + "\n" +
+				Program.Header + 
 				"" + "\n" +
 				"Usage: Occf insert <root> [<test>] [options]" + "\n" +
 				"" + "\n" +
@@ -77,7 +76,7 @@ namespace Occf.Tools.Cui {
 
 			CoverageMode mode;
 			try {
-				mode = CoverageProfiles.GetCoverageProfileByClassName(languageName);
+				mode = CoverageModes.GetCoverageModeByClassName(languageName);
 			} catch {
 				return
 						Program.Print(
@@ -144,7 +143,7 @@ namespace Occf.Tools.Cui {
 				testInfo.TestCases.Add(new TestCase("nothing", "nothing", new CodePosition()));
 			}
 
-			WriteInfos(rootDir, covInfo, testInfo);
+			WriteInfoFiles(rootDir, covInfo, testInfo);
 
 			CopyLibraries(mode, workDir);
 		}
@@ -201,24 +200,32 @@ namespace Occf.Tools.Cui {
 			foreach (var path in paths.ToList()) {
 				var bakPath = rootDir.GetFile(path + OccfNames.BackupSuffix).FullName;
 				path.CopyTo(bakPath, true);
-				var outPath = CoverageCodeGenerator.WriteIdentifiedTest(
+				var outPath = CoverageCodeGenerator.AnalyzeAndWriteIdentifiedTest(
 						prof, info, path, rootDir);
 				Console.WriteLine("wrote:" + outPath);
 			}
 		}
 
-		private static void WriteInfos(
+		private static void WriteInfoFiles(
 				DirectoryInfo rootDir, CoverageInfo covInfo, TestInfo testInfo) {
 			var formatter = new BinaryFormatter();
+			WriteCoverageInfo(rootDir, covInfo, formatter);
+			if (testInfo == null) {
+				return;
+			}
+			WriteTestInfo(rootDir, testInfo, formatter);
+		}
 
+		private static void WriteCoverageInfo(
+				DirectoryInfo rootDir, CoverageInfo covInfo, BinaryFormatter formatter) {
 			var covPath = Path.Combine(rootDir.FullName, OccfNames.CoverageInfo);
 			using (var fs = new FileStream(covPath, FileMode.Create)) {
 				formatter.Serialize(fs, covInfo);
 			}
+		}
 
-			if (testInfo == null) {
-				return;
-			}
+		private static void WriteTestInfo(
+				DirectoryInfo rootDir, TestInfo testInfo, BinaryFormatter formatter) {
 			var testPath = Path.Combine(rootDir.FullName, OccfNames.TestInfo);
 			using (var fs = new FileStream(testPath, FileMode.Create)) {
 				formatter.Serialize(fs, testInfo);

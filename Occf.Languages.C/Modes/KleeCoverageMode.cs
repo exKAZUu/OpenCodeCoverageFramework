@@ -19,32 +19,19 @@
 using System.ComponentModel.Composition;
 using System.IO;
 using Occf.Core.Modes;
-using Occf.Languages.Java.Properties;
+using Occf.Languages.C.Properties;
 using Paraiba.IO;
 
-namespace Occf.Languages.Java.Profiles {
+namespace Occf.Languages.C.Modes {
 	[Export(typeof(CoverageMode))]
-	public class JavaUnitMasterCoverageMode : JavaCoverageMode {
-		public override string Name {
-			get { return "JavaForUM"; }
-		}
-
+	public class KleeCoverageMode : CCoverageMode {
 		public override void CopyLibraries(DirectoryInfo outDirInfo) {
 			ParaibaFile.WriteIfDifferentSize(
-					Path.Combine(outDirInfo.FullName, "CoverageWriter.UM.jar"),
-					Resources.CoverageWriter_UM);
+					Path.Combine(outDirInfo.FullName, "covman.c"),
+					Resources.covman_klee_c);
 			ParaibaFile.WriteIfDifferentSize(
-					Path.Combine(outDirInfo.FullName, "junit-4.8.2.jar"),
-					Resources.junit_4_8_2);
-			ParaibaFile.WriteIfDifferentSize(
-					Path.Combine(outDirInfo.FullName, "Occf.Writer.UM.Java.dll"),
-					Resources.Occf_Writer_UM_Java);
-		}
-
-		public override void RemoveLibraries(DirectoryInfo outDirInfo) {
-			outDirInfo.GetFile("CoverageWriter.UM.jar");
-			outDirInfo.GetFile("junit-4.8.2.jar");
-			outDirInfo.GetFile("Occf.Writer.UM.Java.dll");
+					Path.Combine(outDirInfo.FullName, "covman.h"),
+					Resources.covman_h);
 		}
 	}
 }

@@ -17,13 +17,13 @@
 #endregion
 
 using NUnit.Framework;
-using Occf.Core.Profiles;
+using Occf.Core.Modes;
 using Occf.Core.Utils;
 
 namespace Occf.Languages.Tests.C {
 	public class CMeasurementCodeInsertTest {
 		public CMeasurementCodeInsertTest() {
-			OccfGlobal.SaveCurrentDirectory();
+			OccfGlobal.SaveCurrentState();
 		}
 
 		[Test]
@@ -39,7 +39,7 @@ namespace Occf.Languages.Tests.C {
 		[TestCase("Block2.c")]
 		[TestCase("Block3.c")]
 		public void Should_Insert_Measurement_Code_In_C_Code(string fileName) {
-			var profile = CoverageProfiles.GetCoverageProfileByClassName("C");
+			var profile = CoverageModes.GetCoverageModeByClassName("C");
 			CodeInsertTest.VerifyCodeInsertion(profile, fileName);
 		}
 	}

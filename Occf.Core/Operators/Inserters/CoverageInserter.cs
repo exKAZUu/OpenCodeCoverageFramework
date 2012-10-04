@@ -21,7 +21,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 using Occf.Core.CoverageInformation;
-using Occf.Core.Profiles;
+using Occf.Core.Modes;
 using Paraiba.Collections.Generic;
 
 namespace Occf.Core.Operators.Inserters {

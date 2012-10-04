@@ -23,7 +23,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using NUnit.Framework;
-using Occf.Core.Profiles;
+using Occf.Core.Modes;
 using Occf.Core.Tests;
 using Occf.Core.Utils;
 using Paraiba.Core;
@@ -38,7 +38,7 @@ namespace Occf.Tools.Cui.Tests {
 		[TestCase("Block1")]
 		[TestCase("sort")]
 		public void InsertMeasurementCode(string projectName) {
-			OccfGlobal.SaveCurrentDirectory();
+			OccfGlobal.SaveCurrentState();
 
 			var outDirPath = Fixture.CleanOuputPath();
 			var outDir = new DirectoryInfo(Fixture.CleanOuputPath());
@@ -54,7 +54,7 @@ namespace Occf.Tools.Cui.Tests {
 			// カレントディレクトリを途中で変更しても動作するか検証
 			Environment.CurrentDirectory = "C:\\";
 
-			var profile = CoverageProfiles.GetCoverageProfileByClassName("C");
+			var profile = CoverageModes.GetCoverageModeByClassName("C");
 			Inserter.InsertMeasurementCode(outDir, null, outDir, profile);
 
 			// .cと.hファイルが存在するか

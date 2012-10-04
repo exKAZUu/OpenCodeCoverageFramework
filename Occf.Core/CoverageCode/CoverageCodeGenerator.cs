@@ -18,15 +18,15 @@
 
 using System.IO;
 using Occf.Core.CoverageInformation;
+using Occf.Core.Modes;
 using Occf.Core.Operators.Inserters;
-using Occf.Core.Profiles;
 using Occf.Core.TestInfos;
 using Paraiba.IO;
 using Paraiba.Text;
 
 namespace Occf.Core.CoverageCode {
 	public static class CoverageCodeGenerator {
-		public static string WriteIdentifiedTest(
+		public static string AnalyzeAndWriteIdentifiedTest(
 				CoverageMode mode, TestInfo info, FileInfo fullPath,
 				DirectoryInfo outDirPath) {
 			string relativePath;

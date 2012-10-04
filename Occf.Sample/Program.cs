@@ -19,13 +19,13 @@
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using Occf.Core.Profiles;
+using Occf.Core.Modes;
 using Occf.Core.Utils;
 
 namespace Occf.Sample {
 	internal class Program {
 		private static void Main(string[] args) {
-			OccfGlobal.SaveCurrentDirectory();
+			OccfGlobal.SaveCurrentState();
 
 			var outDirInfo = new DirectoryInfo(@"C:\coverage");
 			var inputDirInfo = new DirectoryInfo(@"C:\Users\exKAZUu\Projects\UnitMaster\fixture\Java\MinForUnitMaster\src\main"
@@ -35,7 +35,7 @@ namespace Occf.Sample {
 					new DirectoryInfo(@"..\..\..\fixture\project\input\GetMid\test");
 
 			var instrumenter = new SampleInstrumenter(outDirInfo, inputDirInfo);
-			var profile = CoverageProfiles.GetCoverageProfileByClassName("Java");
+			var profile = CoverageModes.GetCoverageModeByClassName("Java");
 			var regexes =
 					profile.FilePatterns.Select(
 							pattern => new Regex(pattern.Replace("*", ".*").Replace("?", ".")));

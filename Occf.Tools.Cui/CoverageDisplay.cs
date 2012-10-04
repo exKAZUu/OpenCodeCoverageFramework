@@ -33,8 +33,7 @@ namespace Occf.Tools.Cui {
 		private const int W = 12;
 
 		private static readonly string Usage =
-				"Occf 1.0.0" + "\n" +
-				"Copyright (C) 2011 Kazunori SAKAMOTO" + "\n" +
+				Program.Header + 
 				"" + "\n" +
 				"Usage: Occf cov[erage] <root> [<coverage>]" + "\n" +
 				"" + "\n" +

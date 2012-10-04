@@ -17,14 +17,14 @@
 #endregion
 
 using NUnit.Framework;
-using Occf.Core.Profiles;
+using Occf.Core.Modes;
 using Occf.Core.Utils;
 
 namespace Occf.Languages.Tests.Java {
 	[TestFixture]
 	public class JavaMeasurementCodeInsertTest {
 		public JavaMeasurementCodeInsertTest() {
-			OccfGlobal.SaveCurrentDirectory();
+			OccfGlobal.SaveCurrentState();
 		}
 
 		[Test]
@@ -34,7 +34,7 @@ namespace Occf.Languages.Tests.Java {
 		[TestCase("Condition.java")]
 		[TestCase("Simple.java")]
 		public void Should_Insert_Measurement_Code_In_Java_Code(string fileName) {
-			var profile = CoverageProfiles.GetCoverageProfileByClassName("Java");
+			var profile = CoverageModes.GetCoverageModeByClassName("Java");
 			CodeInsertTest.VerifyCodeInsertion(profile, fileName);
 		}
 	}

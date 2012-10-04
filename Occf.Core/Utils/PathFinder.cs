@@ -16,8 +16,8 @@
 
 #endregion
 
+using System;
 using System.IO;
-using System.Linq;
 using Paraiba.IO;
 
 namespace Occf.Core.Utils {
@@ -42,10 +42,8 @@ namespace Occf.Core.Utils {
 			if (!dirInfo.SafeExists()) {
 				return null;
 			}
-			var path = Directory.EnumerateFiles(dirInfo.FullName, pattern)
-					.OrderByDescending(p => p.Count(c => c == Path.PathSeparator))
-					.FirstOrDefault();
-			return path != null ? new FileInfo(path) : null;
+			var fileInfo = dirInfo.GetFile(pattern);
+			return fileInfo.Exists ? fileInfo : null;
 		}
 	}
 }

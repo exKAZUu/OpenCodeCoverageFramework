@@ -122,6 +122,18 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Code2Xml.1.4.1.11\lib\Code2Xml.Languages.Ruby18.dll</HintPath>
     </Reference>
+    <Reference Include="IronPython, Version=2.7.0.40, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL">
+      <HintPath>..\packages\IronPython.2.7.3\lib\Net40\IronPython.dll</HintPath>
+    </Reference>
+    <Reference Include="IronPython.Modules, Version=2.7.0.40, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL">
+      <HintPath>..\packages\IronPython.2.7.3\lib\Net40\IronPython.Modules.dll</HintPath>
+    </Reference>
+    <Reference Include="IronPython.SQLite, Version=2.7.0.40, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL">
+      <HintPath>..\packages\IronPython.2.7.3\lib\Net40\IronPython.SQLite.dll</HintPath>
+    </Reference>
+    <Reference Include="IronPython.Wpf, Version=2.7.0.40, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL">
+      <HintPath>..\packages\IronPython.2.7.3\lib\Net40\IronPython.Wpf.dll</HintPath>
+    </Reference>
     <Reference Include="IronRuby, Version=1.1.3.0, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL">
       <HintPath>..\packages\Code2Xml.1.4.1.11\lib\IronRuby.dll</HintPath>
     </Reference>
@@ -132,10 +144,16 @@
       <HintPath>..\packages\Code2Xml.1.4.1.11\lib\IronRuby.Libraries.Yaml.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Dynamic, Version=1.1.0.20, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL">
-      <HintPath>..\packages\Code2Xml.1.4.1.11\lib\Microsoft.Dynamic.dll</HintPath>
+      <HintPath>..\packages\IronPython.2.7.3\lib\Net40\Microsoft.Dynamic.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Scripting, Version=1.1.0.20, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL">
-      <HintPath>..\packages\Code2Xml.1.4.1.11\lib\Microsoft.Scripting.dll</HintPath>
+      <HintPath>..\packages\IronPython.2.7.3\lib\Net40\Microsoft.Scripting.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Scripting.AspNet, Version=1.0.0.0, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL">
+      <HintPath>..\packages\IronPython.2.7.3\lib\Net40\Microsoft.Scripting.AspNet.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Scripting.Metadata, Version=1.1.0.20, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL">
+      <HintPath>..\packages\IronPython.2.7.3\lib\Net40\Microsoft.Scripting.Metadata.dll</HintPath>
     </Reference>
     <Reference Include="NDesk.Options">
       <HintPath>..\lib\NDesk.Options.dll</HintPath>
@@ -161,7 +179,7 @@
     <Compile Include="Inserter.cs" />
     <Compile Include="BugLocalizer.cs" />
     <Compile Include="CoverageDisplay.cs" />
-    <Compile Include="Oveserver.cs" />
+    <Compile Include="KleeBugLocalizer.cs" />
     <Compile Include="PathAnalyzer.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -175,6 +193,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="BugLocalization.py">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\nuget.targets" />

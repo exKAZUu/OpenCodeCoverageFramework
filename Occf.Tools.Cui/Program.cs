@@ -18,16 +18,19 @@
 
 using System;
 using System.Linq;
-using Occf.Core.Profiles;
+using Occf.Core.Modes;
 
 namespace Occf.Tools.Cui {
 	public class Program {
 		private const string S = "  ";
 		private const int W = 12;
 
+		public static readonly string Header =
+				"Occf 1.1.0" + "\n" +
+				"Copyright (C) 2011-2012 SAKAMOTO Kazunori" + "\n";
+
 		private static readonly string Usage =
-				"Occf 1.0.0" + "\n" +
-				"Copyright (C) 2011 Kazunori SAKAMOTO" + "\n" +
+				Header + 
 				"" + "\n" +
 				"Usage: Occf <command> [<args>]" + "\n" +
 				"" + "\n" +
@@ -42,6 +45,7 @@ namespace Occf.Tools.Cui {
 				S + "dup[licate]".PadRight(W)
 				+ "Show the duplicated test cases using coverage" + "\n" +
 				S + "loc[alize]".PadRight(W) + "Show the result of bug localization" + "\n" +
+				S + "klee".PadRight(W) + "Analyze klee test files for localizing bugs" + "\n" +
 				"";
 
 		public static bool Print(string message) {
@@ -50,7 +54,6 @@ namespace Occf.Tools.Cui {
 		}
 
 		private static bool Run(string[] args) {
-			var profile = CoverageProfiles.GetCoverageProfileByClassName("Java");
 			if (args.Length < 1) {
 				return Print(Usage);
 			}
@@ -74,6 +77,8 @@ namespace Occf.Tools.Cui {
 			case "loc":
 			case "localize":
 				return BugLocalizer.Run(newArgs);
+			case "klee":
+				return KleeBugLocalizer.Run(newArgs);
 			}
 			return Print(Usage);
 		}

@@ -20,7 +20,7 @@ using System.IO;
 using NUnit.Framework;
 using Occf.Core.CoverageCode;
 using Occf.Core.CoverageInformation;
-using Occf.Core.Profiles;
+using Occf.Core.Modes;
 using Occf.Core.Tests;
 
 namespace Occf.Languages.Tests {

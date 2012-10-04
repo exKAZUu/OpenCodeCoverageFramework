@@ -24,7 +24,7 @@ using System.IO;
 using System.Linq;
 using NUnit.Framework;
 using Occf.Core;
-using Occf.Core.Profiles;
+using Occf.Core.Modes;
 using Occf.Core.Tests;
 using Occf.Core.Utils;
 using Paraiba.Core;
@@ -40,7 +40,7 @@ namespace Occf.Tools.Cui.Tests {
 		[TestCase("GetMid", "GetMidTest")]
 		[TestCase("GetMid3", "GetMid3Test")]
 		public void InsertMeasurementCode(string projectName, string testTargetNames) {
-			OccfGlobal.SaveCurrentDirectory();
+			OccfGlobal.SaveCurrentState();
 
 			var outDirPath = Fixture.CleanOuputPath();
 			var outDir = new DirectoryInfo(Fixture.CleanOuputPath());
@@ -59,7 +59,7 @@ namespace Occf.Tools.Cui.Tests {
 			// カレントディレクトリを途中で変更しても動作するか検証
 			Environment.CurrentDirectory = "C:\\";
 
-			var profile = CoverageProfiles.GetCoverageProfileByClassName("Java");
+			var profile = CoverageModes.GetCoverageModeByClassName("Java");
 			Inserter.InsertMeasurementCode(
 					outDir, new DirectoryInfo(Path.Combine(outDirPath, "test")), outDir,
 					profile);

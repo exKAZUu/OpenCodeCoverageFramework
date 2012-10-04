@@ -16,7 +16,6 @@
 
 #endregion
 
-using System;
 using System.Collections.Generic;
 using System.IO;
 using Code2Xml.Core.CodeToXmls;
@@ -25,7 +24,7 @@ using Occf.Core.Operators.Inserters;
 using Occf.Core.Operators.Selectors;
 using Occf.Core.Operators.Taggers;
 
-namespace Occf.Core.Profiles {
+namespace Occf.Core.Modes {
 	/// <summary>
 	/// A mode (method/way) for masuring test coverage with respect to languages.
 	/// </summary>

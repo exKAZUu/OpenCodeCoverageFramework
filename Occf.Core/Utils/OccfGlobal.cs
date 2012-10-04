@@ -18,22 +18,36 @@
 
 using System;
 using System.Diagnostics;
+using System.IO;
+using System.Reflection;
 
 namespace Occf.Core.Utils {
 	public class OccfGlobal {
 		private static string _currentDirectory;
+		private static string _exeDirectory;
 
 		public static string CurrentDirectory {
 			get {
 				if (_currentDirectory == null) {
 					_currentDirectory = Environment.CurrentDirectory;
-					Debug.WriteLine("Warning: SaveCurrentDirectory doesn't have been executed yet.");
+					Debug.WriteLine(
+							"Warning: SaveCurrentState doesn't have been executed yet.");
 				}
 				return _currentDirectory;
 			}
 		}
 
-		public static void SaveCurrentDirectory() {
+		public static string ExeDirectory {
+			get {
+				if (_exeDirectory == null) {
+					_exeDirectory =
+							Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+				}
+				return _exeDirectory;
+			}
+		}
+
+		public static void SaveCurrentState() {
 			_currentDirectory = Environment.CurrentDirectory;
 		}
 	}

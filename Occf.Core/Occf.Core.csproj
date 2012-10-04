@@ -108,8 +108,8 @@
     <Compile Include="CoverageInformation\SharingMethod.cs" />
     <Compile Include="CoverageInformation\CoverageInfo.cs" />
     <Compile Include="Utils\OccfGlobal.cs" />
-    <Compile Include="Profiles\CoverageProfiles.cs" />
-    <Compile Include="Profiles\CoverageMode.cs" />
+    <Compile Include="Modes\CoverageModes.cs" />
+    <Compile Include="Modes\CoverageMode.cs" />
     <Compile Include="Operators\Inserters\AntlrNodeInserter.cs" />
     <Compile Include="Operators\Inserters\CoverageInserter.cs" />
     <Compile Include="Operators\Inserters\Instrumenter.cs" />

@@ -5,7 +5,9 @@
 static FILE *gFile = NULL;
 
 int Initialize() {
-	char *name = ".occf_coverage_data";
+	char name[256];
+	strcpy(name, getenv("KTEST_FILE"));
+	strcat(name, ".occf_coverage_data");
 	gFile = fopen(name, "ab");
 	return gFile != NULL;
 }

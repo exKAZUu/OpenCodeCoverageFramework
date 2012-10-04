@@ -3,9 +3,8 @@
 static FILE *gFile = NULL;
 
 int Initialize() {
-	char name[256] = ".occf_coverage_data";
-	//sprintf_s(name, 256, "Coverage-%d", id);
-
+	//char *name = getenv("KTEST_FILE");
+	char *name = ".occf_coverage_data";
 	gFile = fopen(name, "ab");
 	return gFile != NULL;
 }

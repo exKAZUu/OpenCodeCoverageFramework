@@ -17,11 +17,13 @@
 #endregion
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text.RegularExpressions;
+using IronPython.Hosting;
 using Occf.Core.CoverageInformation;
 using Occf.Core.TestInfos;
 using Occf.Core.Utils;
@@ -33,8 +35,7 @@ namespace Occf.Tools.Cui {
 		private const int W = 12;
 
 		private static readonly string Usage =
-				"Occf 1.0.0" + "\n" +
-				"Copyright (C) 2011 Kazunori SAKAMOTO" + "\n" +
+				Program.Header +
 				"" + "\n" +
 				"Usage: Occf localize <root> <result> [<coverage>]" + "\n" +
 				"" + "\n" +
@@ -69,7 +70,7 @@ namespace Occf.Tools.Cui {
 			}
 
 			var covDataFile = args.Count >= iArgs + 1
-			                  		? new FileInfo(args[iArgs++]) : null;
+					                  ? new FileInfo(args[iArgs++]) : null;
 			covDataFile = PathFinder.FindCoverageDataPath(covDataFile, rootDir);
 			if (!covDataFile.SafeExists()) {
 				return
@@ -90,11 +91,32 @@ namespace Occf.Tools.Cui {
 			var covInfo = InfoReader.ReadCoverageInfo(covInfoFile, formatter);
 			var testInfo = InfoReader.ReadTestInfo(testInfoFile, formatter);
 
-			testInfo.InitializeForStoringData();
+			testInfo.InitializeForStoringData(true);
 			ReadJUnitResult(resultFile, testInfo);
 			CoverageDataReader.ReadFile(testInfo, covDataFile);
 
-			// Targeting only statement
+			LocalizeStatements(testInfo, covInfo);
+		}
+
+		/// <summary>
+		/// Localize bugs in statements.
+		/// </summary>
+		/// <param name="testInfo"></param>
+		/// <param name="covInfo"></param>
+		public static void LocalizeStatements(TestInfo testInfo, CoverageInfo covInfo) { // Targeting only statement
+			var engine = Python.CreateEngine();
+			var scope = engine.CreateScope();
+			var fileName = "BugLocalization.py";
+			var scriptPath = Path.Combine(OccfGlobal.CurrentDirectory, fileName);
+			if (!File.Exists(scriptPath)) {
+				scriptPath = Path.Combine(OccfGlobal.ExeDirectory, fileName);
+			}
+			engine.ExecuteFile(scriptPath, scope);
+			var calcMetricFunc =
+					scope.GetVariable<Func<double, double, double, double, IEnumerable>>(
+							"CalculateMetric");
+			Console.WriteLine(
+					"risk, executedAndPassedCount / passedCount, executedAndFailedCount / failedCount");
 			foreach (var stmt in covInfo.StatementIndexAndTargets) {
 				var passedTestCases = testInfo.TestCases.Where(t => t.Passed);
 				var executedAndPassedTestCases =
@@ -107,14 +129,14 @@ namespace Occf.Tools.Cui {
 				var passedCount = passedTestCases.Count();
 				var executedAndFailedCount = executedAndFailedTestCases.Count();
 				var failedCount = failedTestCases.Count();
-				var metrics = CalculateMetric(
+				var metrics = calcMetricFunc(
 						executedAndPassedCount,
 						passedCount,
 						executedAndFailedCount,
 						failedCount);
 				var metricsString = "";
 				var delimiter = "";
-				foreach (var metric in metrics) {
+				foreach (double metric in metrics) {
 					metricsString += (delimiter + (metric).ToString("f3"));
 					delimiter = ", ";
 				}
@@ -124,19 +146,19 @@ namespace Occf.Tools.Cui {
 			}
 		}
 
-		private static IEnumerable<double> CalculateMetric(
-				int executedAndPassedCount, int passedCount, int executedAndFailedCount,
-				int failedCount) {
-			if (passedCount == 0) {
-				return new[] { 0.0 };
-			}
-			if (failedCount == 0) {
-				return new[] { 1.0 };
-			}
-			var p = (double)executedAndPassedCount / passedCount;
-			var f = (double)executedAndFailedCount / failedCount;
-			return new[] { p / (p + f), p, f };
-		}
+		//private static IEnumerable<double> CalculateMetric(
+		//        int executedAndPassedCount, int passedCount, int executedAndFailedCount,
+		//        int failedCount) {
+		//    if (passedCount == 0) {
+		//        return new[] { 0.0 };
+		//    }
+		//    if (failedCount == 0) {
+		//        return new[] { 1.0 };
+		//    }
+		//    var p = (double)executedAndPassedCount / passedCount;
+		//    var f = (double)executedAndFailedCount / failedCount;
+		//    return new[] { p / (p + f), p, f };
+		//}
 
 		private static string GetFailedTestCasePrefix(ref int index) {
 			return (++index) + ") ";

@@ -48,8 +48,13 @@ namespace Occf.Core.CoverageInformation {
 		}
 
 		public static void ReadFile(TestInfo testInfo, FileInfo fileInfo) {
-			var testId = 0;
-			using (var fs = new FileStream(fileInfo.FullName, FileMode.Open)) {
+			ReadFile(testInfo, fileInfo.FullName, testInfo.TestCases.Count > 0 ? testInfo.TestCases[0] : null);
+		}
+
+		public static void ReadFile(
+				TestInfo testInfo, string filePath, TestCase initialTestCase) {
+			var testCase = initialTestCase;
+			using (var fs = new FileStream(filePath, FileMode.Open)) {
 				while (true) {
 					var id = (fs.ReadByte() << 24) + (fs.ReadByte() << 16) +
 					         (fs.ReadByte() << 8) + (fs.ReadByte() << 0);
@@ -59,39 +64,35 @@ namespace Occf.Core.CoverageInformation {
 					}
 					switch ((ElementType)(value >> 2)) {
 					case ElementType.Statement:
-						testInfo.TestCases[testId].Statements.Add(id);
-						testInfo.TestCases[testId].StatementConditionDecisions.
-								Add(id);
-						testInfo.TestCases[testId].Paths.Add(id);
+						testCase.Statements.Add(id);
+						testCase.StatementConditionDecisions.Add(id);
+						testCase.Paths.Add(id);
 						break;
 					case ElementType.Decision:
 						id = (value & 1) == 0 ? id : -id;
-						testInfo.TestCases[testId].Decisions.Add(id);
-						testInfo.TestCases[testId].ConditionDecisions.Add(id);
-						testInfo.TestCases[testId].StatementConditionDecisions.
-								Add(id);
+						testCase.Decisions.Add(id);
+						testCase.ConditionDecisions.Add(id);
+						testCase.StatementConditionDecisions.Add(id);
 						break;
 					case ElementType.Condition:
 						id = (value & 1) == 0 ? id : -id;
-						testInfo.TestCases[testId].Conditions.Add(id);
-						testInfo.TestCases[testId].ConditionDecisions.Add(id);
-						testInfo.TestCases[testId].StatementConditionDecisions.
-								Add(id);
+						testCase.Conditions.Add(id);
+						testCase.ConditionDecisions.Add(id);
+						testCase.StatementConditionDecisions.Add(id);
 						break;
 					case ElementType.DecisionAndCondition:
 						id = (value & 1) == 0 ? id : -id;
-						testInfo.TestCases[testId].Decisions.Add(id);
-						testInfo.TestCases[testId].Conditions.Add(id);
-						testInfo.TestCases[testId].ConditionDecisions.Add(id);
-						testInfo.TestCases[testId].StatementConditionDecisions.
-								Add(id);
+						testCase.Decisions.Add(id);
+						testCase.Conditions.Add(id);
+						testCase.ConditionDecisions.Add(id);
+						testCase.StatementConditionDecisions.Add(id);
 						break;
 					case ElementType.TestCase:
-						testId = id;
-						if (testInfo.TestCases.Count <= testId) {
+						if (testInfo.TestCases.Count <= id) {
 							throw new InvalidOperationException(
 									"There is contradiction between the coverage data and the source code. Please retry to measure coverage data.");
 						}
+						testCase = testInfo.TestCases[id];
 						break;
 					}
 				}

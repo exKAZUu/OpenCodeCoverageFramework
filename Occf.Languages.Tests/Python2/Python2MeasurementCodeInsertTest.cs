@@ -17,13 +17,13 @@
 #endregion
 
 using NUnit.Framework;
-using Occf.Core.Profiles;
+using Occf.Core.Modes;
 using Occf.Core.Utils;
 
 namespace Occf.Languages.Tests.Python2 {
 	public class Python2MeasurementCodeInsertTest {
 		public Python2MeasurementCodeInsertTest() {
-			OccfGlobal.SaveCurrentDirectory();
+			OccfGlobal.SaveCurrentState();
 		}
 
 		[Test]
@@ -31,7 +31,7 @@ namespace Occf.Languages.Tests.Python2 {
 		[TestCase("Block2.py")]
 		[TestCase("Block3.py")]
 		public void Should_Insert_Measurement_Code_In_Python2_Code(string fileName) {
-			var profile = CoverageProfiles.GetCoverageProfileByClassName("Python2");
+			var profile = CoverageModes.GetCoverageModeByClassName("Python2");
 			CodeInsertTest.VerifyCodeInsertion(profile, fileName);
 		}
 	}

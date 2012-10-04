@@ -19,8 +19,8 @@
 using System;
 using System.IO;
 using Code2Xml.Core.Position;
+using Occf.Core.Modes;
 using Occf.Core.Operators.Inserters;
-using Occf.Core.Profiles;
 using Paraiba.IO;
 
 namespace Occf.Sample {

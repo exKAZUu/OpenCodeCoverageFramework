@@ -20,7 +20,7 @@ using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 using Code2Xml.Core.Position;
-using Occf.Core.Profiles;
+using Occf.Core.Modes;
 using Paraiba.IO;
 
 namespace Occf.Core.Operators.Inserters {

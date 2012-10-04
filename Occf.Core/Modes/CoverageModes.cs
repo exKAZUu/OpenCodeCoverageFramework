@@ -20,14 +20,15 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using Occf.Core.Utils;
 using Paraiba.Linq;
 
-namespace Occf.Core.Profiles {
-	public class CoverageProfiles {
-		private static CoverageProfiles _instance;
+namespace Occf.Core.Modes {
+	public class CoverageModes {
+		private static CoverageModes _instance;
 
 #pragma warning disable 649
 		[ImportMany] private IEnumerable<CoverageMode> _coverageProfiles;
@@ -38,29 +39,31 @@ namespace Occf.Core.Profiles {
 			get { return Instance._coverageProfiles; }
 		}
 
-		private CoverageProfiles() {
+		private CoverageModes() {
 			var catalog = new AggregateCatalog();
+			var assembly = Assembly.GetExecutingAssembly();
+			catalog.Catalogs.Add(new AssemblyCatalog(assembly));
 			catalog.Catalogs.Add(
-					new AssemblyCatalog(Assembly.GetExecutingAssembly()));
+					new DirectoryCatalog(OccfGlobal.ExeDirectory, "Occf.Languages.*.dll"));
 			catalog.Catalogs.Add(
-					new DirectoryCatalog(OccfGlobal.CurrentDirectory, "Occf*.dll"));
+					new DirectoryCatalog(OccfGlobal.CurrentDirectory, "Occf.Languages.*.dll"));
 			//catalog.Catalogs.Add(new DirectoryCatalog("Extensions"));
 			var container = new CompositionContainer(catalog);
 			container.ComposeParts(this);
 		}
 
-		private static CoverageProfiles Instance {
-			get { return _instance ?? (_instance = new CoverageProfiles()); }
+		private static CoverageModes Instance {
+			get { return _instance ?? (_instance = new CoverageModes()); }
 		}
 
-		public static CoverageMode GetCoverageProfileByName(string name) {
+		public static CoverageMode GetCoverageModeByName(string name) {
 			var lowerName = name.ToLower();
 			return Profile
 					.Where(p => p.Name.ToLower().Contains(lowerName))
 					.MinElementOrDefault(p => Math.Abs(p.Name.Length - name.Length));
 		}
 
-		public static CoverageMode GetCoverageProfileByClassName(string className) {
+		public static CoverageMode GetCoverageModeByClassName(string className) {
 			var lowerName = className.ToLower();
 			return Profile
 					.Where(p => p.GetType().Name.ToLower().Contains(lowerName))

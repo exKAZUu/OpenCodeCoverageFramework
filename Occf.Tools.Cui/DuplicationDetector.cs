@@ -90,7 +90,7 @@ namespace Occf.Tools.Cui {
 			var formatter = new BinaryFormatter();
 			var testInfoPath = PathFinder.FindTestInfoPath(rootDir);
 			var testInfo = InfoReader.ReadTestInfo(testInfoPath, formatter);
-			testInfo.InitializeForStoringData();
+			testInfo.InitializeForStoringData(true);
 			CoverageDataReader.ReadFile(testInfo, covDataFile);
 			var testCases = testInfo.TestCases;
 

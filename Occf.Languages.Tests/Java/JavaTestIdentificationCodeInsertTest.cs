@@ -19,7 +19,7 @@
 using System.IO;
 using NUnit.Framework;
 using Occf.Core.CoverageCode;
-using Occf.Core.Profiles;
+using Occf.Core.Modes;
 using Occf.Core.TestInfos;
 using Occf.Core.Tests;
 
@@ -33,7 +33,7 @@ namespace Occf.Languages.Tests.Java {
 			var inPath = Path.Combine(Fixture.GetTestInputPath(), fileName);
 			var code = CoverageCodeGenerator.GetIdentifiedTest(
 					new FileInfo(inPath), info,
-					CoverageProfiles.GetCoverageProfileByClassName("Java"));
+					CoverageModes.GetCoverageModeByClassName("Java"));
 
 			var expPath = Path.Combine(Fixture.GetTestExpectationPath(), fileName);
 			using (var reader = new StreamReader(expPath)) {

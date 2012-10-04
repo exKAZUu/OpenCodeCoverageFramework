@@ -37,9 +37,9 @@ namespace Occf.Core.TestInfos {
 			BasePath = basePath;
 		}
 
-		public void InitializeForStoringData() {
+		public void InitializeForStoringData(bool initialPassed) {
 			foreach (var testCase in TestCases) {
-				testCase.InitializeForStoringData();
+				testCase.InitializeForStoringData(initialPassed);
 			}
 		}
 	}

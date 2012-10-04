@@ -71,7 +71,7 @@ namespace Occf.Tools.Cui {
 			var testInfoFile = PathFinder.FindTestInfoPath(rootDir);
 			var covInfo = InfoReader.ReadCoverageInfo(covInfoFile, formatter);
 			var testInfo = InfoReader.ReadTestInfo(testInfoFile, formatter);
-			testInfo.InitializeForStoringData();
+			testInfo.InitializeForStoringData(true);
 			CoverageDataReader.ReadFile(testInfo, covDataFile);
 
 			foreach (var testCase in testInfo.TestCases) {

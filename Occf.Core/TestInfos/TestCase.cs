@@ -45,7 +45,7 @@ namespace Occf.Core.TestInfos {
 		public HashSet<int> StatementConditionDecisions { get; private set; }
 		public List<int> Paths { get; private set; }
 
-		public void InitializeForStoringData() {
+		public void InitializeForStoringData(bool initialPaased) {
 			// These properties weren't initialized in inserting due to performance
 			Statements = new HashSet<int>();
 			Decisions = new HashSet<int>();
@@ -54,7 +54,7 @@ namespace Occf.Core.TestInfos {
 			StatementConditionDecisions = new HashSet<int>();
 			Paths = new List<int>();
 			// Assume all testcases are passed without testresult.txt
-			Passed = true;
+			Passed = initialPaased;
 		}
 
 		public override string ToString() {
