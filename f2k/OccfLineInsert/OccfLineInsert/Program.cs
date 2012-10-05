@@ -22,6 +22,7 @@ namespace OccfLineInsert
             const string relativePath3 = @"../../sample/test/line";
             const string relativePath4 = @"../../sample/insert";
             const string relativePath5 = @"../../sample/return";
+            const string relativePath6 = @"../../sample/revert";
             //var basicInput = Console.ReadLine();
 
             //Console.WriteLine(relativePath.Substring(0, relativePath.Length-5));
@@ -46,6 +47,8 @@ namespace OccfLineInsert
 
             //復活
             //returnBackUp.RevertBackUp(relativePath5);
+            //returnBackUp.RevertBackUp(relativePath6);
+            
             
             //埋め込み、停止、復活
             //lineInsert.LineInserts(relativePath4);

@@ -1,17 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
-using System.IO;
 
-namespace OccfLineInsert
+namespace OccfInsertToTestCode
 {
+
     class ReturnBackUp
     {
-        private const string Appender = @".back";
+        private const string Appender = @".backt";
         private readonly int _apdLength = Appender.Length;
 
-        //(fileName).backからの復元
+        //(fileName).backtからの復元
         public void RevertBackUp(string dirPath)
         {
             var dirInfo = new DirectoryInfo(dirPath);
@@ -26,16 +27,14 @@ namespace OccfLineInsert
         }
 
         //指定したバックアップファイルからオリジナルファイルを復元してバックアップファイルを削除
-        public void RevertFile(string fileFulllName)
+        public void RevertFile(string fileFullName)
         {
-            var fullNameLength = fileFulllName.Length;
-            var originFileFullName = fileFulllName.Substring(0, fullNameLength - _apdLength);
+            var fullNameLength = fileFullName.Length;
+            var originFileFullName = fileFullName.Substring(0, fullNameLength - _apdLength);
 
-            File.Copy(fileFulllName, originFileFullName, true);
-            File.Delete(fileFulllName);
+            File.Copy(fileFullName, originFileFullName, true);
+            File.Delete(fileFullName);
         }
-
-
 
     }
 }
