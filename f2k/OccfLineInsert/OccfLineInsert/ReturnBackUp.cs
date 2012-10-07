@@ -15,12 +15,8 @@ namespace OccfLineInsert
         public void RevertBackUp(string dirPath)
         {
             var dirInfo = new DirectoryInfo(dirPath);
-            foreach (var fileInfo in from fileInfo in dirInfo.GetFiles()
-                                     let fileName = fileInfo.Name
-                                     let nameLength = fileName.Length
-                                     where nameLength >= _apdLength && fileName.Substring(nameLength - _apdLength, _apdLength).Equals(Appender)
-                                     select fileInfo)
-            {
+
+            foreach (var fileInfo in dirInfo.GetFiles("*"+Appender, SearchOption.AllDirectories)) {
                 RevertFile(fileInfo.FullName);
             }
         }

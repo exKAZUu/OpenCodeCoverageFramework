@@ -79,7 +79,30 @@ namespace OccfInsertToTestCode
                         var lineLength = line.Length;
 
                         //main 判定　"main" メソッドの抽出と{}による終了判定
+
+                        var mainIndex1 = line.IndexOf(" main ", StringComparison.Ordinal);
+                        var mainIndex2 = line.IndexOf(" main(", StringComparison.Ordinal);
+
+                        if(!(mainFlag) && (mainIndex1 >=0 || mainIndex2 >=0)) {
+                            var mainIndex = mainIndex1 > mainIndex2 ? mainIndex1 : mainIndex2;
+                            for (var i = mainIndex+5; i < lineLength; i++) {
+                                var sent1 = line.Substring(i, 1);
+                                if(sent1.Equals(@"(")) {
+                                    mainFlag = true;
+                                    bracesCount = 0;
+                                    break;
+                                }
+                                if(sent1.Equals(@" ")) {
+                                    break;
+                                }
+                            }
+                        }
+                        
+                        /*
                         if(!(mainFlag) && lineLength >=6) {
+
+
+                            
                             for(var i=5; i<lineLength; i++) {
                                 var sent6 = line.Substring(i - 5, 6);
                                 if(sent6.Equals(@" main ") || sent6.Equals(@" main(")) {
@@ -96,7 +119,7 @@ namespace OccfInsertToTestCode
                                     }
                                 }
                             }
-                        }
+                        }*/
 
                         //main終端判定
                         if (mainFlag && lineLength >= 1)
@@ -113,25 +136,45 @@ namespace OccfInsertToTestCode
                                     if (bracesCount <= 0)
                                     {
                                         mainFlag = false;
+                                        writer.WriteLine("//end:");
                                     }
                                 }
                             }
                         }
 
+                        var rootDir = new DirectoryInfo(Directory.GetCurrentDirectory());
+                        string rootFullName = rootDir.FullName.Replace("\\", "/");
                         //return判定:mainflagがONでかつリターンを検出時
+
+                        if (mainFlag && lineLength >= 8)
+                        {
+                            if (line.Substring(7).Equals("return ") || line.Contains(" return "))
+                            {
+                                writer.WriteLine("");
+                                writer.WriteLine(@"char *tmp = getenv(""KTEST_FILE"");");
+                                writer.WriteLine(@"FILE *file = fopen(""" + rootFullName + @"/.successful_test"", ""a"");");
+                                writer.WriteLine(@"fputs(tmp, file);");
+                                writer.WriteLine(@"fputc('\n', file);");
+                                writer.WriteLine(@"fclose(file);");
+                                writer.WriteLine("");
+                            }
+                            
+                        }
+
+                        /*
                         if(mainFlag && lineLength>=8) {
                             for(var i=8; i<lineLength; i++) {
                                 if (line.Substring(7).Equals("return ") || line.Substring(i - 8, 8).Equals(" return ")) {
                                     writer.WriteLine("");
                                     writer.WriteLine(@"char *tmp = getenv(""KTEST_FILE"");");
-                                    writer.WriteLine(@"FILE *file = fopen("".successful_test"", ""a"");");
+                                    writer.WriteLine(@"FILE *file = fopen("""+ rootFullName +@"/.successful_test"", ""a"");");
                                     writer.WriteLine(@"fputs(tmp, file);");
                                     writer.WriteLine(@"fputc('\n', file);");
                                     writer.WriteLine(@"fclose(file);");
                                     writer.WriteLine("");
                                 }
                             }
-                        }
+                        }*/
 
                         writer.WriteLine(line);
                         lineNum++;

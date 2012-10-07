@@ -12,33 +12,30 @@ namespace OccfLineInsert
         public void LineInserts(string dirPath)
         {
             var dirInfo = new DirectoryInfo(dirPath);
-            foreach (var fileInfo in dirInfo.GetFiles())
+            var insertList = new List<FileInfo>();
+            
+            insertList.AddRange(dirInfo.GetFiles("*.c", SearchOption.AllDirectories));
+            insertList.AddRange(dirInfo.GetFiles("*.cpp", SearchOption.AllDirectories));
+            insertList.AddRange(dirInfo.GetFiles("*.cxx", SearchOption.AllDirectories));
+
+            /*
+            DirectoryInfo test = null;
+
+            if (test != null)
             {
-                var defaultFileFullName = fileInfo.FullName;
-                var fileName = fileInfo.Name;
-                var nameLength = fileName.Length;
-
-                if (nameLength >= 4)
-                {
-                    var end2 = fileName.Substring(nameLength - 2, 2);
-                    var end4 = fileName.Substring(nameLength - 4, 4);
-
-                    if (end2.Equals(@".c") || end4.Equals(@".cpp") || end4.Equals(@".cxx"))
-                    {
-                        WriteInsetLine(defaultFileFullName);
+                for(var i=insertList.Count-1; i>0; i--) {
+                    if(insertList[i].FullName.StartsWith(test.FullName)) {
+                        insertList.Remove(insertList[i]);
                     }
                 }
-                else if (nameLength >= 2)
-                {
-                    var end2 = fileName.Substring(nameLength - 2, 2);
-
-                    if (end2.Equals(@".c"))
-                    {
-                        WriteInsetLine(defaultFileFullName);
-                    }
-                }
-
             }
+            */
+            
+
+            foreach (var fileInfo in insertList) {
+                WriteInsetLine(fileInfo.FullName);
+            }
+
         }
 
         //指定されたファイルのパスを受け取って、指定名のバックアップファイルを作成して挿入

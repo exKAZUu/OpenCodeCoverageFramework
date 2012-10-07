@@ -26,6 +26,15 @@ namespace OccfInsertToTestCode
             //復元
             //returnBackUp.RevertBackUp(relativePath2);
 
+            //復元＆埋め込み
+            //returnBackUp.RevertBackUp(relativePath1);
+            //codeInsert.CodeInserts(relativePath1);
+
+            const string main = "int main  (int a) { aaa }";
+
+            Console.WriteLine(main.IndexOf("main", System.StringComparison.Ordinal));
+            Console.WriteLine(main.IndexOf("aaaa", System.StringComparison.Ordinal));
+
         }
     }
 }

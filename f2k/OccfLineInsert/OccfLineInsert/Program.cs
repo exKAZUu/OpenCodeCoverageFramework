@@ -42,8 +42,12 @@ namespace OccfLineInsert
             //その復活
             //returnBackUp.RevertBackUp(relativePath4);
 
+            //復活＆埋め込み
+            returnBackUp.RevertBackUp(relativePath4);
+            lineInsert.LineInserts(relativePath4);
+
             //元の行数
-            lineAnalysis.OutPutTrueLineNumber(relativePath3);
+            //lineAnalysis.OutPutTrueLineNumber(relativePath3);
 
             //復活
             //returnBackUp.RevertBackUp(relativePath5);
