@@ -77,7 +77,7 @@ namespace Occf.Tools.Cui {
         //指定されたファイルのパスを受け取って、指定名のバックアップファイルを作成して挿入
         private static void WriteInsetLine(string defaultFileFullName) {
             var fileInfo = new FileInfo(defaultFileFullName);
-            const string appendExtension = @".back";
+            const string appendExtension = @".occf_line_back";
             var backUpFileFullName = defaultFileFullName + appendExtension;
 
             File.Copy(defaultFileFullName, backUpFileFullName);

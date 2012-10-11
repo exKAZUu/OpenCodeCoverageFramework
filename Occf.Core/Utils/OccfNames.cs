@@ -24,5 +24,7 @@ namespace Occf.Core.Utils {
 		public const string CoverageData = ".occf_coverage_data";
 		public const string SuccessfulTests = ".successful_tests";
 		public const string Library = "Library";
+	    public const string LineBackUpSuffix = ".occf_line_back";
+	    public const string KleeBackUpSuffix = ".occf_klee_back";
 	}
 }

@@ -95,15 +95,16 @@ namespace Occf.Tools.Cui {
 			ReadJUnitResult(resultFile, testInfo);
 			CoverageDataReader.ReadFile(testInfo, covDataFile);
 
-			LocalizeStatements(testInfo, covInfo);
+			LocalizeStatements(testInfo, covInfo, new Dictionary<FileInfo, Dictionary<int, int>>());
 		}
 
-		/// <summary>
-		/// Localize bugs in statements.
-		/// </summary>
-		/// <param name="testInfo"></param>
-		/// <param name="covInfo"></param>
-		public static void LocalizeStatements(TestInfo testInfo, CoverageInfo covInfo) { // Targeting only statement
+	    /// <summary>
+	    /// Localize bugs in statements.
+	    /// </summary>
+	    /// <param name="testInfo"></param>
+	    /// <param name="covInfo"></param>
+	    /// <param name="lindDic"></param>
+	    public static void LocalizeStatements(TestInfo testInfo, CoverageInfo covInfo, Dictionary<FileInfo, Dictionary<int, int>> lindDic) { // Targeting only statement
 			var engine = Python.CreateEngine();
 			var scope = engine.CreateScope();
 			var fileName = "BugLocalization.py";
@@ -141,7 +142,19 @@ namespace Occf.Tools.Cui {
 					delimiter = ", ";
 				}
 
-				var tag = stmt.Item2.Tag + ": " + stmt.Item2.Position.SmartLineString;
+                //Dictionaryを検索してKeyに対象ファイルが存在したらオリジナル行番号に変換
+			    string tag;
+			    var fileInfo = new FileInfo(stmt.Item2.RelativePath);
+                if(lindDic.ContainsKey(fileInfo)) {
+                    var orgStartLine = lindDic[fileInfo][stmt.Item2.Position.StartLine];
+                    var orgEndLine = lindDic[fileInfo][stmt.Item2.Position.EndLine];
+                    var orgStartLineString = orgStartLine == orgEndLine 
+                                            ? orgStartLine.ToString() : (orgStartLine + " - " + orgEndLine); 
+                    tag = stmt.Item2.Tag + ": " + orgStartLineString;
+                }else {
+                    tag = stmt.Item2.Tag + ": " + stmt.Item2.Position.SmartLineString;
+                }
+                
 				Console.WriteLine(tag.PadRight(45) + ": " + metricsString);
 			}
 		}

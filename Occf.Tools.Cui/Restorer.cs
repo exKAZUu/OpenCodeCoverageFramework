@@ -49,6 +49,22 @@ namespace Occf.Tools.Cui {
 									dp, "*" + OccfNames.BackupSuffix,
 									SearchOption.AllDirectories));
 
+		    var lineFilePaths = args.Where(Directory.Exists)
+		            .SelectMany(
+		                    dp =>
+		                    Directory.GetFiles(
+		                            dp, "*" + OccfNames.LineBackUpSuffix,
+		                            SearchOption.AllDirectories));
+
+            var kleeFilePaths = args.Where(Directory.Exists)
+                    .SelectMany(
+                            dp =>
+                            Directory.GetFiles(
+                                    dp, "*" + OccfNames.KleeBackUpSuffix,
+                                    SearchOption.AllDirectories));
+            //nullエラー出ないよね？
+		    filePaths = filePaths.Concat(lineFilePaths.Concat(kleeFilePaths));
+            
 			foreach (var filePath in filePaths) {
 				var destPath = filePath.Substring(
 						0,

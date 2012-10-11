@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using NDesk.Options;
 using Occf.Core.Modes;
+using Occf.Core.Utils;
 
 namespace Occf.Tools.Cui
 {
@@ -51,9 +52,10 @@ namespace Occf.Tools.Cui
         private static void InsertToMainFail(FileInfo defFile, DirectoryInfo rootDir) {
             
             var defFileFullName = defFile.FullName;
-            const string appendExtension = @".backm";
-            var backUpFileFullName = defFileFullName + appendExtension;
-            var backUpFileName = defFile.Name + appendExtension;
+            //const string appendExtension = @".occf_klee_back"; //KleeBackUpSuffix
+            //const string lineAppendr = @".occf_line_back"; //lineBackUpsuffix
+            var backUpFileFullName = defFileFullName + OccfNames.KleeBackUpSuffix;
+            var backUpFileName = defFile.Name + OccfNames.KleeBackUpSuffix;
 
             //先にバックアップファイルが存在していた場合は削除
             if (File.Exists(backUpFileFullName)) {
@@ -118,7 +120,7 @@ namespace Occf.Tools.Cui
                             if (line.Substring(7).Equals("return ") || line.Contains(" return ")) {
                                 writer.WriteLine("");
                                 writer.WriteLine(@"char *tmp = getenv(""KTEST_FILE"");");
-                                writer.WriteLine(@"FILE *file = fopen(""" + rootFullName + @"/.successful_test"", ""a"");");
+                                writer.WriteLine(@"FILE *file = fopen(""" + rootFullName + @"/" + OccfNames.SuccessfulTests + @""", ""a"");");
                                 writer.WriteLine(@"fputs(tmp, file);");
                                 writer.WriteLine(@"fputc('\n', file);");
                                 writer.WriteLine(@"fclose(file);");
@@ -131,6 +133,11 @@ namespace Occf.Tools.Cui
                     reader.Close();
                     writer.Close();
                 }
+            }
+
+            //上位のバックアップファイルがある場合はバックアップファイルを残さない
+            if(File.Exists(defFileFullName+OccfNames.LineBackUpSuffix)) {
+                File.Delete(backUpFileFullName);
             }
         }
     }
