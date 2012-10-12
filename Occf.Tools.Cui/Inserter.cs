@@ -37,32 +37,42 @@ namespace Occf.Tools.Cui {
 		private const int W = 20;
 
 		private static readonly string Usage =
-				Program.Header + 
+				Program.Header +
 				"" + "\n" +
-				"Usage: Occf insert -r <root_dir> [options]" + "\n" +
+				"Usage: Occf insert -r <root_dir> [options] <target_file1> <target_file2>"
+				+ "\n" +
 				"" + "\n" +
-				S + "<root_dir>".PadRight(W)
-				+ "root directory for writing project information and library files to measure coverage" + "\n" +
-				S + "<test>".PadRight(W) + "test code directory for execluding files as measurement targets and for localizing faults" + "\n" +
-				S + "-l, -lang <name>".PadRight(W)
-				+
+				S + "-r, -root <root_dir>".PadRight(W)
+				+ "root directory for writing project information and library files to measure coverage"
+				+ "\n" +
+				S + "-t, -test <test>".PadRight(W) +
+				"test code directory for execluding files as measurement targets and for localizing faults"
+				+ "\n" +
+				S + "-n, -lang <name>".PadRight(W) +
 				"language of target source. <name> can be Java(default), C, Python2 or Python3."
 				+ "\n" +
-				S + "-w, -work <path>".PadRight(W)
-				+ "path of working directory used as current directory at testing." + "\n" +
-				S + "".PadRight(W)
-				+ "library files to measure coverage are copied in specified directory"
+				S + "-p, -pattern <name>".PadRight(W)
+				+ "search pattern for exploring target source files in the root directory."
+				+ "\n" +
+				S + "-i, -lib <path>".PadRight(W)
+				+ "path of library directory where library files for measuring coverage are copied."
 				+ "\n" +
 				"";
 
 		public static bool Run(IList<string> args) {
+			var rootDirPath = "";
+			var testDirPath = "";
 			var languageName = "Java";
-			var workDirPath = "";
+			var libDirPath = "";
+			var patterns = new List<string>();
 
 			// parse options
 			var p = new OptionSet {
+					{ "r|root=", v => rootDirPath = v },
+					{ "t|test=", v => testDirPath = v },
 					{ "l|lang=", v => languageName = v },
-					{ "w|work=", v => workDirPath = v },
+					{ "p|pattern=", patterns.Add },
+					{ "i|lib=", v => libDirPath = v },
 			};
 			try {
 				args = p.Parse(args);
@@ -70,7 +80,7 @@ namespace Occf.Tools.Cui {
 				return Program.Print(Usage);
 			}
 
-			if (args.Count < 1) {
+			if (args.Count < 1 || string.IsNullOrEmpty(rootDirPath)) {
 				return Program.Print(Usage);
 			}
 
@@ -84,7 +94,7 @@ namespace Occf.Tools.Cui {
 								+ languageName);
 			}
 
-			var rootDir = new DirectoryInfo(args[0]);
+			var rootDir = new DirectoryInfo(rootDirPath);
 			if (!rootDir.Exists) {
 				return
 						Program.Print(
@@ -92,8 +102,8 @@ namespace Occf.Tools.Cui {
 			}
 
 			DirectoryInfo testDir = null;
-			if (args.Count >= 2) {
-				testDir = new DirectoryInfo(args[1]);
+			if (string.IsNullOrEmpty(testDirPath)) {
+				testDir = new DirectoryInfo(testDirPath);
 				if (!testDir.Exists) {
 					return
 							Program.Print(
@@ -101,28 +111,30 @@ namespace Occf.Tools.Cui {
 				}
 			}
 
-			var workDir = rootDir;
-			if (!string.IsNullOrEmpty(workDirPath)) {
-				workDir = new DirectoryInfo(workDirPath);
-				if (!workDir.Exists) {
+			var libDir = rootDir;
+			if (!string.IsNullOrEmpty(libDirPath)) {
+				libDir = new DirectoryInfo(libDirPath);
+				if (!libDir.Exists) {
 					return
 							Program.Print(
-									"Error: working directory doesn't exist.\nwork:" + workDir.FullName);
+									"Error: working directory doesn't exist.\nwork:" + libDir.FullName);
 				}
 			}
 
-			InsertMeasurementCode(rootDir, testDir, workDir, mode);
+			InsertMeasurementCode(rootDir, patterns, testDir, libDir, mode);
 			return true;
 		}
 
 		public static void InsertMeasurementCode(
-				DirectoryInfo rootDir, DirectoryInfo testDir, DirectoryInfo workDir,
+				DirectoryInfo rootDir, List<string> patterns, DirectoryInfo testDir,
+				DirectoryInfo libDir,
 				CoverageMode mode) {
 			Contract.Requires<ArgumentException>(rootDir.Exists);
 			Contract.Requires<ArgumentException>(
 					testDir == null || testDir.Exists);
-			Contract.Requires<ArgumentException>(workDir.Exists);
+			Contract.Requires<ArgumentException>(libDir.Exists);
 			Contract.Requires<ArgumentNullException>(mode != null);
+			patterns = patterns ?? new List<string>();
 
 			var covInfo = new CoverageInfo(
 					rootDir.FullName, mode.Name, SharingMethod.File);
@@ -130,22 +142,23 @@ namespace Occf.Tools.Cui {
 					               ? new TestInfo(rootDir.FullName)
 					               : null;
 
-			RemoveExistingCoverageDataFiles(rootDir, workDir);
+			RemoveExistingCoverageDataFiles(rootDir, libDir);
 
-			mode.RemoveLibraries(workDir);
+			mode.RemoveLibraries(libDir);
 
-			WriteProductionCodeFiles(rootDir, testDir, mode, covInfo);
+			WriteProductionCodeFiles(rootDir, patterns, testDir, mode, covInfo);
 			if (testInfo != null) {
 				WriteTestCodeFiles(rootDir, testDir, mode, testInfo);
 			} else {
 				// Initialize test information with empty contents
 				testInfo = new TestInfo(rootDir.FullName);
-				testInfo.TestCases.Add(new TestCase("nothing", "nothing", new CodePosition()));
+				testInfo.TestCases.Add(
+						new TestCase("nothing", "nothing", new CodePosition()));
 			}
 
 			WriteInfoFiles(rootDir, covInfo, testInfo);
 
-			CopyLibraries(mode, workDir);
+			CopyLibraries(mode, libDir);
 		}
 
 		private static void CopyLibraries(
@@ -167,11 +180,16 @@ namespace Occf.Tools.Cui {
 		}
 
 		private static void WriteProductionCodeFiles(
-				DirectoryInfo rootDir, DirectoryInfo testDir, CoverageMode mode,
-				CoverageInfo info) {
+				DirectoryInfo rootDir, IEnumerable<string> patterns, DirectoryInfo testDir,
+				CoverageMode mode, CoverageInfo info) {
 			var paths = mode.FilePatterns.SelectMany(
-					pattern => rootDir.EnumerateFiles(
-							pattern, SearchOption.AllDirectories));
+					pat => rootDir.EnumerateFiles(
+							pat, SearchOption.AllDirectories));
+			paths =
+					paths.Concat(
+							patterns.Where(pattern => !mode.FilePatterns.Contains(pattern))
+							        .SelectMany(
+									        pat => rootDir.EnumerateFiles(pat, SearchOption.AllDirectories)));
 			// ignore test code in the directory of production code
 			if (testDir != null) {
 				paths = paths.Where(f => !f.FullName.StartsWith(testDir.FullName));

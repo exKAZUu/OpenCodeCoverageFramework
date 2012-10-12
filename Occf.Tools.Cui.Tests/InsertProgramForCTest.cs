@@ -55,7 +55,7 @@ namespace Occf.Tools.Cui.Tests {
 			Environment.CurrentDirectory = "C:\\";
 
 			var profile = CoverageModes.GetCoverageModeByClassName("C");
-			Inserter.InsertMeasurementCode(outDir, null, outDir, profile);
+			Inserter.InsertMeasurementCode(outDir, null, null, outDir, profile);
 
 			// .cと.hファイルが存在するか
 			Assert.That(
