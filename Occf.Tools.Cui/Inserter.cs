@@ -197,7 +197,11 @@ namespace Occf.Tools.Cui {
 
 			foreach (var path in paths.ToList()) {
 				var bakPath = rootDir.GetFile(path + OccfNames.BackupSuffix).FullName;
-				path.CopyTo(bakPath, true);
+                //対象ファイルに対してKlee_backやLine_backがあるときは作成しない
+                if(!(File.Exists(path.FullName+OccfNames.LineBackUpSuffix)) 
+                    && !(File.Exists(path.FullName+OccfNames.KleeBackUpSuffix))) {
+                    path.CopyTo(bakPath, true);
+                }
 				var outPath = CoverageCodeGenerator.WriteCoveragedCode(
 						mode, info, path, rootDir);
 				Console.WriteLine("wrote:" + outPath);

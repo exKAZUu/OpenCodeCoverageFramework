@@ -22,6 +22,8 @@ namespace OccfLineInsert
             const string relativePath3 = @"../../sample/test/line";
             const string relativePath4 = @"../../sample/insert";
             const string relativePath5 = @"../../sample/return";
+            const string relativePath6 = @"../../sample/revert";
+            const string rerativePath7 = @"../../sample/analysis";
             //var basicInput = Console.ReadLine();
 
             //Console.WriteLine(relativePath.Substring(0, relativePath.Length-5));
@@ -41,11 +43,20 @@ namespace OccfLineInsert
             //その復活
             //returnBackUp.RevertBackUp(relativePath4);
 
+            //復活＆埋め込み
+            //returnBackUp.RevertBackUp(relativePath4);
+            //lineInsert.LineInserts(relativePath4);
+
             //元の行数
-            lineAnalysis.OutPutTrueLineNumber(relativePath3);
+            //lineAnalysis.OutPutTrueLineNumber(relativePath3);
 
             //復活
             //returnBackUp.RevertBackUp(relativePath5);
+            //returnBackUp.RevertBackUp(relativePath6);
+            
+            var rootDir = new DirectoryInfo(rerativePath7);
+            var testDir = new DirectoryInfo(rerativePath7 + "/test");
+            lineAnalysis.CreateLineDic(rootDir, testDir);
             
             //埋め込み、停止、復活
             //lineInsert.LineInserts(relativePath4);
@@ -64,6 +75,30 @@ namespace OccfLineInsert
             //Console.WriteLine(LineInsert.LineInsetr2(absolutePath));
             //Console.WriteLine(LineInsert.LineInsetr2(relativePath));
             //Console.WriteLine(LineInsert.LineInsetr2(basicInput));
+
+            /*
+            IEnumerable<string> ie1 = new[] { "aa", "bb", "cc" };
+            IEnumerable<string> ie1b = new[] { "aa", "bb", "cc" };
+            IEnumerable<string> ie2 = new[] { "dd", "ee", "ff", "gg" };
+
+            var ie3 = ie1.Except(ie1b);
+
+            ie1 = ie1.Concat(ie3);
+
+            Console.WriteLine(ie3.Count());
+
+            foreach (var ie in ie3) {
+                Console.WriteLine("zz");
+            }
+
+
+            for (var i = 0; i < ie1.Count(); i++ )
+            {
+                Console.WriteLine(ie1.ElementAt(i));
+            }*/
+
+
+
         }
     }
 }

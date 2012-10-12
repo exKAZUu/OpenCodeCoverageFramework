@@ -8,16 +8,15 @@ namespace OccfLineInsert
 {
     class ReturnBackUp
     {
+        private const string Appender = @".back";
+        private readonly int _apdLength = Appender.Length;
+
         //(fileName).backからの復元
-        public void RevertBackUp(String dirPath)
+        public void RevertBackUp(string dirPath)
         {
             var dirInfo = new DirectoryInfo(dirPath);
-            foreach (var fileInfo in from fileInfo in dirInfo.GetFiles()
-                                     let fileName = fileInfo.Name
-                                     let nameLength = fileName.Length
-                                     where nameLength >= 5 && fileName.Substring(nameLength - 5, 5).Equals(@".back")
-                                     select fileInfo)
-            {
+
+            foreach (var fileInfo in dirInfo.GetFiles("*"+Appender, SearchOption.AllDirectories)) {
                 RevertFile(fileInfo.FullName);
             }
         }
@@ -26,7 +25,7 @@ namespace OccfLineInsert
         public void RevertFile(string fileFulllName)
         {
             var fullNameLength = fileFulllName.Length;
-            var originFileFullName = fileFulllName.Substring(0, fullNameLength - 5);
+            var originFileFullName = fileFulllName.Substring(0, fullNameLength - _apdLength);
 
             File.Copy(fileFulllName, originFileFullName, true);
             File.Delete(fileFulllName);

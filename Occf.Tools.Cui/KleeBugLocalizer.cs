@@ -60,7 +60,11 @@ namespace Occf.Tools.Cui {
 			var covInfo = InfoReader.ReadCoverageInfo(covInfoFile, formatter);
 			var testInfo = AnalyzeKleeTestFiles(testDirInfo);
 			AnalyzeTestResult(rootDirInfo, testInfo);
-			BugLocalizer.LocalizeStatements(testInfo, covInfo);
+
+            //Line対応のMapのMapを作成、
+		    var lineDic = LineDicCreater(rootDirInfo, testDirInfo);
+            
+			BugLocalizer.LocalizeStatements(testInfo, covInfo, lineDic);
 		}
 
 		private static TestInfo AnalyzeKleeTestFiles(DirectoryInfo testDirInfo) {
@@ -69,7 +73,7 @@ namespace Occf.Tools.Cui {
 			testInfo.InitializeForStoringData(false);
 			foreach (var file in files) {
 				var relativePath = XPath.GetRelativePath(file.FullName, testDirInfo.FullName);
-				var testCase = new TestCase(relativePath, file.Name, new CodePosition());
+				var testCase = new TestCase(relativePath, file.FullName, new CodePosition());
 				testInfo.TestCases.Add(testCase);
 				testCase.InitializeForStoringData(false);
 				var dataPath = file.FullName + OccfNames.CoverageData;
@@ -82,7 +86,7 @@ namespace Occf.Tools.Cui {
 			var fileInfo = rootDirInfo.GetFile(OccfNames.SuccessfulTests);
 			using (var reader = fileInfo.OpenText()) {
 				foreach (var line in reader.ReadLines()) {
-					var testCase = testInfo.TestCases.FirstOrDefault(t => t.Name == line);
+					var testCase = testInfo.TestCases.FirstOrDefault(t => t.Name.EndsWith(line));
 					if (testCase != null)
 					{
 						testCase.Passed = true;
@@ -93,5 +97,62 @@ namespace Occf.Tools.Cui {
 				}
 			}
 		}
+
+        private static Dictionary<FileInfo, Dictionary<int, int>> 
+            LineDicCreater(DirectoryInfo rootDirInfo, DirectoryInfo testDirTnfo) {
+            
+            var fileList = new List<FileInfo>();
+            fileList.AddRange(rootDirInfo.GetFiles("*.c", SearchOption.AllDirectories));
+            fileList.AddRange(rootDirInfo.GetFiles("*.cpp", SearchOption.AllDirectories));
+            fileList.AddRange(rootDirInfo.GetFiles("*.cxx", SearchOption.AllDirectories));
+
+            if (testDirTnfo != null && testDirTnfo.Exists) {
+                for (var i = fileList.Count - 1; i > 0; i--) {
+                    if (fileList[i].FullName.StartsWith(testDirTnfo.FullName)) {
+                        fileList.Remove(fileList[i]);
+                    }
+                }
+            }
+
+            var lineDic = fileList.ToDictionary(fileInfo => fileInfo, LineSymmetyCreater);
+
+            return lineDic;
+        }
+
+        private static Dictionary<int, int> LineSymmetyCreater(FileInfo fileInfo) {
+            var lineDic = new Dictionary<int, int>();
+            var fileName = fileInfo.Name;
+            //var lineAppender = @"""" + fileName + @"""";
+            //var apdLength = lineAppender.Length;
+            const string header = @"# ";
+            const string divider = @" ";
+            //var leastLength = header.Length + divider.Length + apdLength;
+            var trueLineNum = 0;
+
+            using (var reader = new StreamReader(fileInfo.FullName)) {
+                
+                var line = reader.ReadLine();
+                var lineAppender = line.Substring(4);
+                var apdLength = lineAppender.Length;
+                var leastLength = header.Length + divider.Length + apdLength;
+
+                var nowLineNum = 2;
+                
+                while ((line = reader.ReadLine()) != null) {
+                    if (line.Length > leastLength) {
+                        var lastSentence = line.Substring(line.Length - apdLength, apdLength);
+                        if (lastSentence.Equals(lineAppender)) {
+                            var digitNum = line.Length - leastLength;
+                            trueLineNum = int.Parse(line.Substring(header.Length, digitNum));
+                        }
+                    }
+                    lineDic.Add(nowLineNum, trueLineNum);
+                    nowLineNum++;
+                }
+                reader.Close();
+            }
+
+            return lineDic;
+        }
 	}
 }
