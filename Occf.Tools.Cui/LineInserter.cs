@@ -5,6 +5,7 @@ using System.Text;
 using NDesk.Options;
 using Occf.Core.Modes;
 using Occf.Core.TestInfos;
+using Occf.Core.Utils;
 
 //using Occf.Tools.Cui;
 
@@ -77,7 +78,8 @@ namespace Occf.Tools.Cui {
         //指定されたファイルのパスを受け取って、指定名のバックアップファイルを作成して挿入
         private static void WriteInsetLine(string defaultFileFullName) {
             var fileInfo = new FileInfo(defaultFileFullName);
-            const string appendExtension = @".occf_line_back";
+            const string appendExtension = OccfNames.LineBackUpSuffix;
+;
             var backUpFileFullName = defaultFileFullName + appendExtension;
 
             File.Copy(defaultFileFullName, backUpFileFullName);

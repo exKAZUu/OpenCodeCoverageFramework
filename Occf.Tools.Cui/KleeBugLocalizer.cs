@@ -122,17 +122,21 @@ namespace Occf.Tools.Cui {
         private static Dictionary<int, int> LineSymmetyCreater(FileInfo fileInfo) {
             var lineDic = new Dictionary<int, int>();
             var fileName = fileInfo.Name;
-            var lineAppender = @"""" + fileName + @"""";
-            var apdLength = lineAppender.Length;
+            //var lineAppender = @"""" + fileName + @"""";
+            //var apdLength = lineAppender.Length;
             const string header = @"# ";
             const string divider = @" ";
-            var leastLength = header.Length + divider.Length + apdLength;
-
+            //var leastLength = header.Length + divider.Length + apdLength;
             var trueLineNum = 0;
 
             using (var reader = new StreamReader(fileInfo.FullName)) {
-                var nowLineNum = 1;
-                string line;
+                
+                var line = reader.ReadLine();
+                var lineAppender = line.Substring(4);
+                var apdLength = lineAppender.Length;
+                var leastLength = header.Length + divider.Length + apdLength;
+
+                var nowLineNum = 2;
                 
                 while ((line = reader.ReadLine()) != null) {
                     if (line.Length > leastLength) {

@@ -119,11 +119,11 @@ namespace Occf.Tools.Cui
                         if (mainFlag && lineLength >= 8) {
                             if (line.Substring(7).Equals("return ") || line.Contains(" return ")) {
                                 writer.WriteLine("");
-                                writer.WriteLine(@"char *tmp = getenv(""KTEST_FILE"");");
-                                writer.WriteLine(@"FILE *file = fopen(""" + rootFullName + @"/" + OccfNames.SuccessfulTests + @""", ""a"");");
-                                writer.WriteLine(@"fputs(tmp, file);");
-                                writer.WriteLine(@"fputc('\n', file);");
-                                writer.WriteLine(@"fclose(file);");
+                                writer.WriteLine(@"char *occftmp = getenv(""KTEST_FILE"");");
+                                writer.WriteLine(@"FILE *occffile = fopen(""" + rootFullName + @"/" + OccfNames.SuccessfulTests + @""", ""a"");");
+                                writer.WriteLine(@"fputs(occftmp, occffile);");
+                                writer.WriteLine(@"fputc('\n', occffile);");
+                                writer.WriteLine(@"fclose(occffile);");
                                 writer.WriteLine("");
                             }
                         }

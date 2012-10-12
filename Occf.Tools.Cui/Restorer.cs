@@ -65,6 +65,10 @@ namespace Occf.Tools.Cui {
             //nullエラー出ないよね？
 		    filePaths = filePaths.Concat(lineFilePaths.Concat(kleeFilePaths));
             
+            for(var i=0; i<filePaths.Count(); i++) {
+                Console.WriteLine("filepaths :" + filePaths.ElementAt(i));
+            }
+
 			foreach (var filePath in filePaths) {
 				var destPath = filePath.Substring(
 						0,
