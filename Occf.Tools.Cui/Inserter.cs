@@ -39,11 +39,11 @@ namespace Occf.Tools.Cui {
 		private static readonly string Usage =
 				Program.Header + 
 				"" + "\n" +
-				"Usage: Occf insert <root> [<test>] [options]" + "\n" +
+				"Usage: Occf insert -r <root_dir> [options]" + "\n" +
 				"" + "\n" +
-				S + "<root>".PadRight(W)
-				+ "path of root directory (including source and test code)" + "\n" +
-				S + "<test>".PadRight(W) + "path of test code directory" + "\n" +
+				S + "<root_dir>".PadRight(W)
+				+ "root directory for writing project information and library files to measure coverage" + "\n" +
+				S + "<test>".PadRight(W) + "test code directory for execluding files as measurement targets and for localizing faults" + "\n" +
 				S + "-l, -lang <name>".PadRight(W)
 				+
 				"language of target source. <name> can be Java(default), C, Python2 or Python3."
@@ -132,7 +132,7 @@ namespace Occf.Tools.Cui {
 
 			RemoveExistingCoverageDataFiles(rootDir, workDir);
 
-			RemoveExistingLibraries(mode, workDir);
+			mode.RemoveLibraries(workDir);
 
 			WriteProductionCodeFiles(rootDir, testDir, mode, covInfo);
 			if (testInfo != null) {
@@ -148,11 +148,6 @@ namespace Occf.Tools.Cui {
 			CopyLibraries(mode, workDir);
 		}
 
-		private static void RemoveExistingLibraries(
-				CoverageMode mode, DirectoryInfo dirInfo) {
-			mode.RemoveLibraries(dirInfo);
-		}
-
 		private static void CopyLibraries(
 				CoverageMode mode, DirectoryInfo dirInfo) {
 			mode.CopyLibraries(dirInfo);
@@ -160,11 +155,11 @@ namespace Occf.Tools.Cui {
 
 		private static void RemoveExistingCoverageDataFiles(
 				DirectoryInfo rootDir, DirectoryInfo workDir) {
+			const string filePattern = "*" + OccfNames.CoverageData;
 			var targets = rootDir.EnumerateFiles(
-					OccfNames.CoverageData, SearchOption.AllDirectories);
+					filePattern, SearchOption.AllDirectories);
 			if (workDir != null) {
-				targets =
-						targets.Concat(workDir.EnumerateFiles(OccfNames.CoverageData));
+				targets = targets.Concat(workDir.EnumerateFiles(filePattern));
 			}
 			foreach (var target in targets.ToList()) {
 				target.Delete();
@@ -172,9 +167,9 @@ namespace Occf.Tools.Cui {
 		}
 
 		private static void WriteProductionCodeFiles(
-				DirectoryInfo rootDir, DirectoryInfo testDir, CoverageMode prof,
+				DirectoryInfo rootDir, DirectoryInfo testDir, CoverageMode mode,
 				CoverageInfo info) {
-			var paths = prof.FilePatterns.SelectMany(
+			var paths = mode.FilePatterns.SelectMany(
 					pattern => rootDir.EnumerateFiles(
 							pattern, SearchOption.AllDirectories));
 			// ignore test code in the directory of production code
@@ -186,7 +181,7 @@ namespace Occf.Tools.Cui {
 				var bakPath = rootDir.GetFile(path + OccfNames.BackupSuffix).FullName;
 				path.CopyTo(bakPath, true);
 				var outPath = CoverageCodeGenerator.WriteCoveragedCode(
-						prof, info, path, rootDir);
+						mode, info, path, rootDir);
 				Console.WriteLine("wrote:" + outPath);
 			}
 		}
@@ -199,7 +194,7 @@ namespace Occf.Tools.Cui {
 							pattern, SearchOption.AllDirectories));
 			foreach (var path in paths.ToList()) {
 				var bakPath = rootDir.GetFile(path + OccfNames.BackupSuffix).FullName;
-				path.CopyTo(bakPath, true);
+				path.CopyTo(bakPath, false);
 				var outPath = CoverageCodeGenerator.AnalyzeAndWriteIdentifiedTest(
 						prof, info, path, rootDir);
 				Console.WriteLine("wrote:" + outPath);

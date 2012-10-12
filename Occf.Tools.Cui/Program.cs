@@ -26,7 +26,7 @@ namespace Occf.Tools.Cui {
 		private const int W = 12;
 
 		public static readonly string Header =
-				"Occf 1.1.0" + "\n" +
+				"Occf 1.1.1" + "\n" +
 				"Copyright (C) 2011-2012 SAKAMOTO Kazunori" + "\n";
 
 		private static readonly string Usage =
