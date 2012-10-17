@@ -178,6 +178,7 @@
     <Compile Include="KleeBugLocalizer.cs" />
     <Compile Include="LineInserter.cs" />
     <Compile Include="KleeMain.cs" />
+    <Compile Include="LineMapCreater.cs" />
     <Compile Include="PathAnalyzer.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

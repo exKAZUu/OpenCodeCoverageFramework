@@ -62,7 +62,13 @@ namespace Occf.Tools.Cui {
 			AnalyzeTestResult(rootDirInfo, testInfo);
 
             //Line対応のMapのMapを作成、
-		    var lineDic = LineDicCreater(rootDirInfo, testDirInfo);
+		    var lineDic = new Dictionary<FileInfo, Dictionary<int, int>>();
+            var mapFileInfo = new FileInfo(rootDirInfo.FullName + "/" + OccfNames.LineMapping);
+            if (mapFileInfo.Exists) {
+                lineDic = mapDicCreater(mapFileInfo);
+            } else {
+                Console.WriteLine("\"" + OccfNames.LineMapping +"\" file is not found.");
+            }
             
 			BugLocalizer.LocalizeStatements(testInfo, covInfo, lineDic);
 		}
@@ -98,6 +104,38 @@ namespace Occf.Tools.Cui {
 			}
 		}
 
+        public static Dictionary<FileInfo, Dictionary<int, int>> mapDicCreater(FileInfo mappingFile) {
+            var mapDic = new Dictionary<FileInfo, Dictionary<int, int>>();
+
+            using (var reader = new StreamReader(mappingFile.FullName)) {
+                var lineDic = new Dictionary<int, int>();
+                var lastFileInfo = new FileInfo(reader.ReadLine());
+                var nowLine = int.Parse(reader.ReadLine());
+                var trueLine = int.Parse(reader.ReadLine());
+                lineDic.Add(nowLine, trueLine);
+
+                string line;
+                while ((line = reader.ReadLine()) != null) {
+                    var fileInfo = new FileInfo(line);
+                    nowLine = int.Parse(reader.ReadLine());
+                    trueLine = int.Parse(reader.ReadLine());
+
+                    if (!(fileInfo.FullName.Equals(lastFileInfo.FullName))) {
+                        mapDic.Add(lastFileInfo, new Dictionary<int, int>(lineDic));
+                        lineDic.Clear();
+                        lastFileInfo = fileInfo;
+                    }
+
+                    lineDic.Add(nowLine, trueLine);
+                }
+                mapDic.Add(lastFileInfo, lineDic);
+                reader.Close();
+            }
+
+            return mapDic;
+        }
+
+        //以下、ファイルからディレクトリを作成に変更のため削除予定
         private static Dictionary<FileInfo, Dictionary<int, int>> 
             LineDicCreater(DirectoryInfo rootDirInfo, DirectoryInfo testDirTnfo) {
             

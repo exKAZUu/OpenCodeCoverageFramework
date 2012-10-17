@@ -14,6 +14,7 @@ namespace OccfLineInsert
             var lineInsert = new LineInsert();
             var returnBackUp = new ReturnBackUp();
             var lineAnalysis = new LineAnalysis();
+            var lineMapCreater = new LineMapCreater();
 
             Console.WriteLine(System.IO.Directory.GetCurrentDirectory());
             const string absolutePath = @"C:\Documents and Settings\Administrator\My Documents\Visual Studio 2010\Projects\ConsoleApplication1\ConsoleApplication1\sample";
@@ -56,8 +57,11 @@ namespace OccfLineInsert
             
             var rootDir = new DirectoryInfo(rerativePath7);
             var testDir = new DirectoryInfo(rerativePath7 + "/test");
-            lineAnalysis.CreateLineDic(rootDir, testDir);
-            
+            //lineAnalysis.CreateLineDic(rootDir, testDir);
+            //lineMapCreater.MapFileCreater(rootDir, testDir);
+            var mappingFile = new FileInfo(rerativePath7 + "/.occf_map_file");
+            lineMapCreater.LineMapKakunin(mappingFile, rootDir);
+
             //埋め込み、停止、復活
             //lineInsert.LineInserts(relativePath4);
             //var basicInput = Console.ReadLine();
