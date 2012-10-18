@@ -48,7 +48,7 @@ namespace Occf.Tools.Cui {
 				S + "-t, -test <test>".PadRight(W) +
 				"test code directory for execluding files as measurement targets and for localizing faults"
 				+ "\n" +
-				S + "-n, -lang <name>".PadRight(W) +
+				S + "-l, -lang <name>".PadRight(W) +
 				"language of target source. <name> can be Java(default), C, Python2 or Python3."
 				+ "\n" +
 				S + "-p, -pattern <name>".PadRight(W)
