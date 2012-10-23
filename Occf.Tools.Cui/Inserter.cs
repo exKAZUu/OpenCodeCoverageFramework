@@ -23,6 +23,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using Code2Xml.Core.Position;
+using IronPython.Runtime;
 using NDesk.Options;
 using Occf.Core.CoverageCode;
 using Occf.Core.CoverageInformation;
@@ -75,14 +76,23 @@ namespace Occf.Tools.Cui {
 					{ "p|pattern=", patterns.Add },
 					{ "i|lib=", v => libDirPath = v },
 			};
-			try {
-				args = p.Parse(args);
-			} catch {
-			    Console.WriteLine("catch");
-				return Program.Print(Usage);
-			}
+            for (int i = 0; i < args.Count; i++ ) {
+                Console.WriteLine("args"+ i + " = " + args[i]);
+            }
+            
+            try {
+                args = p.Parse(args);
+            } catch {
+                Console.WriteLine("catch");
+                return Program.Print(Usage);
+            }
+
+            for (int i = 0; i < args.Count; i++)
+            {
+                Console.WriteLine("args" + i + " = " + args[i]);
+            }
 		    Console.WriteLine("before args count");
-			if (args.Count < 1 || string.IsNullOrEmpty(rootDirPath)) {
+			if (string.IsNullOrEmpty(rootDirPath)) {
 			    Console.WriteLine("count < 1");
 				return Program.Print(Usage);
 			}
@@ -124,6 +134,12 @@ namespace Occf.Tools.Cui {
 				}
 			}
 		    Console.WriteLine("call insertMeasurementCode:");
+		    Console.WriteLine("rootDir: " + rootDir.Name);
+		    string pat = patterns.Count > 0 ? patterns[0] : "null";
+		    Console.WriteLine("patterns: " + pat);
+		    string tDir = testDir != null ? testDir.Name : "null";
+		    Console.WriteLine("testDir:" + tDir);
+		    Console.WriteLine("libDir: " + libDir.Name);
 			InsertMeasurementCode(rootDir, patterns, testDir, libDir, mode);
 			return true;
 		}
@@ -138,19 +154,22 @@ namespace Occf.Tools.Cui {
 			Contract.Requires<ArgumentException>(libDir.Exists);
 			Contract.Requires<ArgumentNullException>(mode != null);
 			patterns = patterns ?? new List<string>();
-
+		    
+            //root
 			var covInfo = new CoverageInfo(
 					rootDir.FullName, mode.Name, SharingMethod.File);
-			var testInfo = testDir != null
+			//(o)root or src?
+            var testInfo = testDir != null
 					               ? new TestInfo(rootDir.FullName)
 					               : null;
-
+            //root
 			RemoveExistingCoverageDataFiles(rootDir, libDir);
 
 			mode.RemoveLibraries(libDir);
-
+            //src
 			WriteProductionCodeFiles(rootDir, patterns, testDir, mode, covInfo);
 			if (testInfo != null) {
+                //(o)root or src
 				WriteTestCodeFiles(rootDir, testDir, mode, testInfo);
 			} else {
 				// Initialize test information with empty contents
@@ -158,7 +177,7 @@ namespace Occf.Tools.Cui {
 				testInfo.TestCases.Add(
 						new TestCase("nothing", "nothing", new CodePosition()));
 			}
-
+            //root
 			WriteInfoFiles(rootDir, covInfo, testInfo);
 
 			CopyLibraries(mode, libDir);
@@ -185,19 +204,70 @@ namespace Occf.Tools.Cui {
 		private static void WriteProductionCodeFiles(
 				DirectoryInfo rootDir, IEnumerable<string> patterns, DirectoryInfo testDir,
 				CoverageMode mode, CoverageInfo info) {
-			var paths = mode.FilePatterns.SelectMany(
+
+		    IEnumerable<FileInfo> paths;
+
+		    IEnumerable<string> bakcupPatterns = new List<string>(){"*"+OccfNames.BackupSuffix, "*"+OccfNames.LineBackUpSuffix, "*"+OccfNames.KleeBackUpSuffix}; 
+		    IEnumerable<FileInfo> backups;
+
+            Console.WriteLine("psize:" + patterns.Count());
+            if(!patterns.Any()) {
+                paths = mode.FilePatterns.SelectMany(
+                    pat => rootDir.EnumerateFiles(
+                            pat, SearchOption.AllDirectories));
+            } else {
+                paths = patterns.Where(pattern => !mode.FilePatterns.Contains(pattern))
+                                    .SelectMany(
+                                            pat => rootDir.EnumerateFiles(pat, SearchOption.AllDirectories));
+            }
+
+            backups = bakcupPatterns.Where(bakcupPattern => !mode.FilePatterns.Contains(bakcupPattern))
+                                    .SelectMany(
+                                            bpat=> rootDir.EnumerateFiles(bpat, SearchOption.AllDirectories));
+            for (int i = 0; i < paths.Count(); i++)
+            {
+                Console.WriteLine("paths2B :" + paths.ElementAt(i));
+
+            }
+		    var bhaps = paths.Intersect(second: backups);
+            for (int i = 0; i < bhaps.Count(); i++)
+            {
+                Console.WriteLine("pathsBAH :" + bhaps.ElementAt(i));
+
+            }
+            for (int i = 0; i < backups.Count(); i++)
+            {
+                Console.WriteLine("pathsBK :" + backups.ElementAt(i));
+
+            }
+            paths = paths.Except(second: backups); 
+            //
+            
+            /*
+            paths = mode.FilePatterns.SelectMany(
 					pat => rootDir.EnumerateFiles(
 							pat, SearchOption.AllDirectories));
-			paths =
+           
+		    paths =
 					paths.Concat(
 							patterns.Where(pattern => !mode.FilePatterns.Contains(pattern))
 							        .SelectMany(
 									        pat => rootDir.EnumerateFiles(pat, SearchOption.AllDirectories)));
-			// ignore test code in the directory of production code
-			if (testDir != null) {
-				paths = paths.Where(f => !f.FullName.StartsWith(testDir.FullName));
-			}
+            */
+            
+            for (int i = 0; i < paths.Count(); i++ ) {
+                Console.WriteLine("paths2 :" + paths.ElementAt(i));
+                
+            }
 
+		    //paths = paths.Except(paths);
+
+            // ignore test code in the directory of production code
+            if (testDir != null)
+            {
+                paths = paths.Where(f => !f.FullName.StartsWith(testDir.FullName));
+            }
+            
 			foreach (var path in paths.ToList()) {
 				var bakPath = rootDir.GetFile(path + OccfNames.BackupSuffix).FullName;
                 //対象ファイルに対してKlee_backやLine_backがあるときは作成しない
