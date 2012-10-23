@@ -60,6 +60,7 @@ namespace Occf.Tools.Cui {
 				"";
 
 		public static bool Run(IList<string> args) {
+		    Console.WriteLine("start:");
 			var rootDirPath = "";
 			var testDirPath = "";
 			var languageName = "Java";
@@ -77,13 +78,15 @@ namespace Occf.Tools.Cui {
 			try {
 				args = p.Parse(args);
 			} catch {
+			    Console.WriteLine("catch");
 				return Program.Print(Usage);
 			}
-
+		    Console.WriteLine("before args count");
 			if (args.Count < 1 || string.IsNullOrEmpty(rootDirPath)) {
+			    Console.WriteLine("count < 1");
 				return Program.Print(Usage);
 			}
-
+		    Console.WriteLine("before mode:");
 			CoverageMode mode;
 			try {
 				mode = CoverageModes.GetCoverageModeByClassName(languageName);
@@ -93,16 +96,16 @@ namespace Occf.Tools.Cui {
 								"error: cant't load script file for programming language of "
 								+ languageName);
 			}
-
+		    Console.WriteLine("before rootDir:");
 			var rootDir = new DirectoryInfo(rootDirPath);
 			if (!rootDir.Exists) {
 				return
 						Program.Print(
 								"Root directory doesn't exist.\nroot:" + rootDir.FullName);
 			}
-
+		    Console.WriteLine("before testDir:");
 			DirectoryInfo testDir = null;
-			if (string.IsNullOrEmpty(testDirPath)) {
+			if (!string.IsNullOrEmpty(testDirPath)) {
 				testDir = new DirectoryInfo(testDirPath);
 				if (!testDir.Exists) {
 					return
@@ -110,7 +113,7 @@ namespace Occf.Tools.Cui {
 									"Error: test code directory doesn't exist.\ntest:" + testDir.FullName);
 				}
 			}
-
+		    Console.WriteLine( "before libDir");
 			var libDir = rootDir;
 			if (!string.IsNullOrEmpty(libDirPath)) {
 				libDir = new DirectoryInfo(libDirPath);
@@ -120,7 +123,7 @@ namespace Occf.Tools.Cui {
 									"Error: working directory doesn't exist.\nwork:" + libDir.FullName);
 				}
 			}
-
+		    Console.WriteLine("call insertMeasurementCode:");
 			InsertMeasurementCode(rootDir, patterns, testDir, libDir, mode);
 			return true;
 		}

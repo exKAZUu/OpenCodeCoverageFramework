@@ -59,17 +59,18 @@ namespace Occf.Tools.Cui {
 			var covInfoFile = PathFinder.FindCoverageInfoPath(rootDirInfo);
 			var covInfo = InfoReader.ReadCoverageInfo(covInfoFile, formatter);
 			var testInfo = AnalyzeKleeTestFiles(testDirInfo);
+		    Console.WriteLine("before: Analyze");
 			AnalyzeTestResult(rootDirInfo, testInfo);
-
+		    Console.WriteLine("before: lineDic");
             //Line対応のMapのMapを作成、
 		    var lineDic = new Dictionary<FileInfo, Dictionary<int, int>>();
             var mapFileInfo = new FileInfo(rootDirInfo.FullName + "/" + OccfNames.LineMapping);
             if (mapFileInfo.Exists) {
-                lineDic = mapDicCreater(mapFileInfo);
+                lineDic = MapDicCreater(mapFileInfo);
             } else {
                 Console.WriteLine("\"" + OccfNames.LineMapping +"\" file is not found.");
             }
-            
+		    Console.WriteLine("before: localizestatement");
 			BugLocalizer.LocalizeStatements(testInfo, covInfo, lineDic);
 		}
 
@@ -104,7 +105,7 @@ namespace Occf.Tools.Cui {
 			}
 		}
 
-        public static Dictionary<FileInfo, Dictionary<int, int>> mapDicCreater(FileInfo mappingFile) {
+        public static Dictionary<FileInfo, Dictionary<int, int>> MapDicCreater(FileInfo mappingFile) {
             var mapDic = new Dictionary<FileInfo, Dictionary<int, int>>();
 
             using (var reader = new StreamReader(mappingFile.FullName)) {

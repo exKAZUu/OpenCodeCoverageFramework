@@ -105,14 +105,19 @@ namespace Occf.Tools.Cui {
 	    /// <param name="covInfo"></param>
 	    /// <param name="lindDic"></param>
 	    public static void LocalizeStatements(TestInfo testInfo, CoverageInfo covInfo, Dictionary<FileInfo, Dictionary<int, int>> lindDic) { // Targeting only statement
-			var engine = Python.CreateEngine();
+	        Console.WriteLine("before: Python.create");
+            var engine = Python.CreateEngine();
+	        Console.WriteLine("before: engine.create");
 			var scope = engine.CreateScope();
 			var fileName = "BugLocalization.py";
+	        Console.WriteLine("before scriptPath");
 			var scriptPath = Path.Combine(OccfGlobal.CurrentDirectory, fileName);
 			if (!File.Exists(scriptPath)) {
 				scriptPath = Path.Combine(OccfGlobal.ExeDirectory, fileName);
 			}
+	        Console.WriteLine("before: engine.Execute");
 			engine.ExecuteFile(scriptPath, scope);
+	        Console.WriteLine("before: calcMetricFunc");
 			var calcMetricFunc =
 					scope.GetVariable<Func<double, double, double, double, IEnumerable>>(
 							"CalculateMetric");
