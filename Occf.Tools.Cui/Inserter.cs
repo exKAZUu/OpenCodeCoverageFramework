@@ -40,7 +40,7 @@ namespace Occf.Tools.Cui {
 		private static readonly string Usage =
 				Program.Header +
 				"" + "\n" +
-				"Usage: Occf insert -r <root_dir> [options] <target_file1> <target_file2>"
+				"Usage: Occf insert -r <root_dir> [options] <src_dir>"
 				+ "\n" +
 				"" + "\n" +
 				S + "-r, -root <root_dir>".PadRight(W)
@@ -63,6 +63,7 @@ namespace Occf.Tools.Cui {
 		public static bool Run(IList<string> args) {
 		    Console.WriteLine("start:");
 			var rootDirPath = "";
+		    var srcDirPath = "";
 			var testDirPath = "";
 			var languageName = "Java";
 			var libDirPath = "";
@@ -76,10 +77,13 @@ namespace Occf.Tools.Cui {
 					{ "p|pattern=", patterns.Add },
 					{ "i|lib=", v => libDirPath = v },
 			};
+
+            //確認用 ** 
             for (int i = 0; i < args.Count; i++ ) {
                 Console.WriteLine("args"+ i + " = " + args[i]);
-            }
+            }// ** 
             
+            // コマンドをパース "-"指定されないのだけargs[]に残る
             try {
                 args = p.Parse(args);
             } catch {
@@ -87,17 +91,33 @@ namespace Occf.Tools.Cui {
                 return Program.Print(Usage);
             }
 
+            //確認用追加 **
             for (int i = 0; i < args.Count; i++)
             {
-                Console.WriteLine("args" + i + " = " + args[i]);
-            }
-		    Console.WriteLine("before args count");
-			if (string.IsNullOrEmpty(rootDirPath)) {
-			    Console.WriteLine("count < 1");
+                Console.WriteLine("argsB" + i + " = " + args[i]);
+            }// **
+
+            Console.WriteLine("before args count");// 確認
+			
+            if (string.IsNullOrEmpty(rootDirPath)) {
+			    Console.WriteLine("count < 1");//確認
 				return Program.Print(Usage);
 			}
-		    Console.WriteLine("before mode:");
-			CoverageMode mode;
+		    Console.WriteLine("before mode:");//確認
+			
+            if(args.Count > 1) {
+                for(var i = 1; i<args.Count; i++) {
+                    Console.WriteLine("Path: " + args[i] + " is a wrong designated method");
+                }
+                Console.WriteLine("you can designate only one srcDir now.");
+                Console.WriteLine("please read how to use Occf inserter .");
+                Console.WriteLine("continue.");
+            }
+
+            srcDirPath = args.Count < 1 ? rootDirPath : args[0];
+            
+
+            CoverageMode mode;
 			try {
 				mode = CoverageModes.GetCoverageModeByClassName(languageName);
 			} catch {
@@ -106,14 +126,24 @@ namespace Occf.Tools.Cui {
 								"error: cant't load script file for programming language of "
 								+ languageName);
 			}
-		    Console.WriteLine("before rootDir:");
+		    Console.WriteLine("before rootDir:");//確認
 			var rootDir = new DirectoryInfo(rootDirPath);
 			if (!rootDir.Exists) {
 				return
 						Program.Print(
 								"Root directory doesn't exist.\nroot:" + rootDir.FullName);
 			}
-		    Console.WriteLine("before testDir:");
+            Console.WriteLine("before srcDir:");//確認
+            var srcDir = new DirectoryInfo(srcDirPath);
+            if (!srcDir.Exists)
+            {
+                return
+                        Program.Print(
+                                "Source directory doesn't exist.\nsrc:" + srcDir.FullName);
+            }
+
+
+		    Console.WriteLine("before testDir:");//確認
 			DirectoryInfo testDir = null;
 			if (!string.IsNullOrEmpty(testDirPath)) {
 				testDir = new DirectoryInfo(testDirPath);
@@ -123,7 +153,7 @@ namespace Occf.Tools.Cui {
 									"Error: test code directory doesn't exist.\ntest:" + testDir.FullName);
 				}
 			}
-		    Console.WriteLine( "before libDir");
+		    Console.WriteLine( "before libDir");//確認
 			var libDir = rootDir;
 			if (!string.IsNullOrEmpty(libDirPath)) {
 				libDir = new DirectoryInfo(libDirPath);
@@ -133,13 +163,16 @@ namespace Occf.Tools.Cui {
 									"Error: working directory doesn't exist.\nwork:" + libDir.FullName);
 				}
 			}
+            //確認　**
 		    Console.WriteLine("call insertMeasurementCode:");
 		    Console.WriteLine("rootDir: " + rootDir.Name);
+		    Console.WriteLine("srcDir: " + srcDir.Name);
 		    string pat = patterns.Count > 0 ? patterns[0] : "null";
 		    Console.WriteLine("patterns: " + pat);
 		    string tDir = testDir != null ? testDir.Name : "null";
 		    Console.WriteLine("testDir:" + tDir);
 		    Console.WriteLine("libDir: " + libDir.Name);
+            //　**
 			InsertMeasurementCode(rootDir, patterns, testDir, libDir, mode);
 			return true;
 		}
@@ -224,6 +257,7 @@ namespace Occf.Tools.Cui {
             backups = bakcupPatterns.Where(bakcupPattern => !mode.FilePatterns.Contains(bakcupPattern))
                                     .SelectMany(
                                             bpat=> rootDir.EnumerateFiles(bpat, SearchOption.AllDirectories));
+            //確認　***
             for (int i = 0; i < paths.Count(); i++)
             {
                 Console.WriteLine("paths2B :" + paths.ElementAt(i));
@@ -240,6 +274,7 @@ namespace Occf.Tools.Cui {
                 Console.WriteLine("pathsBK :" + backups.ElementAt(i));
 
             }
+            //　***
             paths = paths.Except(second: backups); 
             //
             
@@ -255,10 +290,11 @@ namespace Occf.Tools.Cui {
 									        pat => rootDir.EnumerateFiles(pat, SearchOption.AllDirectories)));
             */
             
+            //確認　**
             for (int i = 0; i < paths.Count(); i++ ) {
                 Console.WriteLine("paths2 :" + paths.ElementAt(i));
-                
             }
+            //　**
 
 		    //paths = paths.Except(paths);
 
