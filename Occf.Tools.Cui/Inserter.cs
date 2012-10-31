@@ -243,12 +243,24 @@ namespace Occf.Tools.Cui {
 		    IEnumerable<string> bakcupPatterns = new List<string>(){"*"+OccfNames.BackupSuffix, "*"+OccfNames.LineBackUpSuffix, "*"+OccfNames.KleeBackUpSuffix}; 
 		    IEnumerable<FileInfo> backups;
 
-            Console.WriteLine("psize:" + patterns.Count());
-            if(!patterns.Any()) {
+            //　**
+		    for (int i = 0; i < patterns.Count(); i++) {
+                Console.WriteLine("patterns "+ i + " : " + patterns.ElementAt(i));
+		        
+		    }
+            for (int i = 0; i < bakcupPatterns.Count(); i++)
+            {
+                Console.WriteLine("bkpats " + i + " : " + bakcupPatterns.ElementAt(i));
+
+            }
+		    //　**
+
+            Console.WriteLine("psize:" + patterns.Count());//確認
+            if(!patterns.Any()) { // -p　指定が無い場合：拡張子判定
                 paths = mode.FilePatterns.SelectMany(
                     pat => rootDir.EnumerateFiles(
                             pat, SearchOption.AllDirectories));
-            } else {
+            } else {// -p指定があった時はそれを格納
                 paths = patterns.Where(pattern => !mode.FilePatterns.Contains(pattern))
                                     .SelectMany(
                                             pat => rootDir.EnumerateFiles(pat, SearchOption.AllDirectories));
@@ -257,50 +269,56 @@ namespace Occf.Tools.Cui {
             backups = bakcupPatterns.Where(bakcupPattern => !mode.FilePatterns.Contains(bakcupPattern))
                                     .SelectMany(
                                             bpat=> rootDir.EnumerateFiles(bpat, SearchOption.AllDirectories));
+		    
+            Console.WriteLine("bkcount : " + backups.Count());//確認
             //確認　***
-            for (int i = 0; i < paths.Count(); i++)
-            {
-                Console.WriteLine("paths2B :" + paths.ElementAt(i));
-
+            for (int i = 0; i < paths.Count(); i++){
+                Console.WriteLine("paths1 :" + paths.ElementAt(i));
             }
-		    var bhaps = paths.Intersect(second: backups);
-            for (int i = 0; i < bhaps.Count(); i++)
-            {
-                Console.WriteLine("pathsBAH :" + bhaps.ElementAt(i));
-
-            }
-            for (int i = 0; i < backups.Count(); i++)
-            {
+            for (int i = 0; i < backups.Count(); i++){
                 Console.WriteLine("pathsBK :" + backups.ElementAt(i));
-
             }
-            //　***
-            paths = paths.Except(second: backups); 
-            //
+            //***
+
+		    var pathList = paths.ToList();
+		    var bkpathList = backups.ToList();
+           
+            for (var i = pathList.Count - 1; i > 0; i-- ) {
+                if (bkpathList.Any(bkpath => pathList[i].FullName == bkpath.FullName)) {
+                    pathList.Remove(pathList[i]);
+                }
+            }
+            /* 上の元コード
+            for (var i = pathList.Count - 1; i > 0; i--){
+                foreach (var bkpath in bkpathList){
+                    if (pathList[i].FullName == bkpath.FullName){
+                        pathList.Remove(pathList[i]);
+                        break;
+                    }
+                }
+            }*/
+            
+		    paths = pathList;　//バックアップファイルを除いたリストに置き換え
             
             /*
             paths = mode.FilePatterns.SelectMany(
-					pat => rootDir.EnumerateFiles(
-							pat, SearchOption.AllDirectories));
+                    pat => rootDir.EnumerateFiles(
+                            pat, SearchOption.AllDirectories));
            
-		    paths =
-					paths.Concat(
-							patterns.Where(pattern => !mode.FilePatterns.Contains(pattern))
-							        .SelectMany(
-									        pat => rootDir.EnumerateFiles(pat, SearchOption.AllDirectories)));
+            paths =
+                    paths.Concat(
+                            patterns.Where(pattern => !mode.FilePatterns.Contains(pattern))
+                                    .SelectMany(
+                                            pat => rootDir.EnumerateFiles(pat, SearchOption.AllDirectories)));
             */
-            
+
             //確認　**
-            for (int i = 0; i < paths.Count(); i++ ) {
+            for (int i = 0; i < paths.Count(); i++){
                 Console.WriteLine("paths2 :" + paths.ElementAt(i));
-            }
-            //　**
-
-		    //paths = paths.Except(paths);
-
+            }//**
+            
             // ignore test code in the directory of production code
-            if (testDir != null)
-            {
+            if (testDir != null){
                 paths = paths.Where(f => !f.FullName.StartsWith(testDir.FullName));
             }
             
@@ -310,6 +328,7 @@ namespace Occf.Tools.Cui {
                 if(!(File.Exists(path.FullName+OccfNames.LineBackUpSuffix)) 
                     && !(File.Exists(path.FullName+OccfNames.KleeBackUpSuffix))) {
                     path.CopyTo(bakPath, true);
+                    
                 }
 				var outPath = CoverageCodeGenerator.WriteCoveragedCode(
 						mode, info, path, rootDir);
@@ -325,7 +344,8 @@ namespace Occf.Tools.Cui {
 							pattern, SearchOption.AllDirectories));
 			foreach (var path in paths.ToList()) {
 				var bakPath = rootDir.GetFile(path + OccfNames.BackupSuffix).FullName;
-				path.CopyTo(bakPath, false);
+                //path.CopyTo(bakPath, false); //バックファイルの上書き不可　元
+                path.CopyTo(bakPath, true);
 				var outPath = CoverageCodeGenerator.AnalyzeAndWriteIdentifiedTest(
 						prof, info, path, rootDir);
 				Console.WriteLine("wrote:" + outPath);
@@ -358,4 +378,6 @@ namespace Occf.Tools.Cui {
 			}
 		}
 	}
+   
+
 }
