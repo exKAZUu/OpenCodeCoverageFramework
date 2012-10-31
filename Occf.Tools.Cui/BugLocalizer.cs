@@ -70,7 +70,7 @@ namespace Occf.Tools.Cui {
 			}
 
 			var covDataFile = args.Count >= iArgs + 1
-					                  ? new FileInfo(args[iArgs++]) : null;
+									  ? new FileInfo(args[iArgs++]) : null;
 			covDataFile = PathFinder.FindCoverageDataPath(covDataFile, rootDir);
 			if (!covDataFile.SafeExists()) {
 				return
@@ -98,26 +98,26 @@ namespace Occf.Tools.Cui {
 			LocalizeStatements(testInfo, covInfo, new Dictionary<FileInfo, Dictionary<int, int>>());
 		}
 
-	    /// <summary>
-	    /// Localize bugs in statements.
-	    /// </summary>
-	    /// <param name="testInfo"></param>
-	    /// <param name="covInfo"></param>
-	    /// <param name="lindDic"></param>
-	    public static void LocalizeStatements(TestInfo testInfo, CoverageInfo covInfo, Dictionary<FileInfo, Dictionary<int, int>> lindDic) { // Targeting only statement
-	        Console.WriteLine("before: Python.create");
-            var engine = Python.CreateEngine();
-	        Console.WriteLine("before: engine.create");
+		/// <summary>
+		/// Localize bugs in statements.
+		/// </summary>
+		/// <param name="testInfo"></param>
+		/// <param name="covInfo"></param>
+		/// <param name="lindDic"></param>
+		public static void LocalizeStatements(TestInfo testInfo, CoverageInfo covInfo, Dictionary<FileInfo, Dictionary<int, int>> lindDic) { // Targeting only statement
+			Console.WriteLine("before: Python.create");
+			var engine = Python.CreateEngine();
+			Console.WriteLine("before: engine.create");
 			var scope = engine.CreateScope();
 			var fileName = "BugLocalization.py";
-	        Console.WriteLine("before scriptPath");
+			Console.WriteLine("before scriptPath");
 			var scriptPath = Path.Combine(OccfGlobal.CurrentDirectory, fileName);
 			if (!File.Exists(scriptPath)) {
 				scriptPath = Path.Combine(OccfGlobal.ExeDirectory, fileName);
 			}
-	        Console.WriteLine("before: engine.Execute");
+			Console.WriteLine("before: engine.Execute");
 			engine.ExecuteFile(scriptPath, scope);
-	        Console.WriteLine("before: calcMetricFunc");
+			Console.WriteLine("before: calcMetricFunc");
 			var calcMetricFunc =
 					scope.GetVariable<Func<double, double, double, double, IEnumerable>>(
 							"CalculateMetric");
@@ -147,19 +147,19 @@ namespace Occf.Tools.Cui {
 					delimiter = ", ";
 				}
 
-                //Dictionaryを検索してKeyに対象ファイルが存在したらオリジナル行番号に変換
-			    string tag;
-			    var fileInfo = new FileInfo(stmt.Item2.RelativePath);
-                if(lindDic.ContainsKey(fileInfo)) {
-                    var orgStartLine = lindDic[fileInfo][stmt.Item2.Position.StartLine];
-                    var orgEndLine = lindDic[fileInfo][stmt.Item2.Position.EndLine];
-                    var orgStartLineString = orgStartLine == orgEndLine 
-                                            ? orgStartLine.ToString() : (orgStartLine + " - " + orgEndLine); 
-                    tag = stmt.Item2.Tag + ": " + orgStartLineString;
-                }else {
-                    tag = stmt.Item2.Tag + ": " + stmt.Item2.Position.SmartLineString;
-                }
-                
+				//Dictionaryを検索してKeyに対象ファイルが存在したらオリジナル行番号に変換
+				string tag;
+				var fileInfo = new FileInfo(stmt.Item2.RelativePath);
+				if(lindDic.ContainsKey(fileInfo)) {
+					var orgStartLine = lindDic[fileInfo][stmt.Item2.Position.StartLine];
+					var orgEndLine = lindDic[fileInfo][stmt.Item2.Position.EndLine];
+					var orgStartLineString = orgStartLine == orgEndLine 
+											? orgStartLine.ToString() : (orgStartLine + " - " + orgEndLine); 
+					tag = stmt.Item2.Tag + ": " + orgStartLineString;
+				}else {
+					tag = stmt.Item2.Tag + ": " + stmt.Item2.Position.SmartLineString;
+				}
+				
 				Console.WriteLine(tag.PadRight(45) + ": " + metricsString);
 			}
 		}
