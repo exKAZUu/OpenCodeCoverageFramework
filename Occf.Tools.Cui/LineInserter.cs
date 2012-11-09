@@ -63,7 +63,8 @@ namespace Occf.Tools.Cui {
             insertList.AddRange(rootDir.GetFiles("*.cxx", SearchOption.AllDirectories));
 
             if(testDir != null) {
-                for (var i = insertList.Count - 1; i > 0; i--) {
+                //注意:　i>0⇒i>=0　に変更　要確認
+                for (var i = insertList.Count - 1; i >= 0; i--) {
                     if (insertList[i].FullName.StartsWith(testDir.FullName)) {
                         insertList.Remove(insertList[i]);
                     }

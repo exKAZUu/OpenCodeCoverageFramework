@@ -68,7 +68,8 @@ namespace Occf.Tools.Cui
             mapFileList.AddRange(rootDir.GetFiles("*.cxx", SearchOption.AllDirectories));
 
             if (testDir != null) {
-                for (var i = mapFileList.Count - 1; i > 0; i--) {
+                //注意：i>0　⇒　i>=0に変更
+                for (var i = mapFileList.Count - 1; i >= 0; i--) {
                     if (mapFileList[i].FullName.StartsWith(testDir.FullName)) {
                         mapFileList.Remove(mapFileList[i]);
                     }

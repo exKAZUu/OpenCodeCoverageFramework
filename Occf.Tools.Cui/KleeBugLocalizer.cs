@@ -53,16 +53,15 @@ namespace Occf.Tools.Cui {
 		}
 
 		private static void Localize(IList<string> args) {
-			var formatter = new BinaryFormatter();
+		    var formatter = new BinaryFormatter();
 			var rootDirInfo = new DirectoryInfo(args[0]);
 			var testDirInfo = new DirectoryInfo(args[1]);
-			var covInfoFile = PathFinder.FindCoverageInfoPath(rootDirInfo);
+		    var covInfoFile = PathFinder.FindCoverageInfoPath(rootDirInfo);
 			var covInfo = InfoReader.ReadCoverageInfo(covInfoFile, formatter);
-			var testInfo = AnalyzeKleeTestFiles(testDirInfo);
-		    Console.WriteLine("before: Analyze");
-			AnalyzeTestResult(rootDirInfo, testInfo);
-		    Console.WriteLine("before: lineDic");
-            //Line対応のMapのMapを作成、
+		    var testInfo = AnalyzeKleeTestFiles(testDirInfo);
+		    
+            AnalyzeTestResult(rootDirInfo, testInfo);
+		    //Line対応のMapのMapを作成、
 		    var lineDic = new Dictionary<FileInfo, Dictionary<int, int>>();
             var mapFileInfo = new FileInfo(rootDirInfo.FullName + "/" + OccfNames.LineMapping);
             if (mapFileInfo.Exists) {
@@ -70,21 +69,20 @@ namespace Occf.Tools.Cui {
             } else {
                 Console.WriteLine("\"" + OccfNames.LineMapping +"\" file is not found.");
             }
-		    Console.WriteLine("before: localizestatement");
-			BugLocalizer.LocalizeStatements(testInfo, covInfo, lineDic);
+		    BugLocalizer.LocalizeStatements(testInfo, covInfo, lineDic);
 		}
 
 		private static TestInfo AnalyzeKleeTestFiles(DirectoryInfo testDirInfo) {
-			var files = testDirInfo.EnumerateFiles("*.ktest");
+		    var files = testDirInfo.EnumerateFiles("*.ktest");
 			var testInfo = new TestInfo(testDirInfo.FullName);
-			testInfo.InitializeForStoringData(false);
+		    testInfo.InitializeForStoringData(false);
 			foreach (var file in files) {
-				var relativePath = XPath.GetRelativePath(file.FullName, testDirInfo.FullName);
-				var testCase = new TestCase(relativePath, file.FullName, new CodePosition());
-				testInfo.TestCases.Add(testCase);
-				testCase.InitializeForStoringData(false);
-				var dataPath = file.FullName + OccfNames.CoverageData;
-				CoverageDataReader.ReadFile(testInfo, dataPath, testCase);
+			    var relativePath = XPath.GetRelativePath(file.FullName, testDirInfo.FullName);
+			    var testCase = new TestCase(relativePath, file.FullName, new CodePosition());
+			    testInfo.TestCases.Add(testCase);
+			    testCase.InitializeForStoringData(false);
+			    var dataPath = file.FullName + OccfNames.CoverageData;
+			    CoverageDataReader.ReadFile(testInfo, dataPath, testCase);
 			}
 			return testInfo;
 		}
@@ -137,6 +135,7 @@ namespace Occf.Tools.Cui {
         }
 
         //以下、ファイルからディレクトリを作成に変更のため削除予定
+        /*
         private static Dictionary<FileInfo, Dictionary<int, int>> 
             LineDicCreater(DirectoryInfo rootDirInfo, DirectoryInfo testDirTnfo) {
             
@@ -193,5 +192,6 @@ namespace Occf.Tools.Cui {
 
             return lineDic;
         }
+        */
 	}
 }
