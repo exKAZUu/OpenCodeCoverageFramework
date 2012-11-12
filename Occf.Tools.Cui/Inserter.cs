@@ -246,144 +246,20 @@ namespace Occf.Tools.Cui {
 		    IEnumerable<string> bakcupPatterns = new List<string>(){"*"+OccfNames.BackupSuffix, "*"+OccfNames.LineBackUpSuffix, "*"+OccfNames.KleeBackUpSuffix}; 
 		    IEnumerable<FileInfo> backups;
 
-            //　**
-            /*
-		    for (int i = 0; i < patterns.Count(); i++) {
-                Console.WriteLine("patterns "+ i + " : " + patterns.ElementAt(i));
-		        
-		    }
-            for (int i = 0; i < bakcupPatterns.Count(); i++)
-            {
-                Console.WriteLine("bkpats " + i + " : " + bakcupPatterns.ElementAt(i));
-
-            }
-            */
-		    //　**
-            /*
-		    IEnumerable<FileInfo> pths = rootDir.EnumerateFiles("*", SearchOption.AllDirectories);
-		    IEnumerable<FileInfo> pths3;
-		    var lpth3 = pths.ToList();
-            var lpth3b = new List<FileInfo>();
-            for(var i=lpth3.Count-1; i>=0; i--) {
-                var fi = lpth3.ElementAt(i);
-                foreach (var stpt in mode.FilePatterns) {
-                    if(fi.FullName.EndsWith(stpt.Substring(1))) {
-                        lpth3b.Add(fi);
-                        break;
-                    }
-                }
-            }
-            Console.WriteLine("lpth3.co :" + lpth3b.Count());
-		    pths3 = lpth3b.CopyTo();
-            foreach (var fileInfo in pths3) {
-		        Console.WriteLine("lp3fi : " + fileInfo.FullName);
-		    }
-		    var pat3 = new List<FileInfo>();
-            for(int i=0; i<lpth3.Count; i++) {
-                var fi = lpth3.ElementAt(i);
-                
-                
-            }
-		    Console.WriteLine("pat3 Count : " + pat3.Count());
-            //
-		    var ppp = new List<FileInfo>();
-		    var fdpp = new List<FileInfo>();
-		    var all = lpth3;
-            foreach (var pattern in patterns)
-            {
-                Console.WriteLine("pattaaaa : " + pattern);
-                var newp = rootDir.GetFiles(
-                        pattern, SearchOption.AllDirectories);
-                var s = newp.ToList();
-                Console.WriteLine("newp Co : " + newp.Count());
-                foreach (var fileInfo in s) {
-                    Console.WriteLine("fionfo SS : " + fileInfo.FullName);
-                    ppp.Add(fileInfo);
-                }
-                
-            }
-		    Console.WriteLine("ppp Co : " + ppp.Count());
-
-		    for(int i=all.Count-1; i>=0; i--) {
-		        foreach (var fileInfo in ppp) {
-		            if(fileInfo.FullName == all[i].FullName) {
-		                fdpp.Add(all[i]);
-		                all.Remove(all[i]);
-                        break;
-		            }
-		        }
-		    }
-            Console.WriteLine("fddd : " + fdpp.Count);
-		    Console.WriteLine("lpth3 : "+ lpth3.Count);
-		    Console.WriteLine("all   : "+ all.Count);
-            */
-
-            //Console.WriteLine("psize:" + patterns.Count());//確認
-		    //var allFileList = rootDir.EnumerateFiles("*", SearchOption.AllDirectories).ToList();
-		    //var pathsFilteredList = new List<FileInfo>();
-            if(!patterns.Any()) { // -p　指定が無い場合：拡張子判定
+           if(!patterns.Any()) { // -p　指定が無い場合：拡張子判定
                 paths = mode.FilePatterns.SelectMany(
                     pat => rootDir.GetFiles(
                             pat, SearchOption.AllDirectories));
-                /*
-                for(var i=0; i<allFileList.Count; i++) {
-                    var fileInfo = allFileList.ElementAt(i);
-                    foreach (var filePattern in mode.FilePatterns) {
-                        if(fileInfo.FullName.EndsWith(filePattern.Substring(1))) {
-                            pathsFilteredList.Add(fileInfo);
-                            break;
-                        }
-                    }
-                }
-                paths = pathsFilteredList;*/
             } else {// -p指定があった時はそれを格納
-                //var allFiles = allFileList;
                 paths = patterns.Where(pattern => !mode.FilePatterns.Contains(pattern))
                                     .SelectMany(
                                             pat => rootDir.GetFiles(pat, SearchOption.AllDirectories));
-                /*
-                var patFileLists = new List<FileInfo>();
-                foreach (var pattern in patterns) {
-                    var singlePatLists = rootDir.GetFiles(pattern, SearchOption.AllDirectories).ToList();
-                    foreach (var fileInfo in singlePatLists) {
-                        patFileLists.Add(fileInfo);
-                    }
-                }
-               */
-
             }
 
             backups = bakcupPatterns.Where(bakcupPattern => !mode.FilePatterns.Contains(bakcupPattern))
                                     .SelectMany(
                                             bpat=> rootDir.GetFiles(bpat, SearchOption.AllDirectories));
-
-
-		   
-
-		    //Console.WriteLine("pathsNum : " + paths.Count());
-		    foreach (var fileInfo in paths) {
-		        //Console.WriteLine("fileinfo : " + fileInfo.FullName);
-		    }
-
-            //Console.WriteLine("bkcount : " + backups.Count());//確認
-
-            //確認　**
-            /*
-            for (int i = 0; i < paths.Count(); i++)            {
-                Console.WriteLine("paths2AAA :" + paths.ElementAt(i).FullName);
-            }*/
-
-            //確認　***
-            /*
-            for (int i = 0; i < paths.Count(); i++){
-                Console.WriteLine("paths1 :" + paths.ElementAt(i));
-            }
-            for (int i = 0; i < backups.Count(); i++){
-                Console.WriteLine("pathsBK :" + backups.ElementAt(i));
-            }
-            */ 
-            //***
-
+                        
 		    var pathList = paths.ToList();
 		    var bkpathList = backups.ToList();
 
@@ -402,46 +278,24 @@ namespace Occf.Tools.Cui {
                 }
             }*/
 		    paths = pathList;　//バックアップファイルを除いたリストに置き換え
-            
-            
+                        
             /*
-            paths = mode.FilePatterns.SelectMany(
-                    pat => rootDir.EnumerateFiles(
-                            pat, SearchOption.AllDirectories));
-           
-            paths =
-                    paths.Concat(
-                            patterns.Where(pattern => !mode.FilePatterns.Contains(pattern))
-                                    .SelectMany(
-                                            pat => rootDir.EnumerateFiles(pat, SearchOption.AllDirectories)));
+            paths = mode.FilePatterns.SelectMany(pat => rootDir.EnumerateFiles(pat, SearchOption.AllDirectories));
+            paths = paths.Concat(patterns.Where(pattern => !mode.FilePatterns.Contains(pattern))
+                                    .SelectMany(pat => rootDir.EnumerateFiles(pat, SearchOption.AllDirectories)));
             */
 
-            //確認　**
-            /*
-            for (int i = 0; i < paths.Count(); i++){
-                Console.WriteLine("paths2 :" + paths.ElementAt(i).FullName);
-            }*/
-            
-            //**
-            
             // ignore test code in the directory of production code
             if (testDir != null){
                 paths = paths.Where(f => !f.FullName.StartsWith(testDir.FullName));
             }
 
-            //確認　**
-            /*
-            for (int i = 0; i < paths.Count(); i++){
-                Console.WriteLine("paths2BB :" + paths.ElementAt(i).FullName);
-            }*/
-            
 			foreach (var path in paths.ToList()) {
 				var bakPath = rootDir.GetFile(path + OccfNames.BackupSuffix).FullName;
                 //対象ファイルに対してKlee_backやLine_backがあるときは作成しない
                 if(!(File.Exists(path.FullName+OccfNames.LineBackUpSuffix)) 
                     && !(File.Exists(path.FullName+OccfNames.KleeBackUpSuffix))) {
                     path.CopyTo(bakPath, true);
-                    
                 }
 				var outPath = CoverageCodeGenerator.WriteCoveragedCode(
 						mode, info, path, rootDir);

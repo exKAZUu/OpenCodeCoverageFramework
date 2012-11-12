@@ -147,20 +147,17 @@ namespace Occf.Tools.Cui {
 
 				//Dictionaryを検索してKeyに対象ファイルが存在したらオリジナル行番号に変換
 				string tag;
-			    Console.WriteLine("It2RP : " + stmt.Item2.RelativePath);
-                var fileInfo = (from fileinfos in lindDic.Keys 
+			    var fileInfo = (from fileinfos in lindDic.Keys 
                                         let fileFullname = fileinfos.FullName 
                                         let itemPath = stmt.Item2.RelativePath 
                                         where fileFullname.EndsWith(itemPath) 
                                         select fileinfos).FirstOrDefault();
                 /* 上のLINQの元コード
                 FileInfo fileInfo = null;
-                foreach (var fileinfos in lindDic.Keys)
-                {
+                foreach (var fileinfos in lindDic.Keys) {
                     var fileFullname = fileinfos.FullName;
                     var itemPath = stmt.Item2.RelativePath;
-                    if (fileFullname.EndsWith(itemPath))
-                    {
+                    if (fileFullname.EndsWith(itemPath)) {
                         fileInfo = fileinfos;
                         break;
                     }
