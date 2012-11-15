@@ -162,18 +162,25 @@ namespace Occf.Tools.Cui {
                         break;
                     }
                 }*/
-
+                var orgLineNumFlag = true;
 			    if(fileInfo != null && fileInfo.Exists) {
 					var orgStartLine = lindDic[fileInfo][stmt.Item2.Position.StartLine];
 					var orgEndLine = lindDic[fileInfo][stmt.Item2.Position.EndLine];
-					var orgStartLineString = orgStartLine == orgEndLine 
-											? orgStartLine.ToString() : (orgStartLine + " - " + orgEndLine); 
+					//var orgStartLineString = orgStartLine == orgEndLine 
+						//					? orgStartLine.ToString() : (orgStartLine + " - " + orgEndLine);
+                    var orgStartLineString = orgStartLine.ToString();
 					tag = stmt.Item2.Tag + ": " + orgStartLineString;
+                    if (orgStartLine == 0){
+                        orgLineNumFlag = false;
+                    }
+
 				}else {
 					tag = stmt.Item2.Tag + ": " + stmt.Item2.Position.SmartLineString;
 				}
-				
-				Console.WriteLine(tag.PadRight(45) + ": " + metricsString);
+
+                if (orgLineNumFlag){
+                    Console.WriteLine(tag.PadRight(45) + ": " + metricsString);
+                }
 			}
 		}
 

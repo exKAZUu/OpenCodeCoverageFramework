@@ -86,6 +86,7 @@ namespace Occf.Tools.Cui
             var mappingFileFullname = rootDir.FullName + "/" + OccfNames.LineMapping;
             const string header = @"# ";
             const string divider = @" ";
+            //const string occfLineMarker = "# 1 OccfLineMarker";
             var trueLineNum = 0;
 
             using (var reader = new StreamReader(readedFile.FullName)) {
@@ -98,7 +99,7 @@ namespace Occf.Tools.Cui
 
                     writer.WriteLine(readedFile.FullName);
                     writer.WriteLine(1);
-                    writer.WriteLine(1);
+                    writer.WriteLine(0);
                     
                     var nowLineNum = 2;
                     while ((line = reader.ReadLine()) != null) {
@@ -109,6 +110,9 @@ namespace Occf.Tools.Cui
                                 trueLineNum = int.Parse(line.Substring(header.Length, digitNum));
                             }
                         }
+                        //if (line == occfLineMarker){
+                            trueLineNum = 0;
+                        //}
                         writer.WriteLine(readedFile.FullName);
                         writer.WriteLine(nowLineNum);
                         writer.WriteLine(trueLineNum);
