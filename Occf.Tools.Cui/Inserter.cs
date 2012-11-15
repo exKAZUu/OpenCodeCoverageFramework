@@ -295,7 +295,8 @@ namespace Occf.Tools.Cui {
             }
 
 			foreach (var path in paths.ToList()) {
-				var bakPath = rootDir.GetFile(path + OccfNames.BackupSuffix).FullName;//root
+                //普通にpath.FullName+OccfNames.BackupSuffixでもいいのでは？　まあ../とか完全に一致しない時もあるけど…
+                var bakPath = rootDir.GetFile(path.FullName + OccfNames.BackupSuffix).FullName;//root
                 //対象ファイルに対してKlee_backやLine_backがあるときは作成しない
                 if(!(File.Exists(path.FullName+OccfNames.LineBackUpSuffix)) 
                     && !(File.Exists(path.FullName+OccfNames.KleeBackUpSuffix))) {
