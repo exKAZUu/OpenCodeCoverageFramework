@@ -176,15 +176,16 @@ namespace Occf.Tools.Cui {
 		    Console.WriteLine("testDir:" + tDir);
 		    Console.WriteLine("libDir: " + libDir.Name);
             *///　**
-			InsertMeasurementCode(rootDir, patterns, testDir, libDir, mode);
+			InsertMeasurementCode(rootDir, srcDir, patterns, testDir, libDir, mode);
 			return true;
 		}
 
 		public static void InsertMeasurementCode(
-				DirectoryInfo rootDir, List<string> patterns, DirectoryInfo testDir,
+				DirectoryInfo rootDir, DirectoryInfo srcDir, List<string> patterns, DirectoryInfo testDir,
 				DirectoryInfo libDir,
 				CoverageMode mode) {
 			Contract.Requires<ArgumentException>(rootDir.Exists);
+            Contract.Requires<ArgumentException>(srcDir.Exists);
 			Contract.Requires<ArgumentException>(
 					testDir == null || testDir.Exists);
 			Contract.Requires<ArgumentException>(libDir.Exists);
@@ -202,8 +203,8 @@ namespace Occf.Tools.Cui {
 			RemoveExistingCoverageDataFiles(rootDir, libDir);
 
 			mode.RemoveLibraries(libDir);
-            //src
-			WriteProductionCodeFiles(rootDir, patterns, testDir, mode, covInfo);
+            //+src
+			WriteProductionCodeFiles(rootDir, srcDir, patterns, testDir, mode, covInfo);
 			if (testInfo != null) {
                 //(o)root or src
 				WriteTestCodeFiles(rootDir, testDir, mode, testInfo);
@@ -238,7 +239,7 @@ namespace Occf.Tools.Cui {
 		}
 
 		private static void WriteProductionCodeFiles(
-				DirectoryInfo rootDir, IEnumerable<string> patterns, DirectoryInfo testDir,
+				DirectoryInfo rootDir, DirectoryInfo srcDir, IEnumerable<string> patterns, DirectoryInfo testDir,
 				CoverageMode mode, CoverageInfo info) {
 
 		    IEnumerable<FileInfo> paths;
@@ -248,17 +249,20 @@ namespace Occf.Tools.Cui {
 
            if(!patterns.Any()) { // -p　指定が無い場合：拡張子判定
                 paths = mode.FilePatterns.SelectMany(
-                    pat => rootDir.GetFiles(
+                    //pat => rootDir.GetFiles(
+                    pat => srcDir.GetFiles(//src
                             pat, SearchOption.AllDirectories));
             } else {// -p指定があった時はそれを格納
                 paths = patterns.Where(pattern => !mode.FilePatterns.Contains(pattern))
                                     .SelectMany(
-                                            pat => rootDir.GetFiles(pat, SearchOption.AllDirectories));
+                                            pat => srcDir.GetFiles(pat, SearchOption.AllDirectories));//src
+                                            //pat => rootDir.GetFiles(pat, SearchOption.AllDirectories));
             }
 
             backups = bakcupPatterns.Where(bakcupPattern => !mode.FilePatterns.Contains(bakcupPattern))
                                     .SelectMany(
-                                            bpat=> rootDir.GetFiles(bpat, SearchOption.AllDirectories));
+                                            bpat=> srcDir.GetFiles(bpat, SearchOption.AllDirectories));//src
+                                            //bpat=> rootDir.GetFiles(bpat, SearchOption.AllDirectories));
                         
 		    var pathList = paths.ToList();
 		    var bkpathList = backups.ToList();
@@ -291,14 +295,14 @@ namespace Occf.Tools.Cui {
             }
 
 			foreach (var path in paths.ToList()) {
-				var bakPath = rootDir.GetFile(path + OccfNames.BackupSuffix).FullName;
+				var bakPath = rootDir.GetFile(path + OccfNames.BackupSuffix).FullName;//root
                 //対象ファイルに対してKlee_backやLine_backがあるときは作成しない
                 if(!(File.Exists(path.FullName+OccfNames.LineBackUpSuffix)) 
                     && !(File.Exists(path.FullName+OccfNames.KleeBackUpSuffix))) {
                     path.CopyTo(bakPath, true);
                 }
 				var outPath = CoverageCodeGenerator.WriteCoveragedCode(
-						mode, info, path, rootDir);
+						mode, info, path, rootDir);//? たどってみて調査
 				Console.WriteLine("wrote:" + outPath);
 			}
 		}
