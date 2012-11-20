@@ -20,3 +20,4 @@
 # Development team
 Kazunori Sakamoto
 Kiyofumi Shimojo
+Ryohei Takasawa
