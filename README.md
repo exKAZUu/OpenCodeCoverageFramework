@@ -2,6 +2,7 @@
 1. Create issues on GitHub
 2. Create new branch with the following command (XX is the issue number and YYYY is the abstract):
 
+        git pull
         git checkout -b XX_YYYY
     Note that this command create a branch from the current branch.
 3. Write and commit code!
@@ -14,3 +15,6 @@
         git merge XX_YYYY
         git branch -d XX_YYYY
     Note that git shows errors if the merge is failed.
+
+# Development team
+Kazunori Sakamoto
