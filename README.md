@@ -18,5 +18,5 @@
     Note that git shows errors if the merge is failed.
 
 # Development team
-Kazunori Sakamoto
+Kazunori Sakamoto  
 Ryohei Takasawa
