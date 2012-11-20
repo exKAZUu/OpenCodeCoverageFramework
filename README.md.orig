@@ -18,6 +18,11 @@
     Note that git shows errors if the merge is failed.
 
 # Development team
+<<<<<<< HEAD
 Kazunori Sakamoto  
-Kiyofumi Shimojo  
 Ryohei Takasawa
+=======
+Kazunori Sakamoto
+Kiyofumi Shimojo
+Ryohei Takasawa
+>>>>>>> 8706bd57b4c83d6e2f770625ddb366682c75b253
