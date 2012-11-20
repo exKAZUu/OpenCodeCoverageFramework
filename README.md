@@ -13,6 +13,7 @@
 
         git checkout master
         git merge XX_YYYY
+        git push origin master
         git branch -d XX_YYYY
     Note that git shows errors if the merge is failed.
 
