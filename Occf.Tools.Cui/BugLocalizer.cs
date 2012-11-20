@@ -109,27 +109,27 @@ namespace Occf.Tools.Cui {
 			var scope = engine.CreateScope();
 			var fileName = "BugLocalization.py";
 			
-            var scriptPath = Path.Combine(OccfGlobal.CurrentDirectory, fileName);
+			var scriptPath = Path.Combine(OccfGlobal.CurrentDirectory, fileName);
 			if (!File.Exists(scriptPath)) {
 				scriptPath = Path.Combine(OccfGlobal.ExeDirectory, fileName);
 			}
 			
-            engine.ExecuteFile(scriptPath, scope);
+			engine.ExecuteFile(scriptPath, scope);
 			
-            var calcMetricFunc =
+			var calcMetricFunc =
 					scope.GetVariable<Func<double, double, double, double, IEnumerable>>(
 							"CalculateMetric");
 			Console.WriteLine(
 					"risk, executedAndPassedCount / passedCount, executedAndFailedCount / failedCount");
 			foreach (var stmt in covInfo.StatementIndexAndTargets) {
-			    var passedTestCases = testInfo.TestCases.Where(t => t.Passed);
-			    var executedAndPassedTestCases =
+				var passedTestCases = testInfo.TestCases.Where(t => t.Passed);
+				var executedAndPassedTestCases =
 						passedTestCases.Where(t => t.Statements.Contains(stmt.Item1));
-			    var failedTestCases = testInfo.TestCases.Where(t => !t.Passed);
-			    var executedAndFailedTestCases =
+				var failedTestCases = testInfo.TestCases.Where(t => !t.Passed);
+				var executedAndFailedTestCases =
 						failedTestCases.Where(t => t.Statements.Contains(stmt.Item1));
-			    
-                var executedAndPassedCount = executedAndPassedTestCases.Count();
+				
+				var executedAndPassedCount = executedAndPassedTestCases.Count();
 				var passedCount = passedTestCases.Count();
 				var executedAndFailedCount = executedAndFailedTestCases.Count();
 				var failedCount = failedTestCases.Count();
@@ -147,40 +147,40 @@ namespace Occf.Tools.Cui {
 
 				//Dictionaryを検索してKeyに対象ファイルが存在したらオリジナル行番号に変換
 				string tag;
-			    var fileInfo = (from fileinfos in lindDic.Keys 
-                                        let fileFullname = fileinfos.FullName 
-                                        let itemPath = stmt.Item2.RelativePath 
-                                        where fileFullname.EndsWith(itemPath) 
-                                        select fileinfos).FirstOrDefault();
-                /* 上のLINQの元コード
-                FileInfo fileInfo = null;
-                foreach (var fileinfos in lindDic.Keys) {
-                    var fileFullname = fileinfos.FullName;
-                    var itemPath = stmt.Item2.RelativePath;
-                    if (fileFullname.EndsWith(itemPath)) {
-                        fileInfo = fileinfos;
-                        break;
-                    }
-                }*/
-                var orgLineNumFlag = true;
-			    if(fileInfo != null && fileInfo.Exists) {
+				var fileInfo = (from fileinfos in lindDic.Keys 
+										let fileFullname = fileinfos.FullName 
+										let itemPath = stmt.Item2.RelativePath 
+										where fileFullname.EndsWith(itemPath) 
+										select fileinfos).FirstOrDefault();
+				/* 上のLINQの元コード
+				FileInfo fileInfo = null;
+				foreach (var fileinfos in lindDic.Keys) {
+					var fileFullname = fileinfos.FullName;
+					var itemPath = stmt.Item2.RelativePath;
+					if (fileFullname.EndsWith(itemPath)) {
+						fileInfo = fileinfos;
+						break;
+					}
+				}*/
+				var orgLineNumFlag = true;
+				if(fileInfo != null && fileInfo.Exists) {
 					var orgStartLine = lindDic[fileInfo][stmt.Item2.Position.StartLine];
 					var orgEndLine = lindDic[fileInfo][stmt.Item2.Position.EndLine];
 					//var orgStartLineString = orgStartLine == orgEndLine 
 						//					? orgStartLine.ToString() : (orgStartLine + " - " + orgEndLine);
-                    var orgStartLineString = orgStartLine.ToString();
+					var orgStartLineString = orgStartLine.ToString();
 					tag = stmt.Item2.Tag + ": " + orgStartLineString;
-                    if (orgStartLine == 0){
-                        orgLineNumFlag = false;
-                    }
+					if (orgStartLine == 0){
+						orgLineNumFlag = false;
+					}
 
 				}else {
 					tag = stmt.Item2.Tag + ": " + stmt.Item2.Position.SmartLineString;
 				}
 
-                if (orgLineNumFlag){
-                    Console.WriteLine(tag.PadRight(45) + ": " + metricsString);
-                }
+				if (orgLineNumFlag){
+					Console.WriteLine(tag.PadRight(45) + ": " + metricsString);
+				}
 			}
 		}
 

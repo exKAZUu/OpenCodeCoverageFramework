@@ -53,36 +53,36 @@ namespace Occf.Tools.Cui {
 		}
 
 		private static void Localize(IList<string> args) {
-		    var formatter = new BinaryFormatter();
+			var formatter = new BinaryFormatter();
 			var rootDirInfo = new DirectoryInfo(args[0]);
 			var testDirInfo = new DirectoryInfo(args[1]);
-		    var covInfoFile = PathFinder.FindCoverageInfoPath(rootDirInfo);
+			var covInfoFile = PathFinder.FindCoverageInfoPath(rootDirInfo);
 			var covInfo = InfoReader.ReadCoverageInfo(covInfoFile, formatter);
-		    var testInfo = AnalyzeKleeTestFiles(testDirInfo);
-		    
-            AnalyzeTestResult(rootDirInfo, testInfo);
-		    //Line対応のMapのMapを作成、
-		    var lineDic = new Dictionary<FileInfo, Dictionary<int, int>>();
-            var mapFileInfo = new FileInfo(rootDirInfo.FullName + "/" + OccfNames.LineMapping);
-            if (mapFileInfo.Exists) {
-                lineDic = MapDicCreater(mapFileInfo);
-            } else {
-                Console.WriteLine("\"" + OccfNames.LineMapping +"\" file is not found.");
-            }
-		    BugLocalizer.LocalizeStatements(testInfo, covInfo, lineDic);
+			var testInfo = AnalyzeKleeTestFiles(testDirInfo);
+			
+			AnalyzeTestResult(rootDirInfo, testInfo);
+			//Line対応のMapのMapを作成、
+			var lineDic = new Dictionary<FileInfo, Dictionary<int, int>>();
+			var mapFileInfo = new FileInfo(rootDirInfo.FullName + "/" + OccfNames.LineMapping);
+			if (mapFileInfo.Exists) {
+				lineDic = MapDicCreater(mapFileInfo);
+			} else {
+				Console.WriteLine("\"" + OccfNames.LineMapping +"\" file is not found.");
+			}
+			BugLocalizer.LocalizeStatements(testInfo, covInfo, lineDic);
 		}
 
 		private static TestInfo AnalyzeKleeTestFiles(DirectoryInfo testDirInfo) {
-		    var files = testDirInfo.EnumerateFiles("*.ktest");
+			var files = testDirInfo.EnumerateFiles("*.ktest");
 			var testInfo = new TestInfo(testDirInfo.FullName);
-		    testInfo.InitializeForStoringData(false);
+			testInfo.InitializeForStoringData(false);
 			foreach (var file in files) {
-			    var relativePath = XPath.GetRelativePath(file.FullName, testDirInfo.FullName);
-			    var testCase = new TestCase(relativePath, file.FullName, new CodePosition());
-			    testInfo.TestCases.Add(testCase);
-			    testCase.InitializeForStoringData(false);
-			    var dataPath = file.FullName + OccfNames.CoverageData;
-			    CoverageDataReader.ReadFile(testInfo, dataPath, testCase);
+				var relativePath = XPath.GetRelativePath(file.FullName, testDirInfo.FullName);
+				var testCase = new TestCase(relativePath, file.FullName, new CodePosition());
+				testInfo.TestCases.Add(testCase);
+				testCase.InitializeForStoringData(false);
+				var dataPath = file.FullName + OccfNames.CoverageData;
+				CoverageDataReader.ReadFile(testInfo, dataPath, testCase);
 			}
 			return testInfo;
 		}
@@ -103,95 +103,95 @@ namespace Occf.Tools.Cui {
 			}
 		}
 
-        public static Dictionary<FileInfo, Dictionary<int, int>> MapDicCreater(FileInfo mappingFile) {
-            var mapDic = new Dictionary<FileInfo, Dictionary<int, int>>();
+		public static Dictionary<FileInfo, Dictionary<int, int>> MapDicCreater(FileInfo mappingFile) {
+			var mapDic = new Dictionary<FileInfo, Dictionary<int, int>>();
 
-            using (var reader = new StreamReader(mappingFile.FullName)) {
-                var lineDic = new Dictionary<int, int>();
-                var lastFileInfo = new FileInfo(reader.ReadLine());
-                var nowLine = int.Parse(reader.ReadLine());
-                var trueLine = int.Parse(reader.ReadLine());
-                lineDic.Add(nowLine, trueLine);
+			using (var reader = new StreamReader(mappingFile.FullName)) {
+				var lineDic = new Dictionary<int, int>();
+				var lastFileInfo = new FileInfo(reader.ReadLine());
+				var nowLine = int.Parse(reader.ReadLine());
+				var trueLine = int.Parse(reader.ReadLine());
+				lineDic.Add(nowLine, trueLine);
 
-                string line;
-                while ((line = reader.ReadLine()) != null) {
-                    var fileInfo = new FileInfo(line);
-                    nowLine = int.Parse(reader.ReadLine());
-                    trueLine = int.Parse(reader.ReadLine());
+				string line;
+				while ((line = reader.ReadLine()) != null) {
+					var fileInfo = new FileInfo(line);
+					nowLine = int.Parse(reader.ReadLine());
+					trueLine = int.Parse(reader.ReadLine());
 
-                    if (!(fileInfo.FullName.Equals(lastFileInfo.FullName))) {
-                        mapDic.Add(lastFileInfo, new Dictionary<int, int>(lineDic));
-                        lineDic.Clear();
-                        lastFileInfo = fileInfo;
-                    }
+					if (!(fileInfo.FullName.Equals(lastFileInfo.FullName))) {
+						mapDic.Add(lastFileInfo, new Dictionary<int, int>(lineDic));
+						lineDic.Clear();
+						lastFileInfo = fileInfo;
+					}
 
-                    lineDic.Add(nowLine, trueLine);
-                }
-                mapDic.Add(lastFileInfo, lineDic);
-                reader.Close();
-            }
+					lineDic.Add(nowLine, trueLine);
+				}
+				mapDic.Add(lastFileInfo, lineDic);
+				reader.Close();
+			}
 
-            return mapDic;
-        }
+			return mapDic;
+		}
 
-        //以下、ファイルからディレクトリを作成に変更のため削除予定
-        /*
-        private static Dictionary<FileInfo, Dictionary<int, int>> 
-            LineDicCreater(DirectoryInfo rootDirInfo, DirectoryInfo testDirTnfo) {
-            
-            var fileList = new List<FileInfo>();
-            fileList.AddRange(rootDirInfo.GetFiles("*.c", SearchOption.AllDirectories));
-            fileList.AddRange(rootDirInfo.GetFiles("*.cpp", SearchOption.AllDirectories));
-            fileList.AddRange(rootDirInfo.GetFiles("*.cxx", SearchOption.AllDirectories));
+		//以下、ファイルからディレクトリを作成に変更のため削除予定
+		/*
+		private static Dictionary<FileInfo, Dictionary<int, int>> 
+			LineDicCreater(DirectoryInfo rootDirInfo, DirectoryInfo testDirTnfo) {
+			
+			var fileList = new List<FileInfo>();
+			fileList.AddRange(rootDirInfo.GetFiles("*.c", SearchOption.AllDirectories));
+			fileList.AddRange(rootDirInfo.GetFiles("*.cpp", SearchOption.AllDirectories));
+			fileList.AddRange(rootDirInfo.GetFiles("*.cxx", SearchOption.AllDirectories));
 
-            if (testDirTnfo != null && testDirTnfo.Exists) {
-                for (var i = fileList.Count - 1; i > 0; i--) {
-                    if (fileList[i].FullName.StartsWith(testDirTnfo.FullName)) {
-                        fileList.Remove(fileList[i]);
-                    }
-                }
-            }
+			if (testDirTnfo != null && testDirTnfo.Exists) {
+				for (var i = fileList.Count - 1; i > 0; i--) {
+					if (fileList[i].FullName.StartsWith(testDirTnfo.FullName)) {
+						fileList.Remove(fileList[i]);
+					}
+				}
+			}
 
-            var lineDic = fileList.ToDictionary(fileInfo => fileInfo, LineSymmetyCreater);
+			var lineDic = fileList.ToDictionary(fileInfo => fileInfo, LineSymmetyCreater);
 
-            return lineDic;
-        }
+			return lineDic;
+		}
 
-        private static Dictionary<int, int> LineSymmetyCreater(FileInfo fileInfo) {
-            var lineDic = new Dictionary<int, int>();
-            var fileName = fileInfo.Name;
-            //var lineAppender = @"""" + fileName + @"""";
-            //var apdLength = lineAppender.Length;
-            const string header = @"# ";
-            const string divider = @" ";
-            //var leastLength = header.Length + divider.Length + apdLength;
-            var trueLineNum = 0;
+		private static Dictionary<int, int> LineSymmetyCreater(FileInfo fileInfo) {
+			var lineDic = new Dictionary<int, int>();
+			var fileName = fileInfo.Name;
+			//var lineAppender = @"""" + fileName + @"""";
+			//var apdLength = lineAppender.Length;
+			const string header = @"# ";
+			const string divider = @" ";
+			//var leastLength = header.Length + divider.Length + apdLength;
+			var trueLineNum = 0;
 
-            using (var reader = new StreamReader(fileInfo.FullName)) {
-                
-                var line = reader.ReadLine();
-                var lineAppender = line.Substring(4);
-                var apdLength = lineAppender.Length;
-                var leastLength = header.Length + divider.Length + apdLength;
+			using (var reader = new StreamReader(fileInfo.FullName)) {
+				
+				var line = reader.ReadLine();
+				var lineAppender = line.Substring(4);
+				var apdLength = lineAppender.Length;
+				var leastLength = header.Length + divider.Length + apdLength;
 
-                var nowLineNum = 2;
-                
-                while ((line = reader.ReadLine()) != null) {
-                    if (line.Length > leastLength) {
-                        var lastSentence = line.Substring(line.Length - apdLength, apdLength);
-                        if (lastSentence.Equals(lineAppender)) {
-                            var digitNum = line.Length - leastLength;
-                            trueLineNum = int.Parse(line.Substring(header.Length, digitNum));
-                        }
-                    }
-                    lineDic.Add(nowLineNum, trueLineNum);
-                    nowLineNum++;
-                }
-                reader.Close();
-            }
+				var nowLineNum = 2;
+				
+				while ((line = reader.ReadLine()) != null) {
+					if (line.Length > leastLength) {
+						var lastSentence = line.Substring(line.Length - apdLength, apdLength);
+						if (lastSentence.Equals(lineAppender)) {
+							var digitNum = line.Length - leastLength;
+							trueLineNum = int.Parse(line.Substring(header.Length, digitNum));
+						}
+					}
+					lineDic.Add(nowLineNum, trueLineNum);
+					nowLineNum++;
+				}
+				reader.Close();
+			}
 
-            return lineDic;
-        }
-        */
+			return lineDic;
+		}
+		*/
 	}
 }
