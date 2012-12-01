@@ -61,7 +61,7 @@ namespace Occf.Tools.Cui.Tests {
 
 			var profile = CoverageModes.GetCoverageModeByClassName("Java");
 			Inserter.InsertMeasurementCode(
-					outDir, null, new DirectoryInfo(Path.Combine(outDirPath, "test")), outDir,
+					outDir, outDir, null, new DirectoryInfo(Path.Combine(outDirPath, "test")), outDir,
 					profile);
 
 			// jarとdllファイルが存在するか

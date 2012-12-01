@@ -69,6 +69,7 @@ namespace Occf.Tools.Cui
                 using (var writer = new StreamWriter(defFile.FullName, false)) {
                     string line;
                     var lineNum = 1;
+                    var sharpLineNum = 0;
                     var mainFlag = false;
                     var bracesCount = 0;
                     var rootFullName = rootDir.FullName.Replace("\\", "/");
@@ -80,6 +81,10 @@ namespace Occf.Tools.Cui
                         }
 
                         var lineLength = line.Length;
+                        //#line数の取得
+                        if (line.StartsWith("#line")){
+                            sharpLineNum = int.Parse(line.Substring(6));
+                        }
                         //main 判定　"main" メソッドの抽出と{}による終了判定
                         var mainIndex1 = line.IndexOf(" main ", StringComparison.Ordinal);
                         var mainIndex2 = line.IndexOf(" main(", StringComparison.Ordinal);
@@ -119,12 +124,14 @@ namespace Occf.Tools.Cui
                         if (mainFlag && lineLength >= 8) {
                             if (line.Substring(7).Equals("return ") || line.Contains(" return ")) {
                                 writer.WriteLine("");
+                                //writer.WriteLine(@"#0 ""OccfLineMarker""");
                                 writer.WriteLine(@"char *occftmp = getenv(""KTEST_FILE"");");
                                 writer.WriteLine(@"FILE *occffile = fopen(""" + rootFullName + @"/" + OccfNames.SuccessfulTests + @""", ""a"");");
                                 writer.WriteLine(@"fputs(occftmp, occffile);");
                                 writer.WriteLine(@"fputc('\n', occffile);");
                                 writer.WriteLine(@"fclose(occffile);");
                                 writer.WriteLine("");
+                                //writer.WriteLine("#line " + sharpLineNum);
                             }
                         }
                         writer.WriteLine(line);

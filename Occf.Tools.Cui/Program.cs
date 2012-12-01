@@ -18,6 +18,7 @@
 
 using System;
 using System.Linq;
+using IronPython.Hosting;
 using Occf.Core.Modes;
 
 namespace Occf.Tools.Cui
@@ -52,8 +53,8 @@ namespace Occf.Tools.Cui
 				+ "Insert line number code in source files for C" + "\n" +
 				S + "klee_main".PadRight(W) 
 				+ "Insert output .successful file code in main files " +"\n" +
-                S + "line_map".PadRight(W)
-                + "Create line number mapping file for C" + "\n" +
+				S + "line_map".PadRight(W)
+				+ "Create line number mapping file for C" + "\n" +
 				"";
 
 		public static bool Print(string message)
@@ -62,8 +63,7 @@ namespace Occf.Tools.Cui
 			return false;
 		}
 
-		private static bool Run(string[] args)
-		{
+		private static bool Run(string[] args) {
 			if (args.Length < 1)
 			{
 				return Print(Usage);
@@ -95,8 +95,8 @@ namespace Occf.Tools.Cui
 					return LineInserter.Run(newArgs);
 				case "klee_main":
 					return KleeMain.Run(newArgs);
-                case "line_map":
-                    return LineMapCreater.Run(newArgs);
+				case "line_map":
+					return LineMapCreater.Run(newArgs);
 			}
 			return Print(Usage);
 		}
