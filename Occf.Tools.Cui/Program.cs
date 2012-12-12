@@ -49,11 +49,11 @@ namespace Occf.Tools.Cui
 				+ "Show the duplicated test cases using coverage" + "\n" +
 				S + "loc[alize]".PadRight(W) + "Show the result of bug localization" + "\n" +
 				S + "klee".PadRight(W) + "Analyze klee test files for localizing bugs" + "\n" +
-				S + "line_insert".PadRight(W) 
+				S + "line_insert, lins".PadRight(W) 
 				+ "Insert line number code in source files for C" + "\n" +
-				S + "klee_main".PadRight(W) 
+				S + "klee_main, kmain".PadRight(W) 
 				+ "Insert output .successful file code in main files " +"\n" +
-				S + "line_map".PadRight(W)
+				S + "line_map, lmap".PadRight(W)
 				+ "Create line number mapping file for C" + "\n" +
 				"";
 
@@ -92,10 +92,13 @@ namespace Occf.Tools.Cui
 				case "klee":
 					return KleeBugLocalizer.Run(newArgs);
 				case "line_insert":
+                case "lins":
 					return LineInserter.Run(newArgs);
 				case "klee_main":
+                case "kmain":
 					return KleeMain.Run(newArgs);
 				case "line_map":
+                case "lmap":
 					return LineMapCreater.Run(newArgs);
 			}
 			return Print(Usage);

@@ -16,21 +16,43 @@ namespace Occf.Tools.Cui
         private static readonly string Usage =
             Program.Header +
             "" + "\n" +
-            "Usage: Occf klee_main <root> <main>" + "\n" +
+            "Usage: Occf klee_main -r <root_dir> <main_file_path> [<main_file_path>]" + "\n" +
             "" + "\n" +
-            S + "<root>".PadRight(W)
+            S + "-r, -root <root>".PadRight(W)
             + "path of root directory (including source and test code)" + "\n" +
-            S + "<main>".PadRight(W)
+            S + "<main_file_path>".PadRight(W)
             + "path of main file of execute klee tests" + "\n" +
             "";
 
         public static bool Run(IList<string> args) {
 
-            if (args.Count < 2) {
+            var mainFilePaths = new List<string>();
+            var rootDirPath = "";
+
+            // parse options
+            var p = new OptionSet {
+					{ "r|root=", v => rootDirPath = v },
+			};
+
+            // コマンドをパース "-"指定されないのだけargs[]に残る
+            try {
+                args = p.Parse(args);
+            } catch {
+                Console.WriteLine("catch");
                 return Program.Print(Usage);
             }
 
-            var rootDir = new DirectoryInfo(args[0]);
+            mainFilePaths = args.ToList();
+
+            if (args.Count < 1) {
+                return Program.Print(Usage);
+            }
+
+            if (string.IsNullOrEmpty(rootDirPath)) {
+                return Program.Print(Usage);
+            }
+
+            var rootDir = new DirectoryInfo(rootDirPath);
             if (!rootDir.Exists) {
                 return
                         Program.Print(
@@ -43,19 +65,39 @@ namespace Occf.Tools.Cui
                         Program.Print(
                                 "Error: main file of execute klee tests dosen't exit.\nmain:" + mainFile.FullName);
             }
-            
-            InsertToMainFail(mainFile, rootDir);
+
+            var fileInfos = new List<FileInfo>();
+            foreach (var path in mainFilePaths) {
+                if (!string.IsNullOrEmpty(path)) {
+                    var fileInfo = new FileInfo(path);
+                    if (!fileInfo.Exists) {
+                        return
+                                Program.Print(
+                                        "Error: file path doesn't exist.\nfile_path:" + fileInfo.FullName);
+                    }
+                    fileInfos.Add(fileInfo);
+                }
+            }
+
+            MainFileInsertReader(fileInfos, rootDir);
+            //InsertToMainFail(mainFile, rootDir);
 
             return true;
+        }
+
+        private static void MainFileInsertReader(List<FileInfo> fileInfos, DirectoryInfo rootDir) {
+            foreach (var fileInfo in fileInfos) {
+                InsertToMainFail(fileInfo, rootDir);
+            }
         }
 
         private static void InsertToMainFail(FileInfo defFile, DirectoryInfo rootDir) {
             
             var defFileFullName = defFile.FullName;
-            //const string appendExtension = @".occf_klee_back"; //KleeBackUpSuffix
-            //const string lineAppendr = @".occf_line_back"; //lineBackUpsuffix
             var backUpFileFullName = defFileFullName + OccfNames.KleeBackUpSuffix;
             var backUpFileName = defFile.Name + OccfNames.KleeBackUpSuffix;
+
+            var inserted = false;
 
             //先にバックアップファイルが存在していた場合は削除
             if (File.Exists(backUpFileFullName)) {
@@ -132,6 +174,7 @@ namespace Occf.Tools.Cui
                                 writer.WriteLine(@"fclose(occffile);");
                                 writer.WriteLine("");
                                 //writer.WriteLine("#line " + sharpLineNum);
+                                inserted = true;
                             }
                         }
                         writer.WriteLine(line);
@@ -142,9 +185,15 @@ namespace Occf.Tools.Cui
                 }
             }
 
-            //上位のバックアップファイルがある場合はバックアップファイルを残さない
+            //上位のバックアップファイル(Line ins)がある場合はバックアップファイルを残さない
             if(File.Exists(defFileFullName+OccfNames.LineBackUpSuffix)) {
                 File.Delete(backUpFileFullName);
+            }
+
+            if (inserted) {
+                Console.WriteLine("wrote:" + defFile.FullName);
+            } else {
+                Console.WriteLine("unwrote:" + defFile.FullName);
             }
         }
     }
