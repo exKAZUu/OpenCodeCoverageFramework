@@ -72,7 +72,7 @@ namespace Occf.Tools.Cui {
 
 			var covDataFile = args.Count >= iArgs + 1
 			                  		? new FileInfo(args[iArgs++]) : null;
-			covDataFile = PathFinder.FindCoverageDataPath(covDataFile, rootDir);
+			covDataFile = FileUtil.GetCoverageData(covDataFile, rootDir);
 			if (!covDataFile.SafeExists()) {
 				return
 						Program.Print(
@@ -82,12 +82,11 @@ namespace Occf.Tools.Cui {
 			return Analyze(rootDir, covDataFile, detail);
 		}
 
-		private static bool Analyze(
-				DirectoryInfo rootDir, FileInfo covDataFile, bool detail) {
+		private static bool Analyze( DirectoryInfo rootDir, FileInfo covDataFile, bool detail) {
 			// カバレッジ情報（母数）の取得
 			var formatter = new BinaryFormatter();
-			var covInfoPath = PathFinder.FindCoverageInfoPath(rootDir);
-			var covInfo = InfoReader.ReadCoverageInfo(covInfoPath, formatter);
+			var covInfoPath = FileUtil.GetCoverageInfo(rootDir);
+			var covInfo = CoverageInfo.ReadCoverageInfo(covInfoPath, formatter);
 			CoverageDataReader.ReadFile(covInfo, covDataFile);
 
 			var tags = ReconstructTags(covInfo);

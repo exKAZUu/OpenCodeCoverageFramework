@@ -97,20 +97,14 @@ namespace Occf.Tools.Window {
 			var langName = cmbLanguage.Text;
 
 			Action action = () => {
-				var profile = CoverageModes.GetCoverageModeByClassName(langName);
+				var profile = LanguageSupports.GetCoverageModeByClassName(langName);
 				var info = new CoverageInfo(basePath, profile.Name, SharingMethod.File);
 				var outDir = new DirectoryInfo(outDirPath);
 				foreach (var filePath in filePathList) {
-					CoverageCodeGenerator.WriteCoveragedCode(
+					OccfCodeGenerator.WriteCoveragedCode(
 							profile, info, new FileInfo(filePath), outDir);
 				}
-				using (
-						var fs = new FileStream(
-								Path.Combine(outDirPath, "coverageinfo"),
-								FileMode.Create)) {
-					var formatter = new BinaryFormatter();
-					formatter.Serialize(fs, info);
-				}
+				CoverageInfo.WriteCoverageInfo(new DirectoryInfo(outDirPath), info);
 			};
 			ProgressForm.Start(this, filePathList.Count, action);
 		}

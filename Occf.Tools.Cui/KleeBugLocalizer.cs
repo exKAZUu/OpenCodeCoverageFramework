@@ -56,8 +56,8 @@ namespace Occf.Tools.Cui {
 			var formatter = new BinaryFormatter();
 			var rootDirInfo = new DirectoryInfo(args[0]);
 			var testDirInfo = new DirectoryInfo(args[1]);
-			var covInfoFile = PathFinder.FindCoverageInfoPath(rootDirInfo);
-			var covInfo = InfoReader.ReadCoverageInfo(covInfoFile, formatter);
+			var covInfoFile = FileUtil.GetCoverageInfo(rootDirInfo);
+			var covInfo = CoverageInfo.ReadCoverageInfo(covInfoFile, formatter);
 			var testInfo = AnalyzeKleeTestFiles(testDirInfo);
 			
 			AnalyzeTestResult(rootDirInfo, testInfo);

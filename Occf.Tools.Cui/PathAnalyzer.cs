@@ -22,6 +22,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using Occf.Core.CoverageInformation;
+using Occf.Core.TestInfos;
 using Occf.Core.Utils;
 using Paraiba.IO;
 
@@ -55,7 +56,7 @@ namespace Occf.Tools.Cui {
 			}
 			var covDataFile = args.Count >= iArgs + 1
 			                  		? new FileInfo(args[iArgs++]) : null;
-			covDataFile = PathFinder.FindCoverageDataPath(covDataFile, rootDir);
+			covDataFile = FileUtil.GetCoverageData(covDataFile, rootDir);
 			if (!covDataFile.SafeExists()) {
 				return
 						Program.Print(
@@ -67,10 +68,10 @@ namespace Occf.Tools.Cui {
 
 		private static bool Analyze(DirectoryInfo rootDir, FileInfo covDataFile) {
 			var formatter = new BinaryFormatter();
-			var covInfoFile = PathFinder.FindCoverageInfoPath(rootDir);
-			var testInfoFile = PathFinder.FindTestInfoPath(rootDir);
-			var covInfo = InfoReader.ReadCoverageInfo(covInfoFile, formatter);
-			var testInfo = InfoReader.ReadTestInfo(testInfoFile, formatter);
+			var covInfoFile = FileUtil.GetCoverageInfo(rootDir);
+			var testInfoFile = FileUtil.GetTestInfo(rootDir);
+			var covInfo = CoverageInfo.ReadCoverageInfo(covInfoFile, formatter);
+			var testInfo = TestInfo.ReadTestInfo(testInfoFile, formatter);
 			testInfo.InitializeForStoringData(true);
 			CoverageDataReader.ReadFile(testInfo, covDataFile);
 

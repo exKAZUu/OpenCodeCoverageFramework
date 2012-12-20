@@ -26,11 +26,11 @@ using Occf.Core.Tests;
 namespace Occf.Languages.Tests {
 	public static class CodeInsertTest {
 		public static void VerifyCodeInsertion(
-				CoverageMode mode, string fileName) {
+				LanguageSupport mode, string fileName) {
 			var info = new CoverageInfo(
 					Fixture.GetCoverageInputPath(), mode.Name, SharingMethod.SharedMemory);
 			var inPath = Path.Combine(Fixture.GetCoverageInputPath(), fileName);
-			var code = CoverageCodeGenerator.GetCoveragedCode(
+			var code = OccfCodeGenerator.GetCoveragedCode(
 					new FileInfo(inPath), info, mode);
 			File.WriteAllText(Fixture.GetOutputPath(fileName), code);
 			var expPath = Path.Combine(Fixture.GetCoverageExpectationPath(), fileName);

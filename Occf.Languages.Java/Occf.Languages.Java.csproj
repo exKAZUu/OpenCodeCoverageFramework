@@ -74,8 +74,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Operators\Inserters\JavaNodeInserter.cs" />
-    <Compile Include="Operators\NewJavaCoverageProfile.cs" />
+    <Compile Include="Operators\Inserters\JavaAstTransformer.cs" />
     <Compile Include="Operators\Selectors\JavaMethodNameSelector.cs" />
     <Compile Include="Operators\Selectors\JavaForeachTailSelector.cs" />
     <Compile Include="Operators\Selectors\JavaForeachHeadSelector.cs" />
@@ -92,8 +91,8 @@
     <Compile Include="Operators\Selectors\JavaStatementSelector.cs" />
     <Compile Include="Operators\Selectors\JavaTestCaseLabelTailSelector.cs" />
     <Compile Include="Operators\Taggers\JavaTagger.cs" />
-    <Compile Include="Profiles\JavaUnitMasterCoverageMode.cs" />
-    <Compile Include="Profiles\JavaCoverageMode.cs" />
+    <Compile Include="Profiles\JavaUnitMasterSupport.cs" />
+    <Compile Include="Profiles\JavaSupport.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>

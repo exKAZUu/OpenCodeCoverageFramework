@@ -33,10 +33,8 @@ namespace Occf.Languages.Java.Operators.Selectors {
 								if (name.StartsWith("test")) {
 									return true;
 								}
-								var annotation =
-										e.FirstElement().Element("annotation");
-								if (annotation != null
-								    && annotation.Value == "@Test") {
+								var annotation = e.FirstElement().Element("annotation");
+								if (annotation != null && annotation.Value == "@Test") {
 									return true;
 								}
 								return false;

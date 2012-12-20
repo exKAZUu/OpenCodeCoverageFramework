@@ -42,7 +42,7 @@ namespace Occf.Sample {
 		}
 
 		public void WriteInstrumentedProductionCode(
-				CoverageMode mode, FileInfo inFileInfo) {
+				LanguageSupport mode, FileInfo inFileInfo) {
 			var relativePath = XPath.GetRelativePath(
 					inFileInfo.FullName, BaseDirInfo.FullName);
 			var outFileInfo = OutDirInfo.GetFile(relativePath);
@@ -52,7 +52,7 @@ namespace Occf.Sample {
 		}
 
 		public void WriteInstrumentedTestCode(
-				CoverageMode mode, FileInfo inFileInfo) {
+				LanguageSupport mode, FileInfo inFileInfo) {
 			var relativePath = XPath.GetRelativePath(
 					inFileInfo.FullName, BaseDirInfo.FullName);
 			var outFileInfo = OutDirInfo.GetFile(relativePath);

@@ -35,7 +35,7 @@ namespace Occf.Sample {
 					new DirectoryInfo(@"..\..\..\fixture\project\input\GetMid\test");
 
 			var instrumenter = new SampleInstrumenter(outDirInfo, inputDirInfo);
-			var profile = CoverageModes.GetCoverageModeByClassName("Java");
+			var profile = LanguageSupports.GetCoverageModeByClassName("Java");
 			var regexes =
 					profile.FilePatterns.Select(
 							pattern => new Regex(pattern.Replace("*", ".*").Replace("?", ".")));

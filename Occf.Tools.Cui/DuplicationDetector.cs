@@ -75,7 +75,7 @@ namespace Occf.Tools.Cui {
 
 			var covDataFile = args.Count >= iArgs + 1
 			                  		? new FileInfo(args[iArgs++]) : null;
-			covDataFile = PathFinder.FindCoverageDataPath(covDataFile, rootDir);
+			covDataFile = FileUtil.GetCoverageData(covDataFile, rootDir);
 			if (!covDataFile.SafeExists()) {
 				return
 						Program.Print(
@@ -85,11 +85,10 @@ namespace Occf.Tools.Cui {
 			return Detect(rootDir, covDataFile, criterion);
 		}
 
-		private static bool Detect(
-				DirectoryInfo rootDir, FileInfo covDataFile, string criterion) {
+		private static bool Detect( DirectoryInfo rootDir, FileInfo covDataFile, string criterion) {
 			var formatter = new BinaryFormatter();
-			var testInfoPath = PathFinder.FindTestInfoPath(rootDir);
-			var testInfo = InfoReader.ReadTestInfo(testInfoPath, formatter);
+			var testInfoPath = FileUtil.GetTestInfo(rootDir);
+			var testInfo = TestInfo.ReadTestInfo(testInfoPath, formatter);
 			testInfo.InitializeForStoringData(true);
 			CoverageDataReader.ReadFile(testInfo, covDataFile);
 			var testCases = testInfo.TestCases;

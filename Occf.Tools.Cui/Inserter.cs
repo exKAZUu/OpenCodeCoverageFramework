@@ -61,8 +61,8 @@ namespace Occf.Tools.Cui {
 				"";
 
 		public static bool Run(IList<string> args) {
-		    var rootDirPath = "";
-		    var srcDirPath = "";
+			var rootDirPath = "";
+			var srcDirPath = "";
 			var testDirPath = "";
 			var languageName = "Java";
 			var libDirPath = "";
@@ -77,74 +77,74 @@ namespace Occf.Tools.Cui {
 					{ "i|lib=", v => libDirPath = v },
 			};
 
-            //確認用 ** 
-            /*
-            for (int i = 0; i < args.Count; i++ ) {
-                Console.WriteLine("args"+ i + " = " + args[i]);
-            }*/// ** 
-            
-            // コマンドをパース "-"指定されないのだけargs[]に残る
-            try {
-                args = p.Parse(args);
-            } catch {
-                Console.WriteLine("catch");
-                return Program.Print(Usage);
-            }
-
-            //確認用追加 **
-            /*
-            for (int i = 0; i < args.Count; i++)
-            {
-                Console.WriteLine("argsB" + i + " = " + args[i]);
-            }*/// **
-
-            //Console.WriteLine("before args count");// 確認
+			//確認用 ** 
+			/*
+			for (int i = 0; i < args.Count; i++ ) {
+				Console.WriteLine("args"+ i + " = " + args[i]);
+			}*/// ** 
 			
-            if (string.IsNullOrEmpty(rootDirPath)) {
-			    //Console.WriteLine("count < 1");//確認
+			// コマンドをパース "-"指定されないのだけargs[]に残る
+			try {
+				args = p.Parse(args);
+			} catch {
+				Console.WriteLine("catch");
 				return Program.Print(Usage);
 			}
-		    //Console.WriteLine("before mode:");//確認
+
+			//確認用追加 **
+			/*
+			for (int i = 0; i < args.Count; i++)
+			{
+				Console.WriteLine("argsB" + i + " = " + args[i]);
+			}*/// **
+
+			//Console.WriteLine("before args count");// 確認
 			
-            if(args.Count > 1) {
-                for(var i = 1; i<args.Count; i++) {
-                    Console.WriteLine("Path: " + args[i] + " is a wrong designated method");
-                }
-                Console.WriteLine("you can designate only one srcDir now.");
-                Console.WriteLine("please read how to use Occf inserter .");
-                Console.WriteLine("continue.");
-            }
+			if (string.IsNullOrEmpty(rootDirPath)) {
+				//Console.WriteLine("count < 1");//確認
+				return Program.Print(Usage);
+			}
+			//Console.WriteLine("before mode:");//確認
+			
+			if(args.Count > 1) {
+				for(var i = 1; i<args.Count; i++) {
+					Console.WriteLine("Path: " + args[i] + " is a wrong designated method");
+				}
+				Console.WriteLine("you can designate only one srcDir now.");
+				Console.WriteLine("please read how to use Occf inserter .");
+				Console.WriteLine("continue.");
+			}
 
-            srcDirPath = args.Count < 1 ? rootDirPath : args[0];
-            
+			srcDirPath = args.Count < 1 ? rootDirPath : args[0];
+			
 
-            CoverageMode mode;
+			LanguageSupport mode;
 			try {
-				mode = CoverageModes.GetCoverageModeByClassName(languageName);
+				mode = LanguageSupports.GetCoverageModeByClassName(languageName);
 			} catch {
 				return
 						Program.Print(
 								"error: cant't load script file for programming language of "
 								+ languageName);
 			}
-		    //Console.WriteLine("before rootDir:");//確認
+			//Console.WriteLine("before rootDir:");//確認
 			var rootDir = new DirectoryInfo(rootDirPath);
 			if (!rootDir.Exists) {
 				return
 						Program.Print(
 								"Root directory doesn't exist.\nroot:" + rootDir.FullName);
 			}
-            //Console.WriteLine("before srcDir:");//確認
-            var srcDir = new DirectoryInfo(srcDirPath);
-            if (!srcDir.Exists)
-            {
-                return
-                        Program.Print(
-                                "Source directory doesn't exist.\nsrc:" + srcDir.FullName);
-            }
+			//Console.WriteLine("before srcDir:");//確認
+			var srcDir = new DirectoryInfo(srcDirPath);
+			if (!srcDir.Exists)
+			{
+				return
+						Program.Print(
+								"Source directory doesn't exist.\nsrc:" + srcDir.FullName);
+			}
 
 
-		    //Console.WriteLine("before testDir:");//確認
+			//Console.WriteLine("before testDir:");//確認
 			DirectoryInfo testDir = null;
 			if (!string.IsNullOrEmpty(testDirPath)) {
 				testDir = new DirectoryInfo(testDirPath);
@@ -154,7 +154,7 @@ namespace Occf.Tools.Cui {
 									"Error: test code directory doesn't exist.\ntest:" + testDir.FullName);
 				}
 			}
-		    //Console.WriteLine( "before libDir");//確認
+			//Console.WriteLine( "before libDir");//確認
 			var libDir = rootDir;
 			if (!string.IsNullOrEmpty(libDirPath)) {
 				libDir = new DirectoryInfo(libDirPath);
@@ -165,17 +165,17 @@ namespace Occf.Tools.Cui {
 				}
 			}
 
-            //確認　**
-            /*
-		    Console.WriteLine("call insertMeasurementCode:");
-		    Console.WriteLine("rootDir: " + rootDir.Name);
-		    Console.WriteLine("srcDir: " + srcDir.Name);
-		    string pat = patterns.Count > 0 ? patterns[0] : "null";
-		    Console.WriteLine("patterns: " + pat);
-		    string tDir = testDir != null ? testDir.Name : "null";
-		    Console.WriteLine("testDir:" + tDir);
-		    Console.WriteLine("libDir: " + libDir.Name);
-            *///　**
+			//確認　**
+			/*
+			Console.WriteLine("call insertMeasurementCode:");
+			Console.WriteLine("rootDir: " + rootDir.Name);
+			Console.WriteLine("srcDir: " + srcDir.Name);
+			string pat = patterns.Count > 0 ? patterns[0] : "null";
+			Console.WriteLine("patterns: " + pat);
+			string tDir = testDir != null ? testDir.Name : "null";
+			Console.WriteLine("testDir:" + tDir);
+			Console.WriteLine("libDir: " + libDir.Name);
+			*///　**
 			InsertMeasurementCode(rootDir, srcDir, patterns, testDir, libDir, mode);
 			return true;
 		}
@@ -183,30 +183,30 @@ namespace Occf.Tools.Cui {
 		public static void InsertMeasurementCode(
 				DirectoryInfo rootDir, DirectoryInfo srcDir, List<string> patterns, DirectoryInfo testDir,
 				DirectoryInfo libDir,
-				CoverageMode mode) {
+				LanguageSupport mode) {
 			Contract.Requires<ArgumentException>(rootDir.Exists);
-            Contract.Requires<ArgumentException>(srcDir.Exists);
+			Contract.Requires<ArgumentException>(srcDir.Exists);
 			Contract.Requires<ArgumentException>(
 					testDir == null || testDir.Exists);
 			Contract.Requires<ArgumentException>(libDir.Exists);
 			Contract.Requires<ArgumentNullException>(mode != null);
 			patterns = patterns ?? new List<string>();
-		    
-            //root
+			
+			//root
 			var covInfo = new CoverageInfo(
 					rootDir.FullName, mode.Name, SharingMethod.File);
 			//(o)root or src?
-            var testInfo = testDir != null
-					               ? new TestInfo(rootDir.FullName)
-					               : null;
-            //root
+			var testInfo = testDir != null
+								   ? new TestInfo(rootDir.FullName)
+								   : null;
+			//root
 			RemoveExistingCoverageDataFiles(rootDir, libDir);
 
 			mode.RemoveLibraries(libDir);
-            //+src
+			//+src
 			WriteProductionCodeFiles(rootDir, srcDir, patterns, testDir, mode, covInfo);
 			if (testInfo != null) {
-                //(o)root or src
+				//(o)root or src
 				WriteTestCodeFiles(rootDir, testDir, mode, testInfo);
 			} else {
 				// Initialize test information with empty contents
@@ -214,14 +214,14 @@ namespace Occf.Tools.Cui {
 				testInfo.TestCases.Add(
 						new TestCase("nothing", "nothing", new CodePosition()));
 			}
-            //root
+			//root
 			WriteInfoFiles(rootDir, covInfo, testInfo);
 
 			CopyLibraries(mode, libDir);
 		}
 
 		private static void CopyLibraries(
-				CoverageMode mode, DirectoryInfo dirInfo) {
+				LanguageSupport mode, DirectoryInfo dirInfo) {
 			mode.CopyLibraries(dirInfo);
 		}
 
@@ -240,85 +240,85 @@ namespace Occf.Tools.Cui {
 
 		private static void WriteProductionCodeFiles(
 				DirectoryInfo rootDir, DirectoryInfo srcDir, IEnumerable<string> patterns, DirectoryInfo testDir,
-				CoverageMode mode, CoverageInfo info) {
+				LanguageSupport mode, CoverageInfo info) {
 
-		    IEnumerable<FileInfo> paths;
+			IEnumerable<FileInfo> paths;
 
-		    IEnumerable<string> bakcupPatterns = new List<string>(){"*"+OccfNames.BackupSuffix, "*"+OccfNames.LineBackUpSuffix, "*"+OccfNames.KleeBackUpSuffix}; 
-		    IEnumerable<FileInfo> backups;
+			IEnumerable<string> bakcupPatterns = new List<string>(){"*"+OccfNames.BackupSuffix, "*"+OccfNames.LineBackUpSuffix, "*"+OccfNames.KleeBackUpSuffix}; 
+			IEnumerable<FileInfo> backups;
 
-           if(!patterns.Any()) { // -p　指定が無い場合：拡張子判定
-                paths = mode.FilePatterns.SelectMany(
-                    //pat => rootDir.GetFiles(
-                    pat => srcDir.GetFiles(//src
-                            pat, SearchOption.AllDirectories));
-            } else {// -p指定があった時はそれを格納
-                paths = patterns.Where(pattern => !mode.FilePatterns.Contains(pattern))
-                                    .SelectMany(
-                                            pat => srcDir.GetFiles(pat, SearchOption.AllDirectories));//src
-                                            //pat => rootDir.GetFiles(pat, SearchOption.AllDirectories));
-            }
+		   if(!patterns.Any()) { // -p　指定が無い場合：拡張子判定
+				paths = mode.FilePatterns.SelectMany(
+					//pat => rootDir.GetFiles(
+					pat => srcDir.GetFiles(//src
+							pat, SearchOption.AllDirectories));
+			} else {// -p指定があった時はそれを格納
+				paths = patterns.Where(pattern => !mode.FilePatterns.Contains(pattern))
+									.SelectMany(
+											pat => srcDir.GetFiles(pat, SearchOption.AllDirectories));//src
+											//pat => rootDir.GetFiles(pat, SearchOption.AllDirectories));
+			}
 
-            backups = bakcupPatterns.Where(bakcupPattern => !mode.FilePatterns.Contains(bakcupPattern))
-                                    .SelectMany(
-                                            bpat=> srcDir.GetFiles(bpat, SearchOption.AllDirectories));//src
-                                            //bpat=> rootDir.GetFiles(bpat, SearchOption.AllDirectories));
-                        
-		    var pathList = paths.ToList();
-		    var bkpathList = backups.ToList();
+			backups = bakcupPatterns.Where(bakcupPattern => !mode.FilePatterns.Contains(bakcupPattern))
+									.SelectMany(
+											bpat=> srcDir.GetFiles(bpat, SearchOption.AllDirectories));//src
+											//bpat=> rootDir.GetFiles(bpat, SearchOption.AllDirectories));
+						
+			var pathList = paths.ToList();
+			var bkpathList = backups.ToList();
 
-		    for (var i = pathList.Count - 1; i > 0; i-- ) {
-                if (bkpathList.Any(bkpath => pathList[i].FullName == bkpath.FullName)) {
-                    pathList.Remove(pathList[i]);
-                }
-            }
-            /* 上の元コード
-            for (var i = pathList.Count - 1; i > 0; i--){
-                foreach (var bkpath in bkpathList){
-                    if (pathList[i].FullName == bkpath.FullName){
-                        pathList.Remove(pathList[i]);
-                        break;
-                    }
-                }
-            }*/
-		    paths = pathList;　//バックアップファイルを除いたリストに置き換え
-                        
-            /*
-            paths = mode.FilePatterns.SelectMany(pat => rootDir.EnumerateFiles(pat, SearchOption.AllDirectories));
-            paths = paths.Concat(patterns.Where(pattern => !mode.FilePatterns.Contains(pattern))
-                                    .SelectMany(pat => rootDir.EnumerateFiles(pat, SearchOption.AllDirectories)));
-            */
+			for (var i = pathList.Count - 1; i > 0; i-- ) {
+				if (bkpathList.Any(bkpath => pathList[i].FullName == bkpath.FullName)) {
+					pathList.Remove(pathList[i]);
+				}
+			}
+			/* 上の元コード
+			for (var i = pathList.Count - 1; i > 0; i--){
+				foreach (var bkpath in bkpathList){
+					if (pathList[i].FullName == bkpath.FullName){
+						pathList.Remove(pathList[i]);
+						break;
+					}
+				}
+			}*/
+			paths = pathList;　//バックアップファイルを除いたリストに置き換え
+						
+			/*
+			paths = mode.FilePatterns.SelectMany(pat => rootDir.EnumerateFiles(pat, SearchOption.AllDirectories));
+			paths = paths.Concat(patterns.Where(pattern => !mode.FilePatterns.Contains(pattern))
+									.SelectMany(pat => rootDir.EnumerateFiles(pat, SearchOption.AllDirectories)));
+			*/
 
-            // ignore test code in the directory of production code
-            if (testDir != null){
-                paths = paths.Where(f => !f.FullName.StartsWith(testDir.FullName));
-            }
+			// ignore test code in the directory of production code
+			if (testDir != null){
+				paths = paths.Where(f => !f.FullName.StartsWith(testDir.FullName));
+			}
 
 			foreach (var path in paths.ToList()) {
-                //普通にpath.FullName+OccfNames.BackupSuffixでもいいのでは？　まあ../とか完全に一致しない時もあるけど…
-                var bakPath = rootDir.GetFile(path.FullName + OccfNames.BackupSuffix).FullName;//root
-                //対象ファイルに対してKlee_backやLine_backがあるときは作成しない
-                if(!(File.Exists(path.FullName+OccfNames.LineBackUpSuffix)) 
-                    && !(File.Exists(path.FullName+OccfNames.KleeBackUpSuffix))) {
-                    path.CopyTo(bakPath, true);
-                }
-				var outPath = CoverageCodeGenerator.WriteCoveragedCode(
+				//普通にpath.FullName+OccfNames.BackupSuffixでもいいのでは？　まあ../とか完全に一致しない時もあるけど…
+				var bakPath = rootDir.GetFile(path.FullName + OccfNames.BackupSuffix).FullName;//root
+				//対象ファイルに対してKlee_backやLine_backがあるときは作成しない
+				if(!(File.Exists(path.FullName+OccfNames.LineBackUpSuffix)) 
+					&& !(File.Exists(path.FullName+OccfNames.KleeBackUpSuffix))) {
+					path.CopyTo(bakPath, true);
+				}
+				var outPath = OccfCodeGenerator.WriteCoveragedCode(
 						mode, info, path, rootDir);//? たどってみて調査
 				Console.WriteLine("wrote:" + outPath);
 			}
 		}
 
 		private static void WriteTestCodeFiles(
-				DirectoryInfo rootDir, DirectoryInfo testDir, CoverageMode prof,
+				DirectoryInfo rootDir, DirectoryInfo testDir, LanguageSupport prof,
 				TestInfo info) {
 			var paths = prof.FilePatterns.SelectMany(
 					pattern => testDir.EnumerateFiles(
 							pattern, SearchOption.AllDirectories));
 			foreach (var path in paths.ToList()) {
 				var bakPath = rootDir.GetFile(path + OccfNames.BackupSuffix).FullName;
-                //path.CopyTo(bakPath, false); //バックファイルの上書き不可　元
-                path.CopyTo(bakPath, true);
-				var outPath = CoverageCodeGenerator.AnalyzeAndWriteIdentifiedTest(
+				//path.CopyTo(bakPath, false); //バックファイルの上書き不可　元
+				path.CopyTo(bakPath, true);
+				var outPath = OccfCodeGenerator.AnalyzeAndWriteIdentifiedTest(
 						prof, info, path, rootDir);
 				Console.WriteLine("wrote:" + outPath);
 			}
@@ -327,29 +327,11 @@ namespace Occf.Tools.Cui {
 		private static void WriteInfoFiles(
 				DirectoryInfo rootDir, CoverageInfo covInfo, TestInfo testInfo) {
 			var formatter = new BinaryFormatter();
-			WriteCoverageInfo(rootDir, covInfo, formatter);
+			CoverageInfo.WriteCoverageInfo(rootDir, covInfo, formatter);
 			if (testInfo == null) {
 				return;
 			}
-			WriteTestInfo(rootDir, testInfo, formatter);
-		}
-
-		private static void WriteCoverageInfo(
-				DirectoryInfo rootDir, CoverageInfo covInfo, BinaryFormatter formatter) {
-			var covPath = Path.Combine(rootDir.FullName, OccfNames.CoverageInfo);
-			using (var fs = new FileStream(covPath, FileMode.Create)) {
-				formatter.Serialize(fs, covInfo);
-			}
-		}
-
-		private static void WriteTestInfo(
-				DirectoryInfo rootDir, TestInfo testInfo, BinaryFormatter formatter) {
-			var testPath = Path.Combine(rootDir.FullName, OccfNames.TestInfo);
-			using (var fs = new FileStream(testPath, FileMode.Create)) {
-				formatter.Serialize(fs, testInfo);
-			}
+			TestInfo.WriteTestInfo(rootDir, testInfo, formatter);
 		}
 	}
-   
-
 }
