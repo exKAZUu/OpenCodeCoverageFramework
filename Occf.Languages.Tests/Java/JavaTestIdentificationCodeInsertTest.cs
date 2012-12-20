@@ -31,9 +31,9 @@ namespace Occf.Languages.Tests.Java {
 		public void Should_Insert_Measurement_Code_In_JUnit4_Code(string fileName) {
 			var info = new TestInfo(Fixture.GetTestInputPath());
 			var inPath = Path.Combine(Fixture.GetTestInputPath(), fileName);
-			var code = CoverageCodeGenerator.GetIdentifiedTest(
+			var code = OccfCodeGenerator.GetIdentifiedTest(
 					new FileInfo(inPath), info,
-					CoverageModes.GetCoverageModeByClassName("Java"));
+					LanguageSupports.GetCoverageModeByClassName("Java"));
 
 			var expPath = Path.Combine(Fixture.GetTestExpectationPath(), fileName);
 			using (var reader = new StreamReader(expPath)) {

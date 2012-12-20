@@ -54,7 +54,7 @@ namespace Occf.Tools.Cui.Tests {
 			// カレントディレクトリを途中で変更しても動作するか検証
 			Environment.CurrentDirectory = "C:\\";
 
-			var profile = CoverageModes.GetCoverageModeByClassName("C");
+			var profile = LanguageSupports.GetCoverageModeByClassName("C");
 			Inserter.InsertMeasurementCode(outDir, outDir, new List<FileInfo>(), null, null, outDir, profile);
 
 			// .cと.hファイルが存在するか

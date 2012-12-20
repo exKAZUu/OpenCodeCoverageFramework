@@ -39,7 +39,7 @@ namespace Occf.Languages.Tests.C {
 		[TestCase("Block2.c")]
 		[TestCase("Block3.c")]
 		public void Should_Insert_Measurement_Code_In_C_Code(string fileName) {
-			var profile = CoverageModes.GetCoverageModeByClassName("C");
+			var profile = LanguageSupports.GetCoverageModeByClassName("C");
 			CodeInsertTest.VerifyCodeInsertion(profile, fileName);
 		}
 	}

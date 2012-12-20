@@ -59,7 +59,7 @@ namespace Occf.Tools.Cui.Tests {
 			// カレントディレクトリを途中で変更しても動作するか検証
 			Environment.CurrentDirectory = "C:\\";
 
-			var profile = CoverageModes.GetCoverageModeByClassName("Java");
+			var profile = LanguageSupports.GetCoverageModeByClassName("Java");
 			Inserter.InsertMeasurementCode(
 					outDir, outDir, new List<FileInfo>(), null, new DirectoryInfo(Path.Combine(outDirPath, "test")),
                     outDir, profile);

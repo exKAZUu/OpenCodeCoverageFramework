@@ -27,7 +27,7 @@ namespace Occf.Core.CoverageInformation {
 			using (var fs = new FileStream(fileInfo.FullName, FileMode.Open)) {
 				while (true) {
 					var id = (fs.ReadByte() << 24) + (fs.ReadByte() << 16) +
-					         (fs.ReadByte() << 8) + (fs.ReadByte() << 0);
+							(fs.ReadByte() << 8) + (fs.ReadByte() << 0);
 					var value = fs.ReadByte();
 					if (value == -1) {
 						return;
@@ -48,16 +48,16 @@ namespace Occf.Core.CoverageInformation {
 		}
 
 		public static void ReadFile(TestInfo testInfo, FileInfo fileInfo) {
-			ReadFile(testInfo, fileInfo.FullName, testInfo.TestCases.Count > 0 ? testInfo.TestCases[0] : null);
+			ReadFile(
+					testInfo, fileInfo.FullName, testInfo.TestCases.Count > 0 ? testInfo.TestCases[0] : null);
 		}
 
-		public static void ReadFile(
-				TestInfo testInfo, string filePath, TestCase initialTestCase) {
+		public static void ReadFile(TestInfo testInfo, string filePath, TestCase initialTestCase) {
 			var testCase = initialTestCase;
 			using (var fs = new FileStream(filePath, FileMode.Open)) {
 				while (true) {
 					var id = (fs.ReadByte() << 24) + (fs.ReadByte() << 16) +
-					         (fs.ReadByte() << 8) + (fs.ReadByte() << 0);
+							(fs.ReadByte() << 8) + (fs.ReadByte() << 0);
 					var value = fs.ReadByte();
 					if (value == -1) {
 						return;

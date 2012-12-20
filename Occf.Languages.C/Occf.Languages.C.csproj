@@ -61,11 +61,13 @@
     <Reference Include="Code2Xml.Languages.Python3, Version=1.1.0.38, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Code2Xml.1.5.0.23\lib\Code2Xml.Languages.Python3.dll</HintPath>
     </Reference>
-    <Reference Include="Paraiba, Version=1.0.3.58, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Paraiba.1.0.3.58\lib\net40\Paraiba.dll</HintPath>
+    <Reference Include="Paraiba, Version=1.0.5.66, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Paraiba.1.0.5.66\lib\net40\Paraiba.dll</HintPath>
     </Reference>
-    <Reference Include="Paraiba.Experiment, Version=1.0.2.34, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Paraiba.Experiment.1.0.2.34\lib\net40\Paraiba.Experiment.dll</HintPath>
+    <Reference Include="Paraiba.Experiment, Version=1.0.2.39, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Paraiba.Experiment.1.0.2.39\lib\net40\Paraiba.Experiment.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
@@ -74,17 +76,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Modes\KleeCoverageMode.cs" />
-    <Compile Include="Operators\Inserters\CNodeInserter.cs" />
-    <Compile Include="Operators\Selectors\CBranchSelector.cs" />
-    <Compile Include="Operators\Selectors\CConditionSelector.cs" />
-    <Compile Include="Operators\Selectors\CElements.cs" />
-    <Compile Include="Operators\Selectors\CCaseLabelTailSelector.cs" />
-    <Compile Include="Operators\Selectors\CStatementSelector.cs" />
-    <Compile Include="Operators\Selectors\CInitializerSelector.cs" />
-    <Compile Include="Operators\Selectors\CSwitchSelector.cs" />
-    <Compile Include="Operators\Taggers\CTagger.cs" />
-    <Compile Include="Modes\CCoverageMode.cs" />
+    <Compile Include="Manipulators\Analyzers\CAstAnalyzer.cs" />
+    <Compile Include="Manipulators\KleeSupport.cs" />
+    <Compile Include="Manipulators\Transformers\CAstTransformer.cs" />
+    <Compile Include="Manipulators\Analyzers\CBranchSelector.cs" />
+    <Compile Include="Manipulators\Analyzers\CConditionSelector.cs" />
+    <Compile Include="Manipulators\Analyzers\CElements.cs" />
+    <Compile Include="Manipulators\Analyzers\CCaseLabelTailSelector.cs" />
+    <Compile Include="Manipulators\Analyzers\CStatementSelector.cs" />
+    <Compile Include="Manipulators\Analyzers\CInitializerSelector.cs" />
+    <Compile Include="Manipulators\Analyzers\CSwitchSelector.cs" />
+    <Compile Include="Manipulators\Taggers\CTagger.cs" />
+    <Compile Include="Manipulators\CSupport.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>

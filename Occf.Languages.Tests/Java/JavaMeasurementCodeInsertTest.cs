@@ -34,7 +34,7 @@ namespace Occf.Languages.Tests.Java {
 		[TestCase("Condition.java")]
 		[TestCase("Simple.java")]
 		public void Should_Insert_Measurement_Code_In_Java_Code(string fileName) {
-			var profile = CoverageModes.GetCoverageModeByClassName("Java");
+			var profile = LanguageSupports.GetCoverageModeByClassName("Java");
 			CodeInsertTest.VerifyCodeInsertion(profile, fileName);
 		}
 	}

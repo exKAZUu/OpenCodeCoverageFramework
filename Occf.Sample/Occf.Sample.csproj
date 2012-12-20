@@ -71,11 +71,11 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Code2Xml.1.5.0.23\lib\Code2Xml.Languages.Python3.dll</HintPath>
     </Reference>
-    <Reference Include="Paraiba, Version=1.0.3.58, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Paraiba.1.0.3.58\lib\net40\Paraiba.dll</HintPath>
+    <Reference Include="Paraiba">
+      <HintPath>..\packages\Paraiba.1.0.5.66\lib\net40\Paraiba.dll</HintPath>
     </Reference>
-    <Reference Include="Paraiba.Experiment, Version=1.0.2.34, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Paraiba.Experiment.1.0.2.34\lib\net40\Paraiba.Experiment.dll</HintPath>
+    <Reference Include="Paraiba.Experiment">
+      <HintPath>..\packages\Paraiba.Experiment.1.0.2.39\lib\net40\Paraiba.Experiment.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
