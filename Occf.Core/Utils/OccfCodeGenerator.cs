@@ -18,13 +18,13 @@
 
 using System.IO;
 using Occf.Core.CoverageInformation;
-using Occf.Core.Modes;
-using Occf.Core.Operators.Inserters;
-using Occf.Core.TestInfos;
+using Occf.Core.Manipulators;
+using Occf.Core.Manipulators.Transformers;
+using Occf.Core.TestInformation;
 using Paraiba.IO;
 using Paraiba.Text;
 
-namespace Occf.Core.CoverageCode {
+namespace Occf.Core.Utils {
 	public static class OccfCodeGenerator {
 		public static string AnalyzeAndWriteIdentifiedTest(
 				LanguageSupport mode, TestInfo info, FileInfo fullPath,
@@ -40,12 +40,13 @@ namespace Occf.Core.CoverageCode {
 			return GetIdentifiedTest(testFile, info, support, out relativePath);
 		}
 
-		public static string GetIdentifiedTest( FileInfo testFile, TestInfo info, LanguageSupport support, out string relativePath) {
+		public static string GetIdentifiedTest(
+				FileInfo testFile, TestInfo info, LanguageSupport support, out string relativePath) {
 			relativePath = XPath.GetRelativePath(testFile.FullName, info.BasePath);
 			var ast = support.CodeToXml.GenerateFromFile(testFile.FullName);
 
 			// テストケース識別用コードの埋め込み
-			CodeTransformer.InsertIntoTestCase( info, ast, support, relativePath);
+			CodeTransformer.InsertIntoTestCase(info, ast, support, relativePath);
 
 			// コード生成
 			return support.XmlToCode.Generate(ast);

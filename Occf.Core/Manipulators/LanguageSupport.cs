@@ -20,12 +20,11 @@ using System.Collections.Generic;
 using System.IO;
 using Code2Xml.Core.CodeToXmls;
 using Code2Xml.Core.XmlToCodes;
-using Occf.Core.Operators.Inserters;
-using Occf.Core.Operators.Selectors;
-using Occf.Core.Operators.Taggers;
-using Occf.Languages.Java.Operators;
+using Occf.Core.Manipulators.Analyzers;
+using Occf.Core.Manipulators.Taggers;
+using Occf.Core.Manipulators.Transformers;
 
-namespace Occf.Core.Modes {
+namespace Occf.Core.Manipulators {
 	/// <summary>
 	/// A support (method/way) for masuring test coverage with respect to languages.
 	/// </summary>

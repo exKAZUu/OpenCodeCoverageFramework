@@ -23,7 +23,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using NUnit.Framework;
-using Occf.Core.Modes;
+using Occf.Core.Manipulators;
 using Occf.Core.Tests;
 using Occf.Core.Utils;
 using Paraiba.Core;
@@ -36,7 +36,6 @@ namespace Occf.Tools.Cui.Tests {
 
 		[Test]
 		[TestCase("Block1")]
-		[TestCase("sort")]
 		public void InsertMeasurementCode(string projectName) {
 			OccfGlobal.SaveCurrentState();
 
@@ -44,18 +43,19 @@ namespace Occf.Tools.Cui.Tests {
 			var outDir = new DirectoryInfo(Fixture.CleanOuputPath());
 			var inDirPath = Fixture.GetProjectInputPath(projectName);
 			var expDirPath = Fixture.GetProjectExpectationPath(projectName);
-			FileUtility.CopyRecursively(inDirPath, outDirPath);
+			ParaibaFile.CopyRecursively(inDirPath, outDirPath);
 
 			VerifyMeasureAndLocalize(inDirPath, expDirPath, outDir, outDirPath);
 		}
 
-		private static void VerifyMeasureAndLocalize(string inDirPath, string expDirPath,
+		private static void VerifyMeasureAndLocalize(
+				string inDirPath, string expDirPath,
 				DirectoryInfo outDir, string outDirPath) {
 			// カレントディレクトリを途中で変更しても動作するか検証
 			Environment.CurrentDirectory = "C:\\";
 
 			var profile = LanguageSupports.GetCoverageModeByClassName("C");
-			Inserter.InsertMeasurementCode(outDir, outDir, new List<FileInfo>(), null, null, outDir, profile);
+			Inserter.InsertMeasurementCode(outDir, outDir, new List<string>(), null, outDir, profile);
 
 			// .cと.hファイルが存在するか
 			Assert.That(
@@ -84,10 +84,10 @@ namespace Occf.Tools.Cui.Tests {
 			RunTest(outDirPath);
 
 			var ret = BugLocalizer.Run(
-			        new[] {
-			                outDirPath,
-			                Path.Combine(outDirPath, "testresult.txt")
-			        });
+					new[] {
+							outDirPath,
+							Path.Combine(outDirPath, "testresult.txt")
+					});
 			Assert.That(ret, Is.True);
 		}
 

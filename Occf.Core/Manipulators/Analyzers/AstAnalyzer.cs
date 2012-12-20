@@ -22,7 +22,7 @@ using System.Xml.Linq;
 using Paraiba.Linq;
 using Paraiba.Xml.Linq;
 
-namespace Occf.Languages.Java.Operators {
+namespace Occf.Core.Manipulators.Analyzers {
 	public abstract class AstAnalyzer<TAstAnalyzer> : AstAnalyzer
 			where TAstAnalyzer : AstAnalyzer<TAstAnalyzer>, new() {
 		private static TAstAnalyzer _analyzer;

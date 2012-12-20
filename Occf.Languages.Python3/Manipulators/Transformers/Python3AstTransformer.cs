@@ -22,10 +22,10 @@ using System.Linq;
 using System.Xml.Linq;
 using Code2Xml.Languages.Python3.CodeToXmls;
 using Code2Xml.Languages.Python3.XmlToCodes;
-using Occf.Core.Operators.Inserters;
-using Occf.Core.TestInfos;
+using Occf.Core.Manipulators.Transformers;
+using Occf.Core.TestInformation;
 
-namespace Occf.Languages.Python3.Operators.Inserters {
+namespace Occf.Languages.Python3.Manipulators.Transformers {
 	public class Python3AstTransformer : AstTransformer {
 		public override void InsertImport(XElement target) {
 			var code = "import CoverageWriter";
@@ -36,7 +36,7 @@ namespace Occf.Languages.Python3.Operators.Inserters {
 		protected override IEnumerable<XElement> CreateStatementNode(
 				XElement target, long id, int value, ElementType type) {
 			var code = "CoverageWriter.WriteStatement(" + id + "," + (int)type + ","
-			           + value + ");";
+					+ value + ");";
 			if (target.Name.LocalName == "small_stmt") {
 				yield return Python3CodeToXml.Instance.Generate(code)
 						.Descendants(target.Name)
@@ -54,7 +54,7 @@ namespace Occf.Languages.Python3.Operators.Inserters {
 				XElement target, long id, ElementType type) {
 			var oldcode = Python3XmlToCode.Instance.Generate(target);
 			var code = "CoverageWriter.WritePredicate(" + id + "," + (int)type + ","
-			           + oldcode + ")";
+					+ oldcode + ")";
 			var node = Python3CodeToXml.Instance.Generate(code)
 					.Descendants(target.Name)
 					.First();

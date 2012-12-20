@@ -76,15 +76,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Operators\Inserters\Python3AstTransformer.cs" />
-    <Compile Include="Operators\Selectors\Python3BranchSelector.cs" />
-    <Compile Include="Operators\Selectors\Python3CompoundStatementSelector.cs" />
-    <Compile Include="Operators\Selectors\Python3ConditionSelector.cs" />
-    <Compile Include="Operators\Selectors\Python3ForIfConditionSelector.cs" />
-    <Compile Include="Operators\Selectors\Python3SimpleStatementSelector.cs" />
-    <Compile Include="Operators\Selectors\Python3TernaryOperatorSelector.cs" />
-    <Compile Include="Operators\Taggers\Python3Tagger.cs" />
-    <Compile Include="Profiles\Python3Support.cs" />
+    <Compile Include="Manipulators\Analyzers\Python3AstAnalyzer.cs" />
+    <Compile Include="Manipulators\Transformers\Python3AstTransformer.cs" />
+    <Compile Include="Manipulators\Analyzers\Python3ForIfConditionSelector.cs" />
+    <Compile Include="Manipulators\Analyzers\Python3TernaryOperatorSelector.cs" />
+    <Compile Include="Manipulators\Taggers\Python3Tagger.cs" />
+    <Compile Include="Manipulators\Python3Support.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

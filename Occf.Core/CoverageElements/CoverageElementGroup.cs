@@ -20,8 +20,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Code2Xml.Core.Position;
+using Occf.Core.CoverageInformation;
 
-namespace Occf.Core.CoverageInformation {
+namespace Occf.Core.CoverageElements {
 	[Serializable]
 	public class CoverageElementGroup : ICoverageElement {
 		/// <summary>
@@ -47,8 +48,8 @@ namespace Occf.Core.CoverageInformation {
 		public CoverageState StateChildrenOrParent {
 			get {
 				return Targets.Count > 0
-				       		? Targets.Aggregate(CoverageState.Done, (s, t) => s & t.State)
-				       		: ParentElement.State;
+						? Targets.Aggregate(CoverageState.Done, (s, t) => s & t.State)
+						: ParentElement.State;
 			}
 		}
 

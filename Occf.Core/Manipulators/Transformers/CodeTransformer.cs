@@ -20,12 +20,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
+using Occf.Core.CoverageElements;
 using Occf.Core.CoverageInformation;
-using Occf.Core.Modes;
-using Occf.Core.TestInfos;
+using Occf.Core.TestInformation;
 using Paraiba.Collections.Generic;
 
-namespace Occf.Core.Operators.Inserters {
+namespace Occf.Core.Manipulators.Transformers {
 	public static class CodeTransformer {
 		public const int FalseOnly = ((int)CoverageState.FalseOnly) - 1;
 		public const int TrueOnly = ((int)CoverageState.TrueOnly) - 1;

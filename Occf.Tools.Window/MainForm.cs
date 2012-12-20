@@ -21,16 +21,15 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Windows.Forms;
 using Code2Xml.Core.CodeToXmls;
 using Code2Xml.Languages.C.CodeToXmls;
 using Code2Xml.Languages.Java.CodeToXmls;
 using Code2Xml.Languages.Python2.CodeToXmls;
 using Code2Xml.Languages.Python3.CodeToXmls;
-using Occf.Core.CoverageCode;
 using Occf.Core.CoverageInformation;
-using Occf.Core.Modes;
+using Occf.Core.Manipulators;
+using Occf.Core.Utils;
 using Paraiba.Core;
 using Paraiba.IO;
 

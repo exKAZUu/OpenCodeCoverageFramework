@@ -19,12 +19,12 @@
 using System;
 using System.Collections.Generic;
 using System.Xml.Linq;
-using Occf.Core.TestInfos;
+using Occf.Core.TestInformation;
 using Paraiba.Collections.Generic;
 using Paraiba.Utility;
 using Paraiba.Xml.Linq;
 
-namespace Occf.Core.Operators.Inserters {
+namespace Occf.Core.Manipulators.Transformers {
 	public abstract class AstTransformer {
 		public abstract void InsertImport(XElement target);
 

@@ -23,12 +23,10 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using Code2Xml.Core.Position;
-using IronPython.Runtime;
 using NDesk.Options;
-using Occf.Core.CoverageCode;
 using Occf.Core.CoverageInformation;
-using Occf.Core.Modes;
-using Occf.Core.TestInfos;
+using Occf.Core.Manipulators;
+using Occf.Core.TestInformation;
 using Occf.Core.Utils;
 using Paraiba.IO;
 
@@ -39,26 +37,26 @@ namespace Occf.Tools.Cui {
 
 		private static readonly string Usage =
 				Program.Header +
-				"" + "\n" +
-				"Usage: Occf insert -r <root_dir> [options] <src_dir>"
-				+ "\n" +
-				"" + "\n" +
-				S + "-r, -root <root_dir>".PadRight(W)
-				+ "root directory for writing project information and library files to measure coverage"
-				+ "\n" +
-				S + "-t, -test <test>".PadRight(W) +
-				"test code directory for execluding files as measurement targets and for localizing faults"
-				+ "\n" +
-				S + "-l, -lang <name>".PadRight(W) +
-				"language of target source. <name> can be Java(default), C, Python2 or Python3."
-				+ "\n" +
-				S + "-p, -pattern <name>".PadRight(W)
-				+ "search pattern for exploring target source files in the root directory."
-				+ "\n" +
-				S + "-i, -lib <path>".PadRight(W)
-				+ "path of library directory where library files for measuring coverage are copied."
-				+ "\n" +
-				"";
+						"" + "\n" +
+						"Usage: Occf insert -r <root_dir> [options] <src_dir>"
+						+ "\n" +
+						"" + "\n" +
+						S + "-r, -root <root_dir>".PadRight(W)
+						+ "root directory for writing project information and library files to measure coverage"
+						+ "\n" +
+						S + "-t, -test <test>".PadRight(W) +
+						"test code directory for execluding files as measurement targets and for localizing faults"
+						+ "\n" +
+						S + "-l, -lang <name>".PadRight(W) +
+						"language of target source. <name> can be Java(default), C, Python2 or Python3."
+						+ "\n" +
+						S + "-p, -pattern <name>".PadRight(W)
+						+ "search pattern for exploring target source files in the root directory."
+						+ "\n" +
+						S + "-i, -lib <path>".PadRight(W)
+						+ "path of library directory where library files for measuring coverage are copied."
+						+ "\n" +
+						"";
 
 		public static bool Run(IList<string> args) {
 			var rootDirPath = "";
@@ -81,8 +79,8 @@ namespace Occf.Tools.Cui {
 			/*
 			for (int i = 0; i < args.Count; i++ ) {
 				Console.WriteLine("args"+ i + " = " + args[i]);
-			}*/// ** 
-			
+			}*/ // ** 
+
 			// コマンドをパース "-"指定されないのだけargs[]に残る
 			try {
 				args = p.Parse(args);
@@ -96,18 +94,18 @@ namespace Occf.Tools.Cui {
 			for (int i = 0; i < args.Count; i++)
 			{
 				Console.WriteLine("argsB" + i + " = " + args[i]);
-			}*/// **
+			}*/ // **
 
 			//Console.WriteLine("before args count");// 確認
-			
+
 			if (string.IsNullOrEmpty(rootDirPath)) {
 				//Console.WriteLine("count < 1");//確認
 				return Program.Print(Usage);
 			}
 			//Console.WriteLine("before mode:");//確認
-			
-			if(args.Count > 1) {
-				for(var i = 1; i<args.Count; i++) {
+
+			if (args.Count > 1) {
+				for (var i = 1; i < args.Count; i++) {
 					Console.WriteLine("Path: " + args[i] + " is a wrong designated method");
 				}
 				Console.WriteLine("you can designate only one srcDir now.");
@@ -116,7 +114,6 @@ namespace Occf.Tools.Cui {
 			}
 
 			srcDirPath = args.Count < 1 ? rootDirPath : args[0];
-			
 
 			LanguageSupport mode;
 			try {
@@ -125,7 +122,7 @@ namespace Occf.Tools.Cui {
 				return
 						Program.Print(
 								"error: cant't load script file for programming language of "
-								+ languageName);
+										+ languageName);
 			}
 			//Console.WriteLine("before rootDir:");//確認
 			var rootDir = new DirectoryInfo(rootDirPath);
@@ -136,13 +133,11 @@ namespace Occf.Tools.Cui {
 			}
 			//Console.WriteLine("before srcDir:");//確認
 			var srcDir = new DirectoryInfo(srcDirPath);
-			if (!srcDir.Exists)
-			{
+			if (!srcDir.Exists) {
 				return
 						Program.Print(
 								"Source directory doesn't exist.\nsrc:" + srcDir.FullName);
 			}
-
 
 			//Console.WriteLine("before testDir:");//確認
 			DirectoryInfo testDir = null;
@@ -175,7 +170,7 @@ namespace Occf.Tools.Cui {
 			string tDir = testDir != null ? testDir.Name : "null";
 			Console.WriteLine("testDir:" + tDir);
 			Console.WriteLine("libDir: " + libDir.Name);
-			*///　**
+			*/ //　**
 			InsertMeasurementCode(rootDir, srcDir, patterns, testDir, libDir, mode);
 			return true;
 		}
@@ -191,14 +186,14 @@ namespace Occf.Tools.Cui {
 			Contract.Requires<ArgumentException>(libDir.Exists);
 			Contract.Requires<ArgumentNullException>(mode != null);
 			patterns = patterns ?? new List<string>();
-			
+
 			//root
 			var covInfo = new CoverageInfo(
 					rootDir.FullName, mode.Name, SharingMethod.File);
 			//(o)root or src?
 			var testInfo = testDir != null
-								   ? new TestInfo(rootDir.FullName)
-								   : null;
+					? new TestInfo(rootDir.FullName)
+					: null;
 			//root
 			RemoveExistingCoverageDataFiles(rootDir, libDir);
 
@@ -241,33 +236,36 @@ namespace Occf.Tools.Cui {
 		private static void WriteProductionCodeFiles(
 				DirectoryInfo rootDir, DirectoryInfo srcDir, IEnumerable<string> patterns, DirectoryInfo testDir,
 				LanguageSupport mode, CoverageInfo info) {
-
 			IEnumerable<FileInfo> paths;
 
-			IEnumerable<string> bakcupPatterns = new List<string>(){"*"+OccfNames.BackupSuffix, "*"+OccfNames.LineBackUpSuffix, "*"+OccfNames.KleeBackUpSuffix}; 
+			IEnumerable<string> bakcupPatterns = new List<string> {
+					"*" + OccfNames.BackupSuffix, "*" + OccfNames.LineBackUpSuffix,
+					"*" + OccfNames.KleeBackUpSuffix
+			};
 			IEnumerable<FileInfo> backups;
 
-		   if(!patterns.Any()) { // -p　指定が無い場合：拡張子判定
+			if (!patterns.Any()) { // -p　指定が無い場合：拡張子判定
 				paths = mode.FilePatterns.SelectMany(
-					//pat => rootDir.GetFiles(
-					pat => srcDir.GetFiles(//src
-							pat, SearchOption.AllDirectories));
-			} else {// -p指定があった時はそれを格納
+						//pat => rootDir.GetFiles(
+						pat => srcDir.GetFiles(
+								//src
+								pat, SearchOption.AllDirectories));
+			} else { // -p指定があった時はそれを格納
 				paths = patterns.Where(pattern => !mode.FilePatterns.Contains(pattern))
-									.SelectMany(
-											pat => srcDir.GetFiles(pat, SearchOption.AllDirectories));//src
-											//pat => rootDir.GetFiles(pat, SearchOption.AllDirectories));
+						.SelectMany(
+								pat => srcDir.GetFiles(pat, SearchOption.AllDirectories)); //src
+				//pat => rootDir.GetFiles(pat, SearchOption.AllDirectories));
 			}
 
 			backups = bakcupPatterns.Where(bakcupPattern => !mode.FilePatterns.Contains(bakcupPattern))
-									.SelectMany(
-											bpat=> srcDir.GetFiles(bpat, SearchOption.AllDirectories));//src
-											//bpat=> rootDir.GetFiles(bpat, SearchOption.AllDirectories));
-						
+					.SelectMany(
+							bpat => srcDir.GetFiles(bpat, SearchOption.AllDirectories)); //src
+			//bpat=> rootDir.GetFiles(bpat, SearchOption.AllDirectories));
+
 			var pathList = paths.ToList();
 			var bkpathList = backups.ToList();
 
-			for (var i = pathList.Count - 1; i > 0; i-- ) {
+			for (var i = pathList.Count - 1; i > 0; i--) {
 				if (bkpathList.Any(bkpath => pathList[i].FullName == bkpath.FullName)) {
 					pathList.Remove(pathList[i]);
 				}
@@ -281,8 +279,8 @@ namespace Occf.Tools.Cui {
 					}
 				}
 			}*/
-			paths = pathList;　//バックアップファイルを除いたリストに置き換え
-						
+			paths = pathList; //バックアップファイルを除いたリストに置き換え
+
 			/*
 			paths = mode.FilePatterns.SelectMany(pat => rootDir.EnumerateFiles(pat, SearchOption.AllDirectories));
 			paths = paths.Concat(patterns.Where(pattern => !mode.FilePatterns.Contains(pattern))
@@ -290,20 +288,20 @@ namespace Occf.Tools.Cui {
 			*/
 
 			// ignore test code in the directory of production code
-			if (testDir != null){
+			if (testDir != null) {
 				paths = paths.Where(f => !f.FullName.StartsWith(testDir.FullName));
 			}
 
 			foreach (var path in paths.ToList()) {
 				//普通にpath.FullName+OccfNames.BackupSuffixでもいいのでは？　まあ../とか完全に一致しない時もあるけど…
-				var bakPath = rootDir.GetFile(path.FullName + OccfNames.BackupSuffix).FullName;//root
+				var bakPath = rootDir.GetFile(path.FullName + OccfNames.BackupSuffix).FullName; //root
 				//対象ファイルに対してKlee_backやLine_backがあるときは作成しない
-				if(!(File.Exists(path.FullName+OccfNames.LineBackUpSuffix)) 
-					&& !(File.Exists(path.FullName+OccfNames.KleeBackUpSuffix))) {
+				if (!(File.Exists(path.FullName + OccfNames.LineBackUpSuffix))
+						&& !(File.Exists(path.FullName + OccfNames.KleeBackUpSuffix))) {
 					path.CopyTo(bakPath, true);
 				}
 				var outPath = OccfCodeGenerator.WriteCoveragedCode(
-						mode, info, path, rootDir);//? たどってみて調査
+						mode, info, path, rootDir); //? たどってみて調査
 				Console.WriteLine("wrote:" + outPath);
 			}
 		}

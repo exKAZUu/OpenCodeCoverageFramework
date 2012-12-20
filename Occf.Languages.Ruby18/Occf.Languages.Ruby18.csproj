@@ -75,8 +75,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Operators\Selectors\RubyElements.cs" />
-    <Compile Include="Operators\Taggers\RubyTagger.cs" />
+    <Compile Include="Manipulators\Analyzers\RubyElements.cs" />
+    <Compile Include="Manipulators\Taggers\RubyTagger.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

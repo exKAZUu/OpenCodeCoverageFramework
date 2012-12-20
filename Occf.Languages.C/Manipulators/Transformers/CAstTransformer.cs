@@ -25,13 +25,12 @@ using Code2Xml.Core.CodeToXmls;
 using Code2Xml.Core.XmlToCodes;
 using Code2Xml.Languages.C.CodeToXmls;
 using Code2Xml.Languages.C.XmlToCodes;
-using Occf.Core.Operators.Inserters;
-using Occf.Core.TestInfos;
+using Occf.Core.Manipulators.Transformers;
+using Occf.Core.TestInformation;
 using Occf.Languages.C.Manipulators.Analyzers;
-using Occf.Languages.C.Operators.Selectors;
 using Paraiba.Xml.Linq;
 
-namespace Occf.Languages.C.Operators.Inserters {
+namespace Occf.Languages.C.Manipulators.Transformers {
 	public class CAstTransformer : AntlrAstTransformer<CParser> {
 		protected override string MethodPrefix {
 			get { return ""; }

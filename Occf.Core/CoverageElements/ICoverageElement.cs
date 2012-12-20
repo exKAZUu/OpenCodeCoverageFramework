@@ -17,8 +17,9 @@
 #endregion
 
 using Code2Xml.Core.Position;
+using Occf.Core.CoverageInformation;
 
-namespace Occf.Core.CoverageInformation {
+namespace Occf.Core.CoverageElements {
 	public interface ICoverageElement {
 		CodePosition Position { get; }
 		CoverageState State { get; }

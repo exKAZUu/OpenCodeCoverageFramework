@@ -20,13 +20,12 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
-using System.IO;
 using System.Linq;
 using System.Reflection;
 using Occf.Core.Utils;
 using Paraiba.Linq;
 
-namespace Occf.Core.Modes {
+namespace Occf.Core.Manipulators {
 	public class LanguageSupports {
 		private static LanguageSupports _instance;
 

@@ -20,7 +20,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 
-namespace Occf.Core.Operators.Selectors {
+namespace Occf.Core.Manipulators.Analyzers {
 	public class NoSelector : Selector {
 		public static Selector Instance = new NoSelector();
 

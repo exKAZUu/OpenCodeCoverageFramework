@@ -22,7 +22,7 @@ using System.Xml.Linq;
 using Paraiba.Linq;
 using Paraiba.Xml.Linq;
 
-namespace Occf.Core.Operators.Selectors {
+namespace Occf.Core.Manipulators.Analyzers {
 	public abstract class ConditionSelector : Selector {
 		public override IEnumerable<XElement> Select(XElement root) {
 			var targetParents = root.Descendants()
@@ -30,7 +30,7 @@ namespace Occf.Core.Operators.Selectors {
 					.Where(e => e.Elements().Count() >= 3)
 					.Where(
 							e => e.ParentsWhile(root)
-							     		.All(IsAvailableParent)
+									.All(IsAvailableParent)
 					);
 			var targets = targetParents
 					.SelectMany(e => e.Elements().OddIndexElements());

@@ -22,7 +22,7 @@ using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using Occf.Core.Utils;
 
-namespace Occf.Core.TestInfos {
+namespace Occf.Core.TestInformation {
 	[Serializable]
 	public class TestInfo {
 		/// <summary>

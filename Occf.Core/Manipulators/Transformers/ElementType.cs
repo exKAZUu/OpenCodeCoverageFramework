@@ -16,7 +16,7 @@
 
 #endregion
 
-namespace Occf.Core.Operators.Inserters {
+namespace Occf.Core.Manipulators.Transformers {
 	public enum ElementType {
 		Statement = 0,
 		Decision = 1,

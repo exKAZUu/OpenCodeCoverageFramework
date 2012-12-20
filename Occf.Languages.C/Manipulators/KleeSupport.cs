@@ -18,11 +18,11 @@
 
 using System.ComponentModel.Composition;
 using System.IO;
-using Occf.Core.Modes;
+using Occf.Core.Manipulators;
 using Occf.Languages.C.Properties;
 using Paraiba.IO;
 
-namespace Occf.Languages.C.Modes {
+namespace Occf.Languages.C.Manipulators {
 	[Export(typeof(LanguageSupport))]
 	public class KleeSupport : CSupport {
 		public override void CopyLibraries(DirectoryInfo outDirInfo) {

@@ -18,10 +18,10 @@
 
 using System.IO;
 using NUnit.Framework;
-using Occf.Core.CoverageCode;
-using Occf.Core.Modes;
-using Occf.Core.TestInfos;
+using Occf.Core.Manipulators;
+using Occf.Core.TestInformation;
 using Occf.Core.Tests;
+using Occf.Core.Utils;
 
 namespace Occf.Languages.Tests.Java {
 	[TestFixture]

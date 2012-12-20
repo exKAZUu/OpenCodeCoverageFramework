@@ -22,7 +22,7 @@ using System.Xml.Linq;
 using System.Xml.XPath;
 using Paraiba.Xml.Linq;
 
-namespace Occf.Core.Operators.Selectors {
+namespace Occf.Core.Manipulators.Analyzers {
 	public class FilteredSelectorByXPath : Selector {
 		private readonly Selector _selector;
 
@@ -54,9 +54,9 @@ namespace Occf.Core.Operators.Selectors {
 			//    result = result.Where(e => parents.Any(p => p.Contains(e)));
 			//}
 			var result = string.IsNullOrWhiteSpace(WithParentsExpression)
-			             		? _selector.Select(root)
-			             		: root.XPathSelectElements(WithParentsExpression)
-			             		  		.SelectMany(r => _selector.Select(r));
+					? _selector.Select(root)
+					: root.XPathSelectElements(WithParentsExpression)
+							.SelectMany(r => _selector.Select(r));
 			if (!string.IsNullOrWhiteSpace(WithoutParentsExpression)) {
 				var parents = root
 						.XPathSelectElements(WithoutParentsExpression).ToList();

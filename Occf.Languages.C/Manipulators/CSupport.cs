@@ -23,19 +23,17 @@ using Code2Xml.Core.CodeToXmls;
 using Code2Xml.Core.XmlToCodes;
 using Code2Xml.Languages.C.CodeToXmls;
 using Code2Xml.Languages.C.XmlToCodes;
-using Occf.Core.Modes;
-using Occf.Core.Operators.Inserters;
-using Occf.Core.Operators.Selectors;
-using Occf.Core.Operators.Taggers;
+using Occf.Core.Manipulators;
+using Occf.Core.Manipulators.Analyzers;
+using Occf.Core.Manipulators.Taggers;
+using Occf.Core.Manipulators.Transformers;
 using Occf.Languages.C.Manipulators.Analyzers;
-using Occf.Languages.C.Operators.Inserters;
-using Occf.Languages.C.Operators.Selectors;
-using Occf.Languages.C.Operators.Taggers;
+using Occf.Languages.C.Manipulators.Taggers;
+using Occf.Languages.C.Manipulators.Transformers;
 using Occf.Languages.C.Properties;
-using Occf.Languages.Java.Operators;
 using Paraiba.IO;
 
-namespace Occf.Languages.C.Modes {
+namespace Occf.Languages.C.Manipulators {
 	[Export(typeof(LanguageSupport))]
 	public class CSupport : LanguageSupport {
 		private IEnumerable<string> _filePatterns;

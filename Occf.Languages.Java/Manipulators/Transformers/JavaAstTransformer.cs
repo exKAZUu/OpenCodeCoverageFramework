@@ -25,19 +25,14 @@ using Code2Xml.Core.CodeToXmls;
 using Code2Xml.Core.XmlToCodes;
 using Code2Xml.Languages.Java.CodeToXmls;
 using Code2Xml.Languages.Java.XmlToCodes;
-using Occf.Core.Operators.Inserters;
-using Occf.Core.TestInfos;
-using Occf.Languages.Java.Operators.Selectors;
-using Occf.Languages.Java.Operators.Taggers;
+using Occf.Core.Manipulators.Transformers;
+using Occf.Core.TestInformation;
+using Occf.Languages.Java.Manipulators.Analyzers;
+using Occf.Languages.Java.Manipulators.Taggers;
 using Paraiba.Xml.Linq;
 
-namespace Occf.Languages.Java.Operators.Inserters {
+namespace Occf.Languages.Java.Manipulators.Transformers {
 	public class JavaAstTransformer : AntlrAstTransformer<JavaParser> {
-		private readonly JavaSwitchSelector _switchSelector = new JavaSwitchSelector();
-
-		private readonly JavaCaseLabelTailSelector _caseLabelTailSelector =
-				new JavaCaseLabelTailSelector();
-
 		protected override string MethodPrefix {
 			get { return "jp.ac.waseda.cs.washi.CoverageWriter."; }
 		}
@@ -67,9 +62,9 @@ namespace Occf.Languages.Java.Operators.Inserters {
 		}
 
 		private IEnumerable<XElement> GetLackingDefaultCaseNodes(XElement root) {
-			foreach (var switchNode in _switchSelector.Select(root)) {
+			foreach (var switchNode in JavaAstAnalyzer.Instance.FindSwitches(root)) {
 				// ケース文がないときは分岐していないと見なす
-				var last = _caseLabelTailSelector.Select(switchNode).LastOrDefault();
+				var last = JavaAstAnalyzer.Instance.FindCaseLabelTails(switchNode).LastOrDefault();
 				if (last != null && last.Parent.FirstElement().Value != "default") {
 					yield return last.Parent.Parent;
 				}
@@ -102,8 +97,8 @@ namespace Occf.Languages.Java.Operators.Inserters {
 					.Where(e => e != null)
 					.Where(
 							e =>
-							!(e.Descendants("statement").Any()
-							  && e.Descendants("statement").Last().FirstElement().Value == "throw"))
+									!(e.Descendants("statement").Any()
+											&& e.Descendants("statement").Last().FirstElement().Value == "throw"))
 					.Select(e => e.LastElement());
 			var node = JavaCodeToXml.Instance.GenerateWithoutPosition("return;", p => p.statement());
 			foreach (var method in methods) {

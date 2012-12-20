@@ -19,7 +19,7 @@
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using Occf.Core.Modes;
+using Occf.Core.Manipulators;
 using Occf.Core.Utils;
 
 namespace Occf.Sample {
@@ -28,9 +28,11 @@ namespace Occf.Sample {
 			OccfGlobal.SaveCurrentState();
 
 			var outDirInfo = new DirectoryInfo(@"C:\coverage");
-			var inputDirInfo = new DirectoryInfo(@"C:\Users\exKAZUu\Projects\UnitMaster\fixture\Java\MinForUnitMaster\src\main"
-					//@"..\..\..\fixture\project\input\GetMid"
-			);
+			var inputDirInfo =
+					new DirectoryInfo(
+							@"C:\Users\exKAZUu\Projects\UnitMaster\fixture\Java\MinForUnitMaster\src\main"
+							//@"..\..\..\fixture\project\input\GetMid"
+							);
 			var excludeInDirInfo =
 					new DirectoryInfo(@"..\..\..\fixture\project\input\GetMid\test");
 

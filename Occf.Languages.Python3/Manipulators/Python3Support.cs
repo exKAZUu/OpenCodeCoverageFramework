@@ -24,15 +24,15 @@ using Code2Xml.Core.CodeToXmls;
 using Code2Xml.Core.XmlToCodes;
 using Code2Xml.Languages.Python3.CodeToXmls;
 using Code2Xml.Languages.Python3.XmlToCodes;
-using Occf.Core.Modes;
-using Occf.Core.Operators.Inserters;
-using Occf.Core.Operators.Selectors;
-using Occf.Core.Operators.Taggers;
-using Occf.Languages.Python3.Operators.Inserters;
-using Occf.Languages.Python3.Operators.Selectors;
-using Occf.Languages.Python3.Operators.Taggers;
+using Occf.Core.Manipulators;
+using Occf.Core.Manipulators.Analyzers;
+using Occf.Core.Manipulators.Taggers;
+using Occf.Core.Manipulators.Transformers;
+using Occf.Languages.Python3.Manipulators.Analyzers;
+using Occf.Languages.Python3.Manipulators.Taggers;
+using Occf.Languages.Python3.Manipulators.Transformers;
 
-namespace Occf.Languages.Python3.Profiles {
+namespace Occf.Languages.Python3.Manipulators {
 	[Export(typeof(LanguageSupport))]
 	public class Python3Support : LanguageSupport {
 		private IEnumerable<string> _filePatterns;
@@ -62,58 +62,8 @@ namespace Occf.Languages.Python3.Profiles {
 			get { return _inserter ?? (_inserter = new Python3AstTransformer()); }
 		}
 
-		public override Selector FunctionSelector {
-			get { return NoSelector.Instance; }
-		}
-
-		public override Selector FunctionNameSelector {
-			get { return NoSelector.Instance; }
-		}
-
-		public override Selector StatementSelector {
-			get {
-				return _statementSelector
-				       ?? (_statementSelector = new Python3SimpleStatementSelector());
-			}
-		}
-
-		public override Selector InitializerSelector {
-			get { return NoSelector.Instance; }
-		}
-
-		public override Selector BranchSelector {
-			get { return _branchSelector ?? (_branchSelector = new Python3BranchSelector()); }
-		}
-
-		public override Selector ConditionSelector {
-			get {
-				return _conditionSelector
-				       ?? (_conditionSelector = new Python3ConditionSelector());
-			}
-		}
-
-		public override Selector SwitchSelector {
-			get { return NoSelector.Instance; }
-		}
-
-		public override Selector CaseLabelTailSelector {
-			get { return NoSelector.Instance; }
-		}
-
-		public override Selector ForeachSelector {
-			get { return NoSelector.Instance; }
-		}
-
-		public override Selector ForeachHeadSelector {
-			get { return NoSelector.Instance; }
-		}
-
-		public override Selector ForeachTailSelector {
-			get { return NoSelector.Instance; }
-		}
-
-		public override Selector TestCaseLabelTailSelector {
-			get { return NoSelector.Instance; }
+		public override AstAnalyzer AstAnalyzer {
+			get { return Python3AstAnalyzer.Instance; }
 		}
 
 		public override Tagger Tagger {

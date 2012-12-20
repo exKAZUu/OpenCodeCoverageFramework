@@ -1,16 +1,30 @@
-﻿using System;
+﻿#region License
+
+// Copyright (C) 2009-2012 Kazunori Sakamoto
+// 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#endregion
+
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
-using System.Text;
 using System.Xml.Linq;
-using Occf.Languages.Java.Operators;
+using Occf.Core.Manipulators.Analyzers;
 using Paraiba.Xml.Linq;
 
-namespace Occf.Languages.Java.Manipulators.Analyzers
-{
-	public class JavaAstAnalyzer : AstAnalyzer<JavaAstAnalyzer>
-	{
+namespace Occf.Languages.Java.Manipulators.Analyzers {
+	public class JavaAstAnalyzer : AstAnalyzer<JavaAstAnalyzer> {
 		private static readonly string[] TargetNames = {
 				"conditionalOrExpression", "conditionalAndExpression",
 		};
@@ -62,16 +76,16 @@ namespace Occf.Languages.Java.Manipulators.Analyzers
 			var ifWhileDoWhiles = root.Descendants("statement")
 					.Where(
 							e =>
-							e.FirstElement().Value == "if"
-							|| e.FirstElement().Value == "while"
-							|| e.FirstElement().Value == "do")
+									e.FirstElement().Value == "if"
+											|| e.FirstElement().Value == "while"
+											|| e.FirstElement().Value == "do")
 					.Select(e => e.Element("parExpression"))
 					.Select(e => e.NthElement(1));
 			var fors = root.Descendants("forstatement")
 					.Where(
 							e =>
-							e.NthElement(2).Name.LocalName
-							!= "variableModifiers")
+									e.NthElement(2).Name.LocalName
+											!= "variableModifiers")
 					.SelectMany(e => e.Elements("expression"));
 			var ternaries = root.Descendants("conditionalExpression")
 					.Where(e => e.Elements().Count() > 1)
@@ -85,7 +99,7 @@ namespace Occf.Languages.Java.Manipulators.Analyzers
 
 		protected override bool IsAvailableParent(XElement element) {
 			return element.Elements().Count() == 1 ||
-			       ParentNames.Contains(element.Name.LocalName);
+					ParentNames.Contains(element.Name.LocalName);
 		}
 
 		public override IEnumerable<XElement> FindSwitches(XElement root) {
@@ -125,7 +139,7 @@ namespace Occf.Languages.Java.Manipulators.Analyzers
 
 		public override IEnumerable<XElement> FindForeach(XElement root) {
 			var foreachBlocks = root.Descendants("forstatement")
-					.Where( e => e.NthElement(2).Name.LocalName == "variableModifiers");
+					.Where(e => e.NthElement(2).Name.LocalName == "variableModifiers");
 			return foreachBlocks;
 		}
 

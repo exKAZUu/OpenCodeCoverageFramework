@@ -21,7 +21,7 @@ using System.Linq;
 using System.Xml.Linq;
 using Paraiba.Xml.Linq;
 
-namespace Occf.Languages.Java.Operators.Selectors {
+namespace Occf.Languages.Java.Manipulators.Analyzers {
 	public static class JavaElements {
 		public static IEnumerable<XElement> Statement(XElement root) {
 			return root.Descendants("statement");

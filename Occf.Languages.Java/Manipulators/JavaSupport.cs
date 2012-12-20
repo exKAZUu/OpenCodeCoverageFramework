@@ -24,33 +24,21 @@ using Code2Xml.Core.CodeToXmls;
 using Code2Xml.Core.XmlToCodes;
 using Code2Xml.Languages.Java.CodeToXmls;
 using Code2Xml.Languages.Java.XmlToCodes;
-using Occf.Core.Modes;
-using Occf.Core.Operators.Inserters;
-using Occf.Core.Operators.Selectors;
-using Occf.Core.Operators.Taggers;
-using Occf.Languages.Java.Operators.Inserters;
-using Occf.Languages.Java.Operators.Selectors;
-using Occf.Languages.Java.Operators.Taggers;
+using Occf.Core.Manipulators;
+using Occf.Core.Manipulators.Analyzers;
+using Occf.Core.Manipulators.Taggers;
+using Occf.Core.Manipulators.Transformers;
+using Occf.Languages.Java.Manipulators.Analyzers;
+using Occf.Languages.Java.Manipulators.Taggers;
+using Occf.Languages.Java.Manipulators.Transformers;
 using Occf.Languages.Java.Properties;
 using Paraiba.IO;
 
-namespace Occf.Languages.Java.Profiles {
+namespace Occf.Languages.Java.Manipulators {
 	[Export(typeof(LanguageSupport))]
 	public class JavaSupport : LanguageSupport {
 		private IEnumerable<string> _filePatterns;
 		private AstTransformer _inserter;
-		private Selector _functionSelector;
-		private Selector _functionNameSelector;
-		private Selector _statementSelector;
-		private Selector _initializerSelector;
-		private Selector _branchSelector;
-		private Selector _conditionSelector;
-		private Selector _switchSelector;
-		private Selector _caseLableTailSelector;
-		private Selector _foreachSelector;
-		private Selector _foreachHeadSelector;
-		private Selector _foreachTailSelector;
-		private Selector _testCaseLableTailSelector;
 		private Tagger _tagger;
 
 		public override string Name {
@@ -73,76 +61,8 @@ namespace Occf.Languages.Java.Profiles {
 			get { return _inserter ?? (_inserter = new JavaAstTransformer()); }
 		}
 
-		public override Selector FunctionSelector {
-			get { return _functionSelector ?? (_functionSelector = new JavaMethodSelector()); }
-		}
-
-		public override Selector FunctionNameSelector {
-			get {
-				return _functionNameSelector
-				       ?? (_functionNameSelector = new JavaMethodNameSelector());
-			}
-		}
-
-		public override Selector StatementSelector {
-			get {
-				return _statementSelector
-				       ?? (_statementSelector = new JavaStatementSelector());
-			}
-		}
-
-		public override Selector InitializerSelector {
-			get {
-				return _initializerSelector
-				       ?? (_initializerSelector = new JavaInitializerSelector());
-			}
-		}
-
-		public override Selector BranchSelector {
-			get { return _branchSelector ?? (_branchSelector = new JavaBranchSelector()); }
-		}
-
-		public override Selector ConditionSelector {
-			get {
-				return _conditionSelector
-				       ?? (_conditionSelector = new JavaConditionSelector());
-			}
-		}
-
-		public override Selector SwitchSelector {
-			get { return _switchSelector ?? (_switchSelector = new JavaSwitchSelector()); }
-		}
-
-		public override Selector CaseLabelTailSelector {
-			get {
-				return _caseLableTailSelector
-				       ?? (_caseLableTailSelector = new JavaCaseLabelTailSelector());
-			}
-		}
-
-		public override Selector ForeachSelector {
-			get { return _foreachSelector ?? (_foreachSelector = new JavaForeachSelector()); }
-		}
-
-		public override Selector ForeachHeadSelector {
-			get {
-				return _foreachHeadSelector
-				       ?? (_foreachHeadSelector = new JavaForeachHeadSelector());
-			}
-		}
-
-		public override Selector ForeachTailSelector {
-			get {
-				return _foreachTailSelector
-				       ?? (_foreachTailSelector = new JavaForeachTailSelector());
-			}
-		}
-
-		public override Selector TestCaseLabelTailSelector {
-			get {
-				return _testCaseLableTailSelector
-				       ?? (_testCaseLableTailSelector = new JavaTestCaseLabelTailSelector());
-			}
+		public override AstAnalyzer AstAnalyzer {
+			get { return JavaAstAnalyzer.Instance; }
 		}
 
 		public override Tagger Tagger {

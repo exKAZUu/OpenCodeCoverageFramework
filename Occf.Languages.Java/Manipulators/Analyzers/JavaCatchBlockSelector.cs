@@ -19,10 +19,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
-using Occf.Core.Operators.Selectors;
+using Occf.Core.Manipulators.Analyzers;
 using Paraiba.Xml.Linq;
 
-namespace Occf.Languages.Java.Operators.Selectors {
+namespace Occf.Languages.Java.Manipulators.Analyzers {
 	public class JavaCatchBlockSelector : Selector {
 		public override IEnumerable<XElement> Select(XElement root) {
 			return root.Elements("catches")

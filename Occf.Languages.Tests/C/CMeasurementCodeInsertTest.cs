@@ -17,7 +17,7 @@
 #endregion
 
 using NUnit.Framework;
-using Occf.Core.Modes;
+using Occf.Core.Manipulators;
 using Occf.Core.Utils;
 
 namespace Occf.Languages.Tests.C {

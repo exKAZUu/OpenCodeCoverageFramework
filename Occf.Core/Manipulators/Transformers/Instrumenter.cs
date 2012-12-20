@@ -19,10 +19,9 @@
 using System.IO;
 using System.Xml.Linq;
 using Code2Xml.Core.Position;
-using Occf.Core.Modes;
 using Paraiba.IO;
 
-namespace Occf.Core.Operators.Inserters {
+namespace Occf.Core.Manipulators.Transformers {
 	/// <summary>
 	///   A class to instrument test coverage.
 	/// </summary>

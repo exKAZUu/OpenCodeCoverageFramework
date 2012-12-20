@@ -21,7 +21,7 @@ using System.Collections.Generic;
 using System.Xml.Linq;
 using Code2Xml.Core.Position;
 
-namespace Occf.Core.TestInfos {
+namespace Occf.Core.TestInformation {
 	[Serializable]
 	public class TestCase {
 		public TestCase(string relativePath, string name, XElement node)

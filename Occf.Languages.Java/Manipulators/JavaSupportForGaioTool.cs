@@ -18,11 +18,11 @@
 
 using System.ComponentModel.Composition;
 using System.IO;
-using Occf.Core.Modes;
+using Occf.Core.Manipulators;
 using Occf.Languages.Java.Properties;
 using Paraiba.IO;
 
-namespace Occf.Languages.Java.Profiles {
+namespace Occf.Languages.Java.Manipulators {
 	[Export(typeof(LanguageSupport))]
 	public class JavaSupportForGaioTool : JavaSupport {
 		public override string Name {

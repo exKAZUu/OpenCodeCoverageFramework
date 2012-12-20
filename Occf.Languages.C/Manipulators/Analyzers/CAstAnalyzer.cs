@@ -20,7 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
-using Occf.Languages.Java.Operators;
+using Occf.Core.Manipulators.Analyzers;
 using Paraiba.Xml.Linq;
 
 namespace Occf.Languages.C.Manipulators.Analyzers {
@@ -78,7 +78,7 @@ namespace Occf.Languages.C.Manipulators.Analyzers {
 
 		protected override bool IsAvailableParent(XElement element) {
 			return element.Elements().Count() == 1 ||
-			       ParentNames.Contains(element.Name.LocalName);
+					ParentNames.Contains(element.Name.LocalName);
 		}
 
 		public override IEnumerable<XElement> FindSwitches(XElement root) {

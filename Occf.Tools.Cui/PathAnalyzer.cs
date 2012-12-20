@@ -22,7 +22,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using Occf.Core.CoverageInformation;
-using Occf.Core.TestInfos;
+using Occf.Core.TestInformation;
 using Occf.Core.Utils;
 using Paraiba.IO;
 
@@ -33,15 +33,15 @@ namespace Occf.Tools.Cui {
 
 		private static readonly string Usage =
 				"Occf 1.0.0" + "\n" +
-				"Copyright (C) 2011 Kazunori SAKAMOTO" + "\n" +
-				"" + "\n" +
-				"Usage: Occf path <root> [<coverage>]" + "\n" +
-				"" + "\n" +
-				S + "<root>".PadRight(W)
-				+ "path of root directory (including source and test code)" + "\n" +
-				S + "<coverage>".PadRight(W) + "path of coverage data whose name is "
-				+ OccfNames.CoverageData + "\n" +
-				"";
+						"Copyright (C) 2011 Kazunori SAKAMOTO" + "\n" +
+						"" + "\n" +
+						"Usage: Occf path <root> [<coverage>]" + "\n" +
+						"" + "\n" +
+						S + "<root>".PadRight(W)
+						+ "path of root directory (including source and test code)" + "\n" +
+						S + "<coverage>".PadRight(W) + "path of coverage data whose name is "
+						+ OccfNames.CoverageData + "\n" +
+						"";
 
 		public static bool Run(IList<string> args) {
 			if (args.Count < 1) {
@@ -55,7 +55,7 @@ namespace Occf.Tools.Cui {
 								"Root directory doesn't exist.\nroot:" + rootDir.FullName);
 			}
 			var covDataFile = args.Count >= iArgs + 1
-			                  		? new FileInfo(args[iArgs++]) : null;
+					? new FileInfo(args[iArgs++]) : null;
 			covDataFile = FileUtil.GetCoverageData(covDataFile, rootDir);
 			if (!covDataFile.SafeExists()) {
 				return

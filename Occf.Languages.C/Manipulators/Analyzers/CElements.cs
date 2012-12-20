@@ -21,7 +21,7 @@ using System.Linq;
 using System.Xml.Linq;
 using Paraiba.Xml.Linq;
 
-namespace Occf.Languages.C.Operators.Selectors {
+namespace Occf.Languages.C.Manipulators.Analyzers {
 	public static class CElements {
 		public static IEnumerable<XElement> Loop(XElement root) {
 			return root.Descendants("iteration_statement");

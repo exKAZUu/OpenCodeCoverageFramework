@@ -17,9 +17,9 @@
 #endregion
 
 using System.Xml.Linq;
-using Occf.Core.Operators.Taggers;
+using Occf.Core.Manipulators.Taggers;
 
-namespace Occf.Languages.C.Operators.Taggers {
+namespace Occf.Languages.C.Manipulators.Taggers {
 	public class CTagger : Tagger {
 		public override string Tag(XElement elements) {
 			var tag = "";

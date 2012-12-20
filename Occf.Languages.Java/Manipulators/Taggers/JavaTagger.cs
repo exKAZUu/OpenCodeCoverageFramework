@@ -19,10 +19,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
-using Occf.Core.Operators.Taggers;
+using Occf.Core.Manipulators.Taggers;
 using Paraiba.Xml.Linq;
 
-namespace Occf.Languages.Java.Operators.Taggers {
+namespace Occf.Languages.Java.Manipulators.Taggers {
 	public class JavaTagger : Tagger {
 		public static IList<string> GetTag(XElement element) {
 			var result = element.Ancestors("compilationUnit")
@@ -33,7 +33,7 @@ namespace Occf.Languages.Java.Operators.Taggers {
 					element.AncestorsAndSelf()
 							.Where(
 									e => e.Name.LocalName == "normalClassDeclaration" ||
-									     e.Name.LocalName == "methodDeclaration")
+											e.Name.LocalName == "methodDeclaration")
 							// ReSharper disable PossibleNullReferenceException
 							.Select(e => e.Element("IDENTIFIER").Value)
 							// ReSharper restore PossibleNullReferenceException
@@ -46,7 +46,7 @@ namespace Occf.Languages.Java.Operators.Taggers {
 			var outerNodes = elements.Ancestors()
 					.Where(
 							e => e.Name.LocalName == "normalClassDeclaration" ||
-							     e.Name.LocalName == "methodDeclaration");
+									e.Name.LocalName == "methodDeclaration");
 			foreach (var outerNode in outerNodes) {
 				var node = outerNode.Element("IDENTIFIER");
 				tag = node.Value + '>' + tag;

@@ -23,8 +23,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using NUnit.Framework;
-using Occf.Core;
-using Occf.Core.Modes;
+using Occf.Core.Manipulators;
 using Occf.Core.Tests;
 using Occf.Core.Utils;
 using Paraiba.Core;
@@ -46,7 +45,7 @@ namespace Occf.Tools.Cui.Tests {
 			var outDir = new DirectoryInfo(Fixture.CleanOuputPath());
 			var inDirPath = Fixture.GetProjectInputPath(projectName);
 			var expDirPath = Fixture.GetProjectExpectationPath(projectName);
-			FileUtility.CopyRecursively(inDirPath, outDirPath);
+			ParaibaFile.CopyRecursively(inDirPath, outDirPath);
 
 			VerifyMeasureAndLocalize(
 					testTargetNames, inDirPath, expDirPath, outDir, outDirPath);
@@ -55,14 +54,13 @@ namespace Occf.Tools.Cui.Tests {
 		private static void VerifyMeasureAndLocalize(
 				string testTargetNames, string inDirPath, string expDirPath,
 				DirectoryInfo outDir, string outDirPath) {
-
 			// カレントディレクトリを途中で変更しても動作するか検証
 			Environment.CurrentDirectory = "C:\\";
 
 			var profile = LanguageSupports.GetCoverageModeByClassName("Java");
 			Inserter.InsertMeasurementCode(
-					outDir, outDir, new List<FileInfo>(), null, new DirectoryInfo(Path.Combine(outDirPath, "test")),
-                    outDir, profile);
+					outDir, outDir, new List<string>(), new DirectoryInfo(Path.Combine(outDirPath, "test")),
+					outDir, profile);
 
 			// jarとdllファイルが存在するか
 			var jar = Path.Combine(outDirPath, "CoverageWriter.File.jar");
@@ -138,9 +136,10 @@ namespace Occf.Tools.Cui.Tests {
 					WorkingDirectory = outDirPath,
 			};
 			try {
-				using (var p = Process.Start(info))
-				using (var fs = new StreamWriter(Path.Combine(outDirPath, "testresult.txt"))) {
-					fs.WriteFromStream(p.StandardOutput);
+				using (var p = Process.Start(info)) {
+					using (var fs = new StreamWriter(Path.Combine(outDirPath, "testresult.txt"))) {
+						fs.WriteFromStream(p.StandardOutput);
+					}
 				}
 			} catch (Win32Exception e) {
 				throw new InvalidOperationException("Failed to launch 'java'.", e);

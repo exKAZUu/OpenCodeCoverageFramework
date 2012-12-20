@@ -18,8 +18,8 @@
 
 using System;
 using System.IO;
-using Occf.Core.Operators.Inserters;
-using Occf.Core.TestInfos;
+using Occf.Core.Manipulators.Transformers;
+using Occf.Core.TestInformation;
 
 namespace Occf.Core.CoverageInformation {
 	public class CoverageDataReader {

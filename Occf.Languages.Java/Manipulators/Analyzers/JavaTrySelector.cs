@@ -18,9 +18,9 @@
 
 using System.Collections.Generic;
 using System.Xml.Linq;
-using Occf.Core.Operators.Selectors;
+using Occf.Core.Manipulators.Analyzers;
 
-namespace Occf.Languages.Java.Operators.Selectors {
+namespace Occf.Languages.Java.Manipulators.Analyzers {
 	public class JavaTrySelector : Selector {
 		public override IEnumerable<XElement> Select(XElement root) {
 			return root.Descendants("trystatement");

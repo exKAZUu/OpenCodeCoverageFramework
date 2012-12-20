@@ -20,7 +20,7 @@ using System.Collections.Generic;
 using System.Xml.Linq;
 using Paraiba.Xml.Linq;
 
-namespace Occf.Languages.CSharp.Operators.Selectors {
+namespace Occf.Languages.CSharp.Manipulators.Analyzers {
 	public static class CSharpElements {
 		public static IEnumerable<XElement> If(XElement root) {
 			return root.Descendants("if_statement");

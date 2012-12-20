@@ -22,6 +22,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
+using Occf.Core.CoverageElements;
 using Occf.Core.CoverageInformation;
 using Occf.Reader.SharedMemory;
 using Paraiba.IO;

@@ -24,7 +24,7 @@ using Code2Xml.Core.Antlr;
 using Code2Xml.Core.CodeToXmls;
 using Code2Xml.Core.XmlToCodes;
 
-namespace Occf.Core.Operators.Inserters {
+namespace Occf.Core.Manipulators.Transformers {
 	public abstract class AntlrAstTransformer<TParser> : AstTransformer
 			where TParser : Parser, IAntlrParser {
 		protected abstract string MethodPrefix { get; }
@@ -35,13 +35,13 @@ namespace Occf.Core.Operators.Inserters {
 		protected virtual string CreateTestCaseIdentifierCode(
 				XElement target, long id, int value, ElementType type) {
 			return MethodPrefix + "WriteTestCase(" + id + "," + (int)type + "," + value
-			       + ");";
+					+ ");";
 		}
 
 		protected virtual string CreateStatementCoverageCode(
 				XElement target, long id, int value, ElementType type) {
 			return MethodPrefix + "WriteStatement(" + id + "," + (int)type + "," + value
-			       + ");";
+					+ ");";
 		}
 
 		protected virtual Tuple<string, string> CreatePredicateCoverageCode(
@@ -100,5 +100,5 @@ namespace Occf.Core.Operators.Inserters {
 		}
 
 		protected abstract IEnumerable<XElement> GetLackingBlockNodes(XElement root);
-			}
+	}
 }

@@ -16,7 +16,6 @@
 
 #endregion
 
-using System;
 using System.IO;
 using Paraiba.IO;
 
