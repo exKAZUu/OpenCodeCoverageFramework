@@ -75,8 +75,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Operators\Selectors\CSharpElements.cs" />
-    <Compile Include="Operators\Taggers\CSharpTagger.cs" />
+    <Compile Include="Manipulators\Analyzers\CSharpElements.cs" />
+    <Compile Include="Manipulators\Taggers\CSharpTagger.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -86,7 +86,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Operators\Inserters\" />
+    <Folder Include="Manipulators\Transformers\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

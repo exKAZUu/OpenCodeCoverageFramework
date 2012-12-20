@@ -30,7 +30,7 @@ namespace Occf.Core.Operators.Selectors {
 					.Where(e => e.Elements().Count() >= 3)
 					.Where(
 							e => e.ParentsWhile(root)
-							     		.All(IsAllowableParent)
+							     		.All(IsAvailableParent)
 					);
 			var targets = targetParents
 					.SelectMany(e => e.Elements().OddIndexElements());
@@ -46,6 +46,6 @@ namespace Occf.Core.Operators.Selectors {
 		}
 
 		protected abstract bool IsConditionalTerm(XElement element);
-		protected abstract bool IsAllowableParent(XElement element);
+		protected abstract bool IsAvailableParent(XElement element);
 	}
 }

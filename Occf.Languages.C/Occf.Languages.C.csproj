@@ -77,15 +77,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Manipulators\Analyzers\CAstAnalyzer.cs" />
+    <Compile Include="Manipulators\Analyzers\CElements.cs" />
     <Compile Include="Manipulators\KleeSupport.cs" />
     <Compile Include="Manipulators\Transformers\CAstTransformer.cs" />
-    <Compile Include="Manipulators\Analyzers\CBranchSelector.cs" />
-    <Compile Include="Manipulators\Analyzers\CConditionSelector.cs" />
-    <Compile Include="Manipulators\Analyzers\CElements.cs" />
-    <Compile Include="Manipulators\Analyzers\CCaseLabelTailSelector.cs" />
-    <Compile Include="Manipulators\Analyzers\CStatementSelector.cs" />
-    <Compile Include="Manipulators\Analyzers\CInitializerSelector.cs" />
-    <Compile Include="Manipulators\Analyzers\CSwitchSelector.cs" />
     <Compile Include="Manipulators\Taggers\CTagger.cs" />
     <Compile Include="Manipulators\CSupport.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

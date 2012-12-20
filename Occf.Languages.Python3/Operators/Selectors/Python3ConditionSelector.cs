@@ -35,7 +35,7 @@ namespace Occf.Languages.Python3.Operators.Selectors {
 			return TargetNames.Contains(element.Name.LocalName);
 		}
 
-		protected override bool IsAllowableParent(XElement element) {
+		protected override bool IsAvailableParent(XElement element) {
 			return element.Elements().Count() == 1 ||
 			       ParentNames.Contains(element.Name.LocalName);
 		}

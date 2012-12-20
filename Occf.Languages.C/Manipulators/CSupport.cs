@@ -27,10 +27,12 @@ using Occf.Core.Modes;
 using Occf.Core.Operators.Inserters;
 using Occf.Core.Operators.Selectors;
 using Occf.Core.Operators.Taggers;
+using Occf.Languages.C.Manipulators.Analyzers;
 using Occf.Languages.C.Operators.Inserters;
 using Occf.Languages.C.Operators.Selectors;
 using Occf.Languages.C.Operators.Taggers;
 using Occf.Languages.C.Properties;
+using Occf.Languages.Java.Operators;
 using Paraiba.IO;
 
 namespace Occf.Languages.C.Modes {
@@ -38,12 +40,6 @@ namespace Occf.Languages.C.Modes {
 	public class CSupport : LanguageSupport {
 		private IEnumerable<string> _filePatterns;
 		private AstTransformer _inserter;
-		private Selector _statementSelector;
-		private Selector _initializerSelector;
-		private Selector _branchSelector;
-		private Selector _conditionSelector;
-		private Selector _switchSelector;
-		private Selector _caseLableTailSelector;
 		private Tagger _tagger;
 
 		public override string Name {
@@ -66,58 +62,8 @@ namespace Occf.Languages.C.Modes {
 			get { return _inserter ?? (_inserter = new CAstTransformer()); }
 		}
 
-		public override Selector FunctionSelector {
-			get { return NoSelector.Instance; }
-		}
-
-		public override Selector FunctionNameSelector {
-			get { return NoSelector.Instance; }
-		}
-
-		public override Selector StatementSelector {
-			get { return _statementSelector ?? (_statementSelector = new CStatementSelector()); }
-		}
-
-		public override Selector InitializerSelector {
-			get {
-				return _initializerSelector
-				       ?? (_initializerSelector = new CInitializerSelector());
-			}
-		}
-
-		public override Selector BranchSelector {
-			get { return _branchSelector ?? (_branchSelector = new CBranchSelector()); }
-		}
-
-		public override Selector ConditionSelector {
-			get { return _conditionSelector ?? (_conditionSelector = new CConditionSelector()); }
-		}
-
-		public override Selector SwitchSelector {
-			get { return _switchSelector ?? (_switchSelector = new CSwitchSelector()); }
-		}
-
-		public override Selector CaseLabelTailSelector {
-			get {
-				return _caseLableTailSelector
-				       ?? (_caseLableTailSelector = new CCaseLabelTailSelector());
-			}
-		}
-
-		public override Selector ForeachSelector {
-			get { return NoSelector.Instance; }
-		}
-
-		public override Selector ForeachHeadSelector {
-			get { return NoSelector.Instance; }
-		}
-
-		public override Selector ForeachTailSelector {
-			get { return NoSelector.Instance; }
-		}
-
-		public override Selector TestCaseLabelTailSelector {
-			get { return NoSelector.Instance; }
+		public override AstAnalyzer AstAnalyzer {
+			get { return CAstAnalyzer.Instance; }
 		}
 
 		public override Tagger Tagger {

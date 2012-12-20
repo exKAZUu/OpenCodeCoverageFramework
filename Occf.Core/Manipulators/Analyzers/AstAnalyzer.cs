@@ -17,16 +17,21 @@
 #endregion
 
 using System.Collections.Generic;
+using System.Linq;
 using System.Xml.Linq;
-using Code2Xml.Core.CodeToXmls;
-using Code2Xml.Core.XmlToCodes;
-using Code2Xml.Languages.Java.CodeToXmls;
-using Code2Xml.Languages.Java.XmlToCodes;
-using Occf.Core.Operators.Inserters;
-using Occf.Core.Operators.Selectors;
-using Occf.Core.Operators.Taggers;
+using Paraiba.Linq;
+using Paraiba.Xml.Linq;
 
 namespace Occf.Languages.Java.Operators {
+	public abstract class AstAnalyzer<TAstAnalyzer> : AstAnalyzer
+			where TAstAnalyzer : AstAnalyzer<TAstAnalyzer>, new() {
+		private static TAstAnalyzer _analyzer;
+
+		public static TAstAnalyzer Instance {
+			get { return (_analyzer = _analyzer ?? new TAstAnalyzer()); }
+		}
+	}
+
 	public abstract class AstAnalyzer {
 		/// <summary>
 		/// Returns xml elements indicating function declarators.
@@ -40,7 +45,7 @@ namespace Occf.Languages.Java.Operators {
 		/// </summary>
 		/// <param name="functionElement">The root element where start to find elements.</param>
 		/// <returns>The selected xml elements.</returns>
-		public abstract string GettFunctionName(XElement functionElement);
+		public abstract string GetFunctionName(XElement functionElement);
 
 		/// <summary>
 		/// Returns xml elements indicating statements.
@@ -68,7 +73,37 @@ namespace Occf.Languages.Java.Operators {
 		/// </summary>
 		/// <param name="root">The root element where start to find elements.</param>
 		/// <returns>The selected xml elements.</returns>
-		public abstract IEnumerable<XElement> FindConditions(XElement root);
+		public IEnumerable<XElement> FindConditions(XElement root) {
+			var targetParents = root.Descendants()
+					.Where(IsConditionalTerm)
+					.Where(e => e.Elements().Count() >= 3)
+					.Where(e => e.ParentsWhile(root).All(IsAvailableParent));
+			var targets = targetParents
+					.SelectMany(e => e.Elements().OddIndexElements());
+
+			// 他の項の要素を含まない項の要素のみを抽出
+			// a == b && (a == c || a == d) => a == b, a == c, a == d
+			var atomicTargets = targets.Independents().ToList();
+
+			// XML要素の位置でソーティング
+			atomicTargets.Sort((e1, e2) => e1.IsBefore(e2) ? -1 : 1);
+
+			return atomicTargets;
+		}
+
+		/// <summary>
+		/// Returns the value indicating whether the specified element is a conditional term.
+		/// </summary>
+		/// <param name="element">The element to be judged.</param>
+		/// <returns>The value indicating whether the specified element is a conditional term.</returns>
+		protected abstract bool IsConditionalTerm(XElement element);
+
+		/// <summary>
+		/// Returns the value indicating whether the specified element is an available parent.
+		/// </summary>
+		/// <param name="element">The element to be judged.</param>
+		/// <returns>The value indicating whether the specified element is an available parent.</returns>
+		protected abstract bool IsAvailableParent(XElement element);
 
 		/// <summary>
 		/// Returns xml elements indicating switch statements.

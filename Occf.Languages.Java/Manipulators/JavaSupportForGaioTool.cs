@@ -24,7 +24,7 @@ using Paraiba.IO;
 
 namespace Occf.Languages.Java.Profiles {
 	[Export(typeof(LanguageSupport))]
-	public class JavaUnitMasterSupport : JavaSupport {
+	public class JavaSupportForGaioTool : JavaSupport {
 		public override string Name {
 			get { return "JavaForUM"; }
 		}

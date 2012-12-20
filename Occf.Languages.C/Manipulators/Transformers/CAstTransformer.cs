@@ -27,16 +27,12 @@ using Code2Xml.Languages.C.CodeToXmls;
 using Code2Xml.Languages.C.XmlToCodes;
 using Occf.Core.Operators.Inserters;
 using Occf.Core.TestInfos;
+using Occf.Languages.C.Manipulators.Analyzers;
 using Occf.Languages.C.Operators.Selectors;
 using Paraiba.Xml.Linq;
 
 namespace Occf.Languages.C.Operators.Inserters {
 	public class CAstTransformer : AntlrAstTransformer<CParser> {
-		private readonly CSwitchSelector _switchSelector = new CSwitchSelector();
-
-		private readonly CCaseLabelTailSelector _caseLabelTailSelector =
-				new CCaseLabelTailSelector();
-
 		protected override string MethodPrefix {
 			get { return ""; }
 		}
@@ -79,8 +75,8 @@ namespace Occf.Languages.C.Operators.Inserters {
 		}
 
 		private IEnumerable<XElement> GetLackingDefaultCaseNodes(XElement root) {
-			foreach (var switchNode in _switchSelector.Select(root)) {
-				var last = _caseLabelTailSelector.Select(switchNode).LastOrDefault();
+			foreach (var switchNode in CAstAnalyzer.Instance.FindSwitches(root)) {
+				var last = CAstAnalyzer.Instance.FindCaseLabelTails(switchNode).LastOrDefault();
 				// ケース文がないときは分岐していないと見なす
 				if (last != null && last.Parent.FirstElement().Value != "default") {
 					yield return last.Parent;

@@ -16,20 +16,22 @@
 
 #endregion
 
-using System.Collections.Generic;
-using System.Linq;
 using System.Xml.Linq;
-using Occf.Core.Operators.Selectors;
-using Paraiba.Xml.Linq;
+using Occf.Core.Operators.Taggers;
 
-namespace Occf.Languages.C.Operators.Selectors {
-	public class CStatementSelector : Selector {
-		public override IEnumerable<XElement> Select(XElement root) {
-			return root.Descendants("statement")
-					.Where(
-							e =>
-							e.FirstElement().Name.LocalName != "labeled_statement"
-							&& e.FirstElement().Name.LocalName != "compound_statement");
+namespace Occf.Languages.CSharp.Operators.Taggers {
+	public class CSharpTagger : Tagger {
+		public override string Tag(XElement elements) {
+			var tag = "";
+			//var classNodes = elements.Parents()
+			//    .Where(e => e.Name.LocalName == "classdef");
+			//foreach (var classNode in classNodes) {
+			//    var node = classNode.ElementAtOrDefault(1);
+			//    if (node == null)
+			//        continue;
+			//    tag += node.Value + '>';
+			//}
+			return tag;
 		}
 	}
 }

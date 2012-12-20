@@ -122,7 +122,7 @@ namespace Occf.Core.Operators.Inserters {
 			var analyzer = support.AstAnalyzer;
 			var funcs = analyzer.FindFunctions(root);
 			foreach (var func in funcs) {
-				var funcName = analyzer.GettFunctionName(func);
+				var funcName = analyzer.GetFunctionName(func);
 				var funcId = RegisterFunction(fileId, funcName, CodePositions.New(func));
 
 				InstrumentStatement(support, fileId, funcId, inserter, func);
