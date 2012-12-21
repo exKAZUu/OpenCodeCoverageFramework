@@ -32,6 +32,9 @@ namespace Occf.Core.Manipulators.Analyzers {
 		}
 	}
 
+	/// <summary>
+	/// A class for finding the elements where instrumentation code is inserted. 
+	/// </summary>
 	public abstract class AstAnalyzer {
 		/// <summary>
 		/// Returns xml elements indicating function declarators.
@@ -143,7 +146,7 @@ namespace Occf.Core.Manipulators.Analyzers {
 		/// <summary>
 		/// Returns xml elements indicating the test cases.
 		/// </summary>
-		/// <param name="foreachElement">The root element where start to find elements.</param>
+		/// <param name="root">The root element where start to find elements.</param>
 		/// <returns>The selected xml elements.</returns>
 		public abstract IEnumerable<XElement> FindTestCases(XElement root);
 	}

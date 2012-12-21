@@ -27,15 +27,13 @@ using Paraiba.Text;
 namespace Occf.Core.Utils {
 	public static class OccfCodeGenerator {
 		public static string AnalyzeAndWriteIdentifiedTest(
-				LanguageSupport mode, TestInfo info, FileInfo fullPath,
-				DirectoryInfo outDirPath) {
+				LanguageSupport support, TestInfo info, FileInfo fullPath, DirectoryInfo outDirPath) {
 			string relativePath;
-			var code = GetIdentifiedTest(fullPath, info, mode, out relativePath);
+			var code = GetIdentifiedTest(fullPath, info, support, out relativePath);
 			return WriteCode(relativePath, outDirPath, code);
 		}
 
-		public static string GetIdentifiedTest(
-				FileInfo testFile, TestInfo info, LanguageSupport support) {
+		public static string GetIdentifiedTest(FileInfo testFile, TestInfo info, LanguageSupport support) {
 			string relativePath;
 			return GetIdentifiedTest(testFile, info, support, out relativePath);
 		}
@@ -53,43 +51,36 @@ namespace Occf.Core.Utils {
 		}
 
 		public static string WriteCoveragedCode(
-				LanguageSupport mode, CoverageInfo info, FileInfo codeFile,
-				DirectoryInfo outDir) {
+				LanguageSupport support, CoverageInfo info, FileInfo codeFile, DirectoryInfo outDir) {
 			string relativePath;
-			var code = GetCoveragedCode(
-					codeFile, info, mode, out relativePath);
+			var code = GetCoveragedCode(codeFile, info, support, out relativePath);
 			return WriteCode(relativePath, outDir, code);
 		}
 
 		public static string GetCoveragedCode(
-				FileInfo codeFile, CoverageInfo info, LanguageSupport mode) {
+				FileInfo codeFile, CoverageInfo info, LanguageSupport support) {
 			string relativePath;
-			return GetCoveragedCode(codeFile, info, mode, out relativePath);
+			return GetCoveragedCode(codeFile, info, support, out relativePath);
 		}
 
 		public static string GetCoveragedCode(
-				FileInfo codeFile, CoverageInfo info, LanguageSupport mode,
-				out string relativePath) {
+				FileInfo codeFile, CoverageInfo info, LanguageSupport support, out string relativePath) {
 			relativePath = XPath.GetRelativePath(codeFile.FullName, info.BasePath);
-			var ast = mode.CodeToXml.GenerateFromFile(codeFile.FullName);
-			var nodeIns = mode.AstTransformer;
+			var ast = support.CodeToXml.GenerateFromFile(codeFile.FullName);
 
 			// 測定用コードの埋め込み
 			var path = relativePath;
-			CodeTransformer.InstrumentStatementAndPredicate(
-					info, ast, mode, path);
+			CodeTransformer.InstrumentStatementAndPredicate(info, ast, support, path);
 			//CodeTransformer.InsertIntoStatement(
 			//        info, ast, LanguageSupport, path);
 			//CodeTransformer.InsertPredicate(
 			//        info, ast, LanguageSupport, path);
 
 			// コード生成
-			return mode.XmlToCode.Generate(ast);
+			return support.XmlToCode.Generate(ast);
 		}
 
-		private static string WriteCode(
-				string relativePath, DirectoryInfo outDir,
-				string code) {
+		private static string WriteCode(string relativePath, DirectoryInfo outDir, string code) {
 			var outPath = XPath.GetFullPath(relativePath, outDir.FullName);
 			Directory.CreateDirectory(Path.GetDirectoryName(outPath));
 			using (var writer = new StreamWriter(outPath, false, XEncoding.SJIS)) {

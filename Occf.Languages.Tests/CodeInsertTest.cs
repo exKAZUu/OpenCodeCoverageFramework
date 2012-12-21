@@ -25,19 +25,22 @@ using Occf.Core.Utils;
 
 namespace Occf.Languages.Tests {
 	public static class CodeInsertTest {
-		public static void VerifyCodeInsertion(
-				LanguageSupport mode, string fileName) {
-			var info = new CoverageInfo(
-					Fixture.GetCoverageInputPath(), mode.Name, SharingMethod.SharedMemory);
-			var inPath = Path.Combine(Fixture.GetCoverageInputPath(), fileName);
-			var code = OccfCodeGenerator.GetCoveragedCode(
-					new FileInfo(inPath), info, mode);
-			File.WriteAllText(Fixture.GetOutputPath(fileName), code);
+		public static void VerifyCodeInsertion( LanguageSupport mode, string fileName) {
+			var code = InsertInstrumentationCode(mode, fileName);
 			var expPath = Path.Combine(Fixture.GetCoverageExpectationPath(), fileName);
 			using (var reader = new StreamReader(expPath)) {
 				var expected = reader.ReadToEnd();
 				Assert.That(code, Is.EqualTo(expected));
 			}
+		}
+
+		public static string InsertInstrumentationCode(LanguageSupport mode, string fileName) {
+			var info = new CoverageInfo(
+					Fixture.GetCoverageInputPath(), mode.Name, SharingMethod.SharedMemory);
+			var inPath = Path.Combine(Fixture.GetCoverageInputPath(), fileName);
+			var code = OccfCodeGenerator.GetCoveragedCode( new FileInfo(inPath), info, mode);
+			File.WriteAllText(Fixture.GetOutputPath(fileName), code);
+			return code;
 		}
 	}
 }
