@@ -18,7 +18,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Runtime.Serialization.Formatters.Binary;
+using Occf.Core.CoverageElements;
+using Occf.Core.Utils;
 
 namespace Occf.Core.CoverageInformation {
 	[Serializable]
@@ -83,6 +87,28 @@ namespace Occf.Core.CoverageInformation {
 		private IEnumerable<CoverageElementGroup> GetCoverageElementGroups(
 				Tuple<int, int> r) {
 			return TargetGroups.Skip(r.Item1).Take(r.Item2 - r.Item1);
+		}
+
+		public static CoverageInfo ReadCoverageInfo(FileInfo infoFile) {
+			return ReadCoverageInfo(infoFile, new BinaryFormatter());
+		}
+
+		public static CoverageInfo ReadCoverageInfo(FileInfo infoFile, BinaryFormatter formatter) {
+			using (var fs = new FileStream(infoFile.FullName, FileMode.Open)) {
+				return (CoverageInfo)formatter.Deserialize(fs);
+			}
+		}
+
+		public static void WriteCoverageInfo(DirectoryInfo rootDir, CoverageInfo covInfo) {
+			WriteCoverageInfo(rootDir, covInfo, new BinaryFormatter());
+		}
+
+		public static void WriteCoverageInfo(
+				DirectoryInfo rootDir, CoverageInfo covInfo, BinaryFormatter formatter) {
+			var covPath = Path.Combine(rootDir.FullName, OccfNames.CoverageInfo);
+			using (var fs = new FileStream(covPath, FileMode.Create)) {
+				formatter.Serialize(fs, covInfo);
+			}
 		}
 	}
 }

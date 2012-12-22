@@ -23,7 +23,7 @@ using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using Code2Xml.Core.Position;
 using Occf.Core.CoverageInformation;
-using Occf.Core.TestInfos;
+using Occf.Core.TestInformation;
 using Occf.Core.Utils;
 using Paraiba.IO;
 
@@ -34,14 +34,15 @@ namespace Occf.Tools.Cui {
 
 		private static readonly string Usage =
 				Program.Header +
-				"" + "\n" +
-				"Usage: Occf klee <root_directory> <test_directory>" + "\n" +
-				"" + "\n" +
-				S + "<root_directory>".PadRight(W) + "a path of a directory containing '.occf_coverage_info'" + "\n" +
-				"\n" +
-				S + "<test_directory>".PadRight(W) + "a path of klee test directory" + "\n" +
-				"\n" +
-				"";
+						"" + "\n" +
+						"Usage: Occf klee <root_directory> <test_directory>" + "\n" +
+						"" + "\n" +
+						S + "<root_directory>".PadRight(W) + "a path of a directory containing '.occf_coverage_info'"
+						+ "\n" +
+						"\n" +
+						S + "<test_directory>".PadRight(W) + "a path of klee test directory" + "\n" +
+						"\n" +
+						"";
 
 		public static bool Run(IList<string> args) {
 			// parse options
@@ -56,10 +57,10 @@ namespace Occf.Tools.Cui {
 			var formatter = new BinaryFormatter();
 			var rootDirInfo = new DirectoryInfo(args[0]);
 			var testDirInfo = new DirectoryInfo(args[1]);
-			var covInfoFile = PathFinder.FindCoverageInfoPath(rootDirInfo);
-			var covInfo = InfoReader.ReadCoverageInfo(covInfoFile, formatter);
+			var covInfoFile = FileUtil.GetCoverageInfo(rootDirInfo);
+			var covInfo = CoverageInfo.ReadCoverageInfo(covInfoFile, formatter);
 			var testInfo = AnalyzeKleeTestFiles(testDirInfo);
-			
+
 			AnalyzeTestResult(rootDirInfo, testInfo);
 			//Line対応のMapのMapを作成、
 			var lineDic = new Dictionary<FileInfo, Dictionary<int, int>>();
@@ -67,7 +68,7 @@ namespace Occf.Tools.Cui {
 			if (mapFileInfo.Exists) {
 				lineDic = MapDicCreater(mapFileInfo);
 			} else {
-				Console.WriteLine("\"" + OccfNames.LineMapping +"\" file is not found.");
+				Console.WriteLine("\"" + OccfNames.LineMapping + "\" file is not found.");
 			}
 			BugLocalizer.LocalizeStatements(testInfo, covInfo, lineDic);
 		}
@@ -92,12 +93,10 @@ namespace Occf.Tools.Cui {
 			using (var reader = fileInfo.OpenText()) {
 				foreach (var line in reader.ReadLines()) {
 					var testCase = testInfo.TestCases.FirstOrDefault(t => t.Name.EndsWith(line));
-					if (testCase != null)
-					{
+					if (testCase != null) {
 						testCase.Passed = true;
-					}
-					else {
-						Console.Error.WriteLine("[WARNING] the testcase of '" + line +"' is not founded.");
+					} else {
+						Console.Error.WriteLine("[WARNING] the testcase of '" + line + "' is not founded.");
 					}
 				}
 			}

@@ -25,7 +25,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Text.RegularExpressions;
 using IronPython.Hosting;
 using Occf.Core.CoverageInformation;
-using Occf.Core.TestInfos;
+using Occf.Core.TestInformation;
 using Occf.Core.Utils;
 using Paraiba.IO;
 
@@ -36,18 +36,18 @@ namespace Occf.Tools.Cui {
 
 		private static readonly string Usage =
 				Program.Header +
-				"" + "\n" +
-				"Usage: Occf localize <root> <result> [<coverage>]" + "\n" +
-				"" + "\n" +
-				S + "<root>".PadRight(W)
-				+ "path of root directory (including source and test code)" + "\n" +
-				S + "<result>".PadRight(W)
-				+
-				"path of test result file which contains indexes of failed test case with csv"
-				+ "\n" +
-				S + "<coverage>".PadRight(W) + "path of coverage data whose name is "
-				+ OccfNames.CoverageData + "\n" +
-				"";
+						"" + "\n" +
+						"Usage: Occf localize <root> <result> [<coverage>]" + "\n" +
+						"" + "\n" +
+						S + "<root>".PadRight(W)
+						+ "path of root directory (including source and test code)" + "\n" +
+						S + "<result>".PadRight(W)
+						+
+						"path of test result file which contains indexes of failed test case with csv"
+						+ "\n" +
+						S + "<coverage>".PadRight(W) + "path of coverage data whose name is "
+						+ OccfNames.CoverageData + "\n" +
+						"";
 
 		public static bool Run(IList<string> args) {
 			if (args.Count < 2) {
@@ -70,8 +70,8 @@ namespace Occf.Tools.Cui {
 			}
 
 			var covDataFile = args.Count >= iArgs + 1
-									  ? new FileInfo(args[iArgs++]) : null;
-			covDataFile = PathFinder.FindCoverageDataPath(covDataFile, rootDir);
+					? new FileInfo(args[iArgs++]) : null;
+			covDataFile = FileUtil.GetCoverageData(covDataFile, rootDir);
 			if (!covDataFile.SafeExists()) {
 				return
 						Program.Print(
@@ -83,13 +83,12 @@ namespace Occf.Tools.Cui {
 			return true;
 		}
 
-		private static void Localize(
-				DirectoryInfo rootDir, FileInfo resultFile, FileInfo covDataFile) {
+		private static void Localize(DirectoryInfo rootDir, FileInfo resultFile, FileInfo covDataFile) {
 			var formatter = new BinaryFormatter();
-			var covInfoFile = PathFinder.FindCoverageInfoPath(rootDir);
-			var testInfoFile = PathFinder.FindTestInfoPath(rootDir);
-			var covInfo = InfoReader.ReadCoverageInfo(covInfoFile, formatter);
-			var testInfo = InfoReader.ReadTestInfo(testInfoFile, formatter);
+			var covInfoFile = FileUtil.GetCoverageInfo(rootDir);
+			var testInfoFile = FileUtil.GetTestInfo(rootDir);
+			var covInfo = CoverageInfo.ReadCoverageInfo(covInfoFile, formatter);
+			var testInfo = TestInfo.ReadTestInfo(testInfoFile, formatter);
 
 			testInfo.InitializeForStoringData(true);
 			ReadJUnitResult(resultFile, testInfo);
@@ -104,18 +103,19 @@ namespace Occf.Tools.Cui {
 		/// <param name="testInfo"></param>
 		/// <param name="covInfo"></param>
 		/// <param name="lindDic"></param>
-		public static void LocalizeStatements(TestInfo testInfo, CoverageInfo covInfo, Dictionary<FileInfo, Dictionary<int, int>> lindDic) { // Targeting only statement
+		public static void LocalizeStatements(
+				TestInfo testInfo, CoverageInfo covInfo, Dictionary<FileInfo, Dictionary<int, int>> lindDic) { // Targeting only statement
 			var engine = Python.CreateEngine();
 			var scope = engine.CreateScope();
 			var fileName = "BugLocalization.py";
-			
+
 			var scriptPath = Path.Combine(OccfGlobal.CurrentDirectory, fileName);
 			if (!File.Exists(scriptPath)) {
 				scriptPath = Path.Combine(OccfGlobal.ExeDirectory, fileName);
 			}
-			
+
 			engine.ExecuteFile(scriptPath, scope);
-			
+
 			var calcMetricFunc =
 					scope.GetVariable<Func<double, double, double, double, IEnumerable>>(
 							"CalculateMetric");
@@ -128,7 +128,7 @@ namespace Occf.Tools.Cui {
 				var failedTestCases = testInfo.TestCases.Where(t => !t.Passed);
 				var executedAndFailedTestCases =
 						failedTestCases.Where(t => t.Statements.Contains(stmt.Item1));
-				
+
 				var executedAndPassedCount = executedAndPassedTestCases.Count();
 				var passedCount = passedTestCases.Count();
 				var executedAndFailedCount = executedAndFailedTestCases.Count();
@@ -147,11 +147,11 @@ namespace Occf.Tools.Cui {
 
 				//Dictionaryを検索してKeyに対象ファイルが存在したらオリジナル行番号に変換
 				string tag;
-				var fileInfo = (from fileinfos in lindDic.Keys 
-										let fileFullname = fileinfos.FullName 
-										let itemPath = stmt.Item2.RelativePath 
-										where fileFullname.EndsWith(itemPath) 
-										select fileinfos).FirstOrDefault();
+				var fileInfo = (from fileinfos in lindDic.Keys
+				                let fileFullname = fileinfos.FullName
+				                let itemPath = stmt.Item2.RelativePath
+				                where fileFullname.EndsWith(itemPath)
+				                select fileinfos).FirstOrDefault();
 				/* 上のLINQの元コード
 				FileInfo fileInfo = null;
 				foreach (var fileinfos in lindDic.Keys) {
@@ -163,22 +163,21 @@ namespace Occf.Tools.Cui {
 					}
 				}*/
 				var orgLineNumFlag = true;
-				if(fileInfo != null && fileInfo.Exists) {
+				if (fileInfo != null && fileInfo.Exists) {
 					var orgStartLine = lindDic[fileInfo][stmt.Item2.Position.StartLine];
 					var orgEndLine = lindDic[fileInfo][stmt.Item2.Position.EndLine];
 					//var orgStartLineString = orgStartLine == orgEndLine 
-						//					? orgStartLine.ToString() : (orgStartLine + " - " + orgEndLine);
+					//					? orgStartLine.ToString() : (orgStartLine + " - " + orgEndLine);
 					var orgStartLineString = orgStartLine.ToString();
 					tag = stmt.Item2.Tag + ": " + orgStartLineString;
-					if (orgStartLine == 0){
+					if (orgStartLine == 0) {
 						orgLineNumFlag = false;
 					}
-
-				}else {
+				} else {
 					tag = stmt.Item2.Tag + ": " + stmt.Item2.Position.SmartLineString;
 				}
 
-				if (orgLineNumFlag){
+				if (orgLineNumFlag) {
 					Console.WriteLine(tag.PadRight(45) + ": " + metricsString);
 				}
 			}

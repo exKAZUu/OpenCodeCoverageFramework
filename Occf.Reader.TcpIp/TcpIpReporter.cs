@@ -34,7 +34,7 @@ namespace Occf.Reader.TcpIp {
 					using (var stream = client.GetStream()) {
 						while (true) {
 							var index = (stream.ReadByte() << 24) + (stream.ReadByte() << 16) +
-							            (stream.ReadByte() << 8) + (stream.ReadByte() << 0);
+									(stream.ReadByte() << 8) + (stream.ReadByte() << 0);
 							var value = stream.ReadByte();
 							if (value == -1) {
 								break;

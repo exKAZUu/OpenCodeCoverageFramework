@@ -61,11 +61,13 @@
     <Reference Include="Code2Xml.Languages.Python3, Version=1.1.0.38, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Code2Xml.1.5.0.23\lib\Code2Xml.Languages.Python3.dll</HintPath>
     </Reference>
-    <Reference Include="Paraiba, Version=1.0.3.58, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Paraiba.1.0.3.58\lib\net40\Paraiba.dll</HintPath>
+    <Reference Include="Paraiba, Version=1.0.5.66, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Paraiba.1.0.5.66\lib\net40\Paraiba.dll</HintPath>
     </Reference>
-    <Reference Include="Paraiba.Experiment, Version=1.0.2.34, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Paraiba.Experiment.1.0.2.34\lib\net40\Paraiba.Experiment.dll</HintPath>
+    <Reference Include="Paraiba.Experiment, Version=1.0.2.39, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Paraiba.Experiment.1.0.2.39\lib\net40\Paraiba.Experiment.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -73,7 +75,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Operators\Selectors\LuaElements.cs" />
+    <Compile Include="Manipulators\Analyzers\LuaElements.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

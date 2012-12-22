@@ -51,11 +51,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CodeInsertTest.cs" />
-    <Compile Include="C\CMeasurementCodeInsertTest.cs" />
-    <Compile Include="Java\JavaMeasurementCodeInsertTest.cs" />
+    <Compile Include="C\CInstrumentationCodeInsertionTest.cs" />
+    <Compile Include="Java\JavaInstrumentationCodeInsertionTest.cs" />
     <Compile Include="Java\JavaTestIdentificationCodeInsertTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Python2\Python2MeasurementCodeInsertTest.cs" />
+    <Compile Include="Python2\Python2InstrumentationCodeInsertionTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Occf.Core.Tests\Occf.Core.Tests.csproj">

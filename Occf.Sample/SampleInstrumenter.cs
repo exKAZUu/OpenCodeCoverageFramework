@@ -19,8 +19,8 @@
 using System;
 using System.IO;
 using Code2Xml.Core.Position;
-using Occf.Core.Modes;
-using Occf.Core.Operators.Inserters;
+using Occf.Core.Manipulators;
+using Occf.Core.Manipulators.Transformers;
 using Paraiba.IO;
 
 namespace Occf.Sample {
@@ -42,7 +42,7 @@ namespace Occf.Sample {
 		}
 
 		public void WriteInstrumentedProductionCode(
-				CoverageMode mode, FileInfo inFileInfo) {
+				LanguageSupport mode, FileInfo inFileInfo) {
 			var relativePath = XPath.GetRelativePath(
 					inFileInfo.FullName, BaseDirInfo.FullName);
 			var outFileInfo = OutDirInfo.GetFile(relativePath);
@@ -52,7 +52,7 @@ namespace Occf.Sample {
 		}
 
 		public void WriteInstrumentedTestCode(
-				CoverageMode mode, FileInfo inFileInfo) {
+				LanguageSupport mode, FileInfo inFileInfo) {
 			var relativePath = XPath.GetRelativePath(
 					inFileInfo.FullName, BaseDirInfo.FullName);
 			var outFileInfo = OutDirInfo.GetFile(relativePath);

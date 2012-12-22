@@ -21,8 +21,8 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Windows.Forms;
+using Occf.Core.CoverageElements;
 using Occf.Core.CoverageInformation;
 using Occf.Reader.SharedMemory;
 using Paraiba.IO;
@@ -120,19 +120,16 @@ namespace Occf.Reporter {
 				_pgbBranchCond.Value = 100 * nCoveragedBranchCond / nAll;
 			}
 			_lbCondition.Text = _pgbCondition.Value + "% : " + nCoveragedCondition +
-			                    " / " + nAll;
+					" / " + nAll;
 			_lbBranchCond.Text = _pgbBranchCond.Value + "% : " + nCoveragedBranchCond +
-			                     " / " + nAll;
+					" / " + nAll;
 		}
 
 		private void LoadCoverageInfomation(string filePath) {
 			_txtCovInfoPath.Text = filePath;
 
 			// カバレッジ情報（母数）の取得
-			using (var fs = new FileStream(filePath, FileMode.Open)) {
-				var formatter = new BinaryFormatter();
-				_info = (CoverageInfo)formatter.Deserialize(fs);
-			}
+			_info = CoverageInfo.ReadCoverageInfo(new FileInfo(filePath));
 
 			// タグを構成要素に分解して再構成する
 			var tagSet = _info.Targets.Select(t => t.Tag).ToHashSet();
@@ -195,14 +192,14 @@ namespace Occf.Reporter {
 		private void LvStatementDoubleClick(object sender, EventArgs e) {
 			var item =
 					(CoverageListViewItem)
-					_lvStatement.GetItemAt(_lastMouseLocation.X, _lastMouseLocation.Y);
+							_lvStatement.GetItemAt(_lastMouseLocation.X, _lastMouseLocation.Y);
 			var element = item.Element;
 			var path = XPath.GetFullPath(element.RelativePath, _info.BasePath);
 			new Editor(
 					path, _info.StatementTargets
-					      		.Where(
-					      				elm => elm.RelativePath == element.RelativePath
-					      				       && elm.State != CoverageState.Done)).Show();
+							      .Where(
+									      elm => elm.RelativePath == element.RelativePath
+											      && elm.State != CoverageState.Done)).Show();
 		}
 
 		private void LvStatementMouseDown(object sender, MouseEventArgs e) {

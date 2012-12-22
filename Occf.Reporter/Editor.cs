@@ -21,7 +21,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
-using Occf.Core.CoverageInformation;
+using Occf.Core.CoverageElements;
 using Paraiba.Windows.Forms;
 
 namespace Occf.Reporter {

@@ -29,13 +29,13 @@ namespace Occf.Tools.Cui {
 
 		private static readonly string Usage =
 				"Occf 1.0.0" + "\n" +
-				"Copyright (C) 2011 Kazunori SAKAMOTO" + "\n" +
-				"" + "\n" +
-				"Usage: Occf restore <path1> <path2> ..." + "\n" +
-				"" + "\n" +
-				S + "<path>".PadRight(W) + "path of directory containing files to restore"
-				+ "\n" +
-				"";
+						"Copyright (C) 2011 Kazunori SAKAMOTO" + "\n" +
+						"" + "\n" +
+						"Usage: Occf restore <path1> <path2> ..." + "\n" +
+						"" + "\n" +
+						S + "<path>".PadRight(W) + "path of directory containing files to restore"
+						+ "\n" +
+						"";
 
 		public static bool Run(IList<string> args) {
 			if (args.Count <= 0) {
@@ -45,29 +45,29 @@ namespace Occf.Tools.Cui {
 			var filePaths = args.Where(Directory.Exists)
 					.SelectMany(
 							dp =>
-							Directory.GetFiles(
-									dp, "*" + OccfNames.BackupSuffix,
-									SearchOption.AllDirectories));
+									Directory.GetFiles(
+											dp, "*" + OccfNames.BackupSuffix,
+											SearchOption.AllDirectories));
 
-		    var lineFilePaths = args.Where(Directory.Exists)
-		            .SelectMany(
-		                    dp =>
-		                    Directory.GetFiles(
-		                            dp, "*" + OccfNames.LineBackUpSuffix,
-		                            SearchOption.AllDirectories));
+			var lineFilePaths = args.Where(Directory.Exists)
+					.SelectMany(
+							dp =>
+									Directory.GetFiles(
+											dp, "*" + OccfNames.LineBackUpSuffix,
+											SearchOption.AllDirectories));
 
-            var kleeFilePaths = args.Where(Directory.Exists)
-                    .SelectMany(
-                            dp =>
-                            Directory.GetFiles(
-                                    dp, "*" + OccfNames.KleeBackUpSuffix,
-                                    SearchOption.AllDirectories));
-            //nullエラー出ないよね？
-		    filePaths = filePaths.Concat(lineFilePaths.Concat(kleeFilePaths));
-            
-            for(var i=0; i<filePaths.Count(); i++) {
-                Console.WriteLine("filepaths :" + filePaths.ElementAt(i));
-            }
+			var kleeFilePaths = args.Where(Directory.Exists)
+					.SelectMany(
+							dp =>
+									Directory.GetFiles(
+											dp, "*" + OccfNames.KleeBackUpSuffix,
+											SearchOption.AllDirectories));
+			//nullエラー出ないよね？
+			filePaths = filePaths.Concat(lineFilePaths.Concat(kleeFilePaths));
+
+			for (var i = 0; i < filePaths.Count(); i++) {
+				Console.WriteLine("filepaths :" + filePaths.ElementAt(i));
+			}
 
 			foreach (var filePath in filePaths) {
 				var destPath = filePath.Substring(

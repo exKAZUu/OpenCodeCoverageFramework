@@ -23,7 +23,7 @@ using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using NDesk.Options;
 using Occf.Core.CoverageInformation;
-using Occf.Core.TestInfos;
+using Occf.Core.TestInformation;
 using Occf.Core.Utils;
 using Paraiba.Collections.Generic;
 using Paraiba.IO;
@@ -35,19 +35,19 @@ namespace Occf.Tools.Cui {
 
 		private static readonly string Usage =
 				"Occf 1.0.0" + "\n" +
-				"Copyright (C) 2011 Kazunori SAKAMOTO" + "\n" +
-				"" + "\n" +
-				"Usage: Occf dup[licate] <root> [<coverage>] [options]" + "\n" +
-				"" + "\n" +
-				S + "<root>".PadRight(W)
-				+ "path of root directory (including source and test code)" + "\n" +
-				S + "<coverage>".PadRight(W) + "path of coverage data whose name is "
-				+ OccfNames.CoverageData + "\n" +
-				S + "-c, -criterion <name>".PadRight(W)
-				+
-				"a detection criterion. <name> can be statement(default), branch, condition, branch/condition, subpath, path."
-				+ "\n" +
-				"";
+						"Copyright (C) 2011 Kazunori SAKAMOTO" + "\n" +
+						"" + "\n" +
+						"Usage: Occf dup[licate] <root> [<coverage>] [options]" + "\n" +
+						"" + "\n" +
+						S + "<root>".PadRight(W)
+						+ "path of root directory (including source and test code)" + "\n" +
+						S + "<coverage>".PadRight(W) + "path of coverage data whose name is "
+						+ OccfNames.CoverageData + "\n" +
+						S + "-c, -criterion <name>".PadRight(W)
+						+
+						"a detection criterion. <name> can be statement(default), branch, condition, branch/condition, subpath, path."
+						+ "\n" +
+						"";
 
 		public static bool Run(IList<string> args) {
 			if (args.Count < 2) {
@@ -74,8 +74,8 @@ namespace Occf.Tools.Cui {
 			}
 
 			var covDataFile = args.Count >= iArgs + 1
-			                  		? new FileInfo(args[iArgs++]) : null;
-			covDataFile = PathFinder.FindCoverageDataPath(covDataFile, rootDir);
+					? new FileInfo(args[iArgs++]) : null;
+			covDataFile = FileUtil.GetCoverageData(covDataFile, rootDir);
 			if (!covDataFile.SafeExists()) {
 				return
 						Program.Print(
@@ -85,11 +85,10 @@ namespace Occf.Tools.Cui {
 			return Detect(rootDir, covDataFile, criterion);
 		}
 
-		private static bool Detect(
-				DirectoryInfo rootDir, FileInfo covDataFile, string criterion) {
+		private static bool Detect(DirectoryInfo rootDir, FileInfo covDataFile, string criterion) {
 			var formatter = new BinaryFormatter();
-			var testInfoPath = PathFinder.FindTestInfoPath(rootDir);
-			var testInfo = InfoReader.ReadTestInfo(testInfoPath, formatter);
+			var testInfoPath = FileUtil.GetTestInfo(rootDir);
+			var testInfo = TestInfo.ReadTestInfo(testInfoPath, formatter);
 			testInfo.InitializeForStoringData(true);
 			CoverageDataReader.ReadFile(testInfo, covDataFile);
 			var testCases = testInfo.TestCases;
@@ -126,13 +125,13 @@ namespace Occf.Tools.Cui {
 				var dups = testInfo.TestCases
 						.Where(tc2 => tc2 != tc && isDuplicated(tc, tc2));
 				var tcStr = Environment.NewLine + tc.Name +
-				            "(" + tc.RelativePath + ":" + tc.Position.SmartLineString + ")" +
-				            " is duplicated with:" + Environment.NewLine;
+						"(" + tc.RelativePath + ":" + tc.Position.SmartLineString + ")" +
+						" is duplicated with:" + Environment.NewLine;
 
 				foreach (var dup in dups) {
 					var dupStr = dup.Name +
-					             "(" + dup.RelativePath + ":" + dup.Position.SmartLineString
-					             + ")";
+							"(" + dup.RelativePath + ":" + dup.Position.SmartLineString
+							+ ")";
 					Console.WriteLine(tcStr + "  " + dupStr);
 					tcStr = "";
 				}
