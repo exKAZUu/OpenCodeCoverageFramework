@@ -26,7 +26,7 @@ namespace Occf.Tools.Cui
 	public class Program
 	{
 		private const string S = "  ";
-		private const int W = 12;
+		private const int W = 18;
 
 		public static readonly string Header =
 				"Occf 1.1.1" + "\n" +
@@ -49,11 +49,11 @@ namespace Occf.Tools.Cui
 				+ "Show the duplicated test cases using coverage" + "\n" +
 				S + "loc[alize]".PadRight(W) + "Show the result of bug localization" + "\n" +
 				S + "klee".PadRight(W) + "Analyze klee test files for localizing bugs" + "\n" +
-				S + "line_insert, lins".PadRight(W) 
+				S + "line_insert,lins".PadRight(W) 
 				+ "Insert line number code in source files for C" + "\n" +
-				S + "klee_main, kmain".PadRight(W) 
+				S + "klee_main,kmain".PadRight(W) 
 				+ "Insert output .successful file code in main files " +"\n" +
-				S + "line_map, lmap".PadRight(W)
+				S + "line_map,lmap".PadRight(W)
 				+ "Create line number mapping file for C" + "\n" +
 				"";
 

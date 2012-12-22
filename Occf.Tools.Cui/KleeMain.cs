@@ -58,14 +58,7 @@ namespace Occf.Tools.Cui
                         Program.Print(
                                 "Root directory doesn't exist.\nroot:" + rootDir.FullName);
             }
-
-            var mainFile = new FileInfo(args[1]);
-            if (!mainFile.Exists) {
-                return
-                        Program.Print(
-                                "Error: main file of execute klee tests dosen't exit.\nmain:" + mainFile.FullName);
-            }
-
+            
             var fileInfos = new List<FileInfo>();
             foreach (var path in mainFilePaths) {
                 if (!string.IsNullOrEmpty(path)) {
@@ -85,9 +78,9 @@ namespace Occf.Tools.Cui
             return true;
         }
 
-        private static void MainFileInsertReader(List<FileInfo> fileInfos, DirectoryInfo rootDir) {
-            foreach (var fileInfo in fileInfos) {
-                InsertToMainFail(fileInfo, rootDir);
+        private static void MainFileInsertReader(IEnumerable<FileInfo> fileInfos, DirectoryInfo rootDir) {
+            foreach (var info in fileInfos) {
+                InsertToMainFail(info, rootDir);
             }
         }
 

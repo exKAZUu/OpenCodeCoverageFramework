@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 
@@ -19,7 +20,7 @@ namespace OccfInsertToTestCode
             const string relativePath2 = @"../../sample/revert";
 
             //埋め込み
-            codeInsert.CodeInserts(relativePath1);
+            //codeInsert.CodeInserts(relativePath1);
             //その復元
             //returnBackUp.RevertBackUp(relativePath1);
 
@@ -30,11 +31,17 @@ namespace OccfInsertToTestCode
             //returnBackUp.RevertBackUp(relativePath1);
             //codeInsert.CodeInserts(relativePath1);
 
-            const string main = "int main  (int a) { aaa }";
+            //const string main = "int main  (int a) { aaa }";
 
-            Console.WriteLine(main.IndexOf("main", System.StringComparison.Ordinal));
-            Console.WriteLine(main.IndexOf("aaaa", System.StringComparison.Ordinal));
+            //Console.WriteLine(main.IndexOf("main", System.StringComparison.Ordinal));
+            //Console.WriteLine(main.IndexOf("aaaa", System.StringComparison.Ordinal));
 
+            var rootDir = new DirectoryInfo(".");
+            Console.WriteLine("root : "+ rootDir.FullName);
+            var fileInfos = new List<FileInfo>();
+            List<FileInfo> nullF = new List<FileInfo>();
+            fileInfos.AddRange(rootDir.GetFiles("*"));
+            var fn = fileInfos.Concat(nullF);
         }
     }
 }

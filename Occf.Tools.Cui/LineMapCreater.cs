@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Text;
 using System.IO;
+using NDesk.Options;
 using Occf.Core.Utils;
 
 namespace Occf.Tools.Cui
@@ -10,35 +12,80 @@ namespace Occf.Tools.Cui
     class LineMapCreater
     {
         private const string S = "  ";
-        private const int W = 20;
+        private const int W = 22;
 
         private static readonly string Usage =
             Program.Header +
             "" + "\n" +
-            "Usage: Occf line_map <root> [<test>]" + "\n" +
+            "Usage: Occf line_map -r <root_dir> [options] [<file_path>]" + "\n" +
             "" + "\n" +
-            S + "<root>".PadRight(W)
-            + "path of root directory" + "\n" +
-            S + "<test>".PadRight(W) + "path of test code directory" + "\n" +
+            S + "-r, -root <root_dir>".PadRight(W)
+            + "path of root directory and mapping file place." + "\n" +
+            S + "-t, -test <test_dir>".PadRight(W) 
+            + "path of test code directory" + "\n" +
+            S + "-s, -srcdir <src_dir>".PadRight(W)
+            + "root of source directory for project when you want to "
+            + "\n" + S + "".PadRight(W) + "separate source directory from root directory." 
+            + "\n" +
+            S + "-p, -pattern <name>".PadRight(W)
+            + "search pattern for exploring target source files "
+            + "\n" + S + "".PadRight(W) + "in the root directory." 
+            + "\n" +
+            S + "<file_path>".PadRight(W)
+            + "file path when you want to specify the file directly."
+            + "\n" +
             "";
 
-        public static bool Run(IList<string> args)
-        {
+        public static bool Run(IList<string> args) {
+            var rootDirPath = "";
+            var srcDirPath = "";
+            var testDirPath = "";
+            var patterns = new List<string>();
+            var filePaths = new List<string>();
 
-            if (args.Count < 1) {
+            // parse options
+            var p = new OptionSet {
+					{ "r|root=", v => rootDirPath = v },
+					{ "t|test=", v => testDirPath = v },
+					{ "p|pattern=", patterns.Add },
+                    { "s|srcdir=", v => srcDirPath = v },
+			};
+
+            // コマンドをパース "-"指定されないのだけargs[]に残る
+            try {
+                args = p.Parse(args);
+            } catch {
+                Console.WriteLine("catch");
                 return Program.Print(Usage);
             }
 
-            var rootDir = new DirectoryInfo(args[0]);
+            filePaths = args.ToList();
+
+            if (string.IsNullOrEmpty(rootDirPath)) {
+                return Program.Print(Usage);
+            }
+
+            var rootDir = new DirectoryInfo(rootDirPath);
             if (!rootDir.Exists) {
                 return
                         Program.Print(
                                 "Root directory doesn't exist.\nroot:" + rootDir.FullName);
             }
 
+            if (string.IsNullOrEmpty(srcDirPath)) {
+                srcDirPath = rootDirPath;
+            }
+
+            var srcDir = new DirectoryInfo(srcDirPath);
+            if (!srcDir.Exists) {
+                return
+                        Program.Print(
+                                "Source directory doesn't exist.\nsrc:" + srcDir.FullName);
+            }
+
             DirectoryInfo testDir = null;
-            if (args.Count >= 2) {
-                testDir = new DirectoryInfo(args[1]);
+            if (!string.IsNullOrEmpty(testDirPath)) {
+                testDir = new DirectoryInfo(testDirPath);
                 if (!testDir.Exists) {
                     return
                             Program.Print(
@@ -46,14 +93,40 @@ namespace Occf.Tools.Cui
                 }
             }
 
-            MapFileCreater(rootDir, testDir);
+            var fileInfos = new List<FileInfo>();
+            foreach (var path in filePaths) {
+                if (string.IsNullOrEmpty(path)) {
+                    return
+                            Program.Print(
+                                    "Error: there is file path that is null or empty.");
+                }
+                var fileInfo = new FileInfo(path);
+                if (!fileInfo.Exists) {
+                    return
+                            Program.Print(
+                                    "Error: file path doesn't exist.\nfile path:" + fileInfo.FullName);
+                }
+                fileInfos.Add(fileInfo);
+            }
+
+
+            MapFileCreater(rootDir, srcDir, testDir, patterns, fileInfos);
 
             return true;
         }
 
         //DirInfoを入力として対象ファイルを選択　対象は.c, .cpp, .cxx 
-        public static void MapFileCreater(DirectoryInfo rootDir, DirectoryInfo testDir) {
-            
+        public static void MapFileCreater(
+                DirectoryInfo rootDir, DirectoryInfo srcDir, DirectoryInfo testDir, 
+                List<string> patterns, List<FileInfo> fileInfos ) {
+
+            Contract.Requires<ArgumentException>(rootDir.Exists);
+            Contract.Requires<ArgumentException>(srcDir.Exists);
+            Contract.Requires<ArgumentException>(testDir == null || testDir.Exists);
+            patterns = patterns ?? new List<string>();
+            fileInfos = fileInfos ?? new List<FileInfo>();
+
+            var mapFileList = new List<FileInfo>();
             var mappingFileFullName = rootDir.FullName + "/" + OccfNames.LineMapping;
 
             if (File.Exists(mappingFileFullName)) {
@@ -61,14 +134,31 @@ namespace Occf.Tools.Cui
                 File.Delete(mappingFileFullName);
             }
 
-            var mapFileList = new List<FileInfo>();
+           //ファイルリストの生成
+            if (!patterns.Any() && !fileInfos.Any()) {
+                mapFileList.AddRange(srcDir.GetFiles("*.c", SearchOption.AllDirectories));
+                mapFileList.AddRange(srcDir.GetFiles("*.cpp", SearchOption.AllDirectories));
+                mapFileList.AddRange(srcDir.GetFiles("*.cxx", SearchOption.AllDirectories));                
+            } else if (patterns.Any()) {
+                foreach (var pattern in patterns) {
+                    mapFileList.AddRange(srcDir.GetFiles(pattern, SearchOption.AllDirectories));
+                }
 
-            mapFileList.AddRange(rootDir.GetFiles("*.c", SearchOption.AllDirectories));
-            mapFileList.AddRange(rootDir.GetFiles("*.cpp", SearchOption.AllDirectories));
-            mapFileList.AddRange(rootDir.GetFiles("*.cxx", SearchOption.AllDirectories));
+                //パターン合致によるバックアップファイルの排除   
+                var backUpFiles = new List<FileInfo>();
+                backUpFiles.AddRange(srcDir.GetFiles("*" + OccfNames.LineBackUpSuffix, SearchOption.AllDirectories));
+                backUpFiles.AddRange(srcDir.GetFiles("*" + OccfNames.KleeBackUpSuffix, SearchOption.AllDirectories));
+                backUpFiles.AddRange(srcDir.GetFiles("*" + OccfNames.BackupSuffix, SearchOption.AllDirectories));
 
+                for (var i = mapFileList.Count - 1; i >= 0; i--) {
+                    if (backUpFiles.Any(backUpFile => mapFileList[i].FullName == backUpFile.FullName)) {
+                        mapFileList.Remove(mapFileList[i]);
+                    }
+                }
+            }
+           
+            //テストディレクトリ以下を排除
             if (testDir != null) {
-                //注意：i>0　⇒　i>=0に変更
                 for (var i = mapFileList.Count - 1; i >= 0; i--) {
                     if (mapFileList[i].FullName.StartsWith(testDir.FullName)) {
                         mapFileList.Remove(mapFileList[i]);
@@ -76,13 +166,28 @@ namespace Occf.Tools.Cui
                 }
             }
 
+            //ファイル指定の追加
+            var filePlus = mapFileList.Concat(fileInfos).ToList();
+
+            //重複ファイルの削除
+            for (var i = filePlus.Count - 1; i >= 0; i--) {
+                for (var j = i - 1; j >= 0; j--) {
+                    if (filePlus[i].FullName == filePlus[j].FullName) {
+                        filePlus.Remove(filePlus[i]);
+                        break;
+                    }
+                }
+            }
+            
+            mapFileList = filePlus;
+
             foreach (var fileInfo in mapFileList) {
                 MapFileWriter(fileInfo, rootDir);
             }
         }
 
-        public static void MapFileWriter(FileInfo readedFile, DirectoryInfo rootDir)
-        {
+        public static void MapFileWriter(FileInfo readedFile, DirectoryInfo rootDir) {
+
             var mappingFileFullname = rootDir.FullName + "/" + OccfNames.LineMapping;
             const string header = @"# ";
             const string divider = @" ";
@@ -111,7 +216,7 @@ namespace Occf.Tools.Cui
                             }
                         }
                         //if (line == occfLineMarker){
-                            trueLineNum = 0;
+                            //trueLineNum = 0;
                         //}
                         writer.WriteLine(readedFile.FullName);
                         writer.WriteLine(nowLineNum);
@@ -123,6 +228,8 @@ namespace Occf.Tools.Cui
                     reader.Close();
                 }
             }
+
+            Console.WriteLine("wrote:" + readedFile.FullName);
         }
     }
 }
