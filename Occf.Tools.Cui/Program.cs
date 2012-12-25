@@ -30,30 +30,6 @@ namespace Occf.Tools.Cui {
 
 		private static readonly string Usage =
 				Header +
-<<<<<<< HEAD
-				"" + "\n" +
-				"Usage: Occf <command> [<args>]" + "\n" +
-				"" + "\n" +
-				"The occf commands are:" + "\n" +
-				S + "ins[ert]".PadRight(W)
-				+ "Insert measurement code in source files and test files" + "\n" +
-				S + "res[tore]".PadRight(W) + "Restore inserted files from backup files"
-				+ "\n" +
-				S + "path".PadRight(W) + "Show the execution path of each test case" + "\n" +
-				S + "cov[erage]".PadRight(W) + "Show the measurement result of coverage"
-				+ "\n" +
-				S + "dup[licate]".PadRight(W)
-				+ "Show the duplicated test cases using coverage" + "\n" +
-				S + "loc[alize]".PadRight(W) + "Show the result of bug localization" + "\n" +
-				S + "klee".PadRight(W) + "Analyze klee test files for localizing bugs" + "\n" +
-				S + "line_insert,lins".PadRight(W) 
-				+ "Insert line number code in source files for C" + "\n" +
-				S + "klee_main,kmain".PadRight(W) 
-				+ "Insert output .successful file code in main files " +"\n" +
-				S + "line_map,lmap".PadRight(W)
-				+ "Create line number mapping file for C" + "\n" +
-				"";
-=======
 						"" + "\n" +
 						"Usage: Occf <command> [<args>]" + "\n" +
 						"" + "\n" +
@@ -76,7 +52,6 @@ namespace Occf.Tools.Cui {
 						S + "line_map, lmap".PadRight(W)
 						+ "Create line number mapping file for C" + "\n" +
 						"";
->>>>>>> 3587ca0c216605ba8970ea2d1825980021828d64
 
 		public static bool Print(string message) {
 			Console.WriteLine(message);
