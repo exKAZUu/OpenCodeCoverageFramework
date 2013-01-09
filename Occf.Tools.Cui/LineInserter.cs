@@ -19,6 +19,7 @@
 using System.Collections.Generic;
 using System.IO;
 ﻿using System.Linq;
+using System.Text;
 using NDesk.Options;
 using Occf.Core.Utils;
 ﻿using System;
@@ -46,6 +47,8 @@ namespace Occf.Tools.Cui {
             + "search pattern for exploring target source files "
             + "\n" + S + "".PadRight(W) + "in the src_dir" 
             + "\n" +
+            S + "-e, -encode <code_name>".PadRight(W)
+            + "code-page name. ex:EUC-JP, default:UTF-8" + "\n" +
             S + "<file_path>".PadRight(W)
             + "file path when you want to specify the file directly." 
             + "\n\n" +
@@ -56,6 +59,7 @@ namespace Occf.Tools.Cui {
         public static bool Run (IList<string> args) {
             var srcDirPath = "";
             var testDirPath = "";
+            var encodeName = "";
 
             var patterns = new List<string>();
             var filePaths = new List<string>();
@@ -69,6 +73,7 @@ namespace Occf.Tools.Cui {
                     { "s|srcdir=", v => srcDirPath = v },
                     { "t|rest=", v => testDirPath = v},
                     { "p|pattern=", patterns.Add },
+                    { "e|encode=" , v => encodeName = v},
             };
 
             try {
@@ -125,7 +130,17 @@ namespace Occf.Tools.Cui {
                                 "when you need -pattern option, you have to use -srcdir option.");
             }
 
-            LineInserts(srcDir, testDir, fileInfos, patterns);
+            if (srcDir == null && fileInfos.Count == 0) {
+                return Program.Print(Usage);
+            }
+
+            var encodeType = Encoding.GetEncoding("UTF-8");
+            if (!string.IsNullOrEmpty(encodeName)) {
+                encodeType = Encoding.GetEncoding(encodeName);
+                Console.WriteLine("setting: encode type = " + encodeType.EncodingName);
+            }
+
+            LineInserts(srcDir, testDir, fileInfos, patterns, encodeType);
             
             return true;
         }
@@ -133,8 +148,8 @@ namespace Occf.Tools.Cui {
         //引数に入力ファイルのディレクトリのパス.c、.cpp、.cxxのみにフィルタリングして挿入 
         //テストディレクトリ以下は除外
         private static void LineInserts(
-                 DirectoryInfo rootDir, DirectoryInfo testDir, 
-                 IEnumerable<FileInfo> fileInfos  ,IEnumerable<string> patterns) {
+                 DirectoryInfo rootDir, DirectoryInfo testDir, IEnumerable<FileInfo> fileInfos, 
+                 IEnumerable<string> patterns, Encoding encoding) {
             
             Contract.Requires<ArgumentException>(rootDir == null || rootDir.Exists);
             Contract.Requires<ArgumentException>(testDir == null || testDir.Exists);
@@ -196,12 +211,12 @@ namespace Occf.Tools.Cui {
             insertList = filePlus;
             
             foreach (var fileInfo in insertList) {
-                WriteInsetLine(fileInfo.FullName);
+                WriteInsetLine(fileInfo.FullName, encoding);
             }
         }
 
         //指定されたファイルのパスを受け取って、指定名のバックアップファイルを作成して挿入
-        private static void WriteInsetLine(string defaultFileFullName) {
+        private static void WriteInsetLine(string defaultFileFullName, Encoding encoding) {
             var fileInfo = new FileInfo(defaultFileFullName);
             const string appendExtension = OccfNames.LineBackUpSuffix;
 ;
@@ -209,8 +224,8 @@ namespace Occf.Tools.Cui {
 
             File.Copy(defaultFileFullName, backUpFileFullName, true);
 
-            using (var reader = new StreamReader(backUpFileFullName)) {
-                using (var writer = new StreamWriter(fileInfo.FullName, false)) {
+            using (var reader = new StreamReader(backUpFileFullName, encoding)) {
+                using (var writer = new StreamWriter(fileInfo.FullName, false, encoding)) {
                     string line;
                     var lineNum = 1;
 
