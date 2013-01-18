@@ -16,14 +16,14 @@
 
 #endregion
 
-using Code2Xml.Core.Position;
-using Occf.Core.CoverageInformation;
+using System;
 
-namespace Occf.Core.CoverageElements {
-	public interface ICoverageElement {
-		CodePosition Position { get; }
-		CoverageState State { get; }
-		string Tag { get; }
-		string RelativePath { get; }
+namespace Occf.Core.CoverageInformation.Elements {
+	[Flags]
+	public enum CoverageState {
+		None = 0,
+		FalseOnly = 1,
+		TrueOnly = 2,
+		Done = 3,
 	}
 }

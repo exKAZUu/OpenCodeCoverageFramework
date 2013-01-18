@@ -37,9 +37,6 @@ namespace Occf.Languages.Python3.Manipulators {
 	public class Python3Support : LanguageSupport {
 		private IEnumerable<string> _filePatterns;
 		private AstTransformer _inserter;
-		private Selector _statementSelector;
-		private Selector _branchSelector;
-		private Selector _conditionSelector;
 		private Tagger _tagger;
 
 		public override string Name {

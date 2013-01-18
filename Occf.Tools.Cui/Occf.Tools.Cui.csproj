@@ -64,8 +64,15 @@
     <CodeContractsBaseLineFile />
     <CodeContractsCacheAnalysisResults>False</CodeContractsCacheAnalysisResults>
     <CodeContractsRuntimeCheckingLevel>Full</CodeContractsRuntimeCheckingLevel>
-    <CodeContractsReferenceAssembly>Build</CodeContractsReferenceAssembly>
+    <CodeContractsReferenceAssembly>DoNotBuild</CodeContractsReferenceAssembly>
     <CodeContractsAnalysisWarningLevel>0</CodeContractsAnalysisWarningLevel>
+    <CodeContractsInferRequires>False</CodeContractsInferRequires>
+    <CodeContractsInferEnsures>False</CodeContractsInferEnsures>
+    <CodeContractsInferObjectInvariants>False</CodeContractsInferObjectInvariants>
+    <CodeContractsSuggestAssumptions>False</CodeContractsSuggestAssumptions>
+    <CodeContractsSuggestRequires>True</CodeContractsSuggestRequires>
+    <CodeContractsSuggestEnsures>False</CodeContractsSuggestEnsures>
+    <CodeContractsSuggestObjectInvariants>False</CodeContractsSuggestObjectInvariants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -103,32 +110,32 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Antlr3.Runtime, Version=3.4.1.9004, Culture=neutral, PublicKeyToken=eb42632606e9261f, processorArchitecture=MSIL">
-      <HintPath>..\packages\Code2Xml.1.5.0.23\lib\Antlr3.Runtime.dll</HintPath>
+      <HintPath>..\packages\Code2Xml.1.5.1.31\lib\Antlr3.Runtime.dll</HintPath>
     </Reference>
-    <Reference Include="Code2Xml.Core, Version=1.5.0.23, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Code2Xml.Core, Version=1.5.0.28, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Code2Xml.1.5.0.23\lib\Code2Xml.Core.dll</HintPath>
+      <HintPath>..\packages\Code2Xml.1.5.1.31\lib\Code2Xml.Core.dll</HintPath>
     </Reference>
     <Reference Include="Code2Xml.Languages.C, Version=1.1.0.50, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Code2Xml.1.5.0.23\lib\Code2Xml.Languages.C.dll</HintPath>
+      <HintPath>..\packages\Code2Xml.1.5.1.31\lib\Code2Xml.Languages.C.dll</HintPath>
     </Reference>
     <Reference Include="Code2Xml.Languages.CSharp, Version=1.1.0.40, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Code2Xml.1.5.0.23\lib\Code2Xml.Languages.CSharp.dll</HintPath>
+      <HintPath>..\packages\Code2Xml.1.5.1.31\lib\Code2Xml.Languages.CSharp.dll</HintPath>
     </Reference>
     <Reference Include="Code2Xml.Languages.Java, Version=1.1.0.37, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Code2Xml.1.5.0.23\lib\Code2Xml.Languages.Java.dll</HintPath>
+      <HintPath>..\packages\Code2Xml.1.5.1.31\lib\Code2Xml.Languages.Java.dll</HintPath>
     </Reference>
     <Reference Include="Code2Xml.Languages.JavaScript, Version=1.1.0.49, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Code2Xml.1.5.0.23\lib\Code2Xml.Languages.JavaScript.dll</HintPath>
+      <HintPath>..\packages\Code2Xml.1.5.1.31\lib\Code2Xml.Languages.JavaScript.dll</HintPath>
     </Reference>
     <Reference Include="Code2Xml.Languages.Lua, Version=1.1.0.32, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Code2Xml.1.5.0.23\lib\Code2Xml.Languages.Lua.dll</HintPath>
+      <HintPath>..\packages\Code2Xml.1.5.1.31\lib\Code2Xml.Languages.Lua.dll</HintPath>
     </Reference>
     <Reference Include="Code2Xml.Languages.Python2, Version=1.1.0.36, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Code2Xml.1.5.0.23\lib\Code2Xml.Languages.Python2.dll</HintPath>
+      <HintPath>..\packages\Code2Xml.1.5.1.31\lib\Code2Xml.Languages.Python2.dll</HintPath>
     </Reference>
     <Reference Include="Code2Xml.Languages.Python3, Version=1.1.0.38, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Code2Xml.1.5.0.23\lib\Code2Xml.Languages.Python3.dll</HintPath>
+      <HintPath>..\packages\Code2Xml.1.5.1.31\lib\Code2Xml.Languages.Python3.dll</HintPath>
     </Reference>
     <Reference Include="IronPython, Version=2.7.0.40, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL">
       <HintPath>..\packages\IronPython.2.7.3\lib\Net40\IronPython.dll</HintPath>

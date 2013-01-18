@@ -21,7 +21,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
-using Occf.Core.CoverageElements;
+using Occf.Core.CoverageInformation.Elements;
 using Occf.Core.Utils;
 
 namespace Occf.Core.CoverageInformation {

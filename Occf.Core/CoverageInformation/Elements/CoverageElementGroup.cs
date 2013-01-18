@@ -20,9 +20,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Code2Xml.Core.Position;
-using Occf.Core.CoverageInformation;
 
-namespace Occf.Core.CoverageElements {
+namespace Occf.Core.CoverageInformation.Elements {
 	[Serializable]
 	public class CoverageElementGroup : ICoverageElement {
 		/// <summary>

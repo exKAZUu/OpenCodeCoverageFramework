@@ -21,53 +21,55 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 using Occf.Core.Manipulators.Analyzers;
+using Paraiba.Xml.Linq;
 
-namespace Occf.Languages.Python3.Manipulators.Analyzers {
-	public class Python3AstAnalyzer : AstAnalyzer<Python3AstAnalyzer> {
+namespace Occf.Languages.C.Manipulators.Analyzers {
+	public class CppAstAnalyzer : AstAnalyzer<CppAstAnalyzer> {
 		private static readonly string[] TargetNames = {
-				"or_test",
-				"and_test",
+				"logical_or_expression",
+				"logical_and_expression",
 		};
 
 		private static readonly string[] ParentNames = {
-				"atom",
-		};
-
-		private static readonly string[] StatementNames = {
-				"if_stmt",
-				"while_stmt",
-				"for_stmt",
-				"with_stmt",
+				"logical_or_expression",
+				"logical_and_expression",
+				"primary_expression",
 		};
 
 		public override IEnumerable<XElement> FindFunctions(XElement root) {
-			throw new NotImplementedException();
-		}
-
-		public override string GetFunctionName(XElement functionElement) {
-			throw new NotImplementedException();
-		}
-
-		public IEnumerable<XElement> FindCompoundStatements(XElement root) {
-			return root.Descendants()
-					.Where(e => StatementNames.Any(e.Name.LocalName.EndsWith));
-		}
-
-		public override IEnumerable<XElement> FindStatements(XElement root) {
-			return root
-					.Descendants()
-					.Where(
-							e =>
-									e.Name.LocalName == "small_stmt" || e.Name.LocalName == "compound_stmt");
-		}
-
-		public override IEnumerable<XElement> FindVariableInitializers(XElement root) {
+			// TODO: Implement
 			return Enumerable.Empty<XElement>();
 		}
 
+		public override string GetFunctionName(XElement functionElement) {
+			// TODO: Implement
+			throw new NotImplementedException();
+		}
+
+		public override IEnumerable<XElement> FindStatements(XElement root) {
+			return root.Descendants("statement")
+					.Where(
+							e => e.FirstElement().Name.LocalName != "labeled_statement"
+									&& e.FirstElement().Name.LocalName != "compound_statement");
+		}
+
+		public override IEnumerable<XElement> FindVariableInitializers(XElement root) {
+			return root.Descendants("initializer")
+					.Where(e => e.Parent.Name.LocalName != "initializer_list")
+					.SelectMany(e => e.Elements("assignment_expression"));
+		}
+
 		public override IEnumerable<XElement> FindBranches(XElement root) {
-			return root.Descendants("if_stmt")
-					.SelectMany(e => e.Elements("test"));
+			var ifs = root.Descendants("selection_statement")
+					.Where(e => e.FirstElement().Value == "if")
+					.Select(e => e.NthElement(2));
+			var whilesAndDoWhiles = root.Descendants("iteration_statement")
+					.Select(e => e.FirstElement().Value == "for" ? e.NthElement(3) : e)
+					.SelectMany(e => e.Elements("expression"));
+			var ternaries = root.Descendants("conditional_expression")
+					.Where(e => e.Elements().Count() > 1)
+					.Select(e => e.FirstElement());
+			return ifs.Concat(whilesAndDoWhiles).Concat(ternaries);
 		}
 
 		protected override bool IsConditionalTerm(XElement element) {
@@ -80,26 +82,42 @@ namespace Occf.Languages.Python3.Manipulators.Analyzers {
 		}
 
 		public override IEnumerable<XElement> FindSwitches(XElement root) {
-			return Enumerable.Empty<XElement>();
+			return root.Descendants("selection_statement")
+					.Where(e => e.FirstElement().Value == "switch");
 		}
 
 		public override IEnumerable<XElement> FindCaseLabelTails(XElement root) {
-			return Enumerable.Empty<XElement>();
+			return root.Elements("labeled_statement")
+					.Where(
+							label => label.FirstElement().Value == "case"
+									|| label.FirstElement().Value == "default")
+					// 親以外にswitch文がでてきてはいけない（直接の子供以外のラベルを除去）
+					.Where(
+							label => !label.ParentsWhile(root)
+									.Any(
+											parent => parent.Name.LocalName == "selection_statement"
+													&& parent.FirstElement().Value == "switch"))
+					// コロンを選択する
+					.Select(label => label.Elements().First(e => e.Value == ":"));
 		}
 
 		public override IEnumerable<XElement> FindForeach(XElement root) {
+			// TODO: Implement
 			return Enumerable.Empty<XElement>();
 		}
 
 		public override IEnumerable<XElement> FindForeachHead(XElement foreachElement) {
+			// TODO: Implement
 			return Enumerable.Empty<XElement>();
 		}
 
 		public override IEnumerable<XElement> FindForeachTail(XElement foreachElement) {
 			return Enumerable.Empty<XElement>();
+			// TODO: Implement
 		}
 
 		public override IEnumerable<XElement> FindTestCases(XElement root) {
+			// TODO: Implement
 			return Enumerable.Empty<XElement>();
 		}
 	}

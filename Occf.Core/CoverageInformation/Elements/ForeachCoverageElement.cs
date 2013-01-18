@@ -18,10 +18,9 @@
 
 using System;
 using System.Xml.Linq;
-using Occf.Core.CoverageInformation;
 using Occf.Core.Manipulators.Taggers;
 
-namespace Occf.Core.CoverageElements {
+namespace Occf.Core.CoverageInformation.Elements {
 	[Serializable]
 	public class ForeachCoverageElement : CoverageElement {
 		private CoverageState _lastState;

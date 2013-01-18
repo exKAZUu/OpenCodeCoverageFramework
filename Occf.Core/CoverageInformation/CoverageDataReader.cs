@@ -18,6 +18,7 @@
 
 using System;
 using System.IO;
+using Occf.Core.CoverageInformation.Elements;
 using Occf.Core.Manipulators.Transformers;
 using Occf.Core.TestInformation;
 

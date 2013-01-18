@@ -19,10 +19,9 @@
 using System;
 using System.Xml.Linq;
 using Code2Xml.Core.Position;
-using Occf.Core.CoverageInformation;
 using Occf.Core.Manipulators.Taggers;
 
-namespace Occf.Core.CoverageElements {
+namespace Occf.Core.CoverageInformation.Elements {
 	[Serializable]
 	public class CoverageElement : ICoverageElement {
 		public CoverageElement(string relativePath, XElement node, Tagger tagger) {

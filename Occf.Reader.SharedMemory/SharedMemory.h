@@ -3,7 +3,7 @@
 #include "..\Occf.Writer.SharedMemory\SharedMemoryCommon.h"
 
 using namespace System;
-using namespace Occf::Core::CoverageInformation;
+using namespace Occf::Core::CoverageInformation::Elements;
 
 namespace Occf {
 namespace Reader {

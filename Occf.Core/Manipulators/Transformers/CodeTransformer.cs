@@ -20,8 +20,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
-using Occf.Core.CoverageElements;
 using Occf.Core.CoverageInformation;
+using Occf.Core.CoverageInformation.Elements;
 using Occf.Core.TestInformation;
 using Paraiba.Collections.Generic;
 

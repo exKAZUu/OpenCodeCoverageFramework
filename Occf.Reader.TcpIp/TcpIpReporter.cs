@@ -20,6 +20,7 @@ using System;
 using System.Net;
 using System.Net.Sockets;
 using Occf.Core.CoverageInformation;
+using Occf.Core.CoverageInformation.Elements;
 
 namespace Occf.Reader.TcpIp {
 	public class TcpIpReporter {
