@@ -144,8 +144,6 @@ namespace Occf.Tools.Cui {
                                      string metricsFileName, DirectoryInfo csvDir) {
 
 			var formatter = new BinaryFormatter();
-			//var rootDirInfo = rootDir;
-			//var testDirInfo = testDir;
 			var covInfoFile = FileUtil.GetCoverageInfo(rootDir);
 			var covInfo = CoverageInfo.ReadCoverageInfo(covInfoFile, formatter);
 			var testInfo = AnalyzeKleeTestFiles(testDir);
@@ -195,6 +193,13 @@ namespace Occf.Tools.Cui {
 				}
 			}
 		}
+
+        private static void AnalyzeTestResultCsv(DirectoryInfo rootDir, TestInfo testInfo, FileInfo csvFileInfo) {
+            using (var reader = csvFileInfo.OpenText()) {
+                
+            }
+           
+        }
 
 		public static Dictionary<FileInfo, Dictionary<int, int>> MapDicCreater(FileInfo mappingFile) {
 			var mapDic = new Dictionary<FileInfo, Dictionary<int, int>>();
