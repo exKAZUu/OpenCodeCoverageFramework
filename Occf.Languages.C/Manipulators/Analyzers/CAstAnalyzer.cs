@@ -54,9 +54,11 @@ namespace Occf.Languages.C.Manipulators.Analyzers {
 		}
 
 		public override IEnumerable<XElement> FindVariableInitializers(XElement root) {
-			return root.Descendants("initializer")
-					.Where(e => e.Parent.Name.LocalName != "initializer_list")
-					.SelectMany(e => e.Elements("assignment_expression"));
+			// TODO: Fix
+			//return root.Descendants("initializer")
+			//        .Where(e => e.Parent.Name.LocalName != "initializer_list")
+			//        .SelectMany(e => e.Elements("assignment_expression"));
+			return Enumerable.Empty<XElement>();
 		}
 
 		public override IEnumerable<XElement> FindBranches(XElement root) {

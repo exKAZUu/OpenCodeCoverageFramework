@@ -1,6 +1,6 @@
 ﻿#region License
 
-// Copyright (C) 2009-2012 Kazunori Sakamoto
+// Copyright (C) 2009-2013 Kazunori Sakamoto
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ namespace Occf.Languages.Java.Manipulators.Analyzers {
 
 		public override IEnumerable<XElement> FindFunctions(XElement root) {
 			return root.Descendants()
-					.Where(e => e.Name.LocalName == "methodDeclaration");
+					.Where(e => e.Name() == "methodDeclaration");
 		}
 
 		public override string GetFunctionName(XElement functionElement) {
@@ -48,12 +48,12 @@ namespace Occf.Languages.Java.Manipulators.Analyzers {
 					.Where(
 							e => {
 								// ブロック自身は意味を持たないステートメントで、中身だけが必要なので除外
-								if (e.FirstElement().Name.LocalName == "block") {
+								if (e.FirstElement().Name() == "block") {
 									return false;
 								}
-								// ラベル自身は意味を持たないステートメントで、中身だけが必要なので除外
-								var second = e.NthElementOrDefault(1);
-								if (second != null && second.Value == ":") {
+								// ラベルはループ文に付くため，ラベルの中身は除外
+								var second = e.Parent.NthElementOrDefault(1);
+								if (second != null && second.Value == ":" && e.Parent.Name() == "statement") {
 									return false;
 								}
 								if (e.FirstElement().Value == ";") {
@@ -63,18 +63,19 @@ namespace Occf.Languages.Java.Manipulators.Analyzers {
 							});
 		}
 
-        public override XElement GetBaseElementForStatement(XElement statement) {
-            var val = statement.FirstElement().Value;
-            if (val == "if" || val == "while" || val == "do") {
-                return statement.Element("parExpression");
-            }
-            return statement;
-        }
+		public override XElement GetBaseElementForStatement(XElement statement) {
+			var val = statement.FirstElement().Value;
+			if (val == "if" || val == "while" || val == "do") {
+				return statement.Element("parExpression");
+			}
+			return statement;
+		}
 
 		public override IEnumerable<XElement> FindVariableInitializers(XElement root) {
-			return root.Descendants("variableDeclarator")
-					.SelectMany(e => e.Elements("variableInitializer"))
-					.SelectMany(e => e.Elements("expression"));
+			return Enumerable.Empty<XElement>();
+			//return root.Descendants("variableDeclarator")
+			//        .SelectMany(e => e.Elements("variableInitializer"))
+			//        .SelectMany(e => e.Elements("expression"));
 		}
 
 		public override IEnumerable<XElement> FindBranches(XElement root) {
@@ -90,10 +91,7 @@ namespace Occf.Languages.Java.Manipulators.Analyzers {
 					.Select(e => e.Element("parExpression"))
 					.Select(e => e.NthElement(1));
 			var fors = root.Descendants("forstatement")
-					.Where(
-							e =>
-									e.NthElement(2).Name.LocalName
-											!= "variableModifiers")
+					.Where(e => e.NthElement(2).Name() != "variableModifiers")
 					.SelectMany(e => e.Elements("expression"));
 			var ternaries = root.Descendants("conditionalExpression")
 					.Where(e => e.Elements().Count() > 1)
@@ -102,12 +100,12 @@ namespace Occf.Languages.Java.Manipulators.Analyzers {
 		}
 
 		protected override bool IsConditionalTerm(XElement element) {
-			return TargetNames.Contains(element.Name.LocalName);
+			return TargetNames.Contains(element.Name());
 		}
 
 		protected override bool IsAvailableParent(XElement element) {
 			return element.Elements().Count() == 1 ||
-					ParentNames.Contains(element.Name.LocalName);
+					ParentNames.Contains(element.Name());
 		}
 
 		public override IEnumerable<XElement> FindSwitches(XElement root) {
@@ -147,7 +145,7 @@ namespace Occf.Languages.Java.Manipulators.Analyzers {
 
 		public override IEnumerable<XElement> FindForeach(XElement root) {
 			var foreachBlocks = root.Descendants("forstatement")
-					.Where(e => e.NthElement(2).Name.LocalName == "variableModifiers");
+					.Where(e => e.NthElement(2).Name() == "variableModifiers");
 			return foreachBlocks;
 		}
 
@@ -161,7 +159,7 @@ namespace Occf.Languages.Java.Manipulators.Analyzers {
 
 		public override IEnumerable<XElement> FindTestCases(XElement root) {
 			return root.Descendants()
-					.Where(e => e.Name.LocalName == "methodDeclaration")
+					.Where(e => e.Name() == "methodDeclaration")
 					.Where(
 							e => {
 								var name = e.NthElement(2).Value;
