@@ -22,7 +22,7 @@ using System.Linq;
 namespace Occf.Tools.Cui {
 	public class Program {
 		private const string S = "  ";
-		private const int W = 12;
+		private const int W = 18;
 
 		public static readonly string Header =
 				"Occf 1.1.1" + "\n" +
@@ -99,9 +99,9 @@ namespace Occf.Tools.Cui {
 
 		private static void Main(string[] args) {
 			if (Run(args)) {
-				Environment.Exit(1);
+				Environment.Exit(0);
 			}
-			Environment.Exit(0);
+			Environment.Exit(1);
 		}
 	}
 }

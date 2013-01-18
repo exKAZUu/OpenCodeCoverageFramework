@@ -57,6 +57,15 @@ namespace Occf.Core.Manipulators.Analyzers {
 		/// <returns>The selected xml elements.</returns>
 		public abstract IEnumerable<XElement> FindStatements(XElement root);
 
+        /// <summary>
+        /// Returns xml element for locating a proper position of the specified statement.
+        /// </summary>
+        /// <param name="statement">The root element where start to find elements.</param>
+        /// <returns>The selected xml element.</returns>
+	    public virtual XElement GetBaseElementForStatement(XElement statement) {
+	        return statement;
+	    }
+
 		/// <summary>
 		/// Returns xml elements indicating variable initializers.
 		/// </summary>
@@ -71,6 +80,13 @@ namespace Occf.Core.Manipulators.Analyzers {
 		/// <returns>The selected xml elements.</returns>
 		public abstract IEnumerable<XElement> FindBranches(XElement root);
 
+        ///// <summary>
+        ///// Returns xml elements indicating a condition expression.
+        ///// </summary>
+        ///// <param name="root">The root element where start to find elements.</param>
+        ///// <returns>The selected xml elements.</returns>
+        //public abstract IEnumerable<XElement> FindCondition(XElement root); 
+        
 		/// <summary>
 		/// Returns xml elements indicating condition expressions.
 		/// </summary>

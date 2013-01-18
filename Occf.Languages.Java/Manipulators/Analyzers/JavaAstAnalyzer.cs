@@ -63,6 +63,14 @@ namespace Occf.Languages.Java.Manipulators.Analyzers {
 							});
 		}
 
+        public override XElement GetBaseElementForStatement(XElement statement) {
+            var val = statement.FirstElement().Value;
+            if (val == "if" || val == "while" || val == "do") {
+                return statement.Element("parExpression");
+            }
+            return statement;
+        }
+
 		public override IEnumerable<XElement> FindVariableInitializers(XElement root) {
 			return root.Descendants("variableDeclarator")
 					.SelectMany(e => e.Elements("variableInitializer"))

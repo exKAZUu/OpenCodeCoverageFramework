@@ -52,6 +52,7 @@
   <ItemGroup>
     <Compile Include="CodeInsertTest.cs" />
     <Compile Include="C\CInstrumentationCodeInsertionTest.cs" />
+    <Compile Include="JavaScript\JavaScriptInstrumentationCodeInsertionTest.cs" />
     <Compile Include="Java\JavaInstrumentationCodeInsertionTest.cs" />
     <Compile Include="Java\JavaTestIdentificationCodeInsertTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

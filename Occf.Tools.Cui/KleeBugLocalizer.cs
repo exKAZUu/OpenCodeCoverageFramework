@@ -22,6 +22,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using Code2Xml.Core.Position;
+using NDesk.Options;
 using Occf.Core.CoverageInformation;
 using Occf.Core.TestInformation;
 using Occf.Core.Utils;
@@ -35,42 +36,135 @@ namespace Occf.Tools.Cui {
 		private static readonly string Usage =
 				Program.Header +
 						"" + "\n" +
-						"Usage: Occf klee <root_directory> <test_directory>" + "\n" +
+						"Usage: Occf klee -r <root_dir> -t <test_dir> [options]" + "\n" +
 						"" + "\n" +
-						S + "<root_directory>".PadRight(W) + "a path of a directory containing '.occf_coverage_info'"
+						S + "-r -root<root_dir>".PadRight(W) 
+                        + "a path of a directory containing '.occf_coverage_info'"
 						+ "\n" +
-						"\n" +
-						S + "<test_directory>".PadRight(W) + "a path of klee test directory" + "\n" +
-						"\n" +
-						"";
+						S + "-t -test <test_dir>".PadRight(W) 
+                        + "a path of klee test directory" + "\n" +
+                        S + "-m -metrics <metrics>".PadRight(W)
+                        + "type of metrics of fault localization."+ "\n" + 
+                        S + "".PadRight(W) + "tar[antura], och[iai], jac[card] or rus[sell]"
+                        + "\n" +
+                        S + "-v -csv <csv_dir>".PadRight(W)
+                        + "path of csv file directory" 
+                        + "\n" +
+                        "";
 
 		public static bool Run(IList<string> args) {
-			// parse options
-			if (args.Count != 2) {
+
+		    var rootDirPath = "";
+		    var testDirPath = "";
+		    var metricsType = "";
+		    var csvDirPath = "";
+            
+            // parse options
+
+		    var p = new OptionSet {
+		            { "r|root=", v => rootDirPath = v},
+                    { "t|test=", v=> testDirPath = v },
+                    { "m|metrics=", v => metricsType = v },
+                    { "v|csv=", v => csvDirPath = v },
+		    };
+
+            // コマンドをパース "-"指定されないのだけargs[]に残る
+            try {
+                args = p.Parse(args);
+            } catch {
+                Console.WriteLine("catch");
+                return Program.Print(Usage);
+            }
+
+			if (args.Count > 0) {
 				return Program.Print(Usage);
 			}
-			Localize(args);
+
+            if (string.IsNullOrEmpty(rootDirPath)) {
+                return Program.Print(Usage);
+            }
+
+            var rootDir = new DirectoryInfo(rootDirPath);
+            if (!rootDir.Exists) {
+                return
+                        Program.Print(
+                                "Root directory doesn't exist.\nroot:" + rootDir.FullName);
+            }
+
+            if (string.IsNullOrEmpty(testDirPath)) {
+                return Program.Print(Usage);
+            }
+
+            var testDir = new DirectoryInfo(testDirPath);
+            if (!rootDir.Exists) {
+                return
+                        Program.Print(
+                                "test directory doesn't exist.\ntest:" + testDir.FullName);
+            }
+
+            var metricsFileName = "BugLocalization.py";
+            if (!string.IsNullOrEmpty(metricsType)) {
+                switch (metricsType) {
+                    case "tar":
+                    case "tarantula":
+                        metricsFileName = "Tarantula.py";
+                        break;
+                    case "och":
+                    case "ochiai":
+                        metricsFileName = "Ochiai.py";
+                        break;
+                    case "jac":
+                    case "jaccard":
+                        metricsFileName = "Jaccard.py";
+                        break;
+                    case "rus":
+                    case "russell":
+                        metricsFileName = "Russell.py";
+                        break;
+                    default:
+                        return Program.Print(Usage);
+                }
+            }
+
+            DirectoryInfo csvDir = null;
+            if (!string.IsNullOrEmpty(csvDirPath)) {
+                csvDir = new DirectoryInfo(csvDirPath);
+                if (!csvDir.Exists) {
+                    return
+                            Program.Print(
+                                    "Csv-File directory doesn't exist.\ncsv:" + csvDir.FullName);
+                }
+            }
+
+			Localize(rootDir, testDir, metricsFileName, csvDir);
 			return true;
 		}
 
-		private static void Localize(IList<string> args) {
-			var formatter = new BinaryFormatter();
-			var rootDirInfo = new DirectoryInfo(args[0]);
-			var testDirInfo = new DirectoryInfo(args[1]);
-			var covInfoFile = FileUtil.GetCoverageInfo(rootDirInfo);
-			var covInfo = CoverageInfo.ReadCoverageInfo(covInfoFile, formatter);
-			var testInfo = AnalyzeKleeTestFiles(testDirInfo);
+		private static void Localize(DirectoryInfo rootDir, DirectoryInfo testDir, 
+                                     string metricsFileName, DirectoryInfo csvDir) {
 
-			AnalyzeTestResult(rootDirInfo, testInfo);
+			var formatter = new BinaryFormatter();
+			//var rootDirInfo = rootDir;
+			//var testDirInfo = testDir;
+			var covInfoFile = FileUtil.GetCoverageInfo(rootDir);
+			var covInfo = CoverageInfo.ReadCoverageInfo(covInfoFile, formatter);
+			var testInfo = AnalyzeKleeTestFiles(testDir);
+
+			AnalyzeTestResult(rootDir, testInfo);
 			//Line対応のMapのMapを作成、
 			var lineDic = new Dictionary<FileInfo, Dictionary<int, int>>();
-			var mapFileInfo = new FileInfo(rootDirInfo.FullName + "/" + OccfNames.LineMapping);
+			var mapFileInfo = new FileInfo(rootDir.FullName + "/" + OccfNames.LineMapping);
 			if (mapFileInfo.Exists) {
 				lineDic = MapDicCreater(mapFileInfo);
 			} else {
 				Console.WriteLine("\"" + OccfNames.LineMapping + "\" file is not found.");
 			}
-			BugLocalizer.LocalizeStatements(testInfo, covInfo, lineDic);
+		    
+			BugLocalizer.LocalizeStatements(testInfo, covInfo, lineDic, metricsFileName);
+
+            if (csvDir != null) {
+                BugLocalizer.LocalizeStatementsCSV(csvDir, testInfo, covInfo, lineDic);
+            }
 		}
 
 		private static TestInfo AnalyzeKleeTestFiles(DirectoryInfo testDirInfo) {
@@ -133,64 +227,6 @@ namespace Occf.Tools.Cui {
 			return mapDic;
 		}
 
-		//以下、ファイルからディレクトリを作成に変更のため削除予定
-		/*
-		private static Dictionary<FileInfo, Dictionary<int, int>> 
-			LineDicCreater(DirectoryInfo rootDirInfo, DirectoryInfo testDirTnfo) {
-			
-			var fileList = new List<FileInfo>();
-			fileList.AddRange(rootDirInfo.GetFiles("*.c", SearchOption.AllDirectories));
-			fileList.AddRange(rootDirInfo.GetFiles("*.cpp", SearchOption.AllDirectories));
-			fileList.AddRange(rootDirInfo.GetFiles("*.cxx", SearchOption.AllDirectories));
-
-			if (testDirTnfo != null && testDirTnfo.Exists) {
-				for (var i = fileList.Count - 1; i > 0; i--) {
-					if (fileList[i].FullName.StartsWith(testDirTnfo.FullName)) {
-						fileList.Remove(fileList[i]);
-					}
-				}
-			}
-
-			var lineDic = fileList.ToDictionary(fileInfo => fileInfo, LineSymmetyCreater);
-
-			return lineDic;
-		}
-
-		private static Dictionary<int, int> LineSymmetyCreater(FileInfo fileInfo) {
-			var lineDic = new Dictionary<int, int>();
-			var fileName = fileInfo.Name;
-			//var lineAppender = @"""" + fileName + @"""";
-			//var apdLength = lineAppender.Length;
-			const string header = @"# ";
-			const string divider = @" ";
-			//var leastLength = header.Length + divider.Length + apdLength;
-			var trueLineNum = 0;
-
-			using (var reader = new StreamReader(fileInfo.FullName)) {
-				
-				var line = reader.ReadLine();
-				var lineAppender = line.Substring(4);
-				var apdLength = lineAppender.Length;
-				var leastLength = header.Length + divider.Length + apdLength;
-
-				var nowLineNum = 2;
-				
-				while ((line = reader.ReadLine()) != null) {
-					if (line.Length > leastLength) {
-						var lastSentence = line.Substring(line.Length - apdLength, apdLength);
-						if (lastSentence.Equals(lineAppender)) {
-							var digitNum = line.Length - leastLength;
-							trueLineNum = int.Parse(line.Substring(header.Length, digitNum));
-						}
-					}
-					lineDic.Add(nowLineNum, trueLineNum);
-					nowLineNum++;
-				}
-				reader.Close();
-			}
-
-			return lineDic;
-		}
-		*/
+		
 	}
 }
