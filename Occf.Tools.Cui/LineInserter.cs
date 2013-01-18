@@ -217,6 +217,8 @@ namespace Occf.Tools.Cui {
 
         //指定されたファイルのパスを受け取って、指定名のバックアップファイルを作成して挿入
         private static void WriteInsetLine(string defaultFileFullName, Encoding encoding) {
+            //挿入するべき最後尾の文字
+            string[] delm = { ";", "{", "}", ")"};
             var fileInfo = new FileInfo(defaultFileFullName);
             const string appendExtension = OccfNames.LineBackUpSuffix;
 ;
@@ -230,8 +232,13 @@ namespace Occf.Tools.Cui {
                     var lineNum = 1;
 
                     while ((line = reader.ReadLine()) != null) {
-                        writer.WriteLine("#line " + lineNum);
+                        
                         writer.WriteLine(line);
+                        
+                        if (delm.Any(s => line.TrimEnd(' ', '\t').EndsWith(s))) {
+                            writer.WriteLine("#line " + lineNum);
+                        }
+
                         lineNum++;
                     }
                     reader.Close();

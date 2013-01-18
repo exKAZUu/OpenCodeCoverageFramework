@@ -99,9 +99,9 @@ namespace Occf.Tools.Cui {
 
 		private static void Main(string[] args) {
 			if (Run(args)) {
-				Environment.Exit(1);
+				Environment.Exit(0);
 			}
-			Environment.Exit(0);
+			Environment.Exit(1);
 		}
 	}
 }

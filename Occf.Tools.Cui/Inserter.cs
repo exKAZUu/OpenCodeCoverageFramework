@@ -80,10 +80,10 @@ namespace Occf.Tools.Cui {
 			var patterns = new List<string>();
             var filePaths = new List<string>();
 
-
-			// parse options
+		    // parse options
 			var p = new OptionSet {
 					{ "r|root=", v => rootDirPath = v },
+                    { "s|srcdir=" , v => srcDirPath = v},
 					{ "t|test=", v => testDirPath = v },
 					{ "l|lang=", v => languageName = v },
 					{ "p|pattern=", patterns.Add },
@@ -112,9 +112,7 @@ namespace Occf.Tools.Cui {
 				Console.WriteLine("please read how to use Occf inserter .");
 				Console.WriteLine("continue.");
 			}
-
-			srcDirPath = args.Count < 1 ? rootDirPath : args[0];
-
+            
 			LanguageSupport mode;
 			try {
 				mode = LanguageSupports.GetCoverageModeByClassName(languageName);
@@ -131,11 +129,11 @@ namespace Occf.Tools.Cui {
 						Program.Print(
 								"Root directory doesn't exist.\nroot:" + rootDir.FullName);
 			}
-			
+
             if (string.IsNullOrEmpty(srcDirPath)) {
                 srcDirPath = rootDirPath;
             }
-            
+		    
             var srcDir = new DirectoryInfo(srcDirPath);
             if (!srcDir.Exists) {
                 return
