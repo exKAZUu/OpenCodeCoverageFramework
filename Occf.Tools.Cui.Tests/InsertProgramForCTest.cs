@@ -17,7 +17,9 @@
 #endregion
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
@@ -55,9 +57,9 @@ namespace Occf.Tools.Cui.Tests {
 			Environment.CurrentDirectory = "C:\\";
 
 			var profile = LanguageSupports.GetCoverageModeByClassName("C");
-			Inserter.InsertMeasurementCode(outDir, outDir, new List<FileInfo>(),  new List<string>(), null, outDir, profile);
+			Inserter.InsertMeasurementCode(outDir, new Collection<FileInfo>(), null, outDir, profile);
 
-			// .cと.hファイルが存在するか
+            // .cと.hファイルが存在するか
 			Assert.That(
 					File.Exists(Path.Combine(outDirPath, "covman.c")),
 					Is.True);

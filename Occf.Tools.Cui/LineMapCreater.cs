@@ -24,7 +24,6 @@ using System.IO;
 using NDesk.Options;
 using Occf.Core.Utils;
 
-//<<<<<<< HEAD
 namespace Occf.Tools.Cui
 {
     class LineMapCreater
@@ -210,7 +209,7 @@ namespace Occf.Tools.Cui
             const string header = @"# ";
             const string divider = @" ";
             //const string occfLineMarker = "# 1 OccfLineMarker";
-            var trueLineNum = 0;
+            var trueLineNum = 1;
 
             using (var reader = new StreamReader(readedFile.FullName)) {
                 using (var writer = new StreamWriter(mappingFileFullname, true)) {
@@ -219,27 +218,60 @@ namespace Occf.Tools.Cui
                     var lineAppender = line.Substring(header.Length + divider.Length + 1);
                     var apdLength = lineAppender.Length;
                     var leastLength = header.Length + divider.Length + apdLength;
+                    var fileFullName = readedFile.FullName;
+                    var lineDiff = 0;
+                    var sharpLine = false;
+                    var illegalSharpOne = false;
 
-                    writer.WriteLine(readedFile.FullName);
-                    writer.WriteLine(1);
-                    writer.WriteLine(0);
+                    writer.WriteLine(fileFullName);
+                    writer.WriteLine(1 + "," + (-1));
+                    //writer.WriteLine(0);
+
+                    var iggLineNum = 3;
+                    //最初の2～4行目は見ないようにする
+                    for (var i = 0; i < iggLineNum; i++) {
+                        line = reader.ReadLine();
+                        if (line == null) {
+                            reader.Close();
+                            writer.Close();
+                            return;
+                        }
+                    }
                     
-                    var nowLineNum = 2;
+                    var nowLineNum = iggLineNum + 2;
                     while ((line = reader.ReadLine()) != null) {
                         if (line.Length > leastLength) {
                             var lastSentence = line.Substring(line.Length - apdLength, apdLength);
                             if (lastSentence.Equals(lineAppender)) {
                                 var digitNum = line.Length - leastLength;
                                 trueLineNum = int.Parse(line.Substring(header.Length, digitNum));
+                                sharpLine = true;
+                                if (trueLineNum != 1) {
+                                    illegalSharpOne = true;
+                                }
                             }
                         }
                         //if (line == occfLineMarker){
                             //trueLineNum = 0;
                         //}
-                        writer.WriteLine(readedFile.FullName);
-                        writer.WriteLine(nowLineNum);
-                        writer.WriteLine(trueLineNum);
+                        //writer.WriteLine(readedFile.FullName);
+
+                        
+                        if (sharpLine) {
+                            var nowLineDiff = nowLineNum - trueLineNum - 1;
+                            if (illegalSharpOne && trueLineNum == 1) {
+                                writer.WriteLine(nowLineNum + "," + (-2));
+                            } else if (lineDiff != nowLineDiff){
+                                writer.WriteLine(nowLineNum + "," + nowLineDiff);
+                                lineDiff = nowLineDiff;
+                            }
+                            
+                        }
+
+                        //writer.WriteLine(nowLineNum + "," + (nowLineNum - trueLineNum -1));
+                        //writer.WriteLine(trueLineNum);
                         nowLineNum++;
+                        sharpLine = false;
                     }
 
                     writer.Close();

@@ -18,6 +18,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
@@ -59,7 +60,7 @@ namespace Occf.Tools.Cui.Tests {
 
 			var profile = LanguageSupports.GetCoverageModeByClassName("Java");
 			Inserter.InsertMeasurementCode(
-					outDir, outDir, new List<FileInfo>() , new List<string>(), new DirectoryInfo(Path.Combine(outDirPath, "test")),
+					outDir, new Collection<FileInfo>(), new DirectoryInfo(Path.Combine(outDirPath, "test")),
 					outDir, profile);
 
 			// jarとdllファイルが存在するか

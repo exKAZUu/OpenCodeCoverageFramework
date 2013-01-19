@@ -90,9 +90,10 @@ namespace OccfInsertToTestCode
             int sp = 395;
             //spよりkeyが大きくてkeyが最小のもののvalue
             var a = dic[dic.Keys.Where(s => s >= sp).Min()];
+            var b = dic[dic.Keys.Where(s => s <= sp).Max()];
 
-
-            Console.WriteLine("max : " + a);
+            Console.WriteLine("min : " + a);
+            Console.WriteLine("max : "  + b);
 
 
             var linst = "pass,1988,12";
@@ -102,6 +103,27 @@ namespace OccfInsertToTestCode
                 Console.WriteLine("line : " + list);
             }
             Console.WriteLine("plus : " + ss);
+
+
+            var stlist = new List<string>();
+            stlist.Add("aaa");
+            stlist.Add("bbb");
+            stlist.Add("ccc");
+
+            foreach (var st in stlist) {
+                Console.WriteLine(st);
+            }
+            Console.WriteLine("dddd");
+            stlist.AddRange(stlist);
+
+            foreach (var st in stlist) {
+                Console.WriteLine(st);
+            }
+
+            int sb;
+            var sb1 = int.TryParse("c\\/get_sign.c", out sb);
+
+            Console.WriteLine(sb1);
         }
     }
 }

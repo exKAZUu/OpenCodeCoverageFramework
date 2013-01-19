@@ -50,7 +50,7 @@ namespace Occf.Tools.Cui {
 						+ OccfNames.CoverageData + "\n" +
                         S + "-m -metrics <metrics>".PadRight(W)
                         + "type of metrics of fault localization." + "\n" + 
-                        S + "".PadRight(W) + " tar[antura], och[iai], jac[card] or rus[sell]"
+                        S + "".PadRight(W) + " default:Tarantura[.py], Ochiai[.py], Jaccard[.py] or Russell[.py]"
                         + "\n" +
                         S + "-v -csv <csv_dir>".PadRight(W)
                         + "path of csv file directory" 
@@ -121,25 +121,34 @@ namespace Occf.Tools.Cui {
 
             var metricsFileName = "BugLocalization.py";
             if (!string.IsNullOrEmpty(metricsType)) {
+
+                //裏短縮コード
                 switch (metricsType) {
                     case "tar":
-                    case "tarantula":
-                        metricsFileName = "Tarantula.py";
+                        metricsType = "Tarantula.py";
                         break;
                     case "och":
-                    case "ochiai":
-                        metricsFileName = "Ochiai.py";
+                        metricsType = "Ochiai.py";
                         break;
                     case "jac":
-                    case "jaccard":
-                        metricsFileName = "Jaccard.py";
+                        metricsType = "Jaccard.py";
                         break;
                     case "rus":
-                    case "russell":
-                        metricsFileName = "Russell.py";
+                        metricsType = "Russell.py";
                         break;
-                    default:
-                    return Program.Print(Usage);
+                }
+
+                if (!metricsType.EndsWith(".py")) {
+                    metricsType += ".py";
+                }
+
+                metricsFileName = metricsType;
+                var metricsFileInfo = new FileInfo(metricsType);
+                if (metricsFileInfo.Exists) {
+                    Console.WriteLine("Error: not find \"" + metricsFileName + "\"");
+                    Console.WriteLine("Path: " + metricsFileInfo.FullName);
+                    Console.WriteLine("chage default file");
+                    metricsFileName = "BugLocalization.py";
                 }
             }
 
@@ -174,7 +183,7 @@ namespace Occf.Tools.Cui {
 			LocalizeStatements(testInfo, covInfo, new Dictionary<FileInfo, Dictionary<int, int>>(), metricsFileName);
 
             if (csvDir != null) {
-                LocalizeStatementsCSV(csvDir, testInfo, covInfo, new Dictionary<FileInfo, Dictionary<int, int>>());
+                LocalizeStatementsCsv(csvDir, testInfo, covInfo, new Dictionary<FileInfo, Dictionary<int, int>>());
             }
             
 		}
@@ -232,27 +241,32 @@ namespace Occf.Tools.Cui {
 
 				//Dictionaryを検索してKeyに対象ファイルが存在したらオリジナル行番号に変換
 				string tag;
-                FileInfo fileInfo = null;
-                foreach (var fileinfos in lindDic.Keys){
-                    var fileFullname = fileinfos.FullName;
-                    var itemPath = stmt.Item2.RelativePath;
-                    if (fileFullname.EndsWith(itemPath)) {
-                        fileInfo = fileinfos;
-                        break;
-                    }
-                }
-				
-				var orgLineNumFlag = true;
+
+                //Dicに対象ファイルが存在するかしない場合はnullを返す。
+                var fileInfo = lindDic.Keys.FirstOrDefault(info => info.FullName.EndsWith(stmt.Item2.RelativePath));
+
+			    var orgLineNumFlag = true;
 				if (fileInfo != null && fileInfo.Exists) {
-					var orgStartLine = lindDic[fileInfo][stmt.Item2.Position.StartLine];
-					var orgEndLine = lindDic[fileInfo][stmt.Item2.Position.EndLine];
+                    //Dicに存在したとき
+
+				    var nowStartLine = stmt.Item2.Position.StartLine;
+				    var nowEndLine = stmt.Item2.Position.EndLine;
+                    var lineDicKey = lindDic[fileInfo];
+
+                    var orgStartLine = OrgLineNum(nowStartLine, lineDicKey);
+				    var orgEndLine = OrgLineNum(nowEndLine, lineDicKey);
+
+                    if (orgStartLine <= 0 || orgEndLine <= 0) {
+                        //main用挿入コード
+                        orgLineNumFlag = false;
+                    }
+
 					var orgStartLineString = orgStartLine == orgEndLine 
 										? orgStartLine.ToString() : (orgStartLine + " - " + orgEndLine);
 					//var orgStartLineString = orgStartLine.ToString();
 					tag = stmt.Item2.Tag + ": " + orgStartLineString;
-					if (orgStartLine == 0) {
-						orgLineNumFlag = false;
-					}
+					
+
 				} else {
 				   tag = stmt.Item2.Tag + ": " + stmt.Item2.Position.SmartLineString;
 				}
@@ -263,7 +277,27 @@ namespace Occf.Tools.Cui {
 			}
 		}
 
-        public static void LocalizeStatementsCSV(
+        public static int OrgLineNum(int nowLineNum, Dictionary<int,int> lineDicKey) {
+            int orgLineDiff;
+
+            if (lineDicKey.ContainsKey(nowLineNum + 1)){
+                orgLineDiff = lineDicKey[nowLineNum + 1];
+            } else {//一致ない場合は前後をみる
+                var before = lineDicKey[lineDicKey.Keys.Where(s => s <= (nowLineNum + 1)).Max()];
+                var after = lineDicKey[lineDicKey.Keys.Where(s => s >= (nowLineNum + 1)).Min()];
+
+                if (before == -2 && after == -2) {
+                    //Main用挿入コード
+                    return -1;
+                }
+                orgLineDiff = after;
+            }
+            var orgLineNum = nowLineNum - orgLineDiff;
+ 
+            return orgLineNum;
+        }
+
+        public static void LocalizeStatementsCsv(
                 DirectoryInfo csvDir, TestInfo testInfo, CoverageInfo covInfo, 
                 Dictionary<FileInfo, Dictionary<int, int>> lindDic){ // Targeting only statement
             
@@ -283,36 +317,30 @@ namespace Occf.Tools.Cui {
                 var failedCount = failedTestCases.Count();
 
                 //Dictionaryを検索してKeyに対象ファイルが存在したらオリジナル行番号に変換
-
-                FileInfo fileInfo = null;
-                foreach (var fileinfos in lindDic.Keys) {
-                    var fileFullname = fileinfos.FullName;
-                    var itemPath = stmt.Item2.RelativePath;
-                    if (fileFullname.EndsWith(itemPath)) {
-                        fileInfo = fileinfos;
-                        break;
-                    }
-                }
+                //Dicに対象ファイルが存在するかしない場合はnullを返す。
+                var fileInfo = lindDic.Keys.FirstOrDefault(info => info.FullName.EndsWith(stmt.Item2.RelativePath));
 
                 int startLine;
                 int endLine;
-                string fileName;
+                var fileName = new FileInfo(stmt.Item2.RelativePath).Name;
 
                 var orgLineNumFlag = true;
                 if (fileInfo != null && fileInfo.Exists) {
-                    var orgStartLine = lindDic[fileInfo][stmt.Item2.Position.StartLine];
-                    var orgEndLine = lindDic[fileInfo][stmt.Item2.Position.EndLine];
-                    
-                    fileName = new FileInfo(stmt.Item2.RelativePath).Name;
-                    startLine = orgStartLine;
-                    endLine = orgEndLine;
+                    //Dicに存在したとき
 
-                    if (orgStartLine == 0) {
+                    var nowStartLine = stmt.Item2.Position.StartLine;
+                    var nowEndLine = stmt.Item2.Position.EndLine;
+                    var lineDicKey = lindDic[fileInfo];
+
+                    startLine = OrgLineNum(nowStartLine, lineDicKey);
+                    endLine = OrgLineNum(nowEndLine, lineDicKey);
+
+                    if (startLine <= 0 || endLine <= 0){
+                        //main用挿入コード時
                         orgLineNumFlag = false;
                     }
 
                 } else {
-                    fileName = new FileInfo(stmt.Item2.RelativePath).Name;
                     startLine = stmt.Item2.Position.StartLine;
                     endLine = stmt.Item2.Position.EndLine;
                 }
@@ -326,10 +354,6 @@ namespace Occf.Tools.Cui {
                 
             }
 
-            /*
-            var blad = new BLElement("Hogehoge.java", 12, 12, 2, 1, 1, 1);
-            blElementList.Add(blad);
-            */
             blElementList.Sort(delegate(BLElement ble1, BLElement ble2) { return ble1.StartLine - ble2.StartLine; });
 
             CsvWriter(csvDir, blElementList);

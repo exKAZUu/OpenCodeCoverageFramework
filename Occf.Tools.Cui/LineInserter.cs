@@ -228,15 +228,17 @@ namespace Occf.Tools.Cui {
 
             using (var reader = new StreamReader(backUpFileFullName, encoding)) {
                 using (var writer = new StreamWriter(fileInfo.FullName, false, encoding)) {
+
                     string line;
                     var lineNum = 1;
-
+                    
                     while ((line = reader.ReadLine()) != null) {
                         
-                        writer.WriteLine(line);
-                        
                         if (delm.Any(s => line.TrimEnd(' ', '\t').EndsWith(s))) {
+                            writer.WriteLine(line);
                             writer.WriteLine("#line " + lineNum);
+                        } else {
+                            writer.WriteLine(line);
                         }
 
                         lineNum++;

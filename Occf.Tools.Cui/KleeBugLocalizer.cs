@@ -18,6 +18,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
@@ -47,8 +48,11 @@ namespace Occf.Tools.Cui {
                         + "type of metrics of fault localization."+ "\n" + 
                         S + "".PadRight(W) + "tar[antura], och[iai], jac[card] or rus[sell]"
                         + "\n" +
-                        S + "-v -csv <csv_dir>".PadRight(W)
-                        + "path of csv file directory" 
+                        S + "-v -csv <output_csv_dir>".PadRight(W)
+                        + "path of the directory for csv file for output" 
+                        + "\n" +
+                        S + "-u -success <successfull_csvfile_path>".PadRight(W)
+                        + "path of the successfull csv file"
                         + "\n" +
                         "";
 
@@ -58,6 +62,7 @@ namespace Occf.Tools.Cui {
 		    var testDirPath = "";
 		    var metricsType = "";
 		    var csvDirPath = "";
+		    var passFilePath = "";
             
             // parse options
 
@@ -66,6 +71,7 @@ namespace Occf.Tools.Cui {
                     { "t|test=", v=> testDirPath = v },
                     { "m|metrics=", v => metricsType = v },
                     { "v|csv=", v => csvDirPath = v },
+                    { "u|success=", v => passFilePath = v },
 		    };
 
             // コマンドをパース "-"指定されないのだけargs[]に残る
@@ -104,25 +110,33 @@ namespace Occf.Tools.Cui {
 
             var metricsFileName = "BugLocalization.py";
             if (!string.IsNullOrEmpty(metricsType)) {
-                switch (metricsType) {
+                //裏短縮コード
+                switch (metricsType){
                     case "tar":
-                    case "tarantula":
-                        metricsFileName = "Tarantula.py";
+                        metricsType = "Tarantula.py";
                         break;
                     case "och":
-                    case "ochiai":
-                        metricsFileName = "Ochiai.py";
+                        metricsType = "Ochiai.py";
                         break;
                     case "jac":
-                    case "jaccard":
-                        metricsFileName = "Jaccard.py";
+                        metricsType = "Jaccard.py";
                         break;
                     case "rus":
-                    case "russell":
-                        metricsFileName = "Russell.py";
+                        metricsType = "Russell.py";
                         break;
-                    default:
-                        return Program.Print(Usage);
+                }
+
+                if (!metricsType.EndsWith(".py")){
+                    metricsType += ".py";
+                }
+
+                metricsFileName = metricsType;
+                var metricsFileInfo = new FileInfo(metricsType);
+                if (metricsFileInfo.Exists){
+                    Console.WriteLine("Error: not find \"" + metricsFileName + "\"");
+                    Console.WriteLine("Path: " + metricsFileInfo.FullName);
+                    Console.WriteLine("chage default file");
+                    metricsFileName = "BugLocalization.py";
                 }
             }
 
@@ -136,19 +150,35 @@ namespace Occf.Tools.Cui {
                 }
             }
 
-			Localize(rootDir, testDir, metricsFileName, csvDir);
+		    FileInfo passFile = null;
+            if (!string.IsNullOrEmpty(passFilePath)) {
+                passFile = new FileInfo(passFilePath);
+                if (!passFile.Exists) {
+                    return
+                            Program.Print(
+                                    "successfull_file does'nt exit .\nsuccesfull_file" + passFile.FullName);
+                }
+            }
+
+			Localize(rootDir, testDir, metricsFileName, csvDir, passFile);
 			return true;
 		}
 
 		private static void Localize(DirectoryInfo rootDir, DirectoryInfo testDir, 
-                                     string metricsFileName, DirectoryInfo csvDir) {
+                                     string metricsFileName, DirectoryInfo csvDir,
+                                     FileInfo passFile) {
 
 			var formatter = new BinaryFormatter();
 			var covInfoFile = FileUtil.GetCoverageInfo(rootDir);
 			var covInfo = CoverageInfo.ReadCoverageInfo(covInfoFile, formatter);
 			var testInfo = AnalyzeKleeTestFiles(testDir);
 
-			AnalyzeTestResult(rootDir, testInfo);
+            if (passFile != null) {
+                AnalyzeTestResultCsv(passFile, testInfo);
+            } else {
+                AnalyzeTestResult(rootDir, testInfo);    
+            }
+            
 			//Line対応のMapのMapを作成、
 			var lineDic = new Dictionary<FileInfo, Dictionary<int, int>>();
 			var mapFileInfo = new FileInfo(rootDir.FullName + "/" + OccfNames.LineMapping);
@@ -161,7 +191,7 @@ namespace Occf.Tools.Cui {
 			BugLocalizer.LocalizeStatements(testInfo, covInfo, lineDic, metricsFileName);
 
             if (csvDir != null) {
-                BugLocalizer.LocalizeStatementsCSV(csvDir, testInfo, covInfo, lineDic);
+                BugLocalizer.LocalizeStatementsCsv(csvDir, testInfo, covInfo, lineDic);
             }
 		}
 
@@ -194,36 +224,59 @@ namespace Occf.Tools.Cui {
 			}
 		}
 
-        private static void AnalyzeTestResultCsv(DirectoryInfo rootDir, TestInfo testInfo, FileInfo csvFileInfo) {
+        private static void AnalyzeTestResultCsv(FileInfo csvFileInfo, TestInfo testInfo) {
+            
+            var passTestLists = new List<string>();
+            var spriter = new[] { ',' };
+
             using (var reader = csvFileInfo.OpenText()) {
-                
+                foreach (var line in reader.ReadLines()) {
+                    passTestLists.AddRange(line.Split(spriter).ToList());
+                }
+                reader.Close();
             }
-           
+
+            foreach (var passTest in passTestLists) {
+                var testCase = testInfo.TestCases.FirstOrDefault(t => t.Name.EndsWith(passTest));
+                if (testCase != null) {
+                    testCase.Passed = true;
+                } else {
+                    Console.Error.WriteLine("[WARNING] the testcase of '" + passTest + "' is not founded.");
+                }
+            }
         }
 
 		public static Dictionary<FileInfo, Dictionary<int, int>> MapDicCreater(FileInfo mappingFile) {
-			var mapDic = new Dictionary<FileInfo, Dictionary<int, int>>();
+			// <path, <now, true>>
+            var mapDic = new Dictionary<FileInfo, Dictionary<int, int>>();
 
 			using (var reader = new StreamReader(mappingFile.FullName)) {
 				var lineDic = new Dictionary<int, int>();
 				var lastFileInfo = new FileInfo(reader.ReadLine());
-				var nowLine = int.Parse(reader.ReadLine());
-				var trueLine = int.Parse(reader.ReadLine());
-				lineDic.Add(nowLine, trueLine);
+			    var csvSpriter = new[] {','};
+                var linePare = reader.ReadLine().Split(csvSpriter);
+                int nowLine;
+				int lineDiff;
+			    int.TryParse(linePare[0], out nowLine);
+			    int.TryParse(linePare[1], out lineDiff);
+
+				lineDic.Add(nowLine, lineDiff);
 
 				string line;
 				while ((line = reader.ReadLine()) != null) {
-					var fileInfo = new FileInfo(line);
-					nowLine = int.Parse(reader.ReadLine());
-					trueLine = int.Parse(reader.ReadLine());
 
-					if (!(fileInfo.FullName.Equals(lastFileInfo.FullName))) {
-						mapDic.Add(lastFileInfo, new Dictionary<int, int>(lineDic));
-						lineDic.Clear();
-						lastFileInfo = fileInfo;
-					}
-
-					lineDic.Add(nowLine, trueLine);
+                    linePare = line.Split(csvSpriter);
+                    //line or path
+                    if(int.TryParse(linePare[0], out nowLine) && linePare.Length == 2) {
+                        //nowline,lineDiff
+                        int.TryParse(linePare[1], out lineDiff);
+                        lineDic.Add(nowLine, lineDiff);
+                    } else {
+                        //path
+                        mapDic.Add(lastFileInfo, new Dictionary<int, int>(lineDic));
+                        lineDic.Clear();
+                        lastFileInfo = new FileInfo(line);
+                    }
 				}
 				mapDic.Add(lastFileInfo, lineDic);
 				reader.Close();
