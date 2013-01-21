@@ -36,12 +36,11 @@ namespace Occf.Languages.Tests.C {
 						"mersenne.c",
 						"multi.h",
 						"bubblesort.c",
-						"bubblesort_p.c",
 						"quicksort.c",
-						"quicksort_p.c",
 						"Block1.c",
 						"Block2.c",
 						"Block3.c",
+                        "get_sign.c",
 				};
 				return names.Select(name => new TestCaseData(name));
 			}
