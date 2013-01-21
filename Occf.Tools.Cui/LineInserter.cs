@@ -107,7 +107,6 @@ namespace Occf.Tools.Cui {
 
             var fileInfos = new List<FileInfo>();
             foreach (var path in filePaths) {
-
                 if (string.IsNullOrEmpty(path)) {
                     return
                             Program.Print(
@@ -115,7 +114,6 @@ namespace Occf.Tools.Cui {
                 }
                 
                 var fileInfo = new FileInfo(path);
-
                 if (!fileInfo.Exists) {
                     return
                             Program.Print(
@@ -157,7 +155,6 @@ namespace Occf.Tools.Cui {
             patterns = patterns ?? new List<string>();
 
             var insertList = new List<FileInfo>();
-            
             
             // パス指定時は拡張子検索を行わない
             if(!patterns.Any() && !fileInfos.Any() && rootDir!=null){
@@ -218,29 +215,25 @@ namespace Occf.Tools.Cui {
         //指定されたファイルのパスを受け取って、指定名のバックアップファイルを作成して挿入
         private static void WriteInsetLine(string defaultFileFullName, Encoding encoding) {
             //挿入するべき最後尾の文字
-            string[] delm = { ";", "{", "}", ")"};
+            var delm = new[]{ ";", "{", "}", ")"};
             var fileInfo = new FileInfo(defaultFileFullName);
             const string appendExtension = OccfNames.LineBackUpSuffix;
-;
-            var backUpFileFullName = defaultFileFullName + appendExtension;
 
+            var backUpFileFullName = defaultFileFullName + appendExtension;
             File.Copy(defaultFileFullName, backUpFileFullName, true);
 
             using (var reader = new StreamReader(backUpFileFullName, encoding)) {
                 using (var writer = new StreamWriter(fileInfo.FullName, false, encoding)) {
-
                     string line;
                     var lineNum = 1;
                     
                     while ((line = reader.ReadLine()) != null) {
-                        
                         if (delm.Any(s => line.TrimEnd(' ', '\t').EndsWith(s))) {
                             writer.WriteLine(line);
                             writer.WriteLine("#line " + lineNum);
                         } else {
                             writer.WriteLine(line);
                         }
-
                         lineNum++;
                     }
                     reader.Close();

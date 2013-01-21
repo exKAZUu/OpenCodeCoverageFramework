@@ -98,7 +98,6 @@ namespace Occf.Tools.Cui {
                 }
             }
 
-
 			MainFileInsertReader(fileInfos, rootDir, libtype);
 			//InsertToMainFail(mainFile, rootDir);
 
@@ -126,7 +125,7 @@ namespace Occf.Tools.Cui {
 				Console.WriteLine("delete existing \"" + backUpFileName + "\" and create it newly");
 				File.Delete(backUpFileFullName);
 			}
-
+            //バックアップ兼データ読み込み用ファイルの作成
 			File.Copy(defFileFullName, backUpFileFullName);
 
 			using (var reader = new StreamReader(backUpFileFullName)) {
@@ -136,24 +135,14 @@ namespace Occf.Tools.Cui {
 					var mainFlag = false;
 					var bracesCount = 0;
 					var rootFullName = rootDir.FullName.Replace("\\", "/");
+
 				    const string lineIndent = "#line 0";
+                    const string atexitMarker = "klee_make_symbolic";
 
-				    switch (libType) {
-				        case "lib":
-                            writer.WriteLine("#include <stdlib.h>");
-                            break;
-                        case "io":
-                            writer.WriteLine("#include <stdio.h>");
-                            break;
-                        case "all":
-                            writer.WriteLine("#include <stdlib.h>");
-							writer.WriteLine("#include <stdio.h>");
-                            break;
-				    }
-
+                    //include の埋め込み
+				    WriteInclude(writer,libType);
 
 					while ((line = reader.ReadLine()) != null) {
-						
 						var lineLength = line.Length;
 						
 						//main 判定　"main" メソッドの抽出と{}による終了判定
@@ -167,7 +156,7 @@ namespace Occf.Tools.Cui {
 
 								if (sent1.Equals(@"(")) {
 									mainFlag = true;
-                                    // main直前
+                                    // main直前 OccfExit()の挿入
                                     WriteOccfExit(writer, lineIndent, rootFullName);
 								    insertedMethod = true;
 									bracesCount = 0;
@@ -188,7 +177,6 @@ namespace Occf.Tools.Cui {
 									bracesCount++;
 								} else if (sent1.Equals("}")) {
 									bracesCount--;
-
 									if (bracesCount <= 0) {
 										mainFlag = false;
 									}
@@ -196,15 +184,11 @@ namespace Occf.Tools.Cui {
 							}
 						}
 
-                        // klee_make_symbolic判定mainflagがONでかつklee_makeを検出時　 
-                        if (mainFlag && line.Contains("klee_make_symbolic")) {
-                            var spaceNum = line.IndexOfAny("klee_make_symbolic".ToCharArray());
-                            const string atexit = "atexit(occf_exit);";
-                            writer.WriteLine("");
-                            writer.WriteLine(lineIndent);
-                            writer.WriteLine(atexit.PadLeft(spaceNum + atexit.Length));
-                            writer.WriteLine(lineIndent);
-                            writer.WriteLine("");
+                        // klee_make_symbolic判定mainflagがONでかつklee_makeを検出時
+                        if (mainFlag && line.Contains(atexitMarker)) {
+                            var spaceNum = line.IndexOfAny(atexitMarker.ToCharArray());
+                            //atexit()の挿入
+                            WriteAtExit(writer, lineIndent, spaceNum);
                             insertedAtExit = true;
                         }
 
@@ -229,6 +213,30 @@ namespace Occf.Tools.Cui {
 			    Console.WriteLine("unwrote:" + defFile.FullName);
 			}
 		}
+
+        private static void WriteInclude(StreamWriter writer, string libType) {
+            switch (libType){
+                case "lib":
+                    writer.WriteLine("#include <stdlib.h>");
+                    break;
+                case "io":
+                    writer.WriteLine("#include <stdio.h>");
+                    break;
+                case "all":
+                    writer.WriteLine("#include <stdlib.h>");
+                    writer.WriteLine("#include <stdio.h>");
+                    break;
+            }
+        }
+
+        private static void WriteAtExit(StreamWriter writer,string lineIndent, int spaceNum) {
+            const string atexit = "atexit(occf_exit);";
+            writer.WriteLine("");
+            writer.WriteLine(lineIndent);
+            writer.WriteLine(atexit.PadLeft(spaceNum + atexit.Length));
+            writer.WriteLine(lineIndent);
+            writer.WriteLine("");
+        }
 
         private static void WriteOccfExit(StreamWriter writer, string lineIndent, string rootFullName) {
             writer.WriteLine("");

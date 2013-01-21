@@ -159,9 +159,9 @@ namespace Occf.Tools.Cui {
 			}
 
 			// Ignore backup files
-			fileInfos = fileInfos.Where(fi => fi.FullName.EndsWith(OccfNames.LineBackUpSuffix))
-					.Where(fi => fi.FullName.EndsWith(OccfNames.KleeBackUpSuffix))
-					.Where(fi => fi.FullName.EndsWith(OccfNames.BackupSuffix));
+			fileInfos = fileInfos.Where(fi => !fi.FullName.EndsWith(OccfNames.LineBackUpSuffix))
+					.Where(fi => !fi.FullName.EndsWith(OccfNames.KleeBackUpSuffix))
+					.Where(fi => !fi.FullName.EndsWith(OccfNames.BackupSuffix));
 
 			// Avoid a duplication
 			return fileInfos.ToDictionary(fi => fi.FullName).Values;

@@ -208,8 +208,11 @@ namespace Occf.Tools.Cui
             var mappingFileFullname = rootDir.FullName + "/" + OccfNames.LineMapping;
             const string header = @"# ";
             const string divider = @" ";
-            //const string occfLineMarker = "# 1 OccfLineMarker";
+
             var trueLineNum = 1;
+            var lineDiff = 0;
+            var sharpLine = false;
+            var illegalSharpOne = false;
 
             using (var reader = new StreamReader(readedFile.FullName)) {
                 using (var writer = new StreamWriter(mappingFileFullname, true)) {
@@ -218,16 +221,12 @@ namespace Occf.Tools.Cui
                     var lineAppender = line.Substring(header.Length + divider.Length + 1);
                     var apdLength = lineAppender.Length;
                     var leastLength = header.Length + divider.Length + apdLength;
-                    var fileFullName = readedFile.FullName;
-                    var lineDiff = 0;
-                    var sharpLine = false;
-                    var illegalSharpOne = false;
-
-                    writer.WriteLine(fileFullName);
+                    
+                    writer.WriteLine(readedFile.FullName);
                     writer.WriteLine(1 + "," + (-1));
-                    //writer.WriteLine(0);
 
-                    var iggLineNum = 3;
+                    const int iggLineNum = 3;
+
                     //最初の2～4行目は見ないようにする
                     for (var i = 0; i < iggLineNum; i++) {
                         line = reader.ReadLine();
@@ -251,12 +250,7 @@ namespace Occf.Tools.Cui
                                 }
                             }
                         }
-                        //if (line == occfLineMarker){
-                            //trueLineNum = 0;
-                        //}
-                        //writer.WriteLine(readedFile.FullName);
 
-                        
                         if (sharpLine) {
                             var nowLineDiff = nowLineNum - trueLineNum - 1;
                             if (illegalSharpOne && trueLineNum == 1) {
@@ -268,8 +262,6 @@ namespace Occf.Tools.Cui
                             
                         }
 
-                        //writer.WriteLine(nowLineNum + "," + (nowLineNum - trueLineNum -1));
-                        //writer.WriteLine(trueLineNum);
                         nowLineNum++;
                         sharpLine = false;
                     }

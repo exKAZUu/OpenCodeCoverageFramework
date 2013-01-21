@@ -122,7 +122,7 @@ namespace Occf.Tools.Cui {
             var metricsFileName = "BugLocalization.py";
             if (!string.IsNullOrEmpty(metricsType)) {
 
-                //裏短縮コード
+                //短縮コード
                 switch (metricsType) {
                     case "tar":
                         metricsType = "Tarantula.py";

@@ -89,8 +89,8 @@ namespace OccfInsertToTestCode
             // 
             int sp = 395;
             //spよりkeyが大きくてkeyが最小のもののvalue
-            var a = dic[dic.Keys.Where(s => s >= sp).Min()];
-            var b = dic[dic.Keys.Where(s => s <= sp).Max()];
+            var a = dic[dic.Keys.Where(s => s >= sp).Min()]; //3 after
+            var b = dic[dic.Keys.Where(s => s <= sp).Max()]; //2 before
 
             Console.WriteLine("min : " + a);
             Console.WriteLine("max : "  + b);
