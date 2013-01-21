@@ -282,6 +282,9 @@ namespace Occf.Tools.Cui {
 
             if (lineDicKey.ContainsKey(nowLineNum + 1)){
                 orgLineDiff = lineDicKey[nowLineNum + 1];
+                if (orgLineDiff == -2) {
+                    return -1;
+                }
             } else {//一致ない場合は前後をみる
                 var before = lineDicKey[lineDicKey.Keys.Where(s => s <= (nowLineNum + 1)).Max()];
                 var after = lineDicKey[lineDicKey.Keys.Where(s => s >= (nowLineNum + 1)).Min()];
@@ -367,7 +370,7 @@ namespace Occf.Tools.Cui {
             foreach (var blElement in blElements) {
                 if (!fileList.Contains(blElement.FileName)) {
                     fileList.Add(blElement.FileName);
-                    fileInfos.Add(new FileInfo(csvDir.FullName + "/OccfFL_" + blElement.FileName + ".csv"));
+                    fileInfos.Add(new FileInfo(csvDir.FullName + "/OccfBL_" + blElement.FileName + ".csv"));
                 }
             }
             
@@ -380,7 +383,7 @@ namespace Occf.Tools.Cui {
             }
 
             foreach (var blElement in blElements) {
-                using (var writer = new StreamWriter(csvDir.FullName + "/OccfFL_" + blElement.FileName + ".csv", true)){
+                using (var writer = new StreamWriter(csvDir.FullName + "/OccfBL_" + blElement.FileName + ".csv", true)){
                     writer.WriteLine(blElement.CsvString());
                     writer.Close();
                 }

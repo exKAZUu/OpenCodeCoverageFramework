@@ -132,7 +132,7 @@ namespace Occf.Tools.Cui {
 
                 metricsFileName = metricsType;
                 var metricsFileInfo = new FileInfo(metricsType);
-                if (metricsFileInfo.Exists){
+                if (!metricsFileInfo.Exists){
                     Console.WriteLine("Error: not find \"" + metricsFileName + "\"");
                     Console.WriteLine("Path: " + metricsFileInfo.FullName);
                     Console.WriteLine("chage default file");
