@@ -1,6 +1,6 @@
 #region License
 
-// Copyright (C) 2009-2012 Kazunori Sakamoto
+// Copyright (C) 2009-2013 Kazunori Sakamoto
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -34,32 +34,23 @@ namespace Occf.Core.Manipulators.Transformers {
 
 		protected virtual string CreateTestCaseIdentifierCode(
 				XElement target, long id, int value, ElementType type) {
-			return MethodPrefix + "WriteTestCase(" + id + "," + (int)type + "," + value
-					+ ");";
+			return MethodPrefix + "WriteTestCase(" + id + "," + (int)type + "," + value + ");";
 		}
 
 		protected virtual string CreateStatementCoverageCode(
 				XElement target, long id, int value, ElementType type) {
-			return MethodPrefix + "WriteStatement(" + id + "," + (int)type + "," + value
-					+ ");";
+			return MethodPrefix + "WriteStatement(" + id + "," + (int)type + "," + value + ");";
 		}
 
 		protected virtual Tuple<string, string> CreatePredicateCoverageCode(
 				XElement target, long id, ElementType type) {
-			return
-					Tuple.Create(
-							MethodPrefix + "WritePredicate(" + id + "," + (int)type + ",",
-							")");
+			return Tuple.Create(MethodPrefix + "WritePredicate(" + id + "," + (int)type + ",", ")");
 		}
 
 		protected virtual Tuple<string, string, string> CreateInitializerCoverageCode(
 				XElement target, long id, ElementType type) {
 			var stmt = CreateStatementCoverageCode(target, id, 2, type);
-			return
-					Tuple.Create(
-							stmt.Substring(0, stmt.Length - 1) + " ? (",
-							") : (",
-							")");
+			return Tuple.Create(stmt.Substring(0, stmt.Length - 1) + " ? (", ") : (", ")");
 		}
 
 		protected override IEnumerable<XElement> CreateStatementNode(
@@ -70,8 +61,7 @@ namespace Occf.Core.Manipulators.Transformers {
 			yield return node;
 		}
 
-		public override void InsertPredicate(
-				XElement target, long id, ElementType type) {
+		public override void InsertPredicate(XElement target, long id, ElementType type) {
 			var code = CreatePredicateCoverageCode(target, id, type);
 			//var node = AntlrNodeGenerator.GenerateWrappedNode(
 			//        target,
@@ -83,8 +73,7 @@ namespace Occf.Core.Manipulators.Transformers {
 			target.AddAfterSelf(new XElement("TOKEN", code.Item2));
 		}
 
-		public override void InsertInitializer(
-				XElement target, long id, ElementType type) {
+		public override void InsertInitializer(XElement target, long id, ElementType type) {
 			var code = CreateInitializerCoverageCode(target, id, type);
 			//var node = AntlrNodeGenerator.GenerateWrappedNode(
 			//        target,
@@ -99,9 +88,13 @@ namespace Occf.Core.Manipulators.Transformers {
 
 		public override void SupplementBlock(XElement root) {
 			var nodes = GetLackingBlockNodes(root);
-			ReplaceSafely(
-					nodes,
-					node => AntlrNodeGenerator.GenerateBlock(node, CodeToXml));
+			foreach (var node in nodes) {
+				node.AddBeforeSelf(new XElement("TOKEN", "{"));
+				node.AddAfterSelf(new XElement("TOKEN", "}"));
+			}
+			//ReplaceSafely(
+			//        nodes,
+			//        node => AntlrNodeGenerator.GenerateBlock(node, CodeToXml));
 		}
 
 		protected abstract IEnumerable<XElement> GetLackingBlockNodes(XElement root);

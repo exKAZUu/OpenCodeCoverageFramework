@@ -37,9 +37,9 @@ namespace Occf.Languages.Tests.C {
 						"multi.h",
 						"bubblesort.c",
 						"quicksort.c",
-						"Block1.c",
-						"Block2.c",
-						"Block3.c",
+						"block1.c",
+						"block2.c",
+						"block3.c",
 						"get_sign.c",
 						"uint4.c",
 				};
