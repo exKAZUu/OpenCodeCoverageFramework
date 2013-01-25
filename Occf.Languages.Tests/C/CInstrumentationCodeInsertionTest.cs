@@ -40,7 +40,8 @@ namespace Occf.Languages.Tests.C {
 						"Block1.c",
 						"Block2.c",
 						"Block3.c",
-                        "get_sign.c",
+						"get_sign.c",
+						"uint4.c",
 				};
 				return names.Select(name => new TestCaseData(name));
 			}
