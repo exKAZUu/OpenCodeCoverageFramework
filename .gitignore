@@ -29,6 +29,7 @@ _ReSharper*/
 ipch/
 target
 *.swp
+*~
 
 .nuget
 *.docstates
