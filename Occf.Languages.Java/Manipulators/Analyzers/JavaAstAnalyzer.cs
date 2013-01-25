@@ -114,7 +114,6 @@ namespace Occf.Languages.Java.Manipulators.Analyzers {
 		}
 
 		public override IEnumerable<XElement> FindCaseLabelTails(XElement root) {
-			Contract.Requires(root.Name == "switch");
 			/*
 			statement 
 				:   'switch' parExpression '{' switchBlockStatementGroups '}'

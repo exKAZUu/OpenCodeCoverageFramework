@@ -65,31 +65,36 @@ namespace Occf.Core.Manipulators.Transformers {
 		protected override IEnumerable<XElement> CreateStatementNode(
 				XElement target, long id, int value, ElementType type) {
 			var code = CreateStatementCoverageCode(target, id, value, type);
-			var node = CodeToXml.Generate(code, ParseStatementFunc);
+			//var node = CodeToXml.Generate(code, ParseStatementFunc);
+			var node = new XElement("TOKEN", code);
 			yield return node;
 		}
 
 		public override void InsertPredicate(
 				XElement target, long id, ElementType type) {
 			var code = CreatePredicateCoverageCode(target, id, type);
-			var node = AntlrNodeGenerator.GenerateWrappedNode(
-					target,
-					CodeToXml, XmlToCode,
-					code.Item1, code.Item2);
-			target.AddBeforeSelf(node);
-			target.Remove();
+			//var node = AntlrNodeGenerator.GenerateWrappedNode(
+			//        target,
+			//        CodeToXml, XmlToCode,
+			//        code.Item1, code.Item2);
+			//target.AddBeforeSelf(node);
+			//target.Remove();
+			target.AddBeforeSelf(new XElement("TOKEN", code.Item1));
+			target.AddAfterSelf(new XElement("TOKEN", code.Item2));
 		}
 
 		public override void InsertInitializer(
 				XElement target, long id, ElementType type) {
 			var code = CreateInitializerCoverageCode(target, id, type);
-			var node = AntlrNodeGenerator.GenerateWrappedNode(
-					target,
-					CodeToXml,
-					XmlToCode,
-					code.Item1, code.Item2, code.Item3);
-			target.AddBeforeSelf(node);
-			target.Remove();
+			//var node = AntlrNodeGenerator.GenerateWrappedNode(
+			//        target,
+			//        CodeToXml,
+			//        XmlToCode,
+			//        code.Item1, code.Item2, code.Item3);
+			//target.AddBeforeSelf(node);
+			//target.Remove();
+			target.AddBeforeSelf(new XElement("TOKEN", code.Item1));
+			target.AddAfterSelf(new XElement("TOKEN", code.Item2));
 		}
 
 		public override void SupplementBlock(XElement root) {
