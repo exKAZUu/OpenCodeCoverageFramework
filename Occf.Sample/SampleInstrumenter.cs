@@ -35,26 +35,21 @@ namespace Occf.Sample {
 		/// </summary>
 		/// <param name="outDirInfo">A DirectoryInfo for output directory.</param>
 		/// <param name="inDirInfo">A DirectoryInfo for input base directory.</param>
-		public SampleInstrumenter(
-				DirectoryInfo outDirInfo, DirectoryInfo inDirInfo) {
+		public SampleInstrumenter( DirectoryInfo outDirInfo, DirectoryInfo inDirInfo) {
 			OutDirInfo = outDirInfo;
 			BaseDirInfo = inDirInfo;
 		}
 
-		public void WriteInstrumentedProductionCode(
-				LanguageSupport mode, FileInfo inFileInfo) {
-			var relativePath = XPath.GetRelativePath(
-					inFileInfo.FullName, BaseDirInfo.FullName);
+		public void WriteInstrumentedProductionCode( LanguageSupport mode, FileInfo inFileInfo) {
+			var relativePath = ParaibaPath.GetRelativePath( inFileInfo.FullName, BaseDirInfo.FullName);
 			var outFileInfo = OutDirInfo.GetFile(relativePath);
 			var code = InstrumentStatementAndPredicate(mode, inFileInfo);
 			outFileInfo.Directory.Create();
 			File.WriteAllText(outFileInfo.FullName, code);
 		}
 
-		public void WriteInstrumentedTestCode(
-				LanguageSupport mode, FileInfo inFileInfo) {
-			var relativePath = XPath.GetRelativePath(
-					inFileInfo.FullName, BaseDirInfo.FullName);
+		public void WriteInstrumentedTestCode( LanguageSupport mode, FileInfo inFileInfo) {
+			var relativePath = ParaibaPath.GetRelativePath( inFileInfo.FullName, BaseDirInfo.FullName);
 			var outFileInfo = OutDirInfo.GetFile(relativePath);
 			var code = InstrumentTestCase(mode, inFileInfo, BaseDirInfo);
 			outFileInfo.Directory.Create();
@@ -62,7 +57,7 @@ namespace Occf.Sample {
 		}
 
 		public void CopyFile(FileInfo inFileInfo) {
-			var relativePath = XPath.GetRelativePath(
+			var relativePath = ParaibaPath.GetRelativePath(
 					inFileInfo.FullName, BaseDirInfo.FullName);
 			var outFileInfo = OutDirInfo.GetFile(relativePath);
 			outFileInfo.Directory.Create();
@@ -70,7 +65,7 @@ namespace Occf.Sample {
 		}
 
 		protected override long RegisterFile(FileInfo fileInfo) {
-			var relativePath = XPath.GetRelativePath(
+			var relativePath = ParaibaPath.GetRelativePath(
 					fileInfo.FullName, BaseDirInfo.FullName);
 			Console.WriteLine("Relative path: " + relativePath);
 			return Id++;

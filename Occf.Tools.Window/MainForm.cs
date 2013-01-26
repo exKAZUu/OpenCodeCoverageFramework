@@ -64,7 +64,7 @@ namespace Occf.Tools.Window {
 				var basePath = txtBase.Text.AddIfNotEndsWith('\\');
 
 				var files = filePathes.SelectMany(path => EnumerateFiles(path, "*"))
-						.Select(path => XPath.GetRelativePath(path, basePath));
+						.Select(path => ParaibaPath.GetRelativePath(path, basePath));
 
 				clbFiles.Items.Clear();
 				foreach (var file in files) {

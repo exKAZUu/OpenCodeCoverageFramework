@@ -1,4 +1,4 @@
-#ignore thumbnails created by windows
+#Ignore thumbnails created by windows
 Thumbs.db
 #Ignore files build by Visual Studio
 *.obj
@@ -28,14 +28,17 @@ _ReSharper*/
 *.sdf
 ipch/
 target
-*.swp
 *~
+*.swp
 
-.nuget
+#Ignore generated files by Resharper like
 *.docstates
 *.dotCover
+
+#Ignore NuGet files
 nuspec
 packages
 
+#Ignore generated or downloaded test files
 output
 download

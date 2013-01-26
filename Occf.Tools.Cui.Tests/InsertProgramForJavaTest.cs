@@ -149,8 +149,8 @@ namespace Occf.Tools.Cui.Tests {
 
 		private static void AssertEqualFiles(
 				string inFilePath, string outDirPath, string inDirPath) {
-			var relative = XPath.GetRelativePath(inFilePath, inDirPath);
-			var actualJava = XPath.GetFullPath(relative, outDirPath);
+			var relative = ParaibaPath.GetRelativePath(inFilePath, inDirPath);
+			var actualJava = ParaibaPath.GetFullPath(relative, outDirPath);
 			Assert.That(
 					File.ReadAllBytes(actualJava),
 					Is.EqualTo(File.ReadAllBytes(inFilePath)));

@@ -59,7 +59,7 @@ namespace Occf.Tools.Cui.Tests {
 			var profile = LanguageSupports.GetCoverageModeByClassName("C");
 			Inserter.InsertMeasurementCode(outDir, new Collection<FileInfo>(), null, outDir, profile);
 
-            // .cと.hファイルが存在するか
+			// .cと.hファイルが存在するか
 			Assert.That(
 					File.Exists(Path.Combine(outDirPath, "covman.c")),
 					Is.True);
@@ -132,13 +132,10 @@ namespace Occf.Tools.Cui.Tests {
 			}
 		}
 
-		private static void AssertEqualFiles(
-				string inFilePath, string outDirPath, string inDirPath) {
-			var relative = XPath.GetRelativePath(inFilePath, inDirPath);
-			var actualJava = XPath.GetFullPath(relative, outDirPath);
-			Assert.That(
-					File.ReadAllBytes(actualJava),
-					Is.EqualTo(File.ReadAllBytes(inFilePath)));
+		private static void AssertEqualFiles( string inFilePath, string outDirPath, string inDirPath) {
+			var relative = ParaibaPath.GetRelativePath(inFilePath, inDirPath);
+			var actualJava = ParaibaPath.GetFullPath(relative, outDirPath);
+			Assert.That( File.ReadAllBytes(actualJava), Is.EqualTo(File.ReadAllBytes(inFilePath)));
 		}
 	}
 }

@@ -40,7 +40,7 @@ namespace Occf.Core.Utils {
 
 		public static string GetIdentifiedTest(
 				FileInfo testFile, TestInfo info, LanguageSupport support, out string relativePath) {
-			relativePath = XPath.GetRelativePath(testFile.FullName, info.BasePath);
+			relativePath = ParaibaPath.GetRelativePath(testFile.FullName, info.BasePath);
 			var ast = support.CodeToXml.GenerateFromFile(testFile.FullName);
 
 			// テストケース識別用コードの埋め込み
@@ -65,7 +65,7 @@ namespace Occf.Core.Utils {
 
 		public static string GetCoveragedCode(
 				FileInfo codeFile, CoverageInfo info, LanguageSupport support, out string relativePath) {
-			relativePath = XPath.GetRelativePath(codeFile.FullName, info.BasePath);
+			relativePath = ParaibaPath.GetRelativePath(codeFile.FullName, info.BasePath);
 			var ast = support.CodeToXml.GenerateFromFile(codeFile.FullName);
 
 			// 測定用コードの埋め込み
@@ -81,7 +81,7 @@ namespace Occf.Core.Utils {
 		}
 
 		private static string WriteCode(string relativePath, DirectoryInfo outDir, string code) {
-			var outPath = XPath.GetFullPath(relativePath, outDir.FullName);
+			var outPath = ParaibaPath.GetFullPath(relativePath, outDir.FullName);
 			Directory.CreateDirectory(Path.GetDirectoryName(outPath));
 			using (var writer = new StreamWriter(outPath, false, XEncoding.SJIS)) {
 				writer.Write(code);

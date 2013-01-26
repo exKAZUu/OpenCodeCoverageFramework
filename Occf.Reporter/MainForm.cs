@@ -194,7 +194,7 @@ namespace Occf.Reporter {
 					(CoverageListViewItem)
 							_lvStatement.GetItemAt(_lastMouseLocation.X, _lastMouseLocation.Y);
 			var element = item.Element;
-			var path = XPath.GetFullPath(element.RelativePath, _info.BasePath);
+			var path = ParaibaPath.GetFullPath(element.RelativePath, _info.BasePath);
 			new Editor(
 					path, _info.StatementTargets
 							      .Where(

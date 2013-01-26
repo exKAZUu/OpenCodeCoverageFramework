@@ -79,8 +79,7 @@ namespace Occf.Core.Manipulators.Transformers {
 		/// <returns>The modified test code.</returns>
 		public string InstrumentTestCase(
 				LanguageSupport support, FileInfo fileInfo, DirectoryInfo baseDirInfo) {
-			var relativePath = XPath.GetRelativePath(
-					fileInfo.FullName, baseDirInfo.FullName);
+			var relativePath = ParaibaPath.GetRelativePath( fileInfo.FullName, baseDirInfo.FullName);
 
 			var root = support.CodeToXml.GenerateFromFile(fileInfo.FullName);
 			var inserter = support.AstTransformer;
