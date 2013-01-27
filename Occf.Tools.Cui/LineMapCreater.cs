@@ -39,7 +39,7 @@ namespace Occf.Tools.Cui
             S + "-r, -root <root_dir>".PadRight(W)
             + "path of root directory and mapping file place." + "\n" +
             S + "-t, -test <test_dir>".PadRight(W) 
-            + "path of test code directory" + "\n" +
+            + "path of test code directory." + "\n" +
             S + "-s, -srcdir <src_dir>".PadRight(W)
             + "root of source directory for project when you want to "
             + "\n" + S + "".PadRight(W) + "separate source directory from root directory." 

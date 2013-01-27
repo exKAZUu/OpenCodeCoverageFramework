@@ -35,25 +35,28 @@ namespace Occf.Tools.Cui {
 		private const string S = "  ";
 		private const int W = 24;
 
-		private static readonly string Usage =
-				Program.Header +
-						"" + "\n" +
-						"Usage: Occf localize -r <root_dir> -e <result> [options]" + "\n" +
-						"" + "\n" +
-						S + "-r -root <root_dir>".PadRight(W)
-						+ "path of root directory (including source and test code)" + "\n" +
-						S + "-e -result <result>".PadRight(W)
-						+"path of test result file which contains indexes of failed test case with csv"
-						+ "\n" +
-						S + "-c -coverage <coverage>".PadRight(W) 
-                        + "path of coverage data whose name is "
-						+ OccfNames.CoverageData + "\n" +
+	    private static readonly string Usage =
+	            Program.Header +
+	                    "" + "\n" +
+	                    "Usage: Occf localize -r <root_dir> -e <result> [options]" + "\n" +
+	                    "" + "\n" +
+	                    S + "-r -root <root_dir>".PadRight(W)
+	                    + "path of root directory." + "\n" +
+	                    S + "".PadRight(W) + "(including source and test code)" + "\n" +
+	                    S + "-e -result <result>".PadRight(W)
+	                    + "path of test result file which contains indexes of" + "\n" +
+	                    S + "".PadRight(W) + "failed test case with csv." + "\n" +
+	                    S + "-c -coverage <coverage>".PadRight(W)
+	                    + "path of coverage data whose name is " + "\n" +
+	                    S + "".PadRight(W) + "\"" +OccfNames.CoverageData + "\".\n" +
                         S + "-m -metrics <metrics>".PadRight(W)
-                        + "type of metrics of fault localization." + "\n" + 
-                        S + "".PadRight(W) + " default:Tarantura[.py], Ochiai[.py], Jaccard[.py] or Russell[.py]"
+                        + "type of metrics of fault localization." + "\n" +
+                        S + "".PadRight(W) + "Python script file in the \"metrics\" directory." + "\n" +
+                        S + "".PadRight(W) + "default:Tarantura[.py], Ochiai[.py], Jaccard[.py]" + "\n" +
+                        S + "".PadRight(W) + "       :Russell[.py] or SBI[.py]."
                         + "\n" +
-                        S + "-v -csv <csv_dir>".PadRight(W)
-                        + "path of csv file directory" 
+                        S + "-v -csv <out_dir>".PadRight(W)
+                        + "path of the directory for csv file for output." 
                         + "\n" +
 						"";
 
@@ -119,8 +122,12 @@ namespace Occf.Tools.Cui {
 								"Coverage data file doesn't exist.\ncoverage:" + covDataFile.FullName);
 			}
 
-            var metricsFileName = "BugLocalization.py";
-            if (!string.IsNullOrEmpty(metricsType)) {
+            const string metricsDirName = "metrics";
+            const string fileDelimiter = "/";
+
+            var metricsFilePath = metricsDirName + fileDelimiter + "BugLocalization.py";
+            if (!string.IsNullOrEmpty(metricsType))
+            {
 
                 //短縮コード
                 switch (metricsType) {
@@ -136,19 +143,22 @@ namespace Occf.Tools.Cui {
                     case "rus":
                         metricsType = "Russell.py";
                         break;
+                    case "sbi":
+                        metricsType = "SBI.py";
+                        break;
                 }
 
                 if (!metricsType.EndsWith(".py")) {
                     metricsType += ".py";
                 }
 
-                metricsFileName = metricsType;
-                var metricsFileInfo = new FileInfo(metricsType);
+                metricsFilePath = metricsDirName + fileDelimiter + metricsType;
+                var metricsFileInfo = new FileInfo(metricsFilePath);
                 if (metricsFileInfo.Exists) {
-                    Console.WriteLine("Error: not find \"" + metricsFileName + "\"");
+                    Console.WriteLine("Error: not find \"" + metricsFilePath + "\"");
                     Console.WriteLine("Path: " + metricsFileInfo.FullName);
-                    Console.WriteLine("chage default file");
-                    metricsFileName = "BugLocalization.py";
+                    metricsFilePath = metricsDirName + fileDelimiter + "BugLocalization.py";
+                    Console.WriteLine("chage default file : " + metricsFilePath);
                 }
             }
 
@@ -163,13 +173,13 @@ namespace Occf.Tools.Cui {
                 }
             }
             
-			Localize(rootDir, resultFile, covDataFile, metricsFileName, csvDir);
+			Localize(rootDir, resultFile, covDataFile, metricsFilePath, csvDir);
 
 			return true;
 		}
 
 		private static void Localize(DirectoryInfo rootDir, FileInfo resultFile, 
-                                     FileInfo covDataFile, string metricsFileName, DirectoryInfo csvDir) {
+                                     FileInfo covDataFile, string metricsFilePath, DirectoryInfo csvDir) {
 			var formatter = new BinaryFormatter();
 			var covInfoFile = FileUtil.GetCoverageInfo(rootDir);
 			var testInfoFile = FileUtil.GetTestInfo(rootDir);
@@ -180,7 +190,7 @@ namespace Occf.Tools.Cui {
 			ReadJUnitResult(resultFile, testInfo);
 			CoverageDataReader.ReadFile(testInfo, covDataFile);
 
-			LocalizeStatements(testInfo, covInfo, new Dictionary<FileInfo, Dictionary<int, int>>(), metricsFileName);
+			LocalizeStatements(testInfo, covInfo, new Dictionary<FileInfo, Dictionary<int, int>>(), metricsFilePath);
 
             if (csvDir != null) {
                 LocalizeStatementsCsv(csvDir, testInfo, covInfo, new Dictionary<FileInfo, Dictionary<int, int>>());
@@ -194,14 +204,14 @@ namespace Occf.Tools.Cui {
 		/// <param name="testInfo"></param>
 		/// <param name="covInfo"></param>
 		/// <param name="lindDic"></param>
-		/// <param name="metricsFileName"></param>
+		/// <param name="metricsFilePath"></param>
 		public static void LocalizeStatements(
 				TestInfo testInfo, CoverageInfo covInfo, Dictionary<FileInfo, 
-                Dictionary<int, int>> lindDic, string metricsFileName) { // Targeting only statement
+                Dictionary<int, int>> lindDic, string metricsFilePath) { // Targeting only statement
 			var engine = Python.CreateEngine();
 			var scope = engine.CreateScope();
 			//var fileName = "BugLocalization.py";
-            var fileName = metricsFileName;
+            var fileName = metricsFilePath;
 
 			var scriptPath = Path.Combine(OccfGlobal.CurrentDirectory, fileName);
 			if (!File.Exists(scriptPath)) {
@@ -213,7 +223,8 @@ namespace Occf.Tools.Cui {
 			var calcMetricFunc =
 					scope.GetVariable<Func<double, double, double, double, IEnumerable>>(
 							"CalculateMetric");
-			Console.WriteLine(
+            Console.WriteLine("metrics : " + new FileInfo(metricsFilePath).Name);
+            Console.WriteLine(
 					"risk, executedAndPassedCount / passedCount, executedAndFailedCount / failedCount");
 			foreach (var stmt in covInfo.StatementIndexAndTargets) {
 				var passedTestCases = testInfo.TestCases.Where(t => t.Passed);
@@ -363,33 +374,56 @@ namespace Occf.Tools.Cui {
         }
 
         public static void CsvWriter(DirectoryInfo csvDir, List<BLElement> blElements) {
-           
+
+            const string fileHeadder = "/OccfBL_";
+            const string fileType = ".csv";
+            const string lineOne = "startLine,endLine,P(all),P(exe),F(all),F(exe)";
+            var orgFileNameStart = fileHeadder.Length - 1;
+            var orgFileNameLength = fileHeadder.Length + fileType.Length - 1;
+
             //ファイルの初期化
             var fileList = new List<string>();
             var fileInfos = new List<FileInfo>();
+
             foreach (var blElement in blElements) {
                 if (!fileList.Contains(blElement.FileName)) {
                     fileList.Add(blElement.FileName);
-                    fileInfos.Add(new FileInfo(csvDir.FullName + "/OccfBL_" + blElement.FileName + ".csv"));
+                    fileInfos.Add(new FileInfo(csvDir.FullName + fileHeadder + blElement.FileName + fileType));
                 }
             }
             
+            //重複解除 上で重複しないかな？
+            /*
+            for (var i = fileInfos.Count - 1; i >= 0; i--) {
+                for (var j = i - 1; j >= 0; j--) {
+                    if (fileInfos[i].FullName == fileInfos[j].FullName) {
+                        fileInfos.Remove(fileInfos[i]);
+                        break;
+                    }
+                }
+            }*/
+
             foreach (var fileInfo in fileInfos) {
                 using (var writer = new StreamWriter(fileInfo.FullName, false)) {
-                    writer.WriteLine(fileInfo.Name.Substring(7, fileInfo.Name.Length-11));
-                    writer.WriteLine("startLine,endLine,P(all),P(exe),F(all),F(exe)");
+                    writer.WriteLine(fileInfo.Name.Substring(orgFileNameStart, orgFileNameLength));
+                    writer.WriteLine(lineOne);
                     writer.Close();
+                    Console.WriteLine("create csv file : " + fileInfo.Name);
                 }
             }
 
             foreach (var blElement in blElements) {
-                using (var writer = new StreamWriter(csvDir.FullName + "/OccfBL_" + blElement.FileName + ".csv", true)){
+                using (var writer = new StreamWriter(csvDir.FullName + fileHeadder + blElement.FileName + fileType, true)){
                     writer.WriteLine(blElement.CsvString());
                     writer.Close();
                 }
             }
 
-            Console.WriteLine("wrote csv file");
+            if (!fileInfos.Any()) {
+                Console.WriteLine("didn't create csv file");
+                Console.WriteLine("There was no data to create csv file");
+            }
+            
         }
 
 		//private static IEnumerable<double> CalculateMetric(

@@ -32,27 +32,29 @@ using Paraiba.IO;
 namespace Occf.Tools.Cui {
 	public class KleeBugLocalizer {
 		private const string S = "  ";
-		private const int W = 20;
+		private const int W = 23;
 
 		private static readonly string Usage =
 				Program.Header +
 						"" + "\n" +
 						"Usage: Occf klee -r <root_dir> -t <test_dir> [options]" + "\n" +
 						"" + "\n" +
-						S + "-r -root<root_dir>".PadRight(W) 
-						+ "a path of a directory containing '.occf_coverage_info'"
-						+ "\n" +
+						S + "-r -root <root_dir>".PadRight(W) 
+						+ "a path of a directory containing " + "\n" +
+                        S + "".PadRight(W) + "\".occf_coverage_info\"." + "\n" +
 						S + "-t -test <test_dir>".PadRight(W) 
-						+ "a path of klee test directory" + "\n" +
+						+ "a path of klee test directory." + "\n" +
 						S + "-m -metrics <metrics>".PadRight(W)
-						+ "type of metrics of fault localization."+ "\n" + 
-						S + "".PadRight(W) + "tar[antura], och[iai], jac[card] or rus[sell]"
+						+ "type of metrics of fault localization."+ "\n" +
+                        S + "".PadRight(W) + "Python script file in the \"metrics\" directory." + "\n" +
+                        S + "".PadRight(W) + "default:Tarantura[.py], Ochiai[.py], Jaccard[.py]" + "\n" +
+                        S + "".PadRight(W) + "       :Russell[.py] or SBI[.py]."
+                        + "\n" +
+						S + "-v -csv <out_dir>".PadRight(W)
+						+ "path of the directory for csv file for output." 
 						+ "\n" +
-						S + "-v -csv <output_csv_dir>".PadRight(W)
-						+ "path of the directory for csv file for output" 
-						+ "\n" +
-						S + "-u -success <successfull_csvfile_path>".PadRight(W)
-						+ "path of the successfull csv file"
+						S + "-u -success <csv_path>".PadRight(W)
+						+ "path of the successfull csv file."
 						+ "\n" +
 						"";
 
@@ -108,7 +110,10 @@ namespace Occf.Tools.Cui {
 								"test directory doesn't exist.\ntest:" + testDir.FullName);
 			}
 
-			var metricsFileName = "BugLocalization.py";
+            const string metricsDirName = "metrics";
+            const string fileDelimiter = "/";
+
+            var metricsFilePath = metricsDirName + fileDelimiter + "BugLocalization.py";
 			if (!string.IsNullOrEmpty(metricsType)) {
 				//裏短縮コード
 				switch (metricsType){
@@ -124,19 +129,22 @@ namespace Occf.Tools.Cui {
 					case "rus":
 						metricsType = "Russell.py";
 						break;
+                    case "sbi":
+                        metricsType = "SBI.py";
+                        break;
 				}
 
 				if (!metricsType.EndsWith(".py")){
 					metricsType += ".py";
 				}
 
-				metricsFileName = metricsType;
-				var metricsFileInfo = new FileInfo(metricsType);
+                metricsFilePath = metricsDirName + fileDelimiter + metricsType;
+				var metricsFileInfo = new FileInfo(metricsFilePath);
 				if (!metricsFileInfo.Exists){
-					Console.WriteLine("Error: not find \"" + metricsFileName + "\"");
+					Console.WriteLine("Error: not find \"" + metricsFilePath + "\"");
 					Console.WriteLine("Path: " + metricsFileInfo.FullName);
-					Console.WriteLine("chage default file");
-					metricsFileName = "BugLocalization.py";
+                    metricsFilePath = metricsDirName + fileDelimiter + "BugLocalization.py";
+                    Console.WriteLine("chage default file : " + metricsFilePath);
 				}
 			}
 
@@ -160,12 +168,12 @@ namespace Occf.Tools.Cui {
 				}
 			}
 
-			Localize(rootDir, testDir, metricsFileName, csvDir, passFile);
+			Localize(rootDir, testDir, metricsFilePath, csvDir, passFile);
 			return true;
 		}
 
 		private static void Localize(DirectoryInfo rootDir, DirectoryInfo testDir, 
-									 string metricsFileName, DirectoryInfo csvDir,
+									 string metricsFilePath, DirectoryInfo csvDir,
 									 FileInfo passFile) {
 
 			var formatter = new BinaryFormatter();
@@ -188,7 +196,7 @@ namespace Occf.Tools.Cui {
 				Console.WriteLine("\"" + OccfNames.LineMapping + "\" file is not found.");
 			}
 			
-			BugLocalizer.LocalizeStatements(testInfo, covInfo, lineDic, metricsFileName);
+			BugLocalizer.LocalizeStatements(testInfo, covInfo, lineDic, metricsFilePath);
 
 			if (csvDir != null) {
 				BugLocalizer.LocalizeStatementsCsv(csvDir, testInfo, covInfo, lineDic);

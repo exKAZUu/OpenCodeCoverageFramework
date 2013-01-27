@@ -29,7 +29,7 @@ namespace Occf.Tools.Cui {
 
     public class LineInserter {
         private const string S = "  ";
-        private const int W = 22;
+        private const int W = 24;
 
         private static readonly string Usage = 
             Program.Header +
@@ -38,17 +38,17 @@ namespace Occf.Tools.Cui {
             + "\n" +
             "" + "\n" +
             S + "-s, -srcdir <src_dir>".PadRight(W)
-            + "path of the root directory of the sou rce that have to " 
-            + "\n" + S + "".PadRight(W) + "line inserted."
+            + "path of the root directory of the sou rce that have"
+            + "\n" + S + "".PadRight(W) + "to line inserted."
             + "\n" +
             S + "-t, -test <test_dir>".PadRight(W) 
-            + "path of test code directory" + "\n" +
+            + "path of test code directory." + "\n" +
             S + "-p, -pattern <name>".PadRight(W)
             + "search pattern for exploring target source files "
-            + "\n" + S + "".PadRight(W) + "in the src_dir" 
+            + "\n" + S + "".PadRight(W) + "in the src_dir." 
             + "\n" +
             S + "-e, -encode <code_name>".PadRight(W)
-            + "code-page name. ex:EUC-JP, default:UTF-8" + "\n" +
+            + "code-page name. ex:EUC-JP, default:UTF-8." + "\n" +
             S + "<file_path>".PadRight(W)
             + "file path when you want to specify the file directly." 
             + "\n\n" +

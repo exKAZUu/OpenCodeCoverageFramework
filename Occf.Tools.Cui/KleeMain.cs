@@ -34,12 +34,12 @@ namespace Occf.Tools.Cui {
 						"Usage: Occf klee_main -r <root_dir> <main_file_path> [<main_file_path>]" + "\n" +
 						"" + "\n" +
 						S + "-r, -root <root>".PadRight(W)
-						+ "path of root directory (including source and test code)" + "\n" +
+						+ "path of root directory. (including source and test code)" + "\n" +
                         S + "-l, -lib <lib>".PadRight(W)
-                        + "insert include \"stdlib\" and \"stdio\" " + "\n" +
+                        + "insert include \"stdlib\" and \"stdio\"." + "\n" +
                         S + "".PadRight(W) + " <lib> : \"lib\" is stdlib, \"io\" is stdio, \"all\" is both." + "\n" +
                         S + "<main_file_path>".PadRight(W)
-						+ "path of main file of execute klee tests" + "\n" +
+						+ "path of main file of execute klee tests." + "\n" +
 						"";
 
 		public static bool Run(IList<string> args) {
