@@ -154,7 +154,7 @@ namespace Occf.Tools.Cui {
 
                 metricsFilePath = metricsDirName + fileDelimiter + metricsType;
                 var metricsFileInfo = new FileInfo(metricsFilePath);
-                if (metricsFileInfo.Exists) {
+                if (!metricsFileInfo.Exists) {
                     Console.WriteLine("Error: not find \"" + metricsFilePath + "\"");
                     Console.WriteLine("Path: " + metricsFileInfo.FullName);
                     metricsFilePath = metricsDirName + fileDelimiter + "BugLocalization.py";
@@ -283,7 +283,9 @@ namespace Occf.Tools.Cui {
 				}
 
 				if (orgLineNumFlag) {
-					Console.WriteLine(tag.PadRight(45) + ": " + metricsString);
+					//Console.WriteLine(tag.PadRight(45) + ": " + metricsString);
+                    Console.WriteLine(tag.PadRight(55) + ": " + metricsString);
+
 				}
 			}
 		}
