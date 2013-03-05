@@ -62,9 +62,11 @@ namespace Occf.Core.Manipulators.Analyzers {
 		/// </summary>
 		/// <param name="statement">The root element where start to find elements.</param>
 		/// <returns>The selected xml element.</returns>
-		public virtual XElement GetBaseElementForStatement(XElement statement) {
+		/*
+        public virtual XElement GetBaseElementForStatement(XElement statement) {
 			return statement;
 		}
+        */
 
 		/// <summary>
 		/// Returns xml elements indicating variable initializers.

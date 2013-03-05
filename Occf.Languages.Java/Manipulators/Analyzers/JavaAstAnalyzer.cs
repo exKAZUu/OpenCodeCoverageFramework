@@ -62,7 +62,7 @@ namespace Occf.Languages.Java.Manipulators.Analyzers {
 								return true;
 							});
 		}
-
+        /*
 		public override XElement GetBaseElementForStatement(XElement statement) {
 			var val = statement.FirstElement().Value;
 			if (val == "if" || val == "while" || val == "do") {
@@ -70,6 +70,7 @@ namespace Occf.Languages.Java.Manipulators.Analyzers {
 			}
 			return statement;
 		}
+        */
 
 		public override IEnumerable<XElement> FindVariableInitializers(XElement root) {
 			return Enumerable.Empty<XElement>();
