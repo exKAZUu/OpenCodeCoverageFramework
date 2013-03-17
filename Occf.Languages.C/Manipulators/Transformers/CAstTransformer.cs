@@ -53,7 +53,11 @@ namespace Occf.Languages.C.Manipulators.Transformers {
 			target.AddFirst(ast);
 		}
 
-		public override void SupplementDefaultCase(XElement root) {
+	    public override void SupplementBlock(XElement root) {
+            SupplementBlock(root, "block", "{", "}");
+        }
+
+	    public override void SupplementDefaultCase(XElement root) {
 			var targets = GetLackingDefaultCaseNodes(root);
 			foreach (var target in targets) {
 				var node = CCodeToXml.Instance.Generate(

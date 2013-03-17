@@ -1,6 +1,6 @@
 ﻿#region License
 
-// Copyright (C) 2009-2012 Kazunori Sakamoto
+// Copyright (C) 2009-2013 Kazunori Sakamoto
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -32,91 +32,97 @@ using Occf.Languages.Java.Manipulators.Taggers;
 using Paraiba.Xml.Linq;
 
 namespace Occf.Languages.Java.Manipulators.Transformers {
-	public class JavaAstTransformer : AntlrAstTransformer<JavaParser> {
-		protected override string MethodPrefix {
-			get { return "jp.ac.waseda.cs.washi.CoverageWriter."; }
-		}
+    public class JavaAstTransformer : AntlrAstTransformer<JavaParser> {
+        protected override string MethodPrefix {
+            get { return "jp.ac.waseda.cs.washi.CoverageWriter."; }
+        }
 
-		protected override AntlrCodeToXml<JavaParser> CodeToXml {
-			get { return JavaCodeToXml.Instance; }
-		}
+        protected override AntlrCodeToXml<JavaParser> CodeToXml {
+            get { return JavaCodeToXml.Instance; }
+        }
 
-		protected override XmlToCode XmlToCode {
-			get { return JavaXmlToCode.Instance; }
-		}
+        protected override XmlToCode XmlToCode {
+            get { return JavaXmlToCode.Instance; }
+        }
 
-		protected override Func<JavaParser, XAstParserRuleReturnScope>
-			ParseStatementFunc {
-			get { return p => p.statement(); }
-		}
+        protected override Func<JavaParser, XAstParserRuleReturnScope> ParseStatementFunc {
+            get { return p => p.statement(); }
+        }
 
-		public override void InsertImport(XElement target) {}
+        public override void InsertImport(XElement target) {}
 
-		public override void SupplementDefaultCase(XElement root) {
-			var targets = GetLackingDefaultCaseNodes(root);
-			foreach (var target in targets) {
-				var node = JavaCodeToXml.Instance.GenerateWithoutPosition(
-						"default:", p => p.switchBlockStatementGroup());
-				target.AddAfterSelf(node);
-			}
-		}
+        public override void SupplementBlock(XElement root) {
+            SupplementBlock(root, "block", "{", "}");
+        }
 
-		private IEnumerable<XElement> GetLackingDefaultCaseNodes(XElement root) {
-			foreach (var switchNode in JavaAstAnalyzer.Instance.FindSwitches(root)) {
-				// ケース文がないときは分岐していないと見なす
-				var last = JavaAstAnalyzer.Instance.FindCaseLabelTails(switchNode).LastOrDefault();
-				if (last != null && last.Parent.FirstElement().Value != "default") {
-					yield return last.Parent.Parent;
-				}
-			}
-		}
+        public override void SupplementDefaultCase(XElement root) {
+            var targets = FindLackingDefaultCaseNodes(root);
+            foreach (var target in targets) {
+                //var node = JavaCodeToXml.Instance.GenerateWithoutPosition(
+                //        "default:", p => p.switchBlockStatementGroup());
+                target.AddAfterSelf(new XElement("TOKEN", "default:"));
+            }
+        }
 
-		public override void SupplementDefaultConstructor(XElement root) {
-			throw new NotImplementedException();
-		}
+        private static IEnumerable<XElement> FindLackingDefaultCaseNodes(XElement root) {
+            foreach (var switchNode in JavaAstAnalyzer.Instance.FindSwitches(root)) {
+                // ケース文がないときは分岐していないと見なす
+                var last = JavaAstAnalyzer.Instance.FindCaseLabelTails(switchNode).LastOrDefault();
+                if (last != null && last.Parent.FirstElement().Value != "default") {
+                    yield return last.Parent.Parent;
+                }
+            }
+        }
 
-		public override TestCase InsertTestCaseId(
-				XElement target, long id, string relativePath) {
-			var testCase = new TestCase(
-					relativePath, string.Join(".", JavaTagger.GetTag(target)), target);
-			var blockElement = target.Element("block").NthElement(1);
-			var code = CreateTestCaseIdentifierCode(target, id, 2, ElementType.TestCase);
-			var node = JavaCodeToXml.Instance.GenerateWithoutPosition(code, p => p.statement());
-			if (blockElement.Name.LocalName == "blockStatement") {
-				blockElement.AddFirst(node);
-			} else {
-				blockElement.AddBeforeSelf(node);
-			}
-			return testCase;
-		}
+        public override void SupplementDefaultConstructor(XElement root) {
+            throw new NotImplementedException();
+        }
 
-		protected override IEnumerable<XElement> GetLackingBlockNodes(XElement root) {
-			var methods = root.Descendants("methodDeclaration")
-					.Where(e => e.Elements().Any(e2 => e2.Value == "void"))
-					.Select(e => e.Element("block"))
-					.Where(e => e != null)
-					.Where(
-							e =>
-									!(e.Descendants("statement").Any()
-											&& e.Descendants("statement").Last().FirstElement().Value == "throw"))
-					.Select(e => e.LastElement());
-			var node = JavaCodeToXml.Instance.GenerateWithoutPosition("return;", p => p.statement());
-			foreach (var method in methods) {
-				method.AddBeforeSelf(node);
-			}
+        public override TestCase InsertTestCaseId(XElement target, long id, string relativePath) {
+            var testCase = new TestCase(
+                    relativePath, string.Join(".", JavaTagger.GetTag(target)), target);
+            var blockElement = target.Element("block").NthElement(1);
+            var code = CreateTestCaseIdentifierCode(target, id, 2, ElementType.TestCase);
+            var node = JavaCodeToXml.Instance.GenerateWithoutPosition(code, p => p.statement());
+            if (blockElement.Name.LocalName == "blockStatement") {
+                blockElement.AddFirst(node);
+            } else {
+                blockElement.AddBeforeSelf(node);
+            }
+            return testCase;
+        }
 
-			var ifs = JavaElements.If(root)
-					.SelectMany(JavaElements.IfAndElseProcesses);
-			var whiles = JavaElements.While(root)
-					.Select(JavaElements.WhileProcess);
-			var dos = JavaElements.DoWhile(root)
-					.Select(JavaElements.DoWhileProcess);
-			var fors = JavaElements.For(root)
-					.Select(JavaElements.ForProcess);
+        protected override IEnumerable<XElement> GetLackingBlockNodes(XElement root) {
+            SupplementEmptyMethod(root);
 
-			return ifs.Concat(whiles)
-					.Concat(dos)
-					.Concat(fors);
-		}
-	}
+            var ifs = JavaElements.If(root)
+                    .SelectMany(JavaElements.IfAndElseProcesses);
+            var whiles = JavaElements.While(root)
+                    .Select(JavaElements.WhileProcess);
+            var dos = JavaElements.DoWhile(root)
+                    .Select(JavaElements.DoWhileProcess);
+            var fors = JavaElements.For(root)
+                    .Select(JavaElements.ForProcess);
+
+            return ifs.Concat(whiles)
+                    .Concat(dos)
+                    .Concat(fors);
+        }
+
+        private static void SupplementEmptyMethod(XElement root) {
+            var methods = root.Descendants("methodDeclaration")
+                    .Where(e => e.Elements().Any(e2 => e2.Value == "void"))
+                    .Select(e => e.Element("block"))
+                    .Where(e => e != null)
+                    .Where(e => !(e.Descendants("statement").Any() && e.Descendants("statement")
+                                   .Last()
+                                   .FirstElement()
+                                   .Value == "throw"))
+                    .Select(e => e.LastElement());
+            var node = JavaCodeToXml.Instance.GenerateWithoutPosition("return;", p => p.statement());
+            foreach (var method in methods) {
+                method.AddBeforeSelf(node);
+            }
+        }
+    }
 }
