@@ -1,29 +1,29 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Occf.Writer.File", "Occf.Writer.File\Occf.Writer.File.vcxproj", "{ECBE9C7A-D39B-4CC8-885A-D8DEEFDE3F41}"
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Occf.Writer.Binary", "Occf.Writer\Binary\Occf.Writer.Binary.vcxproj", "{ECBE9C7A-D39B-4CC8-885A-D8DEEFDE3F41}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Occf.Writer.File.Java", "Occf.Writer.File.Java\Occf.Writer.File.Java.vcxproj", "{864B34DE-DC6E-403C-B50D-3B7844961E50}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Occf.Writer.Binary.Java", "Occf.Writer\Binary.Java\Occf.Writer.Binary.Java.vcxproj", "{864B34DE-DC6E-403C-B50D-3B7844961E50}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Occf.Writer.File.Python2", "Occf.Writer.File.Python2\Occf.Writer.File.Python2.vcxproj", "{57CCCAEE-0DE0-4834-A87B-D2A8ECB03488}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Occf.Writer.Binary.Python2", "Occf.Writer\Binary.Python2\Occf.Writer.Binary.Python2.vcxproj", "{57CCCAEE-0DE0-4834-A87B-D2A8ECB03488}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Occf.Writer.File.Python3", "Occf.Writer.File.Python3\Occf.Writer.File.Python3.vcxproj", "{1FF1091C-AF2F-4BC2-8355-7A2D949E1CFD}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Occf.Writer.Binary.Python3", "Occf.Writer\Binary.Python3\Occf.Writer.Binary.Python3.vcxproj", "{1FF1091C-AF2F-4BC2-8355-7A2D949E1CFD}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Occf.Writer.SharedMemory", "Occf.Writer.SharedMemory\Occf.Writer.SharedMemory.vcxproj", "{1E5606DB-49BA-4357-BCCA-EE456DCFED76}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Occf.Writer.SharedMemory", "Occf.Writer\SharedMemory\Occf.Writer.SharedMemory.vcxproj", "{1E5606DB-49BA-4357-BCCA-EE456DCFED76}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Occf.Writer.SharedMemory.Java", "Occf.Writer.SharedMemory.Java\Occf.Writer.SharedMemory.Java.vcxproj", "{D0AB20C5-4B83-4F39-BD81-96AC564DA274}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Occf.Writer.SharedMemory.Java", "Occf.Writer\SharedMemory.Java\Occf.Writer.SharedMemory.Java.vcxproj", "{D0AB20C5-4B83-4F39-BD81-96AC564DA274}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Occf.Writer.SharedMemory.Tests", "Occf.Writer.SharedMemory.Tests\Occf.Writer.SharedMemory.Tests.vcxproj", "{875F4399-44B9-402B-8D70-5B73E9C85F80}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Occf.Writer.SharedMemory.Tests", "Occf.Writer\SharedMemory.Tests\Occf.Writer.SharedMemory.Tests.vcxproj", "{875F4399-44B9-402B-8D70-5B73E9C85F80}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Occf.Writer.TcpIp", "Occf.Writer.TcpIp\Occf.Writer.TcpIp.vcxproj", "{FEC3657A-4F4C-4497-8D71-CAAC23C13A68}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Occf.Writer.TcpIp", "Occf.Writer\TcpIp\Occf.Writer.TcpIp.vcxproj", "{FEC3657A-4F4C-4497-8D71-CAAC23C13A68}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Occf.Writer.TcpIp.Java", "Occf.Writer.TcpIp.Java\Occf.Writer.TcpIp.Java.vcxproj", "{75F71507-A570-481F-9B0D-76B07B03BAC3}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Occf.Writer.TcpIp.Java", "Occf.Writer\TcpIp.Java\Occf.Writer.TcpIp.Java.vcxproj", "{75F71507-A570-481F-9B0D-76B07B03BAC3}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Occf.Writer.File.CSharp", "Occf.Writer.File.CSharp\Occf.Writer.File.CSharp.vcxproj", "{D383B733-A8A8-4E9B-AD4B-D5D27AC5E0C0}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Occf.Writer.Binary.CSharp", "Occf.Writer\Binary.CSharp\Occf.Writer.Binary.CSharp.vcxproj", "{D383B733-A8A8-4E9B-AD4B-D5D27AC5E0C0}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Occf.Writer.UM", "Occf.Writer.UM\Occf.Writer.UM.vcxproj", "{2AFD6FEC-F242-4550-8204-78E13A06423D}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Occf.Writer.Gaio", "Occf.Writer\Gaio\Occf.Writer.Gaio.vcxproj", "{2AFD6FEC-F242-4550-8204-78E13A06423D}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Occf.Writer.UM.Java", "Occf.Writer.UM.Java\Occf.Writer.UM.Java.vcxproj", "{4FBDB2D3-97C2-49B0-A93A-6E44BFC1FCE4}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Occf.Writer.Gaio.Java", "Occf.Writer\Gaio.Java\Occf.Writer.Gaio.Java.vcxproj", "{4FBDB2D3-97C2-49B0-A93A-6E44BFC1FCE4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

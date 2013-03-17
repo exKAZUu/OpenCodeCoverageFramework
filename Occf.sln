@@ -1,27 +1,27 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Occf.Core", "Occf.Core\Occf.Core.csproj", "{E2C3E1ED-7C87-4F50-9786-1CB9DA7FEB93}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Occf.Core.Tests", "Occf.Core.Tests\Occf.Core.Tests.csproj", "{22E6CAF5-7BD0-44E6-A329-687681AD6E28}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Occf.Languages.C", "Occf.Languages.C\Occf.Languages.C.csproj", "{172634B2-0681-4375-9AB3-A5AE7337F749}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Occf.Languages.C", "Occf.Languages\C\Occf.Languages.C.csproj", "{172634B2-0681-4375-9AB3-A5AE7337F749}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Occf.Languages.CSharp", "Occf.Languages.CSharp\Occf.Languages.CSharp.csproj", "{006CA6F6-EBFE-4E8C-BA6C-FE1603C170BB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Occf.Languages.CSharp", "Occf.Languages\CSharp\Occf.Languages.CSharp.csproj", "{006CA6F6-EBFE-4E8C-BA6C-FE1603C170BB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Occf.Languages.Java", "Occf.Languages.Java\Occf.Languages.Java.csproj", "{DC070D0A-F4E2-4105-8D49-960DD586EB50}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Occf.Languages.Java", "Occf.Languages\Java\Occf.Languages.Java.csproj", "{DC070D0A-F4E2-4105-8D49-960DD586EB50}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Occf.Languages.JavaScript", "Occf.Languages.JavaScript\Occf.Languages.JavaScript.csproj", "{021411E5-C5F1-4A61-8B0C-C3EFC5BCA8AE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Occf.Languages.JavaScript", "Occf.Languages\JavaScript\Occf.Languages.JavaScript.csproj", "{021411E5-C5F1-4A61-8B0C-C3EFC5BCA8AE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Occf.Languages.Lua", "Occf.Languages.Lua\Occf.Languages.Lua.csproj", "{9E9BE213-4B24-4109-881A-8829432F99AE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Occf.Languages.Lua", "Occf.Languages\Lua\Occf.Languages.Lua.csproj", "{9E9BE213-4B24-4109-881A-8829432F99AE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Occf.Languages.Python2", "Occf.Languages.Python2\Occf.Languages.Python2.csproj", "{D5FF289C-3716-46C5-B91C-BE8BCDD1A6E8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Occf.Languages.Python2", "Occf.Languages\Python2\Occf.Languages.Python2.csproj", "{D5FF289C-3716-46C5-B91C-BE8BCDD1A6E8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Occf.Languages.Python3", "Occf.Languages.Python3\Occf.Languages.Python3.csproj", "{347C239D-35F5-4A8E-95F6-A34E19897A12}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Occf.Languages.Python3", "Occf.Languages\Python3\Occf.Languages.Python3.csproj", "{347C239D-35F5-4A8E-95F6-A34E19897A12}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Occf.Languages.Ruby18", "Occf.Languages.Ruby18\Occf.Languages.Ruby18.csproj", "{CF794D12-ED2B-479A-B2DD-93C393117D09}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Occf.Languages.Ruby18", "Occf.Languages\Ruby18\Occf.Languages.Ruby18.csproj", "{CF794D12-ED2B-479A-B2DD-93C393117D09}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Occf.Languages.Tests", "Occf.Languages.Tests\Occf.Languages.Tests.csproj", "{6655BFF7-4177-4D7D-A323-3990CD326ED5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Occf.Languages.Tests", "Occf.Languages\Tests\Occf.Languages.Tests.csproj", "{6655BFF7-4177-4D7D-A323-3990CD326ED5}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Occf.Reader.SharedMemory", "Occf.Reader.SharedMemory\Occf.Reader.SharedMemory.vcxproj", "{928CB557-3ABC-4E64-9952-4C990895E624}"
 EndProject
@@ -45,9 +45,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{89BCD5
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Occf.Languages.Cpp", "Occf.Languages.Cpp\Occf.Languages.Cpp.csproj", "{C812C6C8-660F-4FFF-87AA-2A9514542FD0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Occf.Languages.Cpp", "Occf.Languages\Cpp\Occf.Languages.Cpp.csproj", "{C812C6C8-660F-4FFF-87AA-2A9514542FD0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Occf.Languages.Ruby19", "Occf.Languages.Ruby19\Occf.Languages.Ruby19.csproj", "{13EBDD1B-7B90-4941-A4EC-D4B1C5024CB4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Occf.Languages.Ruby19", "Occf.Languages\Ruby19\Occf.Languages.Ruby19.csproj", "{13EBDD1B-7B90-4941-A4EC-D4B1C5024CB4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

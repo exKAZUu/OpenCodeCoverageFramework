@@ -1,0 +1,8 @@
+LIBRARY Occf.Writer.Gaio.dll
+
+EXPORTS
+	Initialize
+	Release
+	WriteStatement
+	WritePredicate
+	WriteTestCase
