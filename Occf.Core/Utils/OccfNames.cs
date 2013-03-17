@@ -22,6 +22,7 @@ namespace Occf.Core.Utils {
 		public const string CoverageInfo = ".occf_coverage_info";
 		public const string TestInfo = ".occf_testcase_info";
 		public const string CoverageData = ".occf_coverage_data";
+		public const string RecordText = ".occf_record_text";
 		public const string SuccessfulTests = ".successful_tests";
 		public const string Library = "Library";
 		public const string LineBackUpSuffix = ".occf_line_back";
