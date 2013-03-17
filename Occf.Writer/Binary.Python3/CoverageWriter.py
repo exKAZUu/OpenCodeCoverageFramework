@@ -68,6 +68,10 @@ except AttributeError:
 
 
 
+def WriteTestCase(*args):
+  return _CoverageWriter.WriteTestCase(*args)
+WriteTestCase = _CoverageWriter.WriteTestCase
+
 def WriteStatement(*args):
   return _CoverageWriter.WriteStatement(*args)
 WriteStatement = _CoverageWriter.WriteStatement

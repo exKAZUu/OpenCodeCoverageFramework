@@ -74,7 +74,7 @@ namespace Occf.Tools.Cui {
 			var libDirPath = "";
 			var patterns = new List<string>();
 
-			// parse options
+			// Set an option grammar
 			var p = new OptionSet {
 					{ "r|root=", v => rootDirPath = v },
 					{ "t|test=", v => testDirPath = v },
@@ -83,7 +83,7 @@ namespace Occf.Tools.Cui {
 					{ "p|pattern=", patterns.Add },
 			};
 
-			// コマンドをパース "-"指定されないのだけargs[]に残る
+            // Parse optoins and return arguments excluding parsed options such as "-r root"
 			try {
 				args = p.Parse(args);
 			} catch {
@@ -163,7 +163,7 @@ namespace Occf.Tools.Cui {
 					.Where(fi => !fi.FullName.EndsWith(OccfNames.KleeBackUpSuffix))
 					.Where(fi => !fi.FullName.EndsWith(OccfNames.BackupSuffix));
 
-			// Avoid a duplication
+			// Avoid duplications
 			return fileInfos.ToDictionary(fi => fi.FullName).Values;
 		}
 

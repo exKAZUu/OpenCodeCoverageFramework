@@ -21,4 +21,4 @@ public class CoverageWriter {
     return CoverageWriterJNI.WritePredicate(id, type, value);
   }
 
-}
+static { System.loadLibrary("Occf.Writer.SharedMemory.Java"); }}

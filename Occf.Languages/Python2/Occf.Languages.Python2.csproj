@@ -176,7 +176,7 @@
       <Project>{E2C3E1ED-7C87-4F50-9786-1CB9DA7FEB93}</Project>
       <Name>Occf.Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Occf.Languages.Python3\Occf.Languages.Python3.csproj">
+    <ProjectReference Include="..\Python3\Occf.Languages.Python3.csproj">
       <Project>{347C239D-35F5-4A8E-95F6-A34E19897A12}</Project>
       <Name>Occf.Languages.Python3</Name>
     </ProjectReference>

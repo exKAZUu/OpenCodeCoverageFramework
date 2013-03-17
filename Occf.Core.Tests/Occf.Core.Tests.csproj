@@ -44,35 +44,35 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Occf.Languages.CSharp\Occf.Languages.CSharp.csproj">
+    <ProjectReference Include="..\Occf.Languages\CSharp\Occf.Languages.CSharp.csproj">
       <Project>{006CA6F6-EBFE-4E8C-BA6C-FE1603C170BB}</Project>
       <Name>Occf.Languages.CSharp</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Occf.Languages.C\Occf.Languages.C.csproj">
+    <ProjectReference Include="..\Occf.Languages\C\Occf.Languages.C.csproj">
       <Project>{172634B2-0681-4375-9AB3-A5AE7337F749}</Project>
       <Name>Occf.Languages.C</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Occf.Languages.JavaScript\Occf.Languages.JavaScript.csproj">
+    <ProjectReference Include="..\Occf.Languages\JavaScript\Occf.Languages.JavaScript.csproj">
       <Project>{021411E5-C5F1-4A61-8B0C-C3EFC5BCA8AE}</Project>
       <Name>Occf.Languages.JavaScript</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Occf.Languages.Java\Occf.Languages.Java.csproj">
+    <ProjectReference Include="..\Occf.Languages\Java\Occf.Languages.Java.csproj">
       <Project>{DC070D0A-F4E2-4105-8D49-960DD586EB50}</Project>
       <Name>Occf.Languages.Java</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Occf.Languages.Lua\Occf.Languages.Lua.csproj">
+    <ProjectReference Include="..\Occf.Languages\Lua\Occf.Languages.Lua.csproj">
       <Project>{9E9BE213-4B24-4109-881A-8829432F99AE}</Project>
       <Name>Occf.Languages.Lua</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Occf.Languages.Python2\Occf.Languages.Python2.csproj">
+    <ProjectReference Include="..\Occf.Languages\Python2\Occf.Languages.Python2.csproj">
       <Project>{D5FF289C-3716-46C5-B91C-BE8BCDD1A6E8}</Project>
       <Name>Occf.Languages.Python2</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Occf.Languages.Python3\Occf.Languages.Python3.csproj">
+    <ProjectReference Include="..\Occf.Languages\Python3\Occf.Languages.Python3.csproj">
       <Project>{347C239D-35F5-4A8E-95F6-A34E19897A12}</Project>
       <Name>Occf.Languages.Python3</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Occf.Languages.Ruby18\Occf.Languages.Ruby18.csproj">
+    <ProjectReference Include="..\Occf.Languages\Ruby18\Occf.Languages.Ruby18.csproj">
       <Project>{CF794D12-ED2B-479A-B2DD-93C393117D09}</Project>
       <Name>Occf.Languages.Ruby18</Name>
     </ProjectReference>

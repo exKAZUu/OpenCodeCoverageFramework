@@ -171,7 +171,7 @@
       <Project>{E2C3E1ED-7C87-4F50-9786-1CB9DA7FEB93}</Project>
       <Name>Occf.Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Occf.Languages.Java\Occf.Languages.Java.csproj">
+    <ProjectReference Include="..\Occf.Languages\Java\Occf.Languages.Java.csproj">
       <Project>{DC070D0A-F4E2-4105-8D49-960DD586EB50}</Project>
       <Name>Occf.Languages.Java</Name>
     </ProjectReference>
