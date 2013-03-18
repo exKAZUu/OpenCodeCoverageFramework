@@ -25,7 +25,7 @@ namespace Occf.Core.TestInformation {
 	[Serializable]
 	public class TestCase {
 		public TestCase(string relativePath, string name, XElement node)
-				: this(relativePath, name, CodePositions.New(node)) {}
+				: this(relativePath, name, CodePositions.Create(node)) {}
 
 		public TestCase(string relativePath, string name, CodePosition pos) {
 			RelativePath = relativePath;

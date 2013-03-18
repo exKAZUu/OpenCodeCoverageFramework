@@ -121,7 +121,7 @@ namespace Occf.Core.Manipulators.Transformers {
 			var funcs = analyzer.FindFunctions(root);
 			foreach (var func in funcs) {
 				var funcName = analyzer.GetFunctionName(func);
-				var funcId = RegisterFunction(fileId, funcName, CodePositions.New(func));
+				var funcId = RegisterFunction(fileId, funcName, CodePositions.Create(func));
 
 				InstrumentStatement(support, fileId, funcId, inserter, func);
 				InstrumentBranch(support, fileId, funcId, inserter, func);
@@ -137,7 +137,7 @@ namespace Occf.Core.Manipulators.Transformers {
 				LanguageSupport support, long fileId, long funcId, AstTransformer inserter, XElement func) {
 			var stmts = support.AstAnalyzer.FindStatements(func);
 			foreach (var stmt in stmts) {
-				var position = CodePositions.New(stmt);
+				var position = CodePositions.Create(stmt);
 				var stmtId = RegisterStatement(fileId, funcId, position);
 				inserter.InsertStatementBefore(stmt, stmtId, CodeTransformer.Done, ElementType.Statement);
 			}
@@ -147,7 +147,7 @@ namespace Occf.Core.Manipulators.Transformers {
 				LanguageSupport support, long fileId, long funcId, AstTransformer inserter, XElement func) {
 			var branches = support.AstAnalyzer.FindBranches(func);
 			foreach (var branch in branches) {
-				var position = CodePositions.New(branch);
+				var position = CodePositions.Create(branch);
 				var branchId = RegisterBranch(fileId, funcId, position);
 				inserter.InsertPredicate(branch, branchId, ElementType.Decision);
 			}
