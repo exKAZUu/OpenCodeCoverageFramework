@@ -24,10 +24,6 @@ using Occf.Core.Utils;
 
 namespace Occf.Languages.Tests.Python2 {
 	public class Python2InstrumentationCodeInsertionTest {
-		public Python2InstrumentationCodeInsertionTest() {
-			OccfGlobal.SaveCurrentState();
-		}
-
 		private static IEnumerable<TestCaseData> TestCases {
 			get {
 				var names = new[] {

@@ -7,7 +7,7 @@ public class CoverageWriter {
 	private static PrintStream writer;
 	static {
 		try {
-			writer = new PrintStream(".occf_record_text");
+			writer = new PrintStream(".occf_record");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

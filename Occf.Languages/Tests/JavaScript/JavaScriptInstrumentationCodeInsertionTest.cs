@@ -24,10 +24,6 @@ using Occf.Core.Utils;
 
 namespace Occf.Languages.Tests.JavaScript {
 	public class JavaScriptInstrumentationCodeInsertionTest {
-		public JavaScriptInstrumentationCodeInsertionTest() {
-			OccfGlobal.SaveCurrentState();
-		}
-
 		private static IEnumerable<TestCaseData> TestCases {
 			get {
 				var names = new[] {

@@ -25,10 +25,6 @@ using Occf.Core.Utils;
 namespace Occf.Languages.Tests.Java {
 	[TestFixture]
 	public class JavaInstrumentationCodeInsertionTest {
-		public JavaInstrumentationCodeInsertionTest() {
-			OccfGlobal.SaveCurrentState();
-		}
-
 		private static IEnumerable<TestCaseData> TestCases {
 			get {
 				var names = new[] {

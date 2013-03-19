@@ -35,15 +35,15 @@
   <ItemGroup>
     <Reference Include="nunit.framework, Version=2.6.2.12296, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\NUnit.2.6.2\lib\nunit.framework.dll</HintPath>
+      <HintPath>..\..\packages\NUnit.2.6.2\lib\nunit.framework.dll</HintPath>
     </Reference>
     <Reference Include="Paraiba, Version=1.1.0.90, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Paraiba.1.1.0.90\lib\net40\Paraiba.dll</HintPath>
+      <HintPath>..\..\packages\Paraiba.1.1.0.90\lib\net40\Paraiba.dll</HintPath>
     </Reference>
     <Reference Include="Paraiba.Experiment, Version=1.1.0.42, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Paraiba.Experiment.1.1.0.42\lib\net40\Paraiba.Experiment.dll</HintPath>
+      <HintPath>..\..\packages\Paraiba.Experiment.1.1.0.42\lib\net40\Paraiba.Experiment.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -60,15 +60,55 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Occf.Core.Tests\Occf.Core.Tests.csproj">
+    <ProjectReference Include="..\..\Occf.Core.Tests\Occf.Core.Tests.csproj">
       <Project>{22E6CAF5-7BD0-44E6-A329-687681AD6E28}</Project>
       <Name>Occf.Core.Tests</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Occf.Core\Occf.Core.csproj">
+    <ProjectReference Include="..\..\Occf.Core\Occf.Core.csproj">
       <Project>{E2C3E1ED-7C87-4F50-9786-1CB9DA7FEB93}</Project>
       <Name>Occf.Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Occf.Tools.Cui\Occf.Tools.Cui.csproj">
+    <ProjectReference Include="..\..\Occf.Languages\Cpp\Occf.Languages.Cpp.csproj">
+      <Project>{c812c6c8-660f-4fff-87aa-2a9514542fd0}</Project>
+      <Name>Occf.Languages.Cpp</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Occf.Languages\CSharp\Occf.Languages.CSharp.csproj">
+      <Project>{006ca6f6-ebfe-4e8c-ba6c-fe1603c170bb}</Project>
+      <Name>Occf.Languages.CSharp</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Occf.Languages\C\Occf.Languages.C.csproj">
+      <Project>{172634b2-0681-4375-9ab3-a5ae7337f749}</Project>
+      <Name>Occf.Languages.C</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Occf.Languages\JavaScript\Occf.Languages.JavaScript.csproj">
+      <Project>{021411e5-c5f1-4a61-8b0c-c3efc5bca8ae}</Project>
+      <Name>Occf.Languages.JavaScript</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Occf.Languages\Java\Occf.Languages.Java.csproj">
+      <Project>{dc070d0a-f4e2-4105-8d49-960dd586eb50}</Project>
+      <Name>Occf.Languages.Java</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Occf.Languages\Lua\Occf.Languages.Lua.csproj">
+      <Project>{9e9be213-4b24-4109-881a-8829432f99ae}</Project>
+      <Name>Occf.Languages.Lua</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Occf.Languages\Python2\Occf.Languages.Python2.csproj">
+      <Project>{d5ff289c-3716-46c5-b91c-be8bcdd1a6e8}</Project>
+      <Name>Occf.Languages.Python2</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Occf.Languages\Python3\Occf.Languages.Python3.csproj">
+      <Project>{347c239d-35f5-4a8e-95f6-a34e19897a12}</Project>
+      <Name>Occf.Languages.Python3</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Occf.Languages\Ruby18\Occf.Languages.Ruby18.csproj">
+      <Project>{cf794d12-ed2b-479a-b2dd-93c393117d09}</Project>
+      <Name>Occf.Languages.Ruby18</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Occf.Languages\Ruby19\Occf.Languages.Ruby19.csproj">
+      <Project>{13ebdd1b-7b90-4941-a4ec-d4b1c5024cb4}</Project>
+      <Name>Occf.Languages.Ruby19</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Cui\Occf.Tools.Cui.csproj">
       <Project>{F9555428-0420-42F6-BE6B-54991A52F8C9}</Project>
       <Name>Occf.Tools.Cui</Name>
     </ProjectReference>

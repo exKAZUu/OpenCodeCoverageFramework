@@ -25,8 +25,6 @@ using Occf.Core.Utils;
 namespace Occf.Sample {
 	internal class Program {
 		private static void Main(string[] args) {
-			OccfGlobal.SaveCurrentState();
-
 			var outDirInfo = new DirectoryInfo(@"C:\coverage");
 			var inputDirInfo =
 					new DirectoryInfo(
@@ -55,7 +53,7 @@ namespace Occf.Sample {
 					instrumenter.CopyFile(fileInfo);
 				}
 			}
-			profile.CopyLibraries(instrumenter.OutDirInfo);
+			profile.CopyLibraries(instrumenter.OutDirInfo, RecordingMode.TextFile);
 		}
 	}
 }

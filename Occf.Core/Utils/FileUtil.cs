@@ -29,12 +29,12 @@ namespace Occf.Core.Utils {
 			return GetFile(dirInfo, OccfNames.TestInfo);
 		}
 
-		public static FileInfo GetCoverageData(
+		public static FileInfo GetCoverageRecord(
 				FileInfo covFileInfo, DirectoryInfo rootDirInfo) {
 			if (covFileInfo.SafeExists()) {
 				return covFileInfo;
 			}
-			return GetFile(rootDirInfo, OccfNames.CoverageData);
+			return GetFile(rootDirInfo, OccfNames.Record);
 		}
 
 		private static FileInfo GetFile(DirectoryInfo dirInfo, string relativePath) {

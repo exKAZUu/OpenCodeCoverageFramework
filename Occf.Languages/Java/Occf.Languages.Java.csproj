@@ -184,6 +184,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Library\CoverageWriter.File.jar" />
+    <Content Include="Library\CoverageWriter.Text.jar" />
     <Content Include="Library\CoverageWriter.UM.jar" />
     <Content Include="Library\junit-4.8.2.jar" />
     <Content Include="Library\Occf.Writer.File.Java.x64.dll" />

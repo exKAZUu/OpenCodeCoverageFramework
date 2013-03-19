@@ -1,6 +1,6 @@
 ﻿#region License
 
-// Copyright (C) 2009-2012 Kazunori Sakamoto
+// Copyright (C) 2012-2013 Kiyofumi Shimojo
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -195,11 +195,13 @@ namespace Occf.Tools.Cui {
 			} else {
 				Console.WriteLine("\"" + OccfNames.LineMapping + "\" file is not found.");
 			}
-			
-			BugLocalizer.LocalizeStatements(testInfo, covInfo, lineDic, metricsFilePath);
+
+		    var localizeStatements = BugLocalizer.LocalizeStatements(covInfo, testInfo, metricsFilePath)
+                .ToList();
+		    BugLocalizer.ShowLocalizeStatements(localizeStatements, lineDic, metricsFilePath);
 
 			if (csvDir != null) {
-				BugLocalizer.LocalizeStatementsCsv(csvDir, testInfo, covInfo, lineDic);
+				BugLocalizer.LocalizeStatementsCsv(csvDir, localizeStatements, lineDic);
 			}
 		}
 
@@ -212,7 +214,7 @@ namespace Occf.Tools.Cui {
 				var testCase = new TestCase(relativePath, file.FullName, new CodePosition());
 				testInfo.TestCases.Add(testCase);
 				testCase.InitializeForStoringData(false);
-				var dataPath = file.FullName + OccfNames.CoverageData;
+				var dataPath = file.FullName + OccfNames.Record;
 				CoverageDataReader.ReadFile(testInfo, dataPath, testCase);
 			}
 			return testInfo;

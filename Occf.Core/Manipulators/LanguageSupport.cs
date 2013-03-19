@@ -40,7 +40,7 @@ namespace Occf.Core.Manipulators {
 
 		public abstract Tagger Tagger { get; }
 
-		public abstract void CopyLibraries(DirectoryInfo outDirInfo);
+		public abstract void CopyLibraries(DirectoryInfo outDirInfo, RecordingMode recordingMode);
 		public abstract void RemoveLibraries(DirectoryInfo outDirInfo);
 	}
 }

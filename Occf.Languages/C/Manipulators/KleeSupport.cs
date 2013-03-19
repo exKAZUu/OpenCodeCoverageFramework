@@ -25,7 +25,7 @@ using Paraiba.IO;
 namespace Occf.Languages.C.Manipulators {
 	[Export(typeof(LanguageSupport))]
 	public class KleeSupport : CSupport {
-		public override void CopyLibraries(DirectoryInfo outDirInfo) {
+		public override void CopyLibraries(DirectoryInfo outDirInfo, RecordingMode recordingMode) {
 			ParaibaFile.WriteIfDifferentSize(
 					Path.Combine(outDirInfo.FullName, "covman.c"),
 					Resources.covman_klee_c);

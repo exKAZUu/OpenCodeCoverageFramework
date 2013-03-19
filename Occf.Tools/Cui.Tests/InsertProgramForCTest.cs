@@ -39,8 +39,6 @@ namespace Occf.Tools.Cui.Tests {
 		[Test]
 		[TestCase("Block1")]
 		public void InsertMeasurementCode(string projectName) {
-			OccfGlobal.SaveCurrentState();
-
 			var outDirPath = Fixture.CleanOuputPath();
 			var outDir = new DirectoryInfo(Fixture.CleanOuputPath());
 			var inDirPath = Fixture.GetProjectInputPath(projectName);
@@ -53,11 +51,8 @@ namespace Occf.Tools.Cui.Tests {
 		private static void VerifyMeasureAndLocalize(
 				string inDirPath, string expDirPath,
 				DirectoryInfo outDir, string outDirPath) {
-			// カレントディレクトリを途中で変更しても動作するか検証
-			Environment.CurrentDirectory = "C:\\";
-
 			var profile = LanguageSupports.GetCoverageModeByClassName("C");
-			Inserter.InsertMeasurementCode(outDir, new Collection<FileInfo>(), null, outDir, profile);
+			Inserter.InsertMeasurementCode(outDir, new Collection<FileInfo>(), null, outDir, profile, RecordingMode.TextFile);
 
 			// .cと.hファイルが存在するか
 			Assert.That(

@@ -4,7 +4,7 @@
   <groupId>jp.ac.waseda.cs.washi</groupId>
   <artifactId>CoverageWriter.Text</artifactId>
   <packaging>jar</packaging>
-  <version>1.0.0</version>
+  <version>1.0.1</version>
   <name>CoverageWriter</name>
   <url>http://maven.apache.org</url>
   <dependencies>

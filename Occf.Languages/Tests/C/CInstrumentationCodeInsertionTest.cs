@@ -24,10 +24,6 @@ using Occf.Core.Utils;
 
 namespace Occf.Languages.Tests.C {
 	public class CInstrumentationCodeInsertionTest {
-		public CInstrumentationCodeInsertionTest() {
-			OccfGlobal.SaveCurrentState();
-		}
-
 		private static IEnumerable<TestCaseData> TestCases {
 			get {
 				var names = new[] {

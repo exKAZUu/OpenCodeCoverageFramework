@@ -29,11 +29,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Occf.Reader.TcpIp", "Occf.R
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Occf.Reporter", "Occf.Reporter\Occf.Reporter.csproj", "{13C87D31-5E84-4FAD-8E96-F92A4BD06860}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Occf.Tools.Window", "Occf.Tools.Window\Occf.Tools.Window.csproj", "{8951538A-CB06-49DF-9BB3-D5CFB08205C7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Occf.Tools.Window", "Occf.Tools\Window\Occf.Tools.Window.csproj", "{8951538A-CB06-49DF-9BB3-D5CFB08205C7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Occf.Tools.Cui.Tests", "Occf.Tools.Cui.Tests\Occf.Tools.Cui.Tests.csproj", "{F1C1EC4E-665A-40D2-8E5F-1B81B3F274CE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Occf.Tools.Cui.Tests", "Occf.Tools\Cui.Tests\Occf.Tools.Cui.Tests.csproj", "{F1C1EC4E-665A-40D2-8E5F-1B81B3F274CE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Occf.Tools.Cui", "Occf.Tools.Cui\Occf.Tools.Cui.csproj", "{F9555428-0420-42F6-BE6B-54991A52F8C9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Occf.Tools.Cui", "Occf.Tools\Cui\Occf.Tools.Cui.csproj", "{F9555428-0420-42F6-BE6B-54991A52F8C9}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Languages", "Languages", "{0A2D99DE-684D-4EF6-AB40-10FC63001E75}"
 EndProject
@@ -48,6 +48,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Occf.Languages.Cpp", "Occf.Languages\Cpp\Occf.Languages.Cpp.csproj", "{C812C6C8-660F-4FFF-87AA-2A9514542FD0}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Occf.Languages.Ruby19", "Occf.Languages\Ruby19\Occf.Languages.Ruby19.csproj", "{13EBDD1B-7B90-4941-A4EC-D4B1C5024CB4}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{356CF850-0FFA-4364-A889-9EAD6C88529B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -351,6 +353,9 @@ Global
 		{172634B2-0681-4375-9AB3-A5AE7337F749} = {0A2D99DE-684D-4EF6-AB40-10FC63001E75}
 		{C812C6C8-660F-4FFF-87AA-2A9514542FD0} = {0A2D99DE-684D-4EF6-AB40-10FC63001E75}
 		{13EBDD1B-7B90-4941-A4EC-D4B1C5024CB4} = {0A2D99DE-684D-4EF6-AB40-10FC63001E75}
+		{F9555428-0420-42F6-BE6B-54991A52F8C9} = {356CF850-0FFA-4364-A889-9EAD6C88529B}
+		{F1C1EC4E-665A-40D2-8E5F-1B81B3F274CE} = {356CF850-0FFA-4364-A889-9EAD6C88529B}
+		{8951538A-CB06-49DF-9BB3-D5CFB08205C7} = {356CF850-0FFA-4364-A889-9EAD6C88529B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		BuildVersion_UseGlobalSettings = False

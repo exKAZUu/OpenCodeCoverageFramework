@@ -68,7 +68,7 @@ namespace Occf.Languages.Python2.Manipulators {
 			get { return _tagger ?? (_tagger = new Python3Tagger()); }
 		}
 
-		public override void CopyLibraries(DirectoryInfo outDirInfo) {
+		public override void CopyLibraries(DirectoryInfo outDirInfo, RecordingMode recordingMode) {
 			ParaibaFile.WriteIfDifferentSize(
 					Path.Combine(outDirInfo.FullName, "_CoverageWriter.pyd"),
 					Resources._CoverageWriter);

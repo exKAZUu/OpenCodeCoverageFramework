@@ -23,19 +23,7 @@ using System.Reflection;
 
 namespace Occf.Core.Utils {
 	public class OccfGlobal {
-		private static string _currentDirectory;
 		private static string _exeDirectory;
-
-		public static string CurrentDirectory {
-			get {
-				if (_currentDirectory == null) {
-					_currentDirectory = Environment.CurrentDirectory;
-					Debug.WriteLine(
-							"Warning: SaveCurrentState doesn't have been executed yet.");
-				}
-				return _currentDirectory;
-			}
-		}
 
 		public static string ExeDirectory {
 			get {
@@ -45,10 +33,6 @@ namespace Occf.Core.Utils {
 				}
 				return _exeDirectory;
 			}
-		}
-
-		public static void SaveCurrentState() {
-			_currentDirectory = Environment.CurrentDirectory;
 		}
 	}
 }

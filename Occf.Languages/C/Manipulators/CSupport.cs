@@ -68,7 +68,7 @@ namespace Occf.Languages.C.Manipulators {
 			get { return _tagger ?? (_tagger = new CTagger()); }
 		}
 
-		public override void CopyLibraries(DirectoryInfo outDirInfo) {
+		public override void CopyLibraries(DirectoryInfo outDirInfo, RecordingMode recordingMode) {
 			ParaibaFile.WriteIfDifferentSize(
 					Path.Combine(outDirInfo.FullName, "covman.c"),
 					Resources.covman_c);

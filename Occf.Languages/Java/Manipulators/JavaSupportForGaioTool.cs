@@ -29,7 +29,7 @@ namespace Occf.Languages.Java.Manipulators {
 			get { return "JavaForUM"; }
 		}
 
-		public override void CopyLibraries(DirectoryInfo outDirInfo) {
+		public override void CopyLibraries(DirectoryInfo outDirInfo, RecordingMode recordingMode) {
 			ParaibaFile.WriteIfDifferentSize(
 					Path.Combine(outDirInfo.FullName, "CoverageWriter.UM.jar"),
 					Resources.CoverageWriter_UM);

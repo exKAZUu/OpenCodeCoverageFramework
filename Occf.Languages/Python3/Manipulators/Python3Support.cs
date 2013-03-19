@@ -67,7 +67,7 @@ namespace Occf.Languages.Python3.Manipulators {
 			get { return _tagger ?? (_tagger = new Python3Tagger()); }
 		}
 
-		public override void CopyLibraries(DirectoryInfo outDirInfo) {
+		public override void CopyLibraries(DirectoryInfo outDirInfo, RecordingMode recordingMode) {
 			throw new NotImplementedException();
 		}
 

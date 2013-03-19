@@ -45,7 +45,7 @@ namespace Occf.Core.Manipulators {
 			catalog.Catalogs.Add(
 					new DirectoryCatalog(OccfGlobal.ExeDirectory, "Occf.Languages.*.dll"));
 			catalog.Catalogs.Add(
-					new DirectoryCatalog(OccfGlobal.CurrentDirectory, "Occf.Languages.*.dll"));
+					new DirectoryCatalog(".", "Occf.Languages.*.dll"));
 			//catalog.Catalogs.Add(new DirectoryCatalog("Extensions"));
 			var container = new CompositionContainer(catalog);
 			container.ComposeParts(this);

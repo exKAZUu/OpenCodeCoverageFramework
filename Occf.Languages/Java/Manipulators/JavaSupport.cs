@@ -35,59 +35,77 @@ using Occf.Languages.Java.Properties;
 using Paraiba.IO;
 
 namespace Occf.Languages.Java.Manipulators {
-	[Export(typeof(LanguageSupport))]
-	public class JavaSupport : LanguageSupport {
-		private IEnumerable<string> _filePatterns;
-		private AstTransformer _inserter;
-		private Tagger _tagger;
+    [Export(typeof(LanguageSupport))]
+    public class JavaSupport : LanguageSupport {
+        private IEnumerable<string> _filePatterns;
+        private AstTransformer _inserter;
+        private Tagger _tagger;
 
-		public override string Name {
-			get { return "Java"; }
-		}
+        public override string Name {
+            get { return "Java"; }
+        }
 
-		public override IEnumerable<string> FilePatterns {
-			get { return _filePatterns ?? (_filePatterns = new[] { "*.java" }); }
-		}
+        public override IEnumerable<string> FilePatterns {
+            get { return _filePatterns ?? (_filePatterns = new[] { "*.java" }); }
+        }
 
-		public override CodeToXml CodeToXml {
-			get { return JavaCodeToXml.Instance; }
-		}
+        public override CodeToXml CodeToXml {
+            get { return JavaCodeToXml.Instance; }
+        }
 
-		public override XmlToCode XmlToCode {
-			get { return JavaXmlToCode.Instance; }
-		}
+        public override XmlToCode XmlToCode {
+            get { return JavaXmlToCode.Instance; }
+        }
 
-		public override AstTransformer AstTransformer {
-			get { return _inserter ?? (_inserter = new JavaAstTransformer()); }
-		}
+        public override AstTransformer AstTransformer {
+            get { return _inserter ?? (_inserter = new JavaAstTransformer()); }
+        }
 
-		public override AstAnalyzer AstAnalyzer {
-			get { return JavaAstAnalyzer.Instance; }
-		}
+        public override AstAnalyzer AstAnalyzer {
+            get { return JavaAstAnalyzer.Instance; }
+        }
 
-		public override Tagger Tagger {
-			get { return _tagger ?? (_tagger = new JavaTagger()); }
-		}
+        public override Tagger Tagger {
+            get { return _tagger ?? (_tagger = new JavaTagger()); }
+        }
 
-		public override void CopyLibraries(DirectoryInfo outDirInfo) {
-			ParaibaFile.WriteIfDifferentSize(
-					Path.Combine(outDirInfo.FullName, "CoverageWriter.File.jar"),
-					Resources.CoverageWriter_File);
-			ParaibaFile.WriteIfDifferentSize(
-					Path.Combine(outDirInfo.FullName, "junit-4.8.2.jar"),
-					Resources.junit_4_8_2);
-			ParaibaFile.WriteIfDifferentSize(
-					Path.Combine(
-							outDirInfo.FullName, "Occf.Writer.File.Java.dll"),
-					Environment.Is64BitOperatingSystem
-							? Resources.Occf_Writer_File_Java_x64
-							: Resources.Occf_Writer_File_Java_x86);
-		}
+        public override void CopyLibraries(DirectoryInfo outDirInfo, RecordingMode recordingMode) {
+            switch (recordingMode) {
+            case RecordingMode.BinaryFile:
+                ParaibaFile.WriteIfDifferentSize(
+                        Path.Combine(outDirInfo.FullName, "CoverageWriter.jar"),
+                        Resources.CoverageWriter_File);
+                ParaibaFile.WriteIfDifferentSize(
+                        Path.Combine(
+                                outDirInfo.FullName, "Occf.Writer.File.Java.dll"),
+                        Environment.Is64BitOperatingSystem
+                                ? Resources.Occf_Writer_File_Java_x64
+                                : Resources.Occf_Writer_File_Java_x86);
+                break;
+            case RecordingMode.TextFile:
+                ParaibaFile.WriteIfDifferentSize(
+                        Path.Combine(outDirInfo.FullName, "CoverageWriter.jar"),
+                        Resources.CoverageWriter_Text);
+                break;
+            case RecordingMode.Gaio:
+                break;
+            case RecordingMode.SharedMemory:
+                break;
+            case RecordingMode.TcpIp:
+                break;
+            default:
+                throw new ArgumentOutOfRangeException("recordingMode");
+            }
 
-		public override void RemoveLibraries(DirectoryInfo outDirInfo) {
-			outDirInfo.GetFile("CoverageWriter.File.jar");
-			outDirInfo.GetFile("junit-4.8.2.jar");
-			outDirInfo.GetFile("Occf.Writer.File.Java.dll");
-		}
-	}
+            ParaibaFile.WriteIfDifferentSize(
+                    Path.Combine(outDirInfo.FullName, "junit-4.8.2.jar"),
+                    Resources.junit_4_8_2);
+        }
+
+        public override void RemoveLibraries(DirectoryInfo outDirInfo) {
+            outDirInfo.GetFile("CoverageWriter.jar");
+            outDirInfo.GetFile("junit-4.8.2.jar");
+            outDirInfo.GetFile("Occf.Writer.File.Java.dll");
+        }
+    }
 }

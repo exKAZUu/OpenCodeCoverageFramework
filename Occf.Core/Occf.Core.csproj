@@ -162,7 +162,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Manipulators\Analyzers\AstAnalyzer.cs" />
-    <Compile Include="Manipulators\RecordingWay.cs" />
+    <Compile Include="Manipulators\RecordingMode.cs" />
     <Compile Include="Utils\OccfCodeGenerator.cs" />
     <Compile Include="CoverageInformation\Elements\ForeachCoverageElement.cs" />
     <Compile Include="CoverageInformation\CoverageDataReader.cs" />

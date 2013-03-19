@@ -40,7 +40,7 @@ namespace Occf.Tools.Cui {
 						S + "<root>".PadRight(W)
 						+ "path of root directory (including source and test code)" + "\n" +
 						S + "<coverage>".PadRight(W) + "path of coverage data whose name is "
-						+ OccfNames.CoverageData + "\n" +
+						+ OccfNames.Record + "\n" +
 						"";
 
 		public static bool Run(IList<string> args) {
@@ -56,7 +56,7 @@ namespace Occf.Tools.Cui {
 			}
 			var covDataFile = args.Count >= iArgs + 1
 					? new FileInfo(args[iArgs++]) : null;
-			covDataFile = FileUtil.GetCoverageData(covDataFile, rootDir);
+			covDataFile = FileUtil.GetCoverageRecord(covDataFile, rootDir);
 			if (!covDataFile.SafeExists()) {
 				return
 						Program.Print(

@@ -17,7 +17,7 @@
 #endregion
 
 namespace Occf.Core.Manipulators {
-    public enum RecordingWay {
+    public enum RecordingMode {
         BinaryFile,
         TextFile,
         Gaio,
