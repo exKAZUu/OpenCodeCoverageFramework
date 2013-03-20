@@ -43,7 +43,7 @@ namespace Occf.Languages.Ruby18.Manipulators {
         }
 
         public override IEnumerable<string> FilePatterns {
-            get { return _filePatterns ?? (_filePatterns = new[] { "*.js" }); }
+            get { return _filePatterns ?? (_filePatterns = new[] { "*.rb" }); }
         }
 
         public override CodeToXml CodeToXml {

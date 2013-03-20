@@ -23,8 +23,8 @@ using System.Xml.Linq;
 using Occf.Core.Manipulators.Analyzers;
 using Paraiba.Xml.Linq;
 
-namespace Occf.Languages.Ruby18.Manipulators.Analyzers {
-    public class Ruby18AstAnalyzer : AstAnalyzer<Ruby18AstAnalyzer> {
+namespace Occf.Languages.Lua.Manipulators.Analyzers {
+    public class LuaAstAnalyzer : AstAnalyzer<LuaAstAnalyzer> {
         private static readonly string[] TargetNames = {
                 "conditionalOrExpression", "conditionalAndExpression",
         };
@@ -45,9 +45,8 @@ namespace Occf.Languages.Ruby18.Manipulators.Analyzers {
         }
 
         public override IEnumerable<XElement> FindStatements(XElement root) {
-            return root.DescendantsAndSelf("block")
-                    .SelectMany(e => e.Elements())
-                    .Where(e => e.Name() != "block");
+            return root.Descendants("stat")
+                    .Concat(root.Descendants("laststat"));
         }
 
         public override IEnumerable<XElement> FindVariableInitializers(XElement root) {
@@ -56,8 +55,9 @@ namespace Occf.Languages.Ruby18.Manipulators.Analyzers {
         }
 
         public override IEnumerable<XElement> FindBranches(XElement root) {
-            return root.Descendants("if")
-                    .Select(e => e.FirstElement());
+            return root.Descendants("stat")
+                    .Where(e => e.FirstElement().Value == "if")
+                    .Select(e => e.NthElement(1));
         }
 
         protected override bool IsConditionalTerm(XElement element) {

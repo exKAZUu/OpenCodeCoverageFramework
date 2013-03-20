@@ -28,11 +28,36 @@ namespace Occf.Languages.Ruby18.Manipulators.Transformers {
 
         protected override IEnumerable<XElement> CreateStatementNode(
                 XElement target, long id, int value, ElementType type) {
-            throw new NotImplementedException();
+            yield return new XElement("call",
+                    new object[] {
+                            new XElement("nil"),
+                            new XElement("Symbol", "stmt"),
+                            new XElement("lit", new[] {
+                                    new XElement("Fixnum", id),
+                            }),
+                            new XElement("lit", new[] {
+                                    new XElement("Fixnum", (int)type),
+                            }),
+                            new XElement("lit", new[] {
+                                    new XElement("Fixnum", value),
+                            }),
+                    });
         }
 
         public override void InsertPredicate(XElement target, long id, ElementType type) {
-            throw new NotImplementedException();
+            var node = new XElement("call", new object[] {
+                    new XElement("nil"),
+                    new XElement("Symbol", "branch"),
+                    new XElement("lit", new[] {
+                            new XElement("Fixnum", id),
+                    }),
+                    new XElement("lit", new[] {
+                            new XElement("Fixnum", (int)type),
+                    }),
+                    target,
+            });
+            target.AddBeforeSelf(node);
+            target.Remove();
         }
 
         public override void InsertInitializer(XElement target, long id, ElementType type) {
