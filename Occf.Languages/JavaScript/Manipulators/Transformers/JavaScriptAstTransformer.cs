@@ -50,7 +50,7 @@ namespace Occf.Languages.JavaScript.Manipulators.Transformers {
         public override void InsertImport(XElement target) {}
 
         public override void SupplementBlock(XElement root) {
-            SupplementBlock(root, "block", "{", "}");
+            SupplementBlock(root, "statementBlock", "{", "}");
         }
 
         public override void SupplementDefaultCase(XElement root) {

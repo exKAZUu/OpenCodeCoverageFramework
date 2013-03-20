@@ -54,7 +54,7 @@ namespace Occf.Languages.C.Manipulators.Transformers {
 		}
 
 	    public override void SupplementBlock(XElement root) {
-            SupplementBlock(root, "block", "{", "}");
+            SupplementBlock(root, "compound_statement", "{", "}");
         }
 
 	    public override void SupplementDefaultCase(XElement root) {

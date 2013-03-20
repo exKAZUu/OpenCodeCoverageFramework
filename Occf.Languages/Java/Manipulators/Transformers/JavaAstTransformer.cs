@@ -34,7 +34,7 @@ using Paraiba.Xml.Linq;
 namespace Occf.Languages.Java.Manipulators.Transformers {
     public class JavaAstTransformer : AntlrAstTransformer<JavaParser> {
         protected override string MethodPrefix {
-            get { return "jp.ac.waseda.cs.washi.CoverageWriter."; }
+            get { return ""; }
         }
 
         protected override AntlrCodeToXml<JavaParser> CodeToXml {
@@ -49,7 +49,10 @@ namespace Occf.Languages.Java.Manipulators.Transformers {
             get { return p => p.statement(); }
         }
 
-        public override void InsertImport(XElement target) {}
+        public override void InsertImport(XElement target) {
+			var ast = new XElement("TOKEN", "import static jp.ac.waseda.cs.washi.CoverageWriter.*;\r\n");
+			target.AddFirst(ast);
+        }
 
         public override void SupplementBlock(XElement root) {
             SupplementBlock(root, "block", "{", "}");
