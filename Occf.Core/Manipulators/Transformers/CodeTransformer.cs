@@ -100,10 +100,9 @@ namespace Occf.Core.Manipulators.Transformers {
 			var nodes = support.AstAnalyzer.FindStatements(root);
 			foreach (var node in nodes.ToList()) {
 				// ステートメントに測定用コードを埋め込む
-			    //var posNode = support.AstAnalyzer.GetBaseElementForStatement(node);
+			    var posNode = support.AstAnalyzer.GetBaseElementForStatement(node);
 				support.AstTransformer.InsertStatementBefore(
-                   		node, info.Targets.Count, Done, ElementType.Statement);
-						//posNode, info.Targets.Count, Done, ElementType.Statement);
+						posNode, info.Targets.Count, Done, ElementType.Statement);
 				// カバレッジ情報を生成
 				var covElem = new CoverageElement(relativePath, node, support.Tagger);
 				info.Targets.Add(covElem);

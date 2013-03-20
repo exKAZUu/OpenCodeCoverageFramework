@@ -23,102 +23,84 @@ using System.Xml.Linq;
 using Occf.Core.Manipulators.Analyzers;
 using Paraiba.Xml.Linq;
 
-namespace Occf.Languages.C.Manipulators.Analyzers {
-	public class CppAstAnalyzer : AstAnalyzer<CppAstAnalyzer> {
-		private static readonly string[] TargetNames = {
-				"logical_or_expression",
-				"logical_and_expression",
-		};
+namespace Occf.Languages.Cpp.Manipulators.Analyzers {
+    public class CppAstAnalyzer : AstAnalyzer<CppAstAnalyzer> {
+        private static readonly string[] TargetNames = {
+                "logical_or_expression",
+                "logical_and_expression",
+        };
 
-		private static readonly string[] ParentNames = {
-				"logical_or_expression",
-				"logical_and_expression",
-				"primary_expression",
-		};
+        private static readonly string[] ParentNames = {
+                "logical_or_expression",
+                "logical_and_expression",
+                "primary_expression",
+        };
 
-		public override IEnumerable<XElement> FindFunctions(XElement root) {
-			// TODO: Implement
-			return Enumerable.Empty<XElement>();
-		}
+        public override IEnumerable<XElement> FindFunctions(XElement root) {
+            // TODO: Implement
+            yield break;
+        }
 
-		public override string GetFunctionName(XElement functionElement) {
-			// TODO: Implement
-			throw new NotImplementedException();
-		}
+        public override string GetFunctionName(XElement functionElement) {
+            // TODO: Implement
+            throw new NotImplementedException();
+        }
 
-		public override IEnumerable<XElement> FindStatements(XElement root) {
-			return root.Descendants("statement")
-					.Where(
-							e => e.FirstElement().Name.LocalName != "labeled_statement"
-									&& e.FirstElement().Name.LocalName != "compound_statement");
-		}
+        public override IEnumerable<XElement> FindStatements(XElement root) {
+            return root.Descendants("block")
+                    .SelectMany(e => e.Elements())
+                    .Where(e => e.Name() != "TOKEN")
+                    .Where(e => e.Name() != "block")
+                    .Where(e => e.Name() != "label")
+                    .Where(e => e.Name() != "empty_stmt");
+        }
 
-		public override IEnumerable<XElement> FindVariableInitializers(XElement root) {
-			return root.Descendants("initializer")
-					.Where(e => e.Parent.Name.LocalName != "initializer_list")
-					.SelectMany(e => e.Elements("assignment_expression"));
-		}
+        public override IEnumerable<XElement> FindVariableInitializers(XElement root) {
+            yield break;
+        }
 
-		public override IEnumerable<XElement> FindBranches(XElement root) {
-			var ifs = root.Descendants("selection_statement")
-					.Where(e => e.FirstElement().Value == "if")
-					.Select(e => e.NthElement(2));
-			var whilesAndDoWhiles = root.Descendants("iteration_statement")
-					.Select(e => e.FirstElement().Value == "for" ? e.NthElement(3) : e)
-					.SelectMany(e => e.Elements("expression"));
-			var ternaries = root.Descendants("conditional_expression")
-					.Where(e => e.Elements().Count() > 1)
-					.Select(e => e.FirstElement());
-			return ifs.Concat(whilesAndDoWhiles).Concat(ternaries);
-		}
+        public override IEnumerable<XElement> FindBranches(XElement root) {
+            return root.Descendants("if")
+                    .Select(e => e.Element("condition"));
+        }
 
-		protected override bool IsConditionalTerm(XElement element) {
-			return TargetNames.Contains(element.Name.LocalName);
-		}
+        protected override bool IsConditionalTerm(XElement element) {
+            return TargetNames.Contains(element.Name.LocalName);
+        }
 
-		protected override bool IsAvailableParent(XElement element) {
-			return element.Elements().Count() == 1 ||
-					ParentNames.Contains(element.Name.LocalName);
-		}
+        protected override bool IsAvailableParent(XElement element) {
+            return element.Elements().Count() == 1 ||
+                    ParentNames.Contains(element.Name.LocalName);
+        }
 
-		public override IEnumerable<XElement> FindSwitches(XElement root) {
-			return root.Descendants("selection_statement")
-					.Where(e => e.FirstElement().Value == "switch");
-		}
+        public override IEnumerable<XElement> FindSwitches(XElement root) {
+            // TODO: Implement
+            yield break;
+        }
 
-		public override IEnumerable<XElement> FindCaseLabelTails(XElement root) {
-			return root.Elements("labeled_statement")
-					.Where(
-							label => label.FirstElement().Value == "case"
-									|| label.FirstElement().Value == "default")
-					// 親以外にswitch文がでてきてはいけない（直接の子供以外のラベルを除去）
-					.Where(
-							label => !label.ParentsWhile(root)
-									.Any(
-											parent => parent.Name.LocalName == "selection_statement"
-													&& parent.FirstElement().Value == "switch"))
-					// コロンを選択する
-					.Select(label => label.Elements().First(e => e.Value == ":"));
-		}
+        public override IEnumerable<XElement> FindCaseLabelTails(XElement root) {
+            // TODO: Implement
+            yield break;
+        }
 
-		public override IEnumerable<XElement> FindForeach(XElement root) {
-			// TODO: Implement
-			return Enumerable.Empty<XElement>();
-		}
+        public override IEnumerable<XElement> FindForeach(XElement root) {
+            // TODO: Implement
+            yield break;
+        }
 
-		public override IEnumerable<XElement> FindForeachHead(XElement foreachElement) {
-			// TODO: Implement
-			return Enumerable.Empty<XElement>();
-		}
+        public override IEnumerable<XElement> FindForeachHead(XElement foreachElement) {
+            // TODO: Implement
+            yield break;
+        }
 
-		public override IEnumerable<XElement> FindForeachTail(XElement foreachElement) {
-			return Enumerable.Empty<XElement>();
-			// TODO: Implement
-		}
+        public override IEnumerable<XElement> FindForeachTail(XElement foreachElement) {
+            // TODO: Implement
+            yield break;
+        }
 
-		public override IEnumerable<XElement> FindTestCases(XElement root) {
-			// TODO: Implement
-			return Enumerable.Empty<XElement>();
-		}
-	}
+        public override IEnumerable<XElement> FindTestCases(XElement root) {
+            // TODO: Implement
+            yield break;
+        }
+    }
 }

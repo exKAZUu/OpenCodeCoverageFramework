@@ -37,8 +37,8 @@ namespace Occf.Languages.C.Manipulators.Analyzers {
 		};
 
 		public override IEnumerable<XElement> FindFunctions(XElement root) {
-			// TODO: Implement
-			return Enumerable.Empty<XElement>();
+            // TODO: Implement
+            yield break;
 		}
 
 		public override string GetFunctionName(XElement functionElement) {
@@ -104,23 +104,23 @@ namespace Occf.Languages.C.Manipulators.Analyzers {
 		}
 
 		public override IEnumerable<XElement> FindForeach(XElement root) {
-			// TODO: Implement
-			return Enumerable.Empty<XElement>();
+            // TODO: Implement
+            yield break;
 		}
 
 		public override IEnumerable<XElement> FindForeachHead(XElement foreachElement) {
-			// TODO: Implement
-			return Enumerable.Empty<XElement>();
+            // TODO: Implement
+            yield break;
 		}
 
 		public override IEnumerable<XElement> FindForeachTail(XElement foreachElement) {
-			return Enumerable.Empty<XElement>();
-			// TODO: Implement
+            // TODO: Implement
+            yield break;
 		}
 
 		public override IEnumerable<XElement> FindTestCases(XElement root) {
-			// TODO: Implement
-			return Enumerable.Empty<XElement>();
+            // TODO: Implement
+            yield break;
 		}
 	}
 }

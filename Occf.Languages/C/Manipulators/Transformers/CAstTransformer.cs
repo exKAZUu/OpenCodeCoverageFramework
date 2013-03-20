@@ -68,7 +68,7 @@ namespace Occf.Languages.C.Manipulators.Transformers {
 
 		public override void SupplementDefaultConstructor(XElement root) {}
 
-		protected override IEnumerable<XElement> GetLackingBlockNodes(XElement root) {
+		protected override IEnumerable<XElement> FindLackingBlockNodes(XElement root) {
 			var loops = CElements.Loop(root)
 					.Select(CElements.LoopProcess);
 			var selections = root.Descendants("selection_statement")

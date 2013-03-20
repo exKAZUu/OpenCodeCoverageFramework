@@ -18,11 +18,13 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Xml.Linq;
 using Antlr.Runtime;
 using Code2Xml.Core.Antlr;
 using Code2Xml.Core.CodeToXmls;
 using Code2Xml.Core.XmlToCodes;
+using Paraiba.Xml.Linq;
 
 namespace Occf.Core.Manipulators.Transformers {
     public abstract class AntlrAstTransformer<TParser> : AstTransformer
@@ -88,7 +90,9 @@ namespace Occf.Core.Manipulators.Transformers {
 
         public void SupplementBlock(
                 XElement root, string elementName, string begin, string end) {
-            var nodes = GetLackingBlockNodes(root);
+            var nodes = FindLackingBlockNodes(root)
+                .Where(e => e.Name.LocalName != elementName)
+                .Where(e => e.FirstElementOrDefault(elementName) == null || e.Elements().Skip(1).Any());
             ReplaceSafely(
                     nodes,
                     node =>
@@ -96,6 +100,6 @@ namespace Occf.Core.Manipulators.Transformers {
                                     new XElement("TOKEN", end)));
         }
 
-        protected abstract IEnumerable<XElement> GetLackingBlockNodes(XElement root);
+        protected abstract IEnumerable<XElement> FindLackingBlockNodes(XElement root);
     }
 }

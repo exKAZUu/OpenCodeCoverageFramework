@@ -51,6 +51,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CodeInsertTest.cs" />
+    <Compile Include="Python3\Python3InstrumentationCodeInsertionTest.cs" />
+    <Compile Include="CSharp\CsharpInstrumentationCodeInsertionTest.cs" />
+    <Compile Include="Cpp\CppInstrumentationCodeInsertionTest.cs" />
     <Compile Include="C\CInstrumentationCodeInsertionTest.cs" />
     <Compile Include="JavaScript\JavaScriptInstrumentationCodeInsertionTest.cs" />
     <Compile Include="Java\JavaInstrumentationCodeInsertionTest.cs" />

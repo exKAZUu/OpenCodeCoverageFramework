@@ -92,7 +92,7 @@ namespace Occf.Languages.Java.Manipulators.Transformers {
             return testCase;
         }
 
-        protected override IEnumerable<XElement> GetLackingBlockNodes(XElement root) {
+        protected override IEnumerable<XElement> FindLackingBlockNodes(XElement root) {
             SupplementEmptyMethod(root);
 
             var ifs = JavaElements.If(root)

@@ -38,10 +38,10 @@ namespace Occf.Core.CoverageInformation {
         private static void ReadTextFile(CoverageInfo covInfo, FileStream fs) {
             using (var reader = new StreamReader(fs)) {
                 string line;
-                while ((line = reader.ReadLine()) != null) {
+                while (!string.IsNullOrEmpty((line = reader.ReadLine()))) {
                     var items = line.Split(' ');
                     var element = covInfo.Targets[int.Parse(items[0])];
-                    var state = (CoverageState)(int.Parse(items[1]));
+                    var state = (CoverageState)(int.Parse(items[2]));
                     element.UpdateState(state);
                 }
             }
@@ -72,28 +72,47 @@ namespace Occf.Core.CoverageInformation {
         private static bool IsTextFile(Stream fs) {
             var buffer = new byte[100];
             fs.Read(buffer, 0, buffer.Length);
-            var str = Encoding.Unicode.GetString(buffer);
-            var items = str.Split(new[] {' ', '\r', '\n'}, StringSplitOptions.RemoveEmptyEntries );
+            var str = Encoding.ASCII.GetString(buffer);
+            var items = str.Split(new[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
             var dummy = 0;
-            return int.TryParse(items[0], out dummy) && int.TryParse(items[1], out dummy);
+            fs.Seek(0, 0);
+            return int.TryParse(items[0], out dummy) && int.TryParse(items[1], out dummy)
+                    && int.TryParse(items[2], out dummy);
         }
 
         public static void ReadFile(TestInfo testInfo, FileInfo fileInfo) {
-            ReadFile(testInfo, fileInfo.FullName,
-                    testInfo.TestCases.Count > 0 ? testInfo.TestCases[0] : null);
+            using (var fs = new FileStream(fileInfo.FullName, FileMode.Open)) {
+                if (IsTextFile(fs)) {
+                    ReadTextFile(testInfo, fs,
+                            testInfo.TestCases.Count > 0 ? testInfo.TestCases[0] : null);
+                } else {
+                    ReadBinaryFile(testInfo, fs,
+                            testInfo.TestCases.Count > 0 ? testInfo.TestCases[0] : null);
+                }
+            }
         }
 
-        public static void ReadFile(TestInfo testInfo, string filePath, TestCase initialTestCase) {
+        public static void ReadFile(TestInfo testInfo, FileInfo fileInfo, TestCase initialTestCase) {
+            using (var fs = new FileStream(fileInfo.FullName, FileMode.Open)) {
+                if (IsTextFile(fs)) {
+                    ReadTextFile(testInfo, fs, initialTestCase);
+                } else {
+                    ReadBinaryFile(testInfo, fs, initialTestCase);
+                }
+            }
+        }
+
+        public static void ReadTextFile(
+                TestInfo testInfo, FileStream fs, TestCase initialTestCase) {
+            // TODO: Should be null (but KLEE uses initialTestCase)
             var testCase = initialTestCase;
-            using (var fs = new FileStream(filePath, FileMode.Open)) {
-                while (true) {
-                    var id = (fs.ReadByte() << 24) + (fs.ReadByte() << 16) +
-                            (fs.ReadByte() << 8) + (fs.ReadByte() << 0);
-                    var value = fs.ReadByte();
-                    if (value == -1) {
-                        return;
-                    }
-                    switch ((ElementType)(value >> 2)) {
+            using (var reader = new StreamReader(fs)) {
+                string line;
+                while (!string.IsNullOrEmpty((line = reader.ReadLine()))) {
+                    var items = line.Split(' ');
+                    var id = int.Parse(items[0]);
+                    var value = int.Parse(items[2]);
+                    switch ((ElementType)int.Parse(items[1])) {
                     case ElementType.Statement:
                         testCase.Statements.Add(id);
                         testCase.StatementConditionDecisions.Add(id);
@@ -126,6 +145,53 @@ namespace Occf.Core.CoverageInformation {
                         testCase = testInfo.TestCases[id];
                         break;
                     }
+                }
+            }
+        }
+
+        public static void ReadBinaryFile(
+                TestInfo testInfo, FileStream fs, TestCase initialTestCase) {
+            // TODO: Should be null (but KLEE uses initialTestCase)
+            var testCase = initialTestCase;
+            while (true) {
+                var id = (fs.ReadByte() << 24) + (fs.ReadByte() << 16) +
+                        (fs.ReadByte() << 8) + (fs.ReadByte() << 0);
+                var value = fs.ReadByte();
+                if (value == -1) {
+                    return;
+                }
+                switch ((ElementType)(value >> 2)) {
+                case ElementType.Statement:
+                    testCase.Statements.Add(id);
+                    testCase.StatementConditionDecisions.Add(id);
+                    testCase.Paths.Add(id);
+                    break;
+                case ElementType.Decision:
+                    id = (value & 1) == 0 ? id : -id;
+                    testCase.Decisions.Add(id);
+                    testCase.ConditionDecisions.Add(id);
+                    testCase.StatementConditionDecisions.Add(id);
+                    break;
+                case ElementType.Condition:
+                    id = (value & 1) == 0 ? id : -id;
+                    testCase.Conditions.Add(id);
+                    testCase.ConditionDecisions.Add(id);
+                    testCase.StatementConditionDecisions.Add(id);
+                    break;
+                case ElementType.DecisionAndCondition:
+                    id = (value & 1) == 0 ? id : -id;
+                    testCase.Decisions.Add(id);
+                    testCase.Conditions.Add(id);
+                    testCase.ConditionDecisions.Add(id);
+                    testCase.StatementConditionDecisions.Add(id);
+                    break;
+                case ElementType.TestCase:
+                    if (testInfo.TestCases.Count <= id) {
+                        throw new InvalidOperationException(
+                                "There is contradiction between the coverage data and the source code. Please retry to measure coverage data.");
+                    }
+                    testCase = testInfo.TestCases[id];
+                    break;
                 }
             }
         }

@@ -215,7 +215,7 @@ namespace Occf.Tools.Cui {
 				testInfo.TestCases.Add(testCase);
 				testCase.InitializeForStoringData(false);
 				var dataPath = file.FullName + OccfNames.Record;
-				CoverageDataReader.ReadFile(testInfo, dataPath, testCase);
+				CoverageDataReader.ReadFile(testInfo, new FileInfo(dataPath), testCase);
 			}
 			return testInfo;
 		}

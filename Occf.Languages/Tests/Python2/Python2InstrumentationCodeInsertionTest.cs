@@ -20,31 +20,30 @@ using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
 using Occf.Core.Manipulators;
-using Occf.Core.Utils;
 
 namespace Occf.Languages.Tests.Python2 {
-	public class Python2InstrumentationCodeInsertionTest {
-		private static IEnumerable<TestCaseData> TestCases {
-			get {
-				var names = new[] {
-						"Block1.py",
-						"Block2.py",
-						"Block3.py",
-				};
-				return names.Select(name => new TestCaseData(name));
-			}
-		}
+    public class Python2InstrumentationCodeInsertionTest {
+        private static IEnumerable<TestCaseData> TestCases {
+            get {
+                var names = new[] {
+                        "Block1.py",
+                        "Block2.py",
+                        "Block3.py",
+                };
+                return names.Select(name => new TestCaseData(name));
+            }
+        }
 
-		[Test, TestCaseSource("TestCases")]
-		public void VerifyInstrumentationCode(string fileName) {
-			var profile = LanguageSupports.GetCoverageModeByClassName("Python2");
-			CodeInsertTest.VerifyCodeInsertion(profile, fileName);
-		}
+        [Test, TestCaseSource("TestCases")]
+        public void VerifyInstrumentationCode(string fileName) {
+            var profile = LanguageSupports.GetCoverageModeByClassName("Python2");
+            CodeInsertTest.VerifyCodeInsertion(profile, fileName);
+        }
 
-		[Test, TestCaseSource("TestCases")]
-		public void InsertInstrumentationCode(string fileName) {
-			var profile = LanguageSupports.GetCoverageModeByClassName("Python2");
-			CodeInsertTest.InsertInstrumentationCode(profile, fileName);
-		}
-	}
+        [Test, TestCaseSource("TestCases")]
+        public void InsertInstrumentationCode(string fileName) {
+            var profile = LanguageSupports.GetCoverageModeByClassName("Python2");
+            CodeInsertTest.InsertInstrumentationCode(profile, fileName);
+        }
+    }
 }

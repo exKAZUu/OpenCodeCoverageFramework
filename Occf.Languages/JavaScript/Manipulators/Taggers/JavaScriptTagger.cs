@@ -19,8 +19,8 @@
 using System.Xml.Linq;
 using Occf.Core.Manipulators.Taggers;
 
-namespace Occf.Languages.Ruby18.Manipulators.Taggers {
-	public class RubyTagger : Tagger {
+namespace Occf.Languages.JavaScript.Manipulators.Taggers {
+	public class JavaScriptTagger : Tagger {
 		public override string Tag(XElement elements) {
 			var tag = "";
 			//var classNodes = elements.Parents()

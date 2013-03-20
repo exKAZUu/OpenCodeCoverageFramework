@@ -14,17 +14,17 @@ public class CoverageWriter {
 	}
 
 	public static boolean WriteTestCase(int id, int type, int value) {
-		writer.println(id + " " + value);
+		writer.println(id + " " + type + " " + (value + 1));
 		return true;
 	}
 
 	public static boolean WriteStatement(int id, int type, int value) {
-		writer.println(id + " " + value);
+		writer.println(id + " " + type + " " + (value + 1));
 		return true;
 	}
 
 	public static boolean WritePredicate(int id, int type, boolean value) {
-		writer.println(id + " " + (value ? 1 : 0));
+		writer.println(id + " " + type + " " + (value ? 2 : 1));
 		return value;
 	}
 }

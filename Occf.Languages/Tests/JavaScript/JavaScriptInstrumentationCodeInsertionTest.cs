@@ -20,31 +20,30 @@ using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
 using Occf.Core.Manipulators;
-using Occf.Core.Utils;
 
 namespace Occf.Languages.Tests.JavaScript {
-	public class JavaScriptInstrumentationCodeInsertionTest {
-		private static IEnumerable<TestCaseData> TestCases {
-			get {
-				var names = new[] {
-						"Block1.js",
-						"Block2.js",
-						"Block3.js"
-				};
-				return names.Select(name => new TestCaseData(name));
-			}
-		}
+    public class JavaScriptInstrumentationCodeInsertionTest {
+        private static IEnumerable<TestCaseData> TestCases {
+            get {
+                var names = new[] {
+                        "Block1.js",
+                        "Block2.js",
+                        "Block3.js"
+                };
+                return names.Select(name => new TestCaseData(name));
+            }
+        }
 
-		//[Test, TestCaseSource("TestCases")]
-		public void VerifyInstrumentationCode(string fileName) {
-			var profile = LanguageSupports.GetCoverageModeByClassName("JavaScript");
-			CodeInsertTest.VerifyCodeInsertion(profile, fileName);
-		}
+        [Test, TestCaseSource("TestCases")]
+        public void VerifyInstrumentationCode(string fileName) {
+            var profile = LanguageSupports.GetCoverageModeByClassName("JavaScript");
+            CodeInsertTest.VerifyCodeInsertion(profile, fileName);
+        }
 
-		//[Test, TestCaseSource("TestCases")]
-		public void InsertInstrumentationCode(string fileName) {
-			var profile = LanguageSupports.GetCoverageModeByClassName("JavaScript");
-			CodeInsertTest.InsertInstrumentationCode(profile, fileName);
-		}
-	}
+        [Test, TestCaseSource("TestCases")]
+        public void InsertInstrumentationCode(string fileName) {
+            var profile = LanguageSupports.GetCoverageModeByClassName("JavaScript");
+            CodeInsertTest.InsertInstrumentationCode(profile, fileName);
+        }
+    }
 }
