@@ -50,14 +50,14 @@ namespace Occf.Tools.Cui {
                         "";
 
         public static bool Run(IList<string> args) {
-            if (args.Count < 2) {
+            if (args.Count < 1) {
                 return Program.Print(Usage);
             }
 
             var criterion = "";
             // parse options
             var p = new OptionSet {
-                    { "c|criterion", v => criterion = v },
+                    { "c|criterion=", v => criterion = v },
             };
             try {
                 args = p.Parse(args);
