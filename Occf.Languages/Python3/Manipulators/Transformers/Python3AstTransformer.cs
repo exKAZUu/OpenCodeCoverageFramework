@@ -65,7 +65,23 @@ namespace Occf.Languages.Python3.Manipulators.Transformers {
 		public override void InsertInitializer(
 				XElement target, long id, ElementType type) {}
 
-		public override void SupplementBlock(XElement root) {}
+	    public override void InsertEqual(XElement target, XElement left, XElement right, long id, ElementType type) {
+	        throw new NotImplementedException();
+	    }
+
+	    public override void InsertNotEqual(XElement target, XElement left, XElement right, long id, ElementType type) {
+	        throw new NotImplementedException();
+	    }
+
+	    public override void InsertLessThan(XElement target, XElement left, XElement right, long id, ElementType type) {
+	        throw new NotImplementedException();
+	    }
+
+	    public override void InsertGraterThan(XElement target, XElement left, XElement right, long id, ElementType type) {
+	        throw new NotImplementedException();
+	    }
+
+	    public override void SupplementBlock(XElement root) {}
 
 		public override void SupplementDefaultCase(XElement root) {}
 

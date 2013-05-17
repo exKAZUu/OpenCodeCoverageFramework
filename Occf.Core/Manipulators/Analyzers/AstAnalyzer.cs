@@ -16,6 +16,7 @@
 
 #endregion
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
@@ -96,6 +97,7 @@ namespace Occf.Core.Manipulators.Analyzers {
 			var targetParents = root.Descendants()
 					.Where(IsConditionalTerm)
 					.Where(e => e.Elements().Count() >= 3)
+                    // Remove exceptions such as function arguments
 					.Where(e => e.ParentsWhile(root).All(IsAvailableParent));
 			var targets = targetParents
 					.SelectMany(e => e.Elements().OddIndexElements());
@@ -123,6 +125,14 @@ namespace Occf.Core.Manipulators.Analyzers {
 		/// <param name="element">The element to be judged.</param>
 		/// <returns>The value indicating whether the specified element is an available parent.</returns>
 		protected abstract bool IsAvailableParent(XElement element);
+
+        /// <summary>
+        /// Returns the compared elements (left and right) and the comparison type
+        /// if root element consists of comparison expressions, otherwise returns null.
+        /// </summary>
+        /// <param name="root">The element to be explorer.</param>
+        /// <returns>the compared elements (left and right) and the comparison type</returns>
+        public abstract Tuple<XElement, XElement, ComparatorType> GetComparedElements(XElement root);
 
 		/// <summary>
 		/// Returns xml elements indicating switch statements.

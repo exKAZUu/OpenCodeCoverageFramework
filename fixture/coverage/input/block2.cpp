@@ -1,27 +1,27 @@
-#include <stdio.h>
+#include <iostream>
 
 int main() {
 	int i = 0;
 	
 	if (i == 0) {
-		printf("test");
+		std::cout << "test";
 	}
 	
 	switch(i) {
 		case 0:
-		printf("test");
+		std::cout << "test";
 	}
 	
 	while (i != 0) {
-		printf("test");
+		std::cout << "test";
 	}
 	
 	do {
-		printf("test");
+		std::cout << "test";
 	} while (i != 0);
 	
 	for (i = 0; i < 0; i++) {
-		printf("test");
+		std::cout << "test";
 	}
 	return 0;
 }

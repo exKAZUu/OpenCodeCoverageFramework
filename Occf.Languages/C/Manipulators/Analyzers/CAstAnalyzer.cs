@@ -20,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
+using Occf.Core.Manipulators;
 using Occf.Core.Manipulators.Analyzers;
 using Paraiba.Xml.Linq;
 
@@ -83,7 +84,11 @@ namespace Occf.Languages.C.Manipulators.Analyzers {
 					ParentNames.Contains(element.Name.LocalName);
 		}
 
-		public override IEnumerable<XElement> FindSwitches(XElement root) {
+	    public override Tuple<XElement, XElement, ComparatorType> GetComparedElements(XElement root) {
+	        throw new NotImplementedException();
+	    }
+
+	    public override IEnumerable<XElement> FindSwitches(XElement root) {
 			return root.Descendants("selection_statement")
 					.Where(e => e.FirstElement().Value == "switch");
 		}

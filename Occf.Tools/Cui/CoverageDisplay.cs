@@ -29,6 +29,12 @@ using Paraiba.IO;
 using Paraiba.Linq;
 
 namespace Occf.Tools.Cui {
+    public class CoverageResult {
+        public string Name { get; set; }
+        public double Coverage { get; set; }
+        public IEnumerable<CoverageResult> Children { get; set; }
+    }
+
 	public class CoverageDisplay {
 		private const string S = "  ";
 		private const int W = 12;

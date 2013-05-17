@@ -20,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
+using Occf.Core.Manipulators;
 using Occf.Core.Manipulators.Analyzers;
 using Paraiba.Xml.Linq;
 
@@ -69,6 +70,10 @@ namespace Occf.Languages.JavaScript.Manipulators.Analyzers {
         protected override bool IsAvailableParent(XElement element) {
             return element.Elements().Count() == 1 ||
                     ParentNames.Contains(element.Name());
+        }
+
+        public override Tuple<XElement, XElement, ComparatorType> GetComparedElements(XElement root) {
+            throw new NotImplementedException();
         }
 
         public override IEnumerable<XElement> FindSwitches(XElement root) {

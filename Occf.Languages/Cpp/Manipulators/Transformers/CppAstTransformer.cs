@@ -63,12 +63,10 @@ namespace Occf.Languages.Cpp.Manipulators.Transformers {
 
 	    public override void SupplementDefaultCase(XElement root) {
             // TODO: Implement
-            throw new NotImplementedException();
 		}
 
 		public override void SupplementDefaultConstructor(XElement root) {
             // TODO: Implement
-            throw new NotImplementedException();
 		}
 
 		protected override IEnumerable<XElement> FindLackingBlockNodes(XElement root) {

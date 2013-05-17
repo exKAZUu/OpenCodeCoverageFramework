@@ -64,6 +64,22 @@ namespace Occf.Languages.Ruby18.Manipulators.Transformers {
             throw new NotImplementedException();
         }
 
+        public override void InsertEqual(XElement target, XElement left, XElement right, long id, ElementType type) {
+            throw new NotImplementedException();
+        }
+
+        public override void InsertNotEqual(XElement target, XElement left, XElement right, long id, ElementType type) {
+            throw new NotImplementedException();
+        }
+
+        public override void InsertLessThan(XElement target, XElement left, XElement right, long id, ElementType type) {
+            throw new NotImplementedException();
+        }
+
+        public override void InsertGraterThan(XElement target, XElement left, XElement right, long id, ElementType type) {
+            throw new NotImplementedException();
+        }
+
         public override void SupplementBlock(XElement root) {}
 
         public override void SupplementDefaultCase(XElement root) {

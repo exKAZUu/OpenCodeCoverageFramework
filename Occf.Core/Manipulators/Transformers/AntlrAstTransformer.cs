@@ -88,6 +88,34 @@ namespace Occf.Core.Manipulators.Transformers {
             target.AddAfterSelf(new XElement("TOKEN", code.Item2));
         }
 
+        public override void InsertEqual(XElement target, XElement left, XElement right, long id, ElementType type) {
+            var code = MethodPrefix + "WriteEqual(" + id + "," + (int)type + "," + left.Value + ","
+                    + right.Value + ")";
+            target.AddBeforeSelf(new XElement("TOKEN", code));
+            target.Remove();
+        }
+
+        public override void InsertNotEqual(XElement target, XElement left, XElement right, long id, ElementType type) {
+            var code = MethodPrefix + "WriteNotEqual(" + id + "," + (int)type + "," + left.Value + ","
+                    + right.Value + ")";
+            target.AddBeforeSelf(new XElement("TOKEN", code));
+            target.Remove();
+        }
+
+        public override void InsertLessThan(XElement target, XElement left, XElement right, long id, ElementType type) {
+            var code = MethodPrefix + "WriteLessThan(" + id + "," + (int)type + "," + left.Value + ","
+                    + right.Value + ")";
+            target.AddBeforeSelf(new XElement("TOKEN", code));
+            target.Remove();
+        }
+
+        public override void InsertGraterThan(XElement target, XElement left, XElement right, long id, ElementType type) {
+            var code = MethodPrefix + "WriteGraterThan(" + id + "," + (int)type + "," + left.Value + ","
+                    + right.Value + ")";
+            target.AddBeforeSelf(new XElement("TOKEN", code));
+            target.Remove();
+        }
+
         public void SupplementBlock(
                 XElement root, string elementName, string begin, string end) {
             var nodes = FindLackingBlockNodes(root)

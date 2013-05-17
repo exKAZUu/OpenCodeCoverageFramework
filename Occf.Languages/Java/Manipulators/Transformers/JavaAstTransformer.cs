@@ -50,8 +50,9 @@ namespace Occf.Languages.Java.Manipulators.Transformers {
         }
 
         public override void InsertImport(XElement target) {
-			var ast = new XElement("TOKEN", "import static jp.ac.waseda.cs.washi.CoverageWriter.*;\r\n");
-			target.AddFirst(ast);
+            var ast = new XElement("TOKEN",
+                    "import static jp.ac.waseda.cs.washi.CoverageWriter.*;\r\n");
+            target.AddFirst(ast);
         }
 
         public override void SupplementBlock(XElement root) {
@@ -117,10 +118,11 @@ namespace Occf.Languages.Java.Manipulators.Transformers {
                     .Where(e => e.Elements().Any(e2 => e2.Value == "void"))
                     .Select(e => e.Element("block"))
                     .Where(e => e != null)
-                    .Where(e => !(e.Descendants("statement").Any() && e.Descendants("statement")
-                                   .Last()
-                                   .FirstElement()
-                                   .Value == "throw"))
+                    .Where(e => !(e.Descendants("statement").Any() &&
+                            e.Descendants("statement")
+                                    .Last()
+                                    .FirstElement()
+                                    .Value == "throw"))
                     .Select(e => e.LastElement());
             var node = JavaCodeToXml.Instance.GenerateWithoutPosition("return;", p => p.statement());
             foreach (var method in methods) {

@@ -17,9 +17,14 @@
 #endregion
 
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using NUnit.Framework;
+using Occf.Core.CoverageInformation;
 using Occf.Core.Manipulators;
+using Occf.Core.Manipulators.Transformers;
+using Occf.Core.Tests;
+using Paraiba.IO;
 
 namespace Occf.Languages.Tests.Java {
     [TestFixture]
@@ -47,6 +52,22 @@ namespace Occf.Languages.Tests.Java {
         public void InsertInstrumentationCode(string fileName) {
             var profile = LanguageSupports.GetCoverageModeByClassName("Java");
             CodeInsertTest.InsertInstrumentationCode(profile, fileName);
+
+			var info = new CoverageInfo(
+					Fixture.GetCoverageInputPath(), profile.Name, SharingMethod.SharedMemory);
+			var inPath = Path.Combine(Fixture.GetCoverageInputPath(), fileName);
+            var codeFile = new FileInfo(inPath);
+
+			var relativePath = ParaibaPath.GetRelativePath(codeFile.FullName, info.BasePath);
+			var ast = profile.CodeToXml.GenerateFromFile(codeFile.FullName);
+
+			File.WriteAllText(Fixture.GetOutputPath(fileName) + ".xml", ast.ToString());
+
+			// 測定用コードの埋め込み
+			var path = relativePath;
+			CodeTransformer.InstrumentStatementAndPredicate(info, ast, profile, path);
+
+			File.WriteAllText(Fixture.GetOutputPath(fileName) + ".modified.xml", ast.ToString());
         }
     }
 }

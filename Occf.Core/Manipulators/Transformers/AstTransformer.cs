@@ -57,6 +57,18 @@ namespace Occf.Core.Manipulators.Transformers {
 		public abstract void InsertInitializer(
 				XElement target, long id, ElementType type);
 
+		public abstract void InsertEqual(
+				XElement target, XElement left, XElement right, long id, ElementType type);
+
+		public abstract void InsertNotEqual(
+				XElement target, XElement left, XElement right, long id, ElementType type);
+
+		public abstract void InsertLessThan(
+				XElement target, XElement left, XElement right, long id, ElementType type);
+
+		public abstract void InsertGraterThan(
+				XElement target, XElement left, XElement right, long id, ElementType type);
+
 		public abstract void SupplementBlock(XElement root);
 
 		public abstract void SupplementDefaultCase(XElement root);

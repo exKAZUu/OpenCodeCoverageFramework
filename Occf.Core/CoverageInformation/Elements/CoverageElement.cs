@@ -22,6 +22,11 @@ using Code2Xml.Core.Position;
 using Occf.Core.Manipulators.Taggers;
 
 namespace Occf.Core.CoverageInformation.Elements {
+    /// <summary>
+    /// A class for a program element to measure coverage.
+    /// This should be class instead of struct
+    /// because 
+    /// </summary>
 	[Serializable]
 	public class CoverageElement : ICoverageElement {
 		public CoverageElement(string relativePath, XElement node, Tagger tagger) {
