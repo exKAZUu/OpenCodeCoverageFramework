@@ -137,7 +137,7 @@ namespace Occf.Tools.Cui {
 					var rootFullName = rootDir.FullName.Replace("\\", "/");
 
 				    const string lineIndent = "#line 0";
-                    const string atexitMarker = "klee_make_symbolic";
+                    //const string atexitMarker = "klee_make_symbolic";
 
                     //include の埋め込み
 				    WriteInclude(writer,libType);
@@ -154,7 +154,7 @@ namespace Occf.Tools.Cui {
 							for (var i = mainIndex + 5; i < lineLength; i++) {
 								var sent1 = line.Substring(i, 1);
 
-								if (sent1.Equals(@"(")) {
+								if (sent1 == "(") {
 									mainFlag = true;
                                     // main直前 OccfExit()の挿入
                                     WriteOccfExit(writer, lineIndent, rootFullName);
@@ -162,7 +162,7 @@ namespace Occf.Tools.Cui {
 									bracesCount = 0;
 									break;
 								}
-								if (sent1.Equals(@" ")) {
+								if (sent1 == " ") {
 									break;
 								}
 							}
@@ -183,17 +183,30 @@ namespace Occf.Tools.Cui {
 								}
 							}
 						}
-
+                        /* atexitの挿入位置を変更　main判定された行の次の行
+                         * 詳しくはmain判定された直後の{のがある行の次の行
                         // klee_make_symbolic判定mainflagがONでかつklee_makeを検出時
                         if (mainFlag && line.Contains(atexitMarker)) {
                             var spaceNum = line.IndexOfAny(atexitMarker.ToCharArray());
                             //atexit()の挿入
                             WriteAtExit(writer, lineIndent, spaceNum);
                             insertedAtExit = true;
-                        }
+                        }*/
 
 						writer.WriteLine(line);
-						lineNum++;
+
+                        // main フラグ立って{ がある次の行に挿入
+                        if (mainFlag && !insertedAtExit && bracesCount==1)
+                        {
+                            //var spaceNum = line.IndexOfAny(atexitMarker.ToCharArray());
+                            //atexit()の挿入
+                            WriteAtExit(writer, lineIndent, 0);
+                            insertedAtExit = true;
+                        }
+                        
+                        
+                        
+                        lineNum++;
 					}
 					reader.Close();
 					writer.Close();
@@ -230,7 +243,8 @@ namespace Occf.Tools.Cui {
         }
 
         private static void WriteAtExit(StreamWriter writer,string lineIndent, int spaceNum) {
-            const string atexit = "atexit(occf_exit);";
+            //const string atexit = "atexit(occf_exit);";
+            const string atexit = "\tatexit(occf_exit);";
             writer.WriteLine("");
             writer.WriteLine(lineIndent);
             writer.WriteLine(atexit.PadLeft(spaceNum + atexit.Length));
@@ -241,9 +255,12 @@ namespace Occf.Tools.Cui {
         private static void WriteOccfExit(StreamWriter writer, string lineIndent, string rootFullName) {
             writer.WriteLine("");
             writer.WriteLine(lineIndent);
-            writer.WriteLine("void occf_exit(){");
+            writer.WriteLine("char *occftmp = getenv(\"KTEST_FILE\");");
+            //writer.WriteLine("");
             writer.WriteLine(lineIndent);
-            writer.WriteLine("\t char *occftmp = getenv(\"KTEST_FILE\");");
+            writer.WriteLine("void occf_exit(){");
+            //writer.WriteLine(lineIndent);
+            //writer.WriteLine("\t char *occftmp = getenv(\"KTEST_FILE\");");
             writer.WriteLine(lineIndent);
             writer.WriteLine("\t FILE *occffile = fopen(\"" + rootFullName + "/" + OccfNames.SuccessfulTests + "\", \"a\");");
             writer.WriteLine(lineIndent);

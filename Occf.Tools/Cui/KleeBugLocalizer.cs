@@ -62,7 +62,7 @@ namespace Occf.Tools.Cui {
 
 			var rootDirPath = "";
 			var testDirPath = "";
-			var metricsType = "";
+            var metricType = "BugLocalization.py";
 			var csvDirPath = "";
 			var passFilePath = "";
 			
@@ -71,7 +71,7 @@ namespace Occf.Tools.Cui {
 			var p = new OptionSet {
 					{ "r|root=", v => rootDirPath = v},
 					{ "t|test=", v=> testDirPath = v },
-					{ "m|metrics=", v => metricsType = v },
+					{ "m|metrics=", v => metricType = v },
 					{ "v|csv=", v => csvDirPath = v },
 					{ "u|success=", v => passFilePath = v },
 			};
@@ -111,42 +111,41 @@ namespace Occf.Tools.Cui {
 			}
 
             const string metricsDirName = "metrics";
-            const string fileDelimiter = "/";
 
-            var metricsFilePath = metricsDirName + fileDelimiter + "BugLocalization.py";
-			if (!string.IsNullOrEmpty(metricsType)) {
-				//裏短縮コード
-				switch (metricsType){
-					case "tar":
-						metricsType = "Tarantula.py";
-						break;
-					case "och":
-						metricsType = "Ochiai.py";
-						break;
-					case "jac":
-						metricsType = "Jaccard.py";
-						break;
-					case "rus":
-						metricsType = "Russell.py";
-						break;
-                    case "sbi":
-                        metricsType = "SBI.py";
-                        break;
-				}
+            // Check abbreviate name
+            switch (metricType)
+            {
+                case "tar":
+                    metricType = "Tarantula.py";
+                    break;
+                case "och":
+                    metricType = "Ochiai.py";
+                    break;
+                case "jac":
+                    metricType = "Jaccard.py";
+                    break;
+                case "rus":
+                    metricType = "Russell.py";
+                    break;
+                case "sbi":
+                    metricType = "SBI.py";
+                    break;
+            }
 
-				if (!metricsType.EndsWith(".py")){
-					metricsType += ".py";
-				}
+            // Supply the extension
+            if (!metricType.EndsWith(".py"))
+            {
+                metricType += ".py";
+            }
 
-                metricsFilePath = metricsDirName + fileDelimiter + metricsType;
-				var metricsFileInfo = new FileInfo(metricsFilePath);
-				if (!metricsFileInfo.Exists){
-					Console.WriteLine("Error: not find \"" + metricsFilePath + "\"");
-					Console.WriteLine("Path: " + metricsFileInfo.FullName);
-                    metricsFilePath = metricsDirName + fileDelimiter + "BugLocalization.py";
-                    Console.WriteLine("chage default file : " + metricsFilePath);
-				}
-			}
+            var metricFilePath = Path.Combine(OccfGlobal.ExeDirectory, metricsDirName, metricType);
+            if (File.Exists(metricFilePath))
+            {
+                Console.WriteLine("Unknown metric: \"" + metricType + "\"");
+                Console.WriteLine("Path: " + metricFilePath);
+                metricFilePath = Path.Combine(OccfGlobal.ExeDirectory, metricsDirName, "BugLocalization.py");
+                Console.WriteLine("Use default metric: " + metricType);
+            }
 
 			DirectoryInfo csvDir = null;
 			if (!string.IsNullOrEmpty(csvDirPath)) {
@@ -168,7 +167,7 @@ namespace Occf.Tools.Cui {
 				}
 			}
 
-			Localize(rootDir, testDir, metricsFilePath, csvDir, passFile);
+			Localize(rootDir, testDir, metricFilePath, csvDir, passFile);
 			return true;
 		}
 

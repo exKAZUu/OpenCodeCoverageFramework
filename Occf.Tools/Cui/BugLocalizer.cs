@@ -220,6 +220,8 @@ namespace Occf.Tools.Cui {
                 CoverageInfo covInfo, TestInfo testInfo, string metricsFilePath) {
 
             var calcMetricFunc = LoadMetricFunc(metricsFilePath);
+            var maxStatementCount = covInfo.StatementIndexAndTargets.Count();
+            var currentStatementCount = 1;
             foreach (var stmt in covInfo.StatementIndexAndTargets) {
                 var id = stmt.Item1;
                 var element = stmt.Item2;
@@ -245,6 +247,9 @@ namespace Occf.Tools.Cui {
                         localized.Failed).Cast<double>().ToList();
                 localized.Values = metrics.ToList();
                 yield return localized;
+
+                Console.Write("Calculating: " + currentStatementCount + " / " + maxStatementCount + "\r");
+                currentStatementCount++;
             }
         }
 
