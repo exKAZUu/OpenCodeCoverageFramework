@@ -5,7 +5,7 @@
 static FILE *gFile = NULL;
 
 int Initialize() {
-	char *name = ".occf_coverage_data";
+	char *name = ".occf_record";
 	gFile = fopen(name, "ab");
 	return gFile != NULL;
 }
