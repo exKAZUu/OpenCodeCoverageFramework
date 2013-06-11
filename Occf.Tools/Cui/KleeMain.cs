@@ -244,8 +244,10 @@ namespace Occf.Tools.Cui {
 
         private static void WriteAtExit(StreamWriter writer,string lineIndent, int spaceNum) {
             //const string atexit = "atexit(occf_exit);";
-            const string atexit = "\tatexit(occf_exit);";
+            const string atexit = "\t atexit(occf_exit);";
             writer.WriteLine("");
+            writer.WriteLine(lineIndent);
+            writer.WriteLine("\t occftmp = getenv(\"KTEST_FILE\");");
             writer.WriteLine(lineIndent);
             writer.WriteLine(atexit.PadLeft(spaceNum + atexit.Length));
             writer.WriteLine(lineIndent);
@@ -255,7 +257,8 @@ namespace Occf.Tools.Cui {
         private static void WriteOccfExit(StreamWriter writer, string lineIndent, string rootFullName) {
             writer.WriteLine("");
             writer.WriteLine(lineIndent);
-            writer.WriteLine("char *occftmp = getenv(\"KTEST_FILE\");");
+            //writer.WriteLine("char *occftmp = getenv(\"KTEST_FILE\");");
+            writer.WriteLine("char *occftmp;");
             //writer.WriteLine("");
             writer.WriteLine(lineIndent);
             writer.WriteLine("void occf_exit(){");
