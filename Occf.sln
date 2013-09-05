@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2010
+# Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Occf.Core", "Occf.Core\Occf.Core.csproj", "{E2C3E1ED-7C87-4F50-9786-1CB9DA7FEB93}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Occf.Core.Tests", "Occf.Core.Tests\Occf.Core.Tests.csproj", "{22E6CAF5-7BD0-44E6-A329-687681AD6E28}"
@@ -51,6 +51,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Occf.Languages.Ruby19", "Occf.Languages\Ruby19\Occf.Languages.Ruby19.csproj", "{13EBDD1B-7B90-4941-A4EC-D4B1C5024CB4}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{356CF850-0FFA-4364-A889-9EAD6C88529B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Occf.Learner", "Occf.Learner\Occf.Learner.csproj", "{F57394BC-7CB4-4E09-97D6-E8AD2F45F4DD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Occf.Learner.Tests", "Occf.Learner.Tests\Occf.Learner.Tests.csproj", "{BF6E8E3D-3404-403C-88B3-F0107121F501}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -338,6 +342,30 @@ Global
 		{13EBDD1B-7B90-4941-A4EC-D4B1C5024CB4}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{13EBDD1B-7B90-4941-A4EC-D4B1C5024CB4}.Release|Win32.ActiveCfg = Release|Any CPU
 		{13EBDD1B-7B90-4941-A4EC-D4B1C5024CB4}.Release|x86.ActiveCfg = Release|Any CPU
+		{F57394BC-7CB4-4E09-97D6-E8AD2F45F4DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F57394BC-7CB4-4E09-97D6-E8AD2F45F4DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F57394BC-7CB4-4E09-97D6-E8AD2F45F4DD}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{F57394BC-7CB4-4E09-97D6-E8AD2F45F4DD}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{F57394BC-7CB4-4E09-97D6-E8AD2F45F4DD}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{F57394BC-7CB4-4E09-97D6-E8AD2F45F4DD}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F57394BC-7CB4-4E09-97D6-E8AD2F45F4DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F57394BC-7CB4-4E09-97D6-E8AD2F45F4DD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F57394BC-7CB4-4E09-97D6-E8AD2F45F4DD}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{F57394BC-7CB4-4E09-97D6-E8AD2F45F4DD}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{F57394BC-7CB4-4E09-97D6-E8AD2F45F4DD}.Release|Win32.ActiveCfg = Release|Any CPU
+		{F57394BC-7CB4-4E09-97D6-E8AD2F45F4DD}.Release|x86.ActiveCfg = Release|Any CPU
+		{BF6E8E3D-3404-403C-88B3-F0107121F501}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BF6E8E3D-3404-403C-88B3-F0107121F501}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BF6E8E3D-3404-403C-88B3-F0107121F501}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{BF6E8E3D-3404-403C-88B3-F0107121F501}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{BF6E8E3D-3404-403C-88B3-F0107121F501}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{BF6E8E3D-3404-403C-88B3-F0107121F501}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{BF6E8E3D-3404-403C-88B3-F0107121F501}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BF6E8E3D-3404-403C-88B3-F0107121F501}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BF6E8E3D-3404-403C-88B3-F0107121F501}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{BF6E8E3D-3404-403C-88B3-F0107121F501}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{BF6E8E3D-3404-403C-88B3-F0107121F501}.Release|Win32.ActiveCfg = Release|Any CPU
+		{BF6E8E3D-3404-403C-88B3-F0107121F501}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

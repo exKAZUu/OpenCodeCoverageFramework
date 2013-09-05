@@ -57,6 +57,7 @@
   <ItemGroup>
     <Compile Include="InsertProgramForCTest.cs" />
     <Compile Include="InsertProgramForJavaTest.cs" />
+    <Compile Include="KleeMainTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
