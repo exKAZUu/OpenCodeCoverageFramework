@@ -42,7 +42,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MustBeRule.cs" />
+    <Compile Include="MustHaveRule.cs" />
+    <Compile Include="MustNotBeRule.cs" />
+    <Compile Include="MustNotHaveRule.cs" />
+    <Compile Include="FilteringRule.cs" />
     <Compile Include="FindLearner.cs" />
+    <Compile Include="IFilteringRule.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

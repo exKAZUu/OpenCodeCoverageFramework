@@ -3,101 +3,176 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 using Paraiba.Linq;
-using Paraiba.Xml.Linq;
 
 namespace Occf.Learner {
-    public class FindRule {
-        public IList<Step> Steps { get; set; }
-    }
+	public static class FindLearner {
+		public static Dictionary<string, List<IFilteringRule>> Learn(
+				XElement ast, IEnumerable<XElement> elements) {
+			var name2elements = new Dictionary<string, HashSet<XElement>>();
+			var name2rules = new Dictionary<string, List<IFilteringRule>>();
+			foreach (var element in elements) {
+				HashSet<XElement> set;
+				if (!name2elements.TryGetValue(element.Name.LocalName, out set)) {
+					set = new HashSet<XElement>();
+					name2elements.Add(element.Name.LocalName, set);
+				}
+				set.Add(element);
+			}
 
-    public class NodeProperty {}
+			foreach (var nameAndElements in name2elements) {
+				var name = nameAndElements.Key;
+				var all = ast.DescendantsAndSelf(name).ToHashSet();
+				var accepted = nameAndElements.Value;
 
-    public class ChildrenCountNodeProperty : NodeProperty {}
+				var rules = Learn(all, accepted).ToList();
+				name2rules.Add(name, rules);
 
-    public class NodeCondition {}
+				var filtered = rules.Aggregate((IEnumerable<XElement>)all,
+						(current, rule) => rule.Filter(current));
+				Console.WriteLine("ElementName: " + name + " (" + all.Count + ", " + accepted.Count + ", "
+				                  + filtered.Count() + ")");
 
-    public class Step {
-        public IList<NodeCondition> Conditions { get; set; }
-    }
+				foreach (var rule in rules) {
+					var count = rule.CountRemovableTargets(all);
+					Console.WriteLine(count + ": " + rule);
+				}
+			}
+			return name2rules;
+		}
 
-    public class InclusionStep : Step {
-        //public void DoStep(XElement ast, ) {
+		public static IEnumerable<IFilteringRule> Learn(HashSet<XElement> all, HashSet<XElement> accepted) {
+			var denied = all.ToHashSet();
+			denied.ExceptWith(accepted);
 
-        //}
-    }
+			/*
+			 * C: FirstElement
+			 * 
+			return root.Descendants("statement")
+					.Where(
+							e => e.FirstElement().Name.LocalName != "labeled_statement"
+									&& e.FirstElement().Name.LocalName != "compound_statement");
+			 */
 
-    public class ExclusionStep : Step {}
+			/*
+			 * Java: FirstElement
+			 * 
+			return root.Descendants("statement")
+					.Where(e => {
+						// ブロック自身は意味を持たないステートメントで、中身だけが必要なので除外
+						if (e.FirstElement().Name() == "block") {
+							return false;
+						}
+						// ラベルはループ文に付くため，ラベルの中身は除外
+						var second = e.Parent.NthElementOrDefault(1);
+						if (second != null && second.Value == ":"
+						    && e.Parent.Name() == "statement") {
+							return false;
+						}
+						if (e.FirstElement().Value == ";") {
+							return false;
+						}
+						return true;
+					});
+			 */
 
-    public static class FindLearner {
-        public static void Learn(XElement ast, IEnumerable<XElement> elements) {
-            var name2elements = new Dictionary<string, HashSet<XElement>>();
-            foreach (var element in elements) {
-                HashSet<XElement> set;
-                if (!name2elements.TryGetValue(element.Name.LocalName, out set)) {
-                    set = new HashSet<XElement>();
-                    name2elements.Add(element.Name.LocalName, set);
-                }
-                set.Add(element);
-            }
+			/*
+			 * C#: FirstElement
+			 * 
+            var decls = root.Descendants("declaration_statement");
+            var stmts = root.Descendants("embedded_statement")
+                    .Where(e => e.FirstElement().Name() != "block");
+            return stmts.Concat(decls);
+			 */
 
-            foreach (var nameAndElements in name2elements) {
-                Learn(ast, nameAndElements.Key, nameAndElements.Value);
-            }
-        }
+			/*
+			 * Ruby: Elements()
+			 * 
+            return root.DescendantsAndSelf("block")
+                    .SelectMany(e => e.Elements())
+                    .Where(e => e.Name() != "block");
 
-        public static void Learn(XElement ast, string name, HashSet<XElement> targets) {
-            var others = ast.DescendantsAndSelf(name).ToHashSet();
-            others.ExceptWith(targets);
+			 */
 
-            {
-                Func<XElement, int> selector = e => e.Elements().Count();
-                Learn(targets, selector, others);
-            }
+			/*
+			 * Lua: None
+			 * 
+            return root.Descendants("stat")
+                    .Concat(root.Descendants("laststat"));
+			 */
 
-            {
-                Func<XElement, string> selector =
-                        e => string.Join("/", e.Parent.Elements().Select(e2 => e2.NameOrValue()));
-                Learn(targets, selector, others);
-            }
+			/*
+			 * Python: None
+			 * 
+            return root
+                    .Descendants()
+                    .Where(e => e.Name.LocalName == "small_stmt"
+                            || e.Name.LocalName == "compound_stmt");
+			 */
 
-            {
-                Func<XElement, IEnumerable<string>> selector =
-                        e => e.Elements().Select(e2 => e2.Name.LocalName);
-                Learn2(targets, selector, others);
-            }
+			yield return LearnMustBeRule(accepted, CountChildren);
+			yield return LearnMustNotBeRule(accepted, CountChildren, denied);
 
-            {
-                Func<XElement, IEnumerable<string>> selector =
-                        e => e.Parent.Elements().Select(e2 => e2.Name.LocalName);
-                Learn2(targets, selector, others);
-            }
+			foreach (var rule in LearnMustNotBeRule(accepted, GetChildrenSet)) {
+				yield return rule;
+			}
+			yield return LearnMustNotHaveRule(accepted, GetChildrenSet, denied);
+		}
 
-            Console.WriteLine(others.Count);
-        }
+		private static int CountChildren(XElement e) {
+			return e.Elements().Count();
+		}
 
-        private static void Learn<T>(IEnumerable<XElement> targets, Func<XElement, T> selector, HashSet<XElement> others) {
-            var targetProps = targets.Select(selector).ToHashSet();
-            var otherProps = others.Select(selector).ToHashSet();
-            otherProps.ExceptWith(targetProps);
-            others.RemoveWhere(e => otherProps.Contains(selector(e)));
-        }
+		private static string GetChildrenSequence(XElement e) {
+			return string.Join("/", e.Elements().Select(e2 => e2.NameOrValue()));
+		}
 
-        private static void Learn2<T>(HashSet<XElement> targets, Func<XElement, IEnumerable<T>> selector, HashSet<XElement> others) {
-            var targetProps = targets.SelectMany(selector).ToHashSet();
-            var otherProps = others.SelectMany(selector).ToHashSet();
-            var requiredProps = targets.Select(selector)
-                    .Aggregate((acc, values) => acc.Intersect(values))
-                    .ToHashSet();
-            requiredProps.ExceptWith(otherProps);
-            if (requiredProps.Count > 0) {
-                others.RemoveWhere(e => !selector(e).IsIntersect(requiredProps));
-            }
-            otherProps.ExceptWith(targetProps);
-            others.RemoveWhere(e => selector(e).IsIntersect(otherProps));
-        }
+		private static string GetSelfSequence(XElement e) {
+			return string.Join("/", e.Parent.Elements().Select(e2 => e2.NameOrValue()));
+		}
 
-        public static string NameOrValue(this XElement element) {
-            return element.Name.LocalName != "TOKEN" ? element.Name.LocalName : element.Value;
-        }
-    }
+		private static IEnumerable<string> GetChildrenSet(XElement e) {
+			return e.Elements().Select(e2 => e2.NameOrValue());
+		}
+
+		private static IEnumerable<string> GetSelfSet(XElement e) {
+			return e.Parent.Elements().Select(e2 => e2.NameOrValue());
+		}
+
+		private static MustBeRule<T> LearnMustBeRule<T>(
+				IEnumerable<XElement> accepted, Func<XElement, T> selector) {
+			var acceptedSet = accepted.Select(selector).ToHashSet();
+			return new MustBeRule<T>(acceptedSet, selector);
+		}
+
+		private static MustNotBeRule<T> LearnMustNotBeRule<T>(
+				IEnumerable<XElement> accepted, Func<XElement, T> selector, IEnumerable<XElement> denied) {
+			var acceptedSet = accepted.Select(selector).ToHashSet();
+			var deniedSet = denied.Select(selector).ToHashSet();
+			deniedSet.ExceptWith(acceptedSet);
+			return new MustNotBeRule<T>(deniedSet, selector);
+		}
+
+		private static IEnumerable<MustHaveRule<T>> LearnMustNotBeRule<T>(
+				IEnumerable<XElement> accepted, Func<XElement, IEnumerable<T>> selector) {
+			var requiredSet = accepted.Select(selector)
+					.Aggregate((acc, values) => acc.Intersect(values))
+					.ToHashSet();
+			if (requiredSet.Count > 0) {
+				yield return new MustHaveRule<T>(requiredSet, selector);
+			}
+		}
+
+		private static MustNotHaveRule<T> LearnMustNotHaveRule<T>(
+				IEnumerable<XElement> accepted, Func<XElement, IEnumerable<T>> selector,
+				IEnumerable<XElement> denied) {
+			var acceptedSet = accepted.SelectMany(selector).ToHashSet();
+			var deniedSet = denied.SelectMany(selector).ToHashSet();
+			deniedSet.ExceptWith(acceptedSet);
+			return new MustNotHaveRule<T>(deniedSet, selector);
+		}
+
+		public static string NameOrValue(this XElement element) {
+			return element.Name.LocalName != "TOKEN" ? element.Name.LocalName : element.Value;
+		}
+	}
 }

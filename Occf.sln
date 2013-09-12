@@ -39,13 +39,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Languages", "Languages", "{
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Occf.Sample", "Occf.Sample\Occf.Sample.csproj", "{D6BCFC5E-20FE-464D-B28B-3F1B272CDDE4}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{89BCD5DD-68CE-45BB-82DA-D289D0CB5FB4}"
-	ProjectSection(SolutionItems) = preProject
-		.nuget\NuGet.Config = .nuget\NuGet.Config
-		.nuget\NuGet.exe = .nuget\NuGet.exe
-		.nuget\NuGet.targets = .nuget\NuGet.targets
-	EndProjectSection
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Occf.Languages.Cpp", "Occf.Languages\Cpp\Occf.Languages.Cpp.csproj", "{C812C6C8-660F-4FFF-87AA-2A9514542FD0}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Occf.Languages.Ruby19", "Occf.Languages\Ruby19\Occf.Languages.Ruby19.csproj", "{13EBDD1B-7B90-4941-A4EC-D4B1C5024CB4}"

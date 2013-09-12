@@ -27,36 +27,38 @@ using Occf.Core.Tests;
 using Paraiba.IO;
 
 namespace Occf.Languages.Tests.Java {
-    [TestFixture]
-    public class JavaInstrumentationCodeInsertionTest {
-        private static IEnumerable<TestCaseData> TestCases {
-            get {
-                var names = new[] {
-                        "Block1.java",
-                        "Block2.java",
-                        "Block3.java",
-                        "Condition.java",
-                        "Simple.java",
-                };
-                return names.Select(name => new TestCaseData(name));
-            }
-        }
+	[TestFixture]
+	public class JavaInstrumentationCodeInsertionTest {
+		private static IEnumerable<TestCaseData> TestCases {
+			get {
+				var names = new[] {
+					"Block1.java",
+					"Block2.java",
+					"Block3.java",
+					"Condition.java",
+					"Simple.java",
+					"GenerateCommand.java",
+					"TestCodeGenerator.java",
+				};
+				return names.Select(name => new TestCaseData(name));
+			}
+		}
 
-        [Test, TestCaseSource("TestCases")]
-        public void VerifyInstrumentationCode(string fileName) {
-            var profile = LanguageSupports.GetCoverageModeByClassName("Java");
-            CodeInsertTest.VerifyCodeInsertion(profile, fileName);
-        }
+		[Test, TestCaseSource("TestCases")]
+		public void VerifyInstrumentationCode(string fileName) {
+			var profile = LanguageSupports.GetCoverageModeByClassName("Java");
+			CodeInsertTest.VerifyCodeInsertion(profile, fileName);
+		}
 
-        [Test, TestCaseSource("TestCases")]
-        public void InsertInstrumentationCode(string fileName) {
-            var profile = LanguageSupports.GetCoverageModeByClassName("Java");
-            CodeInsertTest.InsertInstrumentationCode(profile, fileName);
+		[Test, TestCaseSource("TestCases")]
+		public void InsertInstrumentationCode(string fileName) {
+			var profile = LanguageSupports.GetCoverageModeByClassName("Java");
+			CodeInsertTest.InsertInstrumentationCode(profile, fileName);
 
 			var info = new CoverageInfo(
 					Fixture.GetCoverageInputPath(), profile.Name, SharingMethod.SharedMemory);
 			var inPath = Path.Combine(Fixture.GetCoverageInputPath(), fileName);
-            var codeFile = new FileInfo(inPath);
+			var codeFile = new FileInfo(inPath);
 
 			var relativePath = ParaibaPath.GetRelativePath(codeFile.FullName, info.BasePath);
 			var ast = profile.CodeToXml.GenerateFromFile(codeFile.FullName);
@@ -68,6 +70,6 @@ namespace Occf.Languages.Tests.Java {
 			CodeTransformer.InstrumentStatementAndPredicate(info, ast, profile, path);
 
 			File.WriteAllText(Fixture.GetOutputPath(fileName) + ".modified.xml", ast.ToString());
-        }
-    }
+		}
+	}
 }
