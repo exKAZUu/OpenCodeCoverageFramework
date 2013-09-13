@@ -49,7 +49,7 @@ namespace Occf.Languages.CSharp.Manipulators.Transformers {
 
         public override void InsertImport(XElement target) {}
 
-        public override void Align(XElement root) {
+        public override void SupplementBlock(XElement root) {
             SupplementBlock(root, "block", "{", "}");
         }
 

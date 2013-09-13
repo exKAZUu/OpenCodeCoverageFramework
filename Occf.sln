@@ -51,6 +51,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Occf.Learner.Tests", "Occf.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Occf.Learner.Tool", "Occf.Learner.Tool\Occf.Learner.Tool.csproj", "{5F7B7519-036F-4F7B-A1AC-F345D243CB39}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Occf.Tools.Experiment", "Occf.Tools.Experiment\Occf.Tools.Experiment.csproj", "{65B56562-2501-49BA-8DF7-F11420B0F896}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -373,6 +375,18 @@ Global
 		{5F7B7519-036F-4F7B-A1AC-F345D243CB39}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{5F7B7519-036F-4F7B-A1AC-F345D243CB39}.Release|Win32.ActiveCfg = Release|Any CPU
 		{5F7B7519-036F-4F7B-A1AC-F345D243CB39}.Release|x86.ActiveCfg = Release|Any CPU
+		{65B56562-2501-49BA-8DF7-F11420B0F896}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{65B56562-2501-49BA-8DF7-F11420B0F896}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{65B56562-2501-49BA-8DF7-F11420B0F896}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{65B56562-2501-49BA-8DF7-F11420B0F896}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{65B56562-2501-49BA-8DF7-F11420B0F896}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{65B56562-2501-49BA-8DF7-F11420B0F896}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{65B56562-2501-49BA-8DF7-F11420B0F896}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{65B56562-2501-49BA-8DF7-F11420B0F896}.Release|Any CPU.Build.0 = Release|Any CPU
+		{65B56562-2501-49BA-8DF7-F11420B0F896}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{65B56562-2501-49BA-8DF7-F11420B0F896}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{65B56562-2501-49BA-8DF7-F11420B0F896}.Release|Win32.ActiveCfg = Release|Any CPU
+		{65B56562-2501-49BA-8DF7-F11420B0F896}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -392,6 +406,7 @@ Global
 		{F1C1EC4E-665A-40D2-8E5F-1B81B3F274CE} = {356CF850-0FFA-4364-A889-9EAD6C88529B}
 		{F9555428-0420-42F6-BE6B-54991A52F8C9} = {356CF850-0FFA-4364-A889-9EAD6C88529B}
 		{8951538A-CB06-49DF-9BB3-D5CFB08205C7} = {356CF850-0FFA-4364-A889-9EAD6C88529B}
+		{65B56562-2501-49BA-8DF7-F11420B0F896} = {356CF850-0FFA-4364-A889-9EAD6C88529B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		BuildVersion_UseGlobalSettings = False

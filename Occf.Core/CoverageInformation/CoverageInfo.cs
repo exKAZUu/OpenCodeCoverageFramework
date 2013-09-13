@@ -89,25 +89,24 @@ namespace Occf.Core.CoverageInformation {
 			return TargetGroups.Skip(r.Item1).Take(r.Item2 - r.Item1);
 		}
 
-		public static CoverageInfo ReadCoverageInfo(FileInfo infoFile) {
-			return ReadCoverageInfo(infoFile, new BinaryFormatter());
+		public static CoverageInfo Read(FileInfo infoFile) {
+			return Read(infoFile, new BinaryFormatter());
 		}
 
-		public static CoverageInfo ReadCoverageInfo(FileInfo infoFile, BinaryFormatter formatter) {
+		public static CoverageInfo Read(FileInfo infoFile, BinaryFormatter formatter) {
 			using (var fs = new FileStream(infoFile.FullName, FileMode.Open)) {
 				return (CoverageInfo)formatter.Deserialize(fs);
 			}
 		}
 
-		public static void WriteCoverageInfo(DirectoryInfo rootDir, CoverageInfo covInfo) {
-			WriteCoverageInfo(rootDir, covInfo, new BinaryFormatter());
+		public void Write(DirectoryInfo rootDir) {
+			Write(rootDir, new BinaryFormatter());
 		}
 
-		public static void WriteCoverageInfo(
-				DirectoryInfo rootDir, CoverageInfo covInfo, BinaryFormatter formatter) {
+		public void Write(DirectoryInfo rootDir, BinaryFormatter formatter) {
 			var covPath = Path.Combine(rootDir.FullName, OccfNames.CoverageInfo);
 			using (var fs = new FileStream(covPath, FileMode.Create)) {
-				formatter.Serialize(fs, covInfo);
+				formatter.Serialize(fs, this);
 			}
 		}
 	}

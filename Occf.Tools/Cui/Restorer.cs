@@ -29,55 +29,40 @@ namespace Occf.Tools.Cui {
 
 		private static readonly string Usage =
 				"Occf 1.0.0" + "\n" +
-						"Copyright (C) 2011 Kazunori SAKAMOTO" + "\n" +
-						"" + "\n" +
-						"Usage: Occf restore <path1> <path2> ..." + "\n" +
-						"" + "\n" +
-						S + "<path>".PadRight(W) + "path of directory containing files to restore"
-						+ "\n" +
-						"";
+				"Copyright (C) 2011 Kazunori SAKAMOTO" + "\n" +
+				"" + "\n" +
+				"Usage: Occf restore <path1> <path2> ..." + "\n" +
+				"" + "\n" +
+				S + "<path>".PadRight(W) + "path of directory containing files to restore"
+				+ "\n" +
+				"";
 
 		public static bool Run(IList<string> args) {
 			if (args.Count <= 0) {
 				return Program.Print(Usage);
 			}
 
-			var filePaths = args.Where(Directory.Exists)
-					.SelectMany(
-							dp =>
-									Directory.GetFiles(
-											dp, "*" + OccfNames.BackupSuffix,
-											SearchOption.AllDirectories));
+			var dirs = args.Select(path => new DirectoryInfo(path))
+					.Where(dir => dir.Exists)
+					.ToList();
+			Restore(dirs.SelectMany(dir =>
+					dir.EnumerateFiles("*" + OccfNames.KleeBackUpSuffix, SearchOption.AllDirectories)));
+			Restore(dirs.SelectMany(dir =>
+					dir.EnumerateFiles("*" + OccfNames.LineBackUpSuffix, SearchOption.AllDirectories)));
+			Restore(dirs.SelectMany(dir =>
+					dir.EnumerateFiles("*" + OccfNames.BackupSuffix, SearchOption.AllDirectories)));
+			return true;
+		}
 
-			var lineFilePaths = args.Where(Directory.Exists)
-					.SelectMany(
-							dp =>
-									Directory.GetFiles(
-											dp, "*" + OccfNames.LineBackUpSuffix,
-											SearchOption.AllDirectories));
-
-			var kleeFilePaths = args.Where(Directory.Exists)
-					.SelectMany(
-							dp =>
-									Directory.GetFiles(
-											dp, "*" + OccfNames.KleeBackUpSuffix,
-											SearchOption.AllDirectories));
-			//nullエラー出ないよね？
-			filePaths = filePaths.Concat(lineFilePaths.Concat(kleeFilePaths));
-
-			for (var i = 0; i < filePaths.Count(); i++) {
-				Console.WriteLine("filepaths :" + filePaths.ElementAt(i));
-			}
-
-			foreach (var filePath in filePaths) {
-				var destPath = filePath.Substring(
-						0,
-						filePath.Length - OccfNames.BackupSuffix.Length);
+		private static void Restore(IEnumerable<FileInfo> files) {
+			foreach (var file in files) {
+				var destPath = Path.GetFileNameWithoutExtension(file.FullName);
 				File.Delete(destPath);
-				File.Move(filePath, destPath);
+				file.MoveTo(destPath);
+				File.Delete(destPath + OccfNames.LineBackUpSuffix);
+				File.Delete(destPath + OccfNames.BackupSuffix);
 				Console.WriteLine("restored:" + destPath);
 			}
-			return true;
 		}
 	}
 }

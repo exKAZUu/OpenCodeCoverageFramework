@@ -28,6 +28,7 @@ using Occf.Core.CoverageInformation;
 using Occf.Core.Manipulators;
 using Occf.Core.TestInformation;
 using Occf.Core.Utils;
+using Paraiba.Linq;
 
 namespace Occf.Tools.Cui {
     public class Inserter {
@@ -226,24 +227,15 @@ namespace Occf.Tools.Cui {
             //root
             WriteInfoFiles(rootDir, covInfo, testInfo);
 
-            CopyLibraries(mode, libDir, recordingMode);
+	        mode.CopyLibraries(libDir, recordingMode);
         }
 
-        private static void CopyLibraries(
-                LanguageSupport mode, DirectoryInfo dirInfo, RecordingMode recordingMode) {
-            mode.CopyLibraries(dirInfo, recordingMode);
-        }
-
-        private static void RemoveExistingCoverageDataFiles(
-                DirectoryInfo rootDir, DirectoryInfo workDir) {
+	    private static void RemoveExistingCoverageDataFiles(params DirectoryInfo[] dirInfos) {
             const string filePattern = "*" + OccfNames.Record;
-            var targets = rootDir.EnumerateFiles(filePattern, SearchOption.AllDirectories);
-            if (workDir != null) {
-                targets = targets.Concat(workDir.EnumerateFiles(filePattern));
-            }
-            foreach (var target in targets.ToList()) {
-                target.Delete();
-            }
+		    dirInfos.Where(dir => dir != null)
+				    .SelectMany(dir => dir.EnumerateFiles(filePattern, SearchOption.AllDirectories))
+					.ToList()
+				    .ForEach(file => file.Delete());
         }
 
         private static void WriteProductionCodeFiles(
@@ -278,14 +270,13 @@ namespace Occf.Tools.Cui {
             }
         }
 
-        private static void WriteInfoFiles(
-                DirectoryInfo rootDir, CoverageInfo covInfo, TestInfo testInfo) {
+        private static void WriteInfoFiles(DirectoryInfo rootDir, CoverageInfo covInfo, TestInfo testInfo) {
             var formatter = new BinaryFormatter();
-            CoverageInfo.WriteCoverageInfo(rootDir, covInfo, formatter);
+            covInfo.Write(rootDir, formatter);
             if (testInfo == null) {
                 return;
             }
-            TestInfo.WriteTestInfo(rootDir, testInfo, formatter);
+            testInfo.Write(rootDir, formatter);
         }
     }
 }

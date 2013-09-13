@@ -93,7 +93,7 @@ namespace Occf.Tools.Cui {
 			// カバレッジ情報（母数）の取得
 			var formatter = new BinaryFormatter();
 			var covInfoPath = FileUtil.GetCoverageInfo(rootDir);
-			var covInfo = CoverageInfo.ReadCoverageInfo(covInfoPath, formatter);
+			var covInfo = CoverageInfo.Read(covInfoPath, formatter);
 			CoverageDataReader.ReadFile(covInfo, covDataFile);
 
 			var tags = ReconstructTags(covInfo);

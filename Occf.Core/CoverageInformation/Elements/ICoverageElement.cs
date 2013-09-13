@@ -16,12 +16,14 @@
 
 #endregion
 
+using System.Collections.Generic;
 using Code2Xml.Core.Position;
 
 namespace Occf.Core.CoverageInformation.Elements {
 	public interface ICoverageElement {
 		CodePosition Position { get; }
 		CoverageState State { get; }
+		List<string> Qualifiers { get; }
 		string Tag { get; }
 		string RelativePath { get; }
 	}

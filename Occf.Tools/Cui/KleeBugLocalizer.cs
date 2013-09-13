@@ -176,7 +176,7 @@ namespace Occf.Tools.Cui {
                 FileInfo passFile) {
             var formatter = new BinaryFormatter();
             var covInfoFile = FileUtil.GetCoverageInfo(rootDir);
-            var covInfo = CoverageInfo.ReadCoverageInfo(covInfoFile, formatter);
+            var covInfo = CoverageInfo.Read(covInfoFile, formatter);
             var testInfo = AnalyzeKleeTestFiles(testDir);
 
             if (passFile != null) {

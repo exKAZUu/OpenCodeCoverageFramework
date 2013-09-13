@@ -62,6 +62,10 @@ namespace Occf.Core.CoverageInformation.Elements {
 			get { return Targets.Aggregate(ParentElement.State, (s, t) => s & t.State); }
 		}
 
+		public List<string> Qualifiers {
+			get { return ParentElement.Qualifiers; }
+		}
+
 		public string Tag {
 			get { return ParentElement.Tag; }
 		}

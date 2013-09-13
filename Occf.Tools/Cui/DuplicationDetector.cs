@@ -89,7 +89,7 @@ namespace Occf.Tools.Cui {
         private static bool Detect(DirectoryInfo rootDir, FileInfo covDataFile, string criterion) {
             var formatter = new BinaryFormatter();
             var testInfoPath = FileUtil.GetTestInfo(rootDir);
-            var testInfo = TestInfo.ReadTestInfo(testInfoPath, formatter);
+            var testInfo = TestInfo.Read(testInfoPath, formatter);
             testInfo.InitializeForStoringData(true);
             CoverageDataReader.ReadFile(testInfo, covDataFile);
             var testCases = testInfo.TestCases;

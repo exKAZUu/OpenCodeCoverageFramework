@@ -84,8 +84,8 @@ namespace Occf.Tools.Cui.Tests {
             Compile(outDir.FullName);
             RunTest(outDir.FullName, testTargetNames);
 
-            var covInfo = CoverageInfo.ReadCoverageInfo(covInfoFile);
-            var testInfo = TestInfo.ReadTestInfo(testInfoFile);
+            var covInfo = CoverageInfo.Read(covInfoFile);
+            var testInfo = TestInfo.Read(testInfoFile);
 
             testInfo.InitializeForStoringData(true);
             BugLocalizer.ReadJUnitResult(resultFile, testInfo);

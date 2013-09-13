@@ -81,7 +81,7 @@ namespace Occf.Languages.Python3.Manipulators.Transformers {
 	        throw new NotImplementedException();
 	    }
 
-	    public override void Align(XElement root) {}
+	    public override void SupplementBlock(XElement root) {}
 
 		public override void SupplementDefaultCase(XElement root) {}
 

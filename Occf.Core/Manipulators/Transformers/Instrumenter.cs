@@ -112,7 +112,7 @@ namespace Occf.Core.Manipulators.Transformers {
 			var fileId = RegisterFile(fileInfo);
 
 			// ステートメントを挿入できるようにブロックを補う
-			inserter.Align(root);
+			inserter.SupplementBlock(root);
 
 			// switch文を正しく測定できるようにdefault節を追加する
 			inserter.SupplementDefaultCase(root);

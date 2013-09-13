@@ -17,23 +17,23 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 using System.Xml.Linq;
 using Code2Xml.Core.Position;
 using Occf.Core.Manipulators.Taggers;
 
 namespace Occf.Core.CoverageInformation.Elements {
-    /// <summary>
-    /// A class for a program element to measure coverage.
-    /// This should be class instead of struct
-    /// because 
-    /// </summary>
+	/// <summary>
+	/// A class for a program element to measure coverage.
+	/// This should be class instead of struct
+	/// because 
+	/// </summary>
 	[Serializable]
 	public class CoverageElement : ICoverageElement {
 		public CoverageElement(string relativePath, XElement node, Tagger tagger) {
 			RelativePath = relativePath;
 			Position = CodePositions.Create(node);
-			var tag = relativePath.Replace('\\', '>') + '>' + tagger.Tag(node);
-			Tag = tag.EndsWith(">") ? tag : tag + ">";
+			Qualifiers = tagger.Tag(node);
 		}
 
 		#region ICoverageElement Members
@@ -42,7 +42,11 @@ namespace Occf.Core.CoverageInformation.Elements {
 
 		public CoverageState State { get; protected set; }
 
-		public string Tag { get; private set; }
+		public List<string> Qualifiers { get; private set; }
+
+		public string Tag {
+			get { return RelativePath.Replace('\\', '>') + '>' + string.Join(">", Qualifiers) + ">"; }
+		}
 
 		public string RelativePath { get; private set; }
 

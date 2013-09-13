@@ -21,17 +21,5 @@ using Occf.Core.Manipulators.Taggers;
 
 namespace Occf.Languages.JavaScript.Manipulators.Taggers {
 	public class JavaScriptTagger : Tagger {
-		public override string Tag(XElement elements) {
-			var tag = "";
-			//var classNodes = elements.Parents()
-			//    .Where(e => e.Name.LocalName == "classdef");
-			//foreach (var classNode in classNodes) {
-			//    var node = classNode.ElementAtOrDefault(1);
-			//    if (node == null)
-			//        continue;
-			//    tag += node.Value + '>';
-			//}
-			return tag;
-		}
 	}
 }

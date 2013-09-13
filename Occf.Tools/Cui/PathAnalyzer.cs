@@ -70,8 +70,8 @@ namespace Occf.Tools.Cui {
 			var formatter = new BinaryFormatter();
 			var covInfoFile = FileUtil.GetCoverageInfo(rootDir);
 			var testInfoFile = FileUtil.GetTestInfo(rootDir);
-			var covInfo = CoverageInfo.ReadCoverageInfo(covInfoFile, formatter);
-			var testInfo = TestInfo.ReadTestInfo(testInfoFile, formatter);
+			var covInfo = CoverageInfo.Read(covInfoFile, formatter);
+			var testInfo = TestInfo.Read(testInfoFile, formatter);
 			testInfo.InitializeForStoringData(true);
 			CoverageDataReader.ReadFile(testInfo, covDataFile);
 

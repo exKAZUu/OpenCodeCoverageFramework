@@ -53,7 +53,7 @@ namespace Occf.Languages.C.Manipulators.Transformers {
 			target.AddFirst(ast);
 		}
 
-	    public override void Align(XElement root) {
+	    public override void SupplementBlock(XElement root) {
             SupplementBlock(root, "compound_statement", "{", "}");
         }
 
