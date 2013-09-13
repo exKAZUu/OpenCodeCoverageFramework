@@ -71,10 +71,6 @@ namespace Occf.Core.Utils {
 			// 測定用コードの埋め込み
 			var path = relativePath;
 			CodeTransformer.InstrumentStatementAndPredicate(info, ast, support, path);
-			//CodeTransformer.InsertIntoStatement(
-			//        info, ast, LanguageSupport, path);
-			//CodeTransformer.InsertPredicate(
-			//        info, ast, LanguageSupport, path);
 
 			// コード生成
 			return support.XmlToCode.Generate(ast);

@@ -121,7 +121,6 @@ namespace Occf.Tools.Cui {
                 break;
             default:
                 throw new ArgumentException('"' + criterion + '"' + " is not supported.");
-                break;
             }
 
             foreach (var tc in testCases) {

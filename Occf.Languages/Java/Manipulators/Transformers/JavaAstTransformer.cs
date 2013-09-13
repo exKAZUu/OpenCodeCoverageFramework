@@ -34,7 +34,7 @@ using Paraiba.Xml.Linq;
 namespace Occf.Languages.Java.Manipulators.Transformers {
     public class JavaAstTransformer : AntlrAstTransformer<JavaParser> {
         protected override string MethodPrefix {
-            get { return ""; }
+            get { return "net.exkazuu.CoverageWriter."; }
         }
 
         protected override AntlrCodeToXml<JavaParser> CodeToXml {
@@ -50,9 +50,6 @@ namespace Occf.Languages.Java.Manipulators.Transformers {
         }
 
         public override void InsertImport(XElement target) {
-            var ast = new XElement("TOKEN",
-                    "import static jp.ac.waseda.cs.washi.CoverageWriter.*;\r\n");
-            target.AddFirst(ast);
         }
 
         public override void SupplementBlock(XElement root) {
@@ -97,8 +94,6 @@ namespace Occf.Languages.Java.Manipulators.Transformers {
         }
 
         protected override IEnumerable<XElement> FindLackingBlockNodes(XElement root) {
-            SupplementEmptyMethod(root);
-
             var ifs = JavaElements.If(root)
                     .SelectMany(JavaElements.IfAndElseProcesses);
             var whiles = JavaElements.While(root)
@@ -114,6 +109,8 @@ namespace Occf.Languages.Java.Manipulators.Transformers {
         }
 
         private static void SupplementEmptyMethod(XElement root) {
+			// TODO: This transformation causes compile errors due to unrechable code
+			// e.g. return; return;
             var methods = root.Descendants("methodDeclaration")
                     .Where(e => e.Elements().Any(e2 => e2.Value == "void"))
                     .Select(e => e.Element("block"))

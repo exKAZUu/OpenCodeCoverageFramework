@@ -49,7 +49,7 @@ namespace Occf.Languages.JavaScript.Manipulators.Transformers {
 
         public override void InsertImport(XElement target) {}
 
-        public override void SupplementBlock(XElement root) {
+        public override void Align(XElement root) {
             SupplementBlock(root, "statementBlock", "{", "}");
         }
 

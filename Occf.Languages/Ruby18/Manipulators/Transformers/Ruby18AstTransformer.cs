@@ -80,7 +80,7 @@ namespace Occf.Languages.Ruby18.Manipulators.Transformers {
             throw new NotImplementedException();
         }
 
-        public override void SupplementBlock(XElement root) {}
+        public override void Align(XElement root) {}
 
         public override void SupplementDefaultCase(XElement root) {
             // TODO: Implement
