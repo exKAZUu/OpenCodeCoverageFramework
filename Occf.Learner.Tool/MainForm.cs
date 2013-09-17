@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
 using System.Windows.Forms;
 using Code2Xml.Core.CodeToXmls;
-using Code2Xml.Core.Plugins;
+using Code2Xml.Core.Plugin;
 using Code2Xml.Languages.Java.CodeToXmls;
 using Sgry.Azuki;
 using Sgry.Azuki.Highlighter;

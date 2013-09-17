@@ -18,7 +18,7 @@
 
 using System;
 using System.IO;
-using Code2Xml.Core.Position;
+using Code2Xml.Core.Location;
 using Occf.Core.Manipulators;
 using Occf.Core.Manipulators.Transformers;
 using Paraiba.IO;
@@ -35,21 +35,21 @@ namespace Occf.Sample {
 		/// </summary>
 		/// <param name="outDirInfo">A DirectoryInfo for output directory.</param>
 		/// <param name="inDirInfo">A DirectoryInfo for input base directory.</param>
-		public SampleInstrumenter( DirectoryInfo outDirInfo, DirectoryInfo inDirInfo) {
+		public SampleInstrumenter(DirectoryInfo outDirInfo, DirectoryInfo inDirInfo) {
 			OutDirInfo = outDirInfo;
 			BaseDirInfo = inDirInfo;
 		}
 
-		public void WriteInstrumentedProductionCode( LanguageSupport mode, FileInfo inFileInfo) {
-			var relativePath = ParaibaPath.GetRelativePath( inFileInfo.FullName, BaseDirInfo.FullName);
+		public void WriteInstrumentedProductionCode(LanguageSupport mode, FileInfo inFileInfo) {
+			var relativePath = ParaibaPath.GetRelativePath(inFileInfo.FullName, BaseDirInfo.FullName);
 			var outFileInfo = OutDirInfo.GetFile(relativePath);
 			var code = InstrumentStatementAndPredicate(mode, inFileInfo);
 			outFileInfo.Directory.Create();
 			File.WriteAllText(outFileInfo.FullName, code);
 		}
 
-		public void WriteInstrumentedTestCode( LanguageSupport mode, FileInfo inFileInfo) {
-			var relativePath = ParaibaPath.GetRelativePath( inFileInfo.FullName, BaseDirInfo.FullName);
+		public void WriteInstrumentedTestCode(LanguageSupport mode, FileInfo inFileInfo) {
+			var relativePath = ParaibaPath.GetRelativePath(inFileInfo.FullName, BaseDirInfo.FullName);
 			var outFileInfo = OutDirInfo.GetFile(relativePath);
 			var code = InstrumentTestCase(mode, inFileInfo, BaseDirInfo);
 			outFileInfo.Directory.Create();
@@ -72,19 +72,19 @@ namespace Occf.Sample {
 		}
 
 		protected override long RegisterFunction(
-				long fileId, string functionName, CodePosition position) {
+				long fileId, string functionName, CodeRange position) {
 			Console.WriteLine("Function name: " + functionName + ", pos: " + position);
 			return Id++;
 		}
 
 		protected override long RegisterStatement(
-				long fileId, long funcId, CodePosition position) {
+				long fileId, long funcId, CodeRange position) {
 			Console.WriteLine("Statement position: " + position);
 			return Id++;
 		}
 
 		protected override long RegisterBranch(
-				long fileId, long funcId, CodePosition position) {
+				long fileId, long funcId, CodeRange position) {
 			Console.WriteLine("Branch position: " + position.SmartPositionString);
 			return Id++;
 		}

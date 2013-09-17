@@ -19,15 +19,15 @@
 using System;
 using System.Collections.Generic;
 using System.Xml.Linq;
-using Code2Xml.Core.Position;
+using Code2Xml.Core.Location;
 
 namespace Occf.Core.TestInformation {
 	[Serializable]
 	public class TestCase {
 		public TestCase(string relativePath, string name, XElement node)
-				: this(relativePath, name, CodePositions.Create(node)) {}
+				: this(relativePath, name, CodeRange.Locate(node)) {}
 
-		public TestCase(string relativePath, string name, CodePosition pos) {
+		public TestCase(string relativePath, string name, CodeRange pos) {
 			RelativePath = relativePath;
 			Name = name;
 			Position = pos;
@@ -36,7 +36,7 @@ namespace Occf.Core.TestInformation {
 		public bool Passed { get; set; }
 		public string RelativePath { get; private set; }
 		public string Name { get; private set; }
-		public CodePosition Position { get; private set; }
+		public CodeRange Position { get; private set; }
 
 		public HashSet<int> Statements { get; private set; }
 		public HashSet<int> Decisions { get; private set; }

@@ -29,11 +29,11 @@ using Paraiba.IO;
 using Paraiba.Linq;
 
 namespace Occf.Tools.Cui {
-    public class CoverageResult {
-        public string Name { get; set; }
-        public double Coverage { get; set; }
-        public IEnumerable<CoverageResult> Children { get; set; }
-    }
+	public class CoverageResult {
+		public string Name { get; set; }
+		public double Coverage { get; set; }
+		public IEnumerable<CoverageResult> Children { get; set; }
+	}
 
 	public class CoverageDisplay {
 		private const string S = "  ";
@@ -41,24 +41,24 @@ namespace Occf.Tools.Cui {
 
 		private static readonly string Usage =
 				Program.Header +
-						"" + "\n" +
-						"Usage: Occf cov[erage] <root> [<coverage>]" + "\n" +
-						"" + "\n" +
-						S + "<root>".PadRight(W)
-						+ "path of root directory (including source and test code)" + "\n" +
-						S + "<coverage>".PadRight(W) + "path of coverage data whose name is "
-						+ OccfNames.Record + "\n" +
-						S + "-d, -detail <name>".PadRight(W)
-						+
-						"show all not executed elements."
-						+ "\n" +
-						"";
+				"" + "\n" +
+				"Usage: Occf cov[erage] <root> [<coverage>]" + "\n" +
+				"" + "\n" +
+				S + "<root>".PadRight(W)
+				+ "path of root directory (including source and test code)" + "\n" +
+				S + "<coverage>".PadRight(W) + "path of coverage data whose name is "
+				+ OccfNames.Record + "\n" +
+				S + "-d, -detail <name>".PadRight(W)
+				+
+				"show all not executed elements."
+				+ "\n" +
+				"";
 
 		public static bool Run(IList<string> args) {
 			var detail = false;
 			// parse options
 			var p = new OptionSet {
-					{ "d|detail", v => detail = v != null },
+				{ "d|detail", v => detail = v != null },
 			};
 			try {
 				args = p.Parse(args);
@@ -103,15 +103,13 @@ namespace Occf.Tools.Cui {
 					var checkedLine = new HashSet<Tuple<string, int>>();
 					var executedAndNot = covInfo.StatementTargets
 							.Where(e => e.Tag.StartsWith(tag))
-							.Where(
-									e =>
-											checkedLine.Add(Tuple.Create(e.RelativePath, e.Position.StartLine)))
+							.Where(e => checkedLine.Add(Tuple.Create(e.RelativePath, e.Position.StartLine)))
 							.Halve(e => e.State == CoverageState.Done);
 					var nExe = executedAndNot.Item1.Count;
 					var nAll = nExe + executedAndNot.Item2.Count;
 					Console.WriteLine(
 							"Line Coverage: " + nExe * (100.0 / nAll) + "% : " + nExe + " / "
-									+ nAll);
+							+ nAll);
 					if (detail) {
 						foreach (var element in executedAndNot.Item2) {
 							Console.Write(element.Position.SmartPositionString);
@@ -126,7 +124,7 @@ namespace Occf.Tools.Cui {
 					var nAll = nExe + executedAndNot.Item2.Count;
 					Console.WriteLine(
 							"Statement Coverage: " + nExe * (100.0 / nAll) + "% : " + nExe + " / "
-									+ nAll);
+							+ nAll);
 					if (detail) {
 						foreach (var element in executedAndNot.Item2) {
 							Console.Write(element.Position.SmartPositionString);
@@ -141,7 +139,7 @@ namespace Occf.Tools.Cui {
 					var nAll = nExe + executedAndNot.Item2.Count;
 					Console.WriteLine(
 							"Branch Coverage: " + nExe * (100.0 / nAll) + "% : " + nExe + " / "
-									+ nAll);
+							+ nAll);
 					if (detail) {
 						foreach (var element in executedAndNot.Item2) {
 							Console.Write(element.Position.SmartPositionString);
@@ -171,7 +169,7 @@ namespace Occf.Tools.Cui {
 					}
 					Console.WriteLine(
 							"Branch Coverage in detail: " + nExe * (100.0 / nAll) + "% : " + nExe
-									+ " / " + nAll);
+							+ " / " + nAll);
 					if (detail) {
 						foreach (var element in notExecuted) {
 							Console.Write(element.Position.SmartPositionString);
@@ -186,7 +184,7 @@ namespace Occf.Tools.Cui {
 					var nAll = nExe + executedAndNot.Item2.Count;
 					Console.WriteLine(
 							"Condition Coverage: " + nExe * (100.0 / nAll) + "% : " + nExe + " / "
-									+ nAll);
+							+ nAll);
 					if (detail) {
 						foreach (var element in executedAndNot.Item2) {
 							Console.Write(element.Position.SmartPositionString);
@@ -226,8 +224,8 @@ namespace Occf.Tools.Cui {
 					}
 					Console.WriteLine(
 							"Condition Coverage in detail: " + nExe * (100.0 / nAll) + "% : " + nExe
-									+ " / "
-									+ nAll);
+							+ " / "
+							+ nAll);
 					if (detail) {
 						foreach (var element in notExecuted) {
 							Console.Write(element.Position.SmartPositionString);
@@ -242,7 +240,7 @@ namespace Occf.Tools.Cui {
 					var nAll = nExe + executedAndNot.Item2.Count;
 					Console.WriteLine(
 							"Branch/Condition Coverage: " + nExe * (100.0 / nAll) + "% : " + nExe
-									+ " / " + nAll);
+							+ " / " + nAll);
 					if (detail) {
 						foreach (var element in executedAndNot.Item2) {
 							Console.Write(element.Position.SmartPositionString);

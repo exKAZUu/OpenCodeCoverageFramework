@@ -19,7 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.Xml.Linq;
-using Code2Xml.Core.Position;
+using Code2Xml.Core.Location;
 using Occf.Core.Manipulators.Taggers;
 
 namespace Occf.Core.CoverageInformation.Elements {
@@ -32,13 +32,13 @@ namespace Occf.Core.CoverageInformation.Elements {
 	public class CoverageElement : ICoverageElement {
 		public CoverageElement(string relativePath, XElement node, Tagger tagger) {
 			RelativePath = relativePath;
-			Position = CodePositions.Create(node);
+			Position = CodeRange.Locate(node);
 			Qualifiers = tagger.Tag(node);
 		}
 
 		#region ICoverageElement Members
 
-		public CodePosition Position { get; private set; }
+		public CodeRange Position { get; private set; }
 
 		public CoverageState State { get; protected set; }
 

@@ -84,7 +84,7 @@ namespace Occf.Languages.Java.Manipulators.Transformers {
                     relativePath, string.Join(".", JavaTagger.GetTag(target)), target);
             var blockElement = target.Element("block").NthElement(1);
             var code = CreateTestCaseIdentifierCode(target, id, 2, ElementType.TestCase);
-            var node = JavaCodeToXml.Instance.GenerateWithoutPosition(code, p => p.statement());
+            var node = JavaCodeToXml.Instance.Generate(code, p => p.statement(), false, false);
             if (blockElement.Name.LocalName == "blockStatement") {
                 blockElement.AddFirst(node);
             } else {
@@ -121,7 +121,7 @@ namespace Occf.Languages.Java.Manipulators.Transformers {
                                     .FirstElement()
                                     .Value == "throw"))
                     .Select(e => e.LastElement());
-            var node = JavaCodeToXml.Instance.GenerateWithoutPosition("return;", p => p.statement());
+            var node = JavaCodeToXml.Instance.Generate("return;", p => p.statement(), false, false);
             foreach (var method in methods) {
                 method.AddBeforeSelf(node);
             }

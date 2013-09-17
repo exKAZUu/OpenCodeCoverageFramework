@@ -17,11 +17,11 @@
 #endregion
 
 using System.Collections.Generic;
-using Code2Xml.Core.Position;
+using Code2Xml.Core.Location;
 
 namespace Occf.Core.CoverageInformation.Elements {
 	public interface ICoverageElement {
-		CodePosition Position { get; }
+		CodeRange Position { get; }
 		CoverageState State { get; }
 		List<string> Qualifiers { get; }
 		string Tag { get; }
