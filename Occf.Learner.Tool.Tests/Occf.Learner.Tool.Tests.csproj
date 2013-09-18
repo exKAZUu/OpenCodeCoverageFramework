@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{BF6E8E3D-3404-403C-88B3-F0107121F501}</ProjectGuid>
+    <ProjectGuid>{FC6E6673-A927-4B50-BEE2-1D2547526B13}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Occf.Learner.Tests</RootNamespace>
-    <AssemblyName>Occf.Learner.Tests</AssemblyName>
+    <RootNamespace>Occf.Learner.Tool.Tests</RootNamespace>
+    <AssemblyName>Occf.Learner.Tool.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
@@ -32,53 +32,52 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Antlr3.Runtime, Version=3.5.0.2, Culture=neutral, PublicKeyToken=eb42632606e9261f, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="Antlr3.Runtime">
       <HintPath>..\packages\Antlr.3.5.0.2\lib\Antlr3.Runtime.dll</HintPath>
     </Reference>
-    <Reference Include="Code2Xml.Core, Version=1.8.1.68, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Code2Xml.Core, Version=1.8.2.69, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Code2Xml.1.8.1.68\lib\Code2Xml.Core.dll</HintPath>
+      <HintPath>..\packages\Code2Xml.1.8.2.69\lib\Code2Xml.Core.dll</HintPath>
     </Reference>
     <Reference Include="Code2Xml.Languages.C, Version=1.1.0.71, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Code2Xml.1.8.1.68\lib\Code2Xml.Languages.C.dll</HintPath>
+      <HintPath>..\packages\Code2Xml.1.8.2.69\lib\Code2Xml.Languages.C.dll</HintPath>
     </Reference>
     <Reference Include="Code2Xml.Languages.CSharp, Version=1.1.0.51, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Code2Xml.1.8.1.68\lib\Code2Xml.Languages.CSharp.dll</HintPath>
+      <HintPath>..\packages\Code2Xml.1.8.2.69\lib\Code2Xml.Languages.CSharp.dll</HintPath>
     </Reference>
     <Reference Include="Code2Xml.Languages.Java, Version=1.1.0.57, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Code2Xml.1.8.1.68\lib\Code2Xml.Languages.Java.dll</HintPath>
+      <HintPath>..\packages\Code2Xml.1.8.2.69\lib\Code2Xml.Languages.Java.dll</HintPath>
     </Reference>
     <Reference Include="Code2Xml.Languages.JavaScript, Version=1.1.0.60, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Code2Xml.1.8.1.68\lib\Code2Xml.Languages.JavaScript.dll</HintPath>
+      <HintPath>..\packages\Code2Xml.1.8.2.69\lib\Code2Xml.Languages.JavaScript.dll</HintPath>
     </Reference>
     <Reference Include="Code2Xml.Languages.Lua, Version=1.1.0.44, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Code2Xml.1.8.1.68\lib\Code2Xml.Languages.Lua.dll</HintPath>
+      <HintPath>..\packages\Code2Xml.1.8.2.69\lib\Code2Xml.Languages.Lua.dll</HintPath>
     </Reference>
     <Reference Include="Code2Xml.Languages.Python2, Version=1.1.0.50, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Code2Xml.1.8.1.68\lib\Code2Xml.Languages.Python2.dll</HintPath>
+      <HintPath>..\packages\Code2Xml.1.8.2.69\lib\Code2Xml.Languages.Python2.dll</HintPath>
     </Reference>
     <Reference Include="Code2Xml.Languages.Python3, Version=1.1.0.52, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Code2Xml.1.8.1.68\lib\Code2Xml.Languages.Python3.dll</HintPath>
+      <HintPath>..\packages\Code2Xml.1.8.2.69\lib\Code2Xml.Languages.Python3.dll</HintPath>
     </Reference>
     <Reference Include="Code2Xml.Languages.Ruby18, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Code2Xml.1.8.1.68\lib\Code2Xml.Languages.Ruby18.dll</HintPath>
+      <HintPath>..\packages\Code2Xml.1.8.2.69\lib\Code2Xml.Languages.Ruby18.dll</HintPath>
     </Reference>
     <Reference Include="Code2Xml.Languages.Ruby19, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Code2Xml.1.8.1.68\lib\Code2Xml.Languages.Ruby19.dll</HintPath>
+      <HintPath>..\packages\Code2Xml.1.8.2.69\lib\Code2Xml.Languages.Ruby19.dll</HintPath>
     </Reference>
     <Reference Include="Code2Xml.Languages.SrcML, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Code2Xml.1.8.1.68\lib\Code2Xml.Languages.SrcML.dll</HintPath>
+      <HintPath>..\packages\Code2Xml.1.8.2.69\lib\Code2Xml.Languages.SrcML.dll</HintPath>
     </Reference>
     <Reference Include="nunit.framework">
       <HintPath>..\packages\NUnit.2.6.2\lib\nunit.framework.dll</HintPath>
@@ -98,32 +97,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="FindLearnerTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Occf.Core.Tests\Occf.Core.Tests.csproj">
-      <Project>{22e6caf5-7bd0-44e6-a329-687681ad6e28}</Project>
-      <Name>Occf.Core.Tests</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Occf.Core\Occf.Core.csproj">
-      <Project>{e2c3e1ed-7c87-4f50-9786-1cb9da7feb93}</Project>
-      <Name>Occf.Core</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Occf.Languages\C\Occf.Languages.C.csproj">
-      <Project>{172634b2-0681-4375-9ab3-a5ae7337f749}</Project>
-      <Name>Occf.Languages.C</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Occf.Languages\Java\Occf.Languages.Java.csproj">
-      <Project>{dc070d0a-f4e2-4105-8d49-960dd586eb50}</Project>
-      <Name>Occf.Languages.Java</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Occf.Learner\Occf.Learner.csproj">
-      <Project>{f57394bc-7cb4-4e09-97d6-e8ad2f45f4dd}</Project>
-      <Name>Occf.Learner</Name>
+    <ProjectReference Include="..\Occf.Learner.Tool\Occf.Learner.Tool.csproj">
+      <Project>{5F7B7519-036F-4F7B-A1AC-F345D243CB39}</Project>
+      <Name>Occf.Learner.Tool</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

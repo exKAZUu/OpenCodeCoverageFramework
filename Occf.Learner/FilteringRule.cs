@@ -1,29 +1,37 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 
-namespace Occf.Learner {
-	public abstract class FilteringRule<T> : IFilteringRule {
-		protected readonly ISet<T> Set;
+namespace Occf.Learner.Core {
+	public class FilteringRule {
+		public Dictionary<string, List<IFilter>> FilterDictionary { get; private set; }
 
-		protected FilteringRule(ISet<T> set) {
-			Set = set;
+		public IEnumerable<IFilter> Filters {
+			get { return FilterDictionary.Values.SelectMany(f => f); }
 		}
 
-		public abstract IEnumerable<XElement> Filter(IEnumerable<XElement> targets);
-
-		public int CountRemovableTargets(IEnumerable<XElement> targets) {
-			return targets.Count() - Filter(targets).Count();
+		public FilteringRule(IEnumerable<IFilter> filters) {
+			FilterDictionary = new Dictionary<string, List<IFilter>>();
+			foreach (var filter in filters) {
+				var name = filter.ElementName;
+				List<IFilter> rules;
+				if (!FilterDictionary.TryGetValue(name, out rules)) {
+					rules = new List<IFilter>();
+					FilterDictionary.Add(name, rules);
+				}
+				rules.Add(filter);
+			}
 		}
 
-		public bool RuleEquals(IFilteringRule rule) {
-			var ruleWithSet = rule as FilteringRule<T>;
-			return ruleWithSet != null && Set.SetEquals(ruleWithSet.Set);
-		}
-
-		public override string ToString() {
-			return GetType().Name + " [" + String.Join(",", Set.Select(e => e.ToString())) + "]";
+		public IEnumerable<XElement> Apply(XElement ast) {
+			foreach (var nameAndRules in FilterDictionary) {
+				var elements = ast.DescendantsAndSelf(nameAndRules.Key);
+				var rules = nameAndRules.Value;
+				var results = elements.Where(e => rules.All(rule => rule.IsAcceptable(e)));
+				foreach (var result in results) {
+					yield return result;
+				}
+			}
 		}
 	}
 }

@@ -5,9 +5,8 @@ using System.Linq;
 using NUnit.Framework;
 using Occf.Core.Manipulators;
 using Occf.Core.Tests;
-using Paraiba.Linq;
 
-namespace Occf.Learner.Tests {
+namespace Occf.Learner.Core.Tests {
 	[TestFixture]
 	public class FindLearnerTest {
 		private static IEnumerable<TestCaseData> TestCases {
@@ -49,7 +48,7 @@ namespace Occf.Learner.Tests {
 			var codeFile = new FileInfo(inPath);
 			var ast = profile.CodeToXml.GenerateFromFile(codeFile.FullName);
 			var statements = profile.AstAnalyzer.FindStatements(ast).ToList();
-			FindLearner.Learn(ast, statements);
+			FilteringRuleLearner.Learn(ast, statements);
 			//var statements2 = rule.Find(ast).ToList();
 			//Assert.That(statements2.Count, Is.EqualTo(statements.Count));
 			//Assert.That(statements2, Is.SubsetOf(statements));
@@ -72,13 +71,13 @@ namespace Occf.Learner.Tests {
 			Console.WriteLine("------------------------------");
 		}
 
-		public Dictionary<string, List<IFilteringRule>> LearnJava(string fileName) {
+		public IEnumerable<IFilter> LearnJava(string fileName) {
 			var profile = LanguageSupports.GetCoverageModeByClassName("Java");
 			var inPath = Path.Combine(Fixture.GetCoverageInputPath(), fileName);
 			var codeFile = new FileInfo(inPath);
 			var ast = profile.CodeToXml.GenerateFromFile(codeFile.FullName);
 			var accepted = profile.AstAnalyzer.FindStatements(ast).ToList();
-			var rules = FindLearner.Learn(ast, accepted);
+			var rules = FilteringRuleLearner.Learn(ast, accepted);
 			return rules;
 		}
 	}

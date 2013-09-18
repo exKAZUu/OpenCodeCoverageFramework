@@ -45,13 +45,15 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Occf.Languages.Ruby19", "Oc
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{356CF850-0FFA-4364-A889-9EAD6C88529B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Occf.Learner", "Occf.Learner\Occf.Learner.csproj", "{F57394BC-7CB4-4E09-97D6-E8AD2F45F4DD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Occf.Learner.Core", "Occf.Learner\Occf.Learner.Core.csproj", "{F57394BC-7CB4-4E09-97D6-E8AD2F45F4DD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Occf.Learner.Tests", "Occf.Learner.Tests\Occf.Learner.Tests.csproj", "{BF6E8E3D-3404-403C-88B3-F0107121F501}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Occf.Learner.Core.Tests", "Occf.Learner.Tests\Occf.Learner.Core.Tests.csproj", "{BF6E8E3D-3404-403C-88B3-F0107121F501}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Occf.Learner.Tool", "Occf.Learner.Tool\Occf.Learner.Tool.csproj", "{5F7B7519-036F-4F7B-A1AC-F345D243CB39}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Occf.Tools.Experiment", "Occf.Tools.Experiment\Occf.Tools.Experiment.csproj", "{65B56562-2501-49BA-8DF7-F11420B0F896}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Occf.Learner.Tool.Tests", "Occf.Learner.Tool.Tests\Occf.Learner.Tool.Tests.csproj", "{FC6E6673-A927-4B50-BEE2-1D2547526B13}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -387,6 +389,18 @@ Global
 		{65B56562-2501-49BA-8DF7-F11420B0F896}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{65B56562-2501-49BA-8DF7-F11420B0F896}.Release|Win32.ActiveCfg = Release|Any CPU
 		{65B56562-2501-49BA-8DF7-F11420B0F896}.Release|x86.ActiveCfg = Release|Any CPU
+		{FC6E6673-A927-4B50-BEE2-1D2547526B13}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FC6E6673-A927-4B50-BEE2-1D2547526B13}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FC6E6673-A927-4B50-BEE2-1D2547526B13}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{FC6E6673-A927-4B50-BEE2-1D2547526B13}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{FC6E6673-A927-4B50-BEE2-1D2547526B13}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{FC6E6673-A927-4B50-BEE2-1D2547526B13}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{FC6E6673-A927-4B50-BEE2-1D2547526B13}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FC6E6673-A927-4B50-BEE2-1D2547526B13}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FC6E6673-A927-4B50-BEE2-1D2547526B13}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{FC6E6673-A927-4B50-BEE2-1D2547526B13}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{FC6E6673-A927-4B50-BEE2-1D2547526B13}.Release|Win32.ActiveCfg = Release|Any CPU
+		{FC6E6673-A927-4B50-BEE2-1D2547526B13}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
