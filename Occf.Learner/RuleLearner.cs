@@ -5,7 +5,7 @@ using System.Xml.Linq;
 using Paraiba.Linq;
 
 namespace Occf.Learner.Core {
-	public static class FilteringRuleLearner {
+	public static class RuleLearner {
 		public static IEnumerable<IFilter> Learn(XElement ast, IEnumerable<XElement> elements) {
 			var name2Elements = new Dictionary<string, HashSet<XElement>>();
 			foreach (var element in elements) {
@@ -109,13 +109,22 @@ namespace Occf.Learner.Core {
                             || e.Name.LocalName == "compound_stmt");
 			 */
 
+			yield return new NopFilter(elementName);
 			yield return LearnMustBeRule(elementName, new ChildrenCountExtractor(), accepted);
 			yield return LearnMustNotBeRule(elementName, new ChildrenCountExtractor(), accepted, denied);
+			yield return LearnMustBeRule(elementName, new ChildrenSequenceExtractor(), accepted);
+			yield return LearnMustNotBeRule(elementName, new ChildrenSequenceExtractor(), accepted, denied);
+			yield return LearnMustBeRule(elementName, new SelfSequenceExtractor(), accepted);
+			yield return LearnMustNotBeRule(elementName, new SelfSequenceExtractor(), accepted, denied);
 
 			foreach (var rule in LearnMustNotBeRule(elementName, new ChildrenSetExtractor(), accepted)) {
 				yield return rule;
 			}
 			yield return LearnMustNotHaveRule(elementName, new ChildrenSetExtractor(), accepted, denied);
+			foreach (var rule in LearnMustNotBeRule(elementName, new SelfSetExtractor(), accepted)) {
+				yield return rule;
+			}
+			yield return LearnMustNotHaveRule(elementName, new SelfSetExtractor(), accepted, denied);
 		}
 
 		private static MustBeFilter<T> LearnMustBeRule<T>(

@@ -100,7 +100,8 @@
     <Compile Include="MustNotBeFilter.cs" />
     <Compile Include="MustNotHaveFilter.cs" />
     <Compile Include="Filter.cs" />
-    <Compile Include="FilteringRuleLearner.cs" />
+    <Compile Include="NopFilter.cs" />
+    <Compile Include="RuleLearner.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PropertyExtractor.cs" />
   </ItemGroup>

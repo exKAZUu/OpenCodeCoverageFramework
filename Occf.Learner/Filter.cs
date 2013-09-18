@@ -42,8 +42,12 @@ namespace Occf.Learner.Core {
 		public override string ToString() {
 			var name = GetType().Name;
 			var index = name.IndexOf("Filter");
-			return ElementName + " " + name.Substring(0, index) + ": " + Extractor +
-			       " [" + String.Join(",", Properties.Select(e => e.ToString())) + "]";
+			if (Extractor != null) {
+				return ElementName + " " + name.Substring(0, index) + " " + Extractor +
+				       " [" + String.Join(",", Properties.Select(e => e.ToString())) + "]";
+			} else {
+				return ElementName + " " + name.Substring(0, index);
+			}
 		}
 	}
 }
