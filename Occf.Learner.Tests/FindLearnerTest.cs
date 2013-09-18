@@ -48,7 +48,7 @@ namespace Occf.Learner.Core.Tests {
 			var codeFile = new FileInfo(inPath);
 			var ast = profile.CodeToXml.GenerateFromFile(codeFile.FullName);
 			var statements = profile.AstAnalyzer.FindStatements(ast).ToList();
-			RuleLearner.Learn(ast, statements);
+			RuleLearner.Learn(new[] { new LearningData(ast, statements) });
 			//var statements2 = rule.Find(ast).ToList();
 			//Assert.That(statements2.Count, Is.EqualTo(statements.Count));
 			//Assert.That(statements2, Is.SubsetOf(statements));
@@ -77,7 +77,7 @@ namespace Occf.Learner.Core.Tests {
 			var codeFile = new FileInfo(inPath);
 			var ast = profile.CodeToXml.GenerateFromFile(codeFile.FullName);
 			var accepted = profile.AstAnalyzer.FindStatements(ast).ToList();
-			var rules = RuleLearner.Learn(ast, accepted);
+			var rules = RuleLearner.Learn(new[] { new LearningData(ast, accepted) });
 			return rules;
 		}
 	}

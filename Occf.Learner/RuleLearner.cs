@@ -5,21 +5,23 @@ using System.Xml.Linq;
 using Paraiba.Linq;
 
 namespace Occf.Learner.Core {
-	public static class RuleLearner {
-		public static IEnumerable<IFilter> Learn(XElement ast, IEnumerable<XElement> elements) {
-			var name2Elements = new Dictionary<string, HashSet<XElement>>();
-			foreach (var element in elements) {
-				HashSet<XElement> set;
-				if (!name2Elements.TryGetValue(element.Name.LocalName, out set)) {
-					set = new HashSet<XElement>();
-					name2Elements.Add(element.Name.LocalName, set);
-				}
-				set.Add(element);
-			}
+	public class LearningData {
+		public XElement Ast { get; private set; }
 
+		public IEnumerable<XElement> Elements { get; private set; }
+
+		public LearningData(XElement ast, IEnumerable<XElement> elements) {
+			Ast = ast;
+			Elements = elements;
+		}
+	}
+
+	public static class RuleLearner {
+		public static IEnumerable<IFilter> Learn(IList<LearningData> datas) {
+			var name2Elements = ClassifyElements(datas);
 			foreach (var nameAndElements in name2Elements) {
 				var name = nameAndElements.Key;
-				var all = ast.DescendantsAndSelf(name).ToHashSet();
+				var all = datas.SelectMany(data => data.Ast.DescendantsAndSelf(name)).ToHashSet();
 				var accepted = nameAndElements.Value;
 
 				var filters = Learn(name, all, accepted).ToList();
@@ -39,8 +41,21 @@ namespace Occf.Learner.Core {
 			}
 		}
 
+		private static Dictionary<string, HashSet<XElement>> ClassifyElements(IList<LearningData> datas) {
+			var name2Elements = new Dictionary<string, HashSet<XElement>>();
+			foreach (var element in datas.SelectMany(data => data.Elements)) {
+				HashSet<XElement> set;
+				if (!name2Elements.TryGetValue(element.Name.LocalName, out set)) {
+					set = new HashSet<XElement>();
+					name2Elements.Add(element.Name.LocalName, set);
+				}
+				set.Add(element);
+			}
+			return name2Elements;
+		}
+
 		private static IEnumerable<IFilter> Learn(
-				string elementName, HashSet<XElement> all, HashSet<XElement> accepted) {
+				string elementName, IEnumerable<XElement> all, HashSet<XElement> accepted) {
 			var denied = all.ToHashSet();
 			denied.ExceptWith(accepted);
 
@@ -56,6 +71,16 @@ namespace Occf.Learner.Core {
 			/*
 			 * Java: FirstElement
 			 * 
+blockStatement 
+    :   localVariableDeclarationStatement
+    |   classOrInterfaceDeclaration
+    |   statement
+    ;
+
+statement 
+    :   block
+    |   'assert' expression (':' expression)? ';'
+
 			return root.Descendants("statement")
 					.Where(e => {
 						// ブロック自身は意味を持たないステートメントで、中身だけが必要なので除外
@@ -110,17 +135,27 @@ namespace Occf.Learner.Core {
 			 */
 
 			yield return new NopFilter(elementName);
-			yield return LearnMustBeRule(elementName, new ChildrenCountExtractor(), accepted);
+			//yield return LearnMustBeRule(elementName, new ChildrenCountExtractor(), accepted);
 			yield return LearnMustNotBeRule(elementName, new ChildrenCountExtractor(), accepted, denied);
-			yield return LearnMustBeRule(elementName, new ChildrenSequenceExtractor(), accepted);
+
+			//yield return LearnMustBeRule(elementName, new ChildrenSequenceExtractor(), accepted);
 			yield return LearnMustNotBeRule(elementName, new ChildrenSequenceExtractor(), accepted, denied);
-			yield return LearnMustBeRule(elementName, new SelfSequenceExtractor(), accepted);
+
+			//yield return LearnMustBeRule(elementName, new SelfSequenceExtractor(), accepted);
 			yield return LearnMustNotBeRule(elementName, new SelfSequenceExtractor(), accepted, denied);
+
+			//yield return LearnMustBeRule(elementName, new ParentWithOnlyChildSequenceExtractor(), accepted);
+			yield return
+					LearnMustNotBeRule(elementName, new ParentWithOnlyChildSequenceExtractor(), accepted, denied);
+
+			//yield return LearnMustBeRule(elementName, new OnlyChildSequenceExtractor(), accepted);
+			yield return LearnMustNotBeRule(elementName, new OnlyChildSequenceExtractor(), accepted, denied);
 
 			foreach (var rule in LearnMustNotBeRule(elementName, new ChildrenSetExtractor(), accepted)) {
 				yield return rule;
 			}
 			yield return LearnMustNotHaveRule(elementName, new ChildrenSetExtractor(), accepted, denied);
+
 			foreach (var rule in LearnMustNotBeRule(elementName, new SelfSetExtractor(), accepted)) {
 				yield return rule;
 			}
@@ -163,6 +198,20 @@ namespace Occf.Learner.Core {
 
 		public static string NameOrValue(this XElement element) {
 			return element.Name.LocalName != "TOKEN" ? element.Name.LocalName : element.Value;
+		}
+
+		public static IEnumerable<XElement> DescendantsOfOnlyChildAndSelf(this XElement element) {
+			do {
+				yield return element;
+				element = element.Elements().First();
+			} while (element.Elements().Count() == 1);
+		}
+
+		public static IEnumerable<XElement> DescendantsOfOnlyChild(this XElement element) {
+			while (element.Elements().Count() == 1) {
+				element = element.Elements().First();
+				yield return element;
+			}
 		}
 	}
 }
