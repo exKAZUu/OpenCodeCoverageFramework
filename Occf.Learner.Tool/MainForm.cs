@@ -25,6 +25,21 @@ namespace Occf.Learner.Tool {
 			set { azuki.Text = value; }
 		}
 
+		private IEnumerable<CodeFile> Files {
+			get {
+				return lvModifiableFile.Items.Cast<FileListViewItem>()
+						.Concat(lvFreezedFile.Items.Cast<FileListViewItem>())
+						.Select(item => item.File);
+			}
+		}
+
+		private IEnumerable<CodeFile> FreezingFiles {
+			get {
+				return lvFreezedFile.Items.Cast<FileListViewItem>()
+						.Select(item => item.File);
+			}
+		}
+
 		public MainForm() {
 			InitializeComponent();
 			Marking.Register(new MarkingInfo(0, "selected"));
@@ -55,10 +70,10 @@ namespace Occf.Learner.Tool {
 
 					Code = "";
 					_activeFile = null;
-					lvModifyingFile.Items.Clear();
-					lvFreezingFile.Items.Clear();
-					lvRule.Items.Clear();
-					lvFreezingRule.Items.Clear();
+					lvModifiableFile.Items.Clear();
+					lvFreezedFile.Items.Clear();
+					lvModifiableRule.Items.Clear();
+					lvFreezedRule.Items.Clear();
 					lvWillBeMarkedElements.Items.Clear();
 					lvMarkedElements.Items.Clear();
 				};
@@ -69,34 +84,32 @@ namespace Occf.Learner.Tool {
 		}
 
 		private void btnInfer_Click(object sender, EventArgs e) {
-			NormalizeAllRange2Element();
-			var datas = lvModifyingFile.Items.Cast<FileListViewItem>()
-					.Concat(lvFreezingFile.Items.Cast<FileListViewItem>())
-					.Select(item => item.File)
+			NormalizeAllRange2Element(); // To infer good rules
+			var datas = Files
 					.Select(f => new LearningData(f.Ast, f.Range2Elements.Values))
 					.ToList();
 			var filters = RuleLearner.Learn(datas).ToList();
-			lvRule.Items.Clear();
+			lvModifiableRule.Items.Clear();
 			foreach (var filter in filters) {
 				var item = new FilterListViewItem(filter);
-				lvRule.Items.Add(item);
-				item.Checked = filter is NopFilter;
+				lvModifiableRule.Items.Add(item);
+				item.Checked = true; //filter is NopFilter;
 			}
 		}
 
 		private void btnApply_Click(object sender, EventArgs e) {
 			var rule = InferRule();
-			_activeFile.Range2Elements = ExtractRange2Elements(_activeFile, rule);
-			NormalizeAllRange2Element();
+			_activeFile.Range2Elements = rule.ExtractRange2Elements(_activeFile.Ast);
+			NormalizeAllRange2Element(); // To show good element lists
 			RedrawActiveFile();
 		}
 
 		private void btnApplyAll_Click(object sender, EventArgs e) {
 			var rule = InferRule();
-			foreach (var file in lvModifyingFile.Items.Cast<FileListViewItem>().Select(i => i.File)) {
-				file.Range2Elements = ExtractRange2Elements(file, rule);
+			foreach (var file in lvModifiableFile.Items.Cast<FileListViewItem>().Select(i => i.File)) {
+				file.Range2Elements = rule.ExtractRange2Elements(file.Ast);
 			}
-			NormalizeAllRange2Element();
+			NormalizeAllRange2Element(); // To show good element lists
 			RedrawActiveFile();
 		}
 
@@ -109,6 +122,7 @@ namespace Occf.Learner.Tool {
 			var range = CodeRange.Locate(element);
 			if (!_activeFile.Range2Elements.ContainsKey(range)) {
 				_activeFile.Range2Elements.Add(range, element);
+				NormalizeAllRange2Element(); // To show good element lists
 				DrawMarkers(_activeFile.Range2Elements, 0, 1);
 				ListElements(_activeFile.Range2Elements, lvMarkedElements);
 			}
@@ -137,17 +151,17 @@ namespace Occf.Learner.Tool {
 
 		private void azuki_DragDrop(object sender, DragEventArgs e) {
 			var fileNames = (string[])e.Data.GetData(DataFormats.FileDrop, false);
-			var count = lvModifyingFile.Items.Count;
+			var count = lvModifiableFile.Items.Count;
 			foreach (var fileName in fileNames) {
 				var file = new FileInfo(fileName);
 				var codeFile = new CodeFile(_activeCodeToXml, file);
 				var item = new FileListViewItem(codeFile);
-				lvModifyingFile.Items.Add(item);
+				lvModifiableFile.Items.Add(item);
 			}
-			lvModifyingFile.Items[count].Selected = true;
+			lvModifiableFile.Items[count].Selected = true;
 		}
 
-		private void lvModifyingFile_ItemSelectionChanged(
+		private void lvFile_ItemSelectionChanged(
 				object sender, ListViewItemSelectionChangedEventArgs e) {
 			var item = e.Item as FileListViewItem;
 			if (item != null && item != _lastSelectedItem) {
@@ -156,31 +170,49 @@ namespace Occf.Learner.Tool {
 			}
 		}
 
-		private void ChangeActiveFile(CodeFile activeFile) {
-			_activeFile = activeFile;
-			Code = _activeFile.Code;
-			RedrawActiveFile();
+		private void lvFile_Click(object sender, EventArgs e) {
+			var listView = (ListView)sender;
+			if (listView.SelectedItems.Count == 0) {
+				return;
+			}
+			var item = listView.SelectedItems.Cast<FileListViewItem>()
+					.FirstOrDefault();
+			if (item != null && item != _lastSelectedItem) {
+				_lastSelectedItem = item;
+				ChangeActiveFile(item.File);
+			}
+		}
+
+		private void lvFile_MouseClick(object sender, MouseEventArgs e) {
+			var src = (ListView)sender;
+			var dst = src == lvModifiableFile ? lvFreezedFile : lvModifiableFile;
+			var readOnly = src == lvModifiableFile;
+			if (e.Button == MouseButtons.Right) {
+				foreach (FileListViewItem item in src.SelectedItems) {
+					item.Remove();
+					dst.Items.Add(item);
+					item.File.ReadOnly = readOnly;
+					azuki.ContextMenuStrip = _activeFile.ReadOnly ? null : contextMenuStrip;
+				}
+			}
+		}
+
+		private void lvRule_ItemChecked(object sender, ItemCheckedEventArgs e) {
 			var rule = InferRule();
-			var range2Elements = ExtractRange2Elements(_activeFile, rule);
+			var range2Elements = rule.ExtractRange2Elements(_activeFile.Ast);
+			var equal = _activeFile.RangesEquals(range2Elements);
+			btnApply.Enabled = !_activeFile.ReadOnly || equal;
+			btnApplyAll.Enabled = btnApply.Enabled
+			                      && FreezingFiles.All(f => f.RangesEquals(rule.ExtractRange2Elements(f.Ast)));
 			DrawMarkers(range2Elements, 2);
 			ListElements(range2Elements, lvWillBeMarkedElements);
 		}
 
-		private void PairedListView_MouseClick(object sender, MouseEventArgs e) {
+		private void lvRule_MouseClick(object sender, MouseEventArgs e) {
 			var src = (ListView)sender;
-			ListView dst;
-			if (src == lvModifyingFile) {
-				dst = lvFreezingFile;
-			} else if (src == lvFreezingFile) {
-				dst = lvModifyingFile;
-			} else if (src == lvRule) {
-				dst = lvFreezingRule;
-			} else {
-				dst = lvRule;
-			}
-
+			var dst = src == lvModifiableRule ? lvFreezedRule : lvModifiableRule;
 			if (e.Button == MouseButtons.Right) {
-				foreach (ListViewItem item in src.SelectedItems) {
+				foreach (FilterListViewItem item in src.SelectedItems) {
 					item.Remove();
 					dst.Items.Add(item);
 				}
@@ -196,49 +228,19 @@ namespace Occf.Learner.Tool {
 			}
 		}
 
-		private void lvRule_ItemChecked(object sender, ItemCheckedEventArgs e) {
-			var rule = InferRule();
-			var range2Elements = ExtractRange2Elements(_activeFile, rule);
-			DrawMarkers(range2Elements, 2);
-			ListElements(range2Elements, lvWillBeMarkedElements);
-		}
-
-		private void lvFile_Click(object sender, EventArgs e) {
-			var listView = (ListView)sender;
-			if (listView.SelectedItems.Count == 0) {
-				return;
-			}
-			var item = listView.SelectedItems.Cast<FileListViewItem>()
-				.FirstOrDefault();
-			if (item != null && item != _lastSelectedItem) {
-				_lastSelectedItem = item;
-				ChangeActiveFile(item.File);
-			}
-		}
-
 		#region Helper Methods
 
 		private ExtractingRule InferRule() {
-			var filters = lvRule.CheckedItems.Cast<FilterListViewItem>()
-					.Concat(lvFreezingRule.CheckedItems.Cast<FilterListViewItem>())
+			var filters = lvModifiableRule.CheckedItems.Cast<FilterListViewItem>()
+					.Concat(lvFreezedRule.CheckedItems.Cast<FilterListViewItem>())
 					.Select(item => item.Filter);
 			return new ExtractingRule(filters);
 		}
 
-		private Dictionary<CodeRange, XElement> ExtractRange2Elements(CodeFile file, ExtractingRule rule) {
-			var elements = rule.Extract(file.Ast);
-			// Elements having the same range can appear so can't use ToDictiornary
-			var ret = new Dictionary<CodeRange, XElement>();
-			foreach (var element in elements) {
-				var range = CodeRange.Locate(element);
-				ret[range] = element;
-			}
-			return ret;
-		}
-
 		private void NormalizeAllRange2Element() {
 			var name2Count = new Dictionary<string, int>();
-			var elements = _modifyingFiles.SelectMany(f => f.Range2Elements.Values)
+			var elements = Files
+					.SelectMany(file => file.Range2Elements.Values)
 					.SelectMany(e => e.DescendantsOfOnlyChildAndSelf());
 			foreach (var element in elements) {
 				int count = 0;
@@ -246,7 +248,7 @@ namespace Occf.Learner.Tool {
 				name2Count[element.Name.LocalName] = count + 1;
 			}
 
-			foreach (var codeFile in _modifyingFiles) {
+			foreach (var codeFile in Files) {
 				var newRange2Elements = new Dictionary<CodeRange, XElement>();
 				foreach (var nameAndElement in codeFile.Range2Elements) {
 					var newElement = nameAndElement.Value.DescendantsOfOnlyChildAndSelf()
@@ -269,7 +271,8 @@ namespace Occf.Learner.Tool {
 		/// </summary>
 		/// <param name="range2Elements"></param>
 		/// <param name="markingIds"></param>
-		private void DrawMarkers(IDictionary<CodeRange, XElement> range2Elements, params int[] markingIds) {
+		private void DrawMarkers(
+				IEnumerable<KeyValuePair<CodeRange, XElement>> range2Elements, params int[] markingIds) {
 			foreach (var markingId in markingIds) {
 				azuki.Document.Unmark(0, azuki.TextLength, markingId);
 			}
@@ -288,9 +291,10 @@ namespace Occf.Learner.Tool {
 		/// <summary>
 		/// Shows the specified dictionary of ranges and elements on the list.
 		/// </summary>
-		private void ListElements(IDictionary<CodeRange, XElement> range2Elements, ListView listView) {
+		private void ListElements(
+				IEnumerable<KeyValuePair<CodeRange, XElement>> range2Elements, ListView listView) {
 			listView.Items.Clear();
-			foreach (var rangeAndElement in _activeFile.Range2Elements) {
+			foreach (var rangeAndElement in range2Elements) {
 				var item = new ElementListViewItem(rangeAndElement.Key, rangeAndElement.Value);
 				listView.Items.Add(item);
 			}
@@ -300,6 +304,17 @@ namespace Occf.Learner.Tool {
 			DrawMarkers(_activeFile.Range2Elements, 0, 1, 2);
 			ListElements(_activeFile.Range2Elements, lvMarkedElements);
 			ListElements(_activeFile.Range2Elements, lvWillBeMarkedElements);
+		}
+
+		private void ChangeActiveFile(CodeFile activeFile) {
+			_activeFile = activeFile;
+			Code = _activeFile.Code;
+			RedrawActiveFile();
+			var rule = InferRule();
+			var range2Elements = rule.ExtractRange2Elements(_activeFile.Ast);
+			DrawMarkers(range2Elements, 2);
+			ListElements(range2Elements, lvWillBeMarkedElements);
+			azuki.ContextMenuStrip = _activeFile.ReadOnly ? null : contextMenuStrip;
 		}
 
 		#endregion

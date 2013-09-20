@@ -44,20 +44,20 @@
 			this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.columnHeader4 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.btnApply = new System.Windows.Forms.Button();
-			this.lvModifyingFile = new System.Windows.Forms.ListView();
+			this.lvModifiableFile = new System.Windows.Forms.ListView();
 			this.columnHeader5 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.columnHeader6 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.splitContainer1 = new System.Windows.Forms.SplitContainer();
 			this.splitContainer2 = new System.Windows.Forms.SplitContainer();
 			this.splitContainer5 = new System.Windows.Forms.SplitContainer();
-			this.lvRule = new System.Windows.Forms.ListView();
+			this.lvModifiableRule = new System.Windows.Forms.ListView();
 			this.columnHeader7 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-			this.lvFreezingRule = new System.Windows.Forms.ListView();
+			this.lvFreezedRule = new System.Windows.Forms.ListView();
 			this.columnHeader10 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.splitContainer3 = new System.Windows.Forms.SplitContainer();
 			this.btnApplyAll = new System.Windows.Forms.Button();
 			this.splitContainer4 = new System.Windows.Forms.SplitContainer();
-			this.lvFreezingFile = new System.Windows.Forms.ListView();
+			this.lvFreezedFile = new System.Windows.Forms.ListView();
 			this.columnHeader8 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.columnHeader9 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.contextMenuStrip.SuspendLayout();
@@ -228,25 +228,25 @@
 			this.btnApply.UseVisualStyleBackColor = true;
 			this.btnApply.Click += new System.EventHandler(this.btnApply_Click);
 			// 
-			// lvModifyingFile
+			// lvModifiableFile
 			// 
-			this.lvModifyingFile.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+			this.lvModifiableFile.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader5,
             this.columnHeader6});
-			this.lvModifyingFile.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.lvModifyingFile.HideSelection = false;
-			this.lvModifyingFile.Location = new System.Drawing.Point(0, 0);
-			this.lvModifyingFile.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-			this.lvModifyingFile.MultiSelect = false;
-			this.lvModifyingFile.Name = "lvModifyingFile";
-			this.lvModifyingFile.ShowItemToolTips = true;
-			this.lvModifyingFile.Size = new System.Drawing.Size(297, 370);
-			this.lvModifyingFile.TabIndex = 11;
-			this.lvModifyingFile.UseCompatibleStateImageBehavior = false;
-			this.lvModifyingFile.View = System.Windows.Forms.View.Details;
-			this.lvModifyingFile.ItemSelectionChanged += new System.Windows.Forms.ListViewItemSelectionChangedEventHandler(this.lvModifyingFile_ItemSelectionChanged);
-			this.lvModifyingFile.Click += new System.EventHandler(this.lvFile_Click);
-			this.lvModifyingFile.MouseClick += new System.Windows.Forms.MouseEventHandler(this.PairedListView_MouseClick);
+			this.lvModifiableFile.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.lvModifiableFile.HideSelection = false;
+			this.lvModifiableFile.Location = new System.Drawing.Point(0, 0);
+			this.lvModifiableFile.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+			this.lvModifiableFile.MultiSelect = false;
+			this.lvModifiableFile.Name = "lvModifiableFile";
+			this.lvModifiableFile.ShowItemToolTips = true;
+			this.lvModifiableFile.Size = new System.Drawing.Size(297, 370);
+			this.lvModifiableFile.TabIndex = 11;
+			this.lvModifiableFile.UseCompatibleStateImageBehavior = false;
+			this.lvModifiableFile.View = System.Windows.Forms.View.Details;
+			this.lvModifiableFile.ItemSelectionChanged += new System.Windows.Forms.ListViewItemSelectionChangedEventHandler(this.lvFile_ItemSelectionChanged);
+			this.lvModifiableFile.Click += new System.EventHandler(this.lvFile_Click);
+			this.lvModifiableFile.MouseClick += new System.Windows.Forms.MouseEventHandler(this.lvFile_MouseClick);
 			// 
 			// columnHeader5
 			// 
@@ -307,51 +307,51 @@
 			// 
 			// splitContainer5.Panel1
 			// 
-			this.splitContainer5.Panel1.Controls.Add(this.lvRule);
+			this.splitContainer5.Panel1.Controls.Add(this.lvModifiableRule);
 			// 
 			// splitContainer5.Panel2
 			// 
-			this.splitContainer5.Panel2.Controls.Add(this.lvFreezingRule);
+			this.splitContainer5.Panel2.Controls.Add(this.lvFreezedRule);
 			this.splitContainer5.Size = new System.Drawing.Size(442, 363);
 			this.splitContainer5.SplitterDistance = 181;
 			this.splitContainer5.TabIndex = 1;
 			// 
-			// lvRule
+			// lvModifiableRule
 			// 
-			this.lvRule.CheckBoxes = true;
-			this.lvRule.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+			this.lvModifiableRule.CheckBoxes = true;
+			this.lvModifiableRule.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader7});
-			this.lvRule.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.lvRule.Location = new System.Drawing.Point(0, 0);
-			this.lvRule.Margin = new System.Windows.Forms.Padding(4);
-			this.lvRule.Name = "lvRule";
-			this.lvRule.Size = new System.Drawing.Size(442, 181);
-			this.lvRule.TabIndex = 0;
-			this.lvRule.UseCompatibleStateImageBehavior = false;
-			this.lvRule.View = System.Windows.Forms.View.Details;
-			this.lvRule.ItemChecked += new System.Windows.Forms.ItemCheckedEventHandler(this.lvRule_ItemChecked);
-			this.lvRule.MouseClick += new System.Windows.Forms.MouseEventHandler(this.PairedListView_MouseClick);
+			this.lvModifiableRule.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.lvModifiableRule.Location = new System.Drawing.Point(0, 0);
+			this.lvModifiableRule.Margin = new System.Windows.Forms.Padding(4);
+			this.lvModifiableRule.Name = "lvModifiableRule";
+			this.lvModifiableRule.Size = new System.Drawing.Size(442, 181);
+			this.lvModifiableRule.TabIndex = 0;
+			this.lvModifiableRule.UseCompatibleStateImageBehavior = false;
+			this.lvModifiableRule.View = System.Windows.Forms.View.Details;
+			this.lvModifiableRule.ItemChecked += new System.Windows.Forms.ItemCheckedEventHandler(this.lvRule_ItemChecked);
+			this.lvModifiableRule.MouseClick += new System.Windows.Forms.MouseEventHandler(this.lvRule_MouseClick);
 			// 
 			// columnHeader7
 			// 
 			this.columnHeader7.Text = "Filter";
 			this.columnHeader7.Width = 326;
 			// 
-			// lvFreezingRule
+			// lvFreezedRule
 			// 
-			this.lvFreezingRule.CheckBoxes = true;
-			this.lvFreezingRule.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+			this.lvFreezedRule.CheckBoxes = true;
+			this.lvFreezedRule.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader10});
-			this.lvFreezingRule.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.lvFreezingRule.Location = new System.Drawing.Point(0, 0);
-			this.lvFreezingRule.Margin = new System.Windows.Forms.Padding(4);
-			this.lvFreezingRule.Name = "lvFreezingRule";
-			this.lvFreezingRule.Size = new System.Drawing.Size(442, 178);
-			this.lvFreezingRule.TabIndex = 1;
-			this.lvFreezingRule.UseCompatibleStateImageBehavior = false;
-			this.lvFreezingRule.View = System.Windows.Forms.View.Details;
-			this.lvFreezingRule.ItemChecked += new System.Windows.Forms.ItemCheckedEventHandler(this.lvRule_ItemChecked);
-			this.lvFreezingRule.MouseClick += new System.Windows.Forms.MouseEventHandler(this.PairedListView_MouseClick);
+			this.lvFreezedRule.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.lvFreezedRule.Location = new System.Drawing.Point(0, 0);
+			this.lvFreezedRule.Margin = new System.Windows.Forms.Padding(4);
+			this.lvFreezedRule.Name = "lvFreezedRule";
+			this.lvFreezedRule.Size = new System.Drawing.Size(442, 178);
+			this.lvFreezedRule.TabIndex = 1;
+			this.lvFreezedRule.UseCompatibleStateImageBehavior = false;
+			this.lvFreezedRule.View = System.Windows.Forms.View.Details;
+			this.lvFreezedRule.ItemChecked += new System.Windows.Forms.ItemCheckedEventHandler(this.lvRule_ItemChecked);
+			this.lvFreezedRule.MouseClick += new System.Windows.Forms.MouseEventHandler(this.lvRule_MouseClick);
 			// 
 			// columnHeader10
 			// 
@@ -397,32 +397,34 @@
 			// 
 			// splitContainer4.Panel1
 			// 
-			this.splitContainer4.Panel1.Controls.Add(this.lvModifyingFile);
+			this.splitContainer4.Panel1.Controls.Add(this.lvModifiableFile);
 			// 
 			// splitContainer4.Panel2
 			// 
-			this.splitContainer4.Panel2.Controls.Add(this.lvFreezingFile);
+			this.splitContainer4.Panel2.Controls.Add(this.lvFreezedFile);
 			this.splitContainer4.Size = new System.Drawing.Size(297, 740);
 			this.splitContainer4.SplitterDistance = 370;
 			this.splitContainer4.TabIndex = 14;
 			// 
-			// lvFreezingFile
+			// lvFreezedFile
 			// 
-			this.lvFreezingFile.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+			this.lvFreezedFile.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader8,
             this.columnHeader9});
-			this.lvFreezingFile.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.lvFreezingFile.HideSelection = false;
-			this.lvFreezingFile.Location = new System.Drawing.Point(0, 0);
-			this.lvFreezingFile.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-			this.lvFreezingFile.MultiSelect = false;
-			this.lvFreezingFile.Name = "lvFreezingFile";
-			this.lvFreezingFile.ShowItemToolTips = true;
-			this.lvFreezingFile.Size = new System.Drawing.Size(297, 366);
-			this.lvFreezingFile.TabIndex = 12;
-			this.lvFreezingFile.UseCompatibleStateImageBehavior = false;
-			this.lvFreezingFile.View = System.Windows.Forms.View.Details;
-			this.lvFreezingFile.MouseClick += new System.Windows.Forms.MouseEventHandler(this.PairedListView_MouseClick);
+			this.lvFreezedFile.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.lvFreezedFile.HideSelection = false;
+			this.lvFreezedFile.Location = new System.Drawing.Point(0, 0);
+			this.lvFreezedFile.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+			this.lvFreezedFile.MultiSelect = false;
+			this.lvFreezedFile.Name = "lvFreezedFile";
+			this.lvFreezedFile.ShowItemToolTips = true;
+			this.lvFreezedFile.Size = new System.Drawing.Size(297, 366);
+			this.lvFreezedFile.TabIndex = 12;
+			this.lvFreezedFile.UseCompatibleStateImageBehavior = false;
+			this.lvFreezedFile.View = System.Windows.Forms.View.Details;
+			this.lvFreezedFile.ItemSelectionChanged += new System.Windows.Forms.ListViewItemSelectionChangedEventHandler(this.lvFile_ItemSelectionChanged);
+			this.lvFreezedFile.Click += new System.EventHandler(this.lvFile_Click);
+			this.lvFreezedFile.MouseClick += new System.Windows.Forms.MouseEventHandler(this.lvFile_MouseClick);
 			// 
 			// columnHeader8
 			// 
@@ -493,21 +495,21 @@
 		private System.Windows.Forms.ColumnHeader columnHeader3;
 		private System.Windows.Forms.ColumnHeader columnHeader4;
 		private System.Windows.Forms.Button btnApply;
-		private System.Windows.Forms.ListView lvModifyingFile;
+		private System.Windows.Forms.ListView lvModifiableFile;
 		private System.Windows.Forms.ColumnHeader columnHeader5;
 		private System.Windows.Forms.ColumnHeader columnHeader6;
 		private System.Windows.Forms.SplitContainer splitContainer1;
 		private System.Windows.Forms.SplitContainer splitContainer2;
 		private System.Windows.Forms.SplitContainer splitContainer3;
-		private System.Windows.Forms.ListView lvRule;
+		private System.Windows.Forms.ListView lvModifiableRule;
 		private System.Windows.Forms.Button btnApplyAll;
 		private System.Windows.Forms.ColumnHeader columnHeader7;
 		private System.Windows.Forms.SplitContainer splitContainer4;
-		private System.Windows.Forms.ListView lvFreezingFile;
+		private System.Windows.Forms.ListView lvFreezedFile;
 		private System.Windows.Forms.ColumnHeader columnHeader8;
 		private System.Windows.Forms.ColumnHeader columnHeader9;
 		private System.Windows.Forms.SplitContainer splitContainer5;
-		private System.Windows.Forms.ListView lvFreezingRule;
+		private System.Windows.Forms.ListView lvFreezedRule;
 		private System.Windows.Forms.ColumnHeader columnHeader10;
 	}
 }

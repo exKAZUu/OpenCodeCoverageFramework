@@ -3,6 +3,7 @@ using System.IO;
 using System.Xml.Linq;
 using Code2Xml.Core.CodeToXmls;
 using Code2Xml.Core.Location;
+using Paraiba.Linq;
 using Paraiba.Text;
 
 namespace Occf.Learner.Tool {
@@ -22,6 +23,10 @@ namespace Occf.Learner.Tool {
 			Code = GuessEncoding.ReadAllText(info.FullName);
 			Ast = codeToXml.Generate(Code);
 			Range2Elements = new Dictionary<CodeRange, XElement>();
+		}
+
+		public bool RangesEquals(Dictionary<CodeRange, XElement> range2Elements) {
+			return Range2Elements.Values.ToHashSet().SetEquals(range2Elements.Values.ToHashSet());
 		}
 	}
 }
