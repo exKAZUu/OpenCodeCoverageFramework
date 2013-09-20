@@ -9,12 +9,12 @@ namespace Occf.Learner.Core {
 		bool IsAcceptable(XElement target);
 		IEnumerable<XElement> Select(IEnumerable<XElement> targets);
 		int CountRemovableTargets(IEnumerable<XElement> targets);
-		bool RuleEquals(IFilter rule);
+		bool TryUpdate(IFilter rule);
 	}
 
 	public abstract class Filter<TProperty, TExtractedProperty> : IFilter {
 		public string ElementName { get; private set; }
-		protected readonly ISet<TProperty> Properties;
+		protected ISet<TProperty> Properties;
 		protected readonly IPropertyExtractor<TExtractedProperty> Extractor;
 
 		protected Filter(
@@ -34,9 +34,16 @@ namespace Occf.Learner.Core {
 			return targets.Count() - Select(targets).Count();
 		}
 
-		public bool RuleEquals(IFilter rule) {
-			var ruleWithSet = rule as Filter<TProperty, TExtractedProperty>;
-			return ruleWithSet != null && Properties.SetEquals(ruleWithSet.Properties);
+		public bool TryUpdate(IFilter rule) {
+			if (GetType() != rule.GetType()) {
+				return false;
+			}
+			var ruleWithSet = (Filter<TProperty, TExtractedProperty>)rule;
+			if (ElementName != rule.ElementName || !Equals(Extractor, ruleWithSet.Extractor)) {
+				return false;
+			}
+			Properties = ruleWithSet.Properties;
+			return true;
 		}
 
 		public override string ToString() {

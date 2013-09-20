@@ -10,6 +10,10 @@ namespace Occf.Learner.Core {
 	public abstract class PropertyExtractor<T> : IPropertyExtractor<T> {
 		public abstract T ExtractProperty(XElement e);
 
+		public override bool Equals(object obj) {
+			return GetType() == obj.GetType();
+		}
+
 		public override string ToString() {
 			var name = GetType().Name;
 			var index = name.IndexOf("Extractor");

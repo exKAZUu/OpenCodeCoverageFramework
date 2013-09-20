@@ -19,6 +19,7 @@ namespace Occf.Learner.Tool {
 		private CodeToXml _activeCodeToXml;
 		private CodeFile _activeFile;
 		private ListViewItem _lastSelectedItem;
+		private bool _eventEnabled;
 
 		public string Code {
 			get { return azuki.Text; }
@@ -41,6 +42,8 @@ namespace Occf.Learner.Tool {
 		}
 
 		public MainForm() {
+			_eventEnabled = true;
+
 			InitializeComponent();
 			Marking.Register(new MarkingInfo(0, "selected"));
 			Marking.Register(new MarkingInfo(1, "selected_head"));
@@ -90,11 +93,21 @@ namespace Occf.Learner.Tool {
 					.ToList();
 			var filters = RuleLearner.Learn(datas).ToList();
 			lvModifiableRule.Items.Clear();
+			_eventEnabled = false;
 			foreach (var filter in filters) {
-				var item = new FilterListViewItem(filter);
-				lvModifiableRule.Items.Add(item);
-				item.Checked = true; //filter is NopFilter;
+				var item = new RuleListViewItem(filter);
+				var updatedItem = lvFreezedRule.Items.Cast<RuleListViewItem>()
+						.FirstOrDefault(i => i.Filter.TryUpdate(filter));
+				if (updatedItem == null) {
+					lvModifiableRule.Items.Add(item);
+					item.Checked = true;			//TODO: should use "filter is NopFilter;" ?
+				} else {
+					updatedItem.Update();
+					updatedItem.Checked = true;		//TODO: should use "filter is NopFilter;" ?
+				}
 			}
+			_eventEnabled = true;
+			lvRule_ItemChecked(null, null);
 		}
 
 		private void btnApply_Click(object sender, EventArgs e) {
@@ -198,6 +211,7 @@ namespace Occf.Learner.Tool {
 		}
 
 		private void lvRule_ItemChecked(object sender, ItemCheckedEventArgs e) {
+			if (!_eventEnabled) return;
 			var rule = InferRule();
 			var range2Elements = rule.ExtractRange2Elements(_activeFile.Ast);
 			var equal = _activeFile.RangesEquals(range2Elements);
@@ -212,7 +226,7 @@ namespace Occf.Learner.Tool {
 			var src = (ListView)sender;
 			var dst = src == lvModifiableRule ? lvFreezedRule : lvModifiableRule;
 			if (e.Button == MouseButtons.Right) {
-				foreach (FilterListViewItem item in src.SelectedItems) {
+				foreach (RuleListViewItem item in src.SelectedItems) {
 					item.Remove();
 					dst.Items.Add(item);
 				}
@@ -231,8 +245,8 @@ namespace Occf.Learner.Tool {
 		#region Helper Methods
 
 		private ExtractingRule InferRule() {
-			var filters = lvModifiableRule.CheckedItems.Cast<FilterListViewItem>()
-					.Concat(lvFreezedRule.CheckedItems.Cast<FilterListViewItem>())
+			var filters = lvModifiableRule.CheckedItems.Cast<RuleListViewItem>()
+					.Concat(lvFreezedRule.CheckedItems.Cast<RuleListViewItem>())
 					.Select(item => item.Filter);
 			return new ExtractingRule(filters);
 		}
@@ -330,12 +344,16 @@ namespace Occf.Learner.Tool {
 			}
 		}
 
-		public class FilterListViewItem : ListViewItem {
+		public class RuleListViewItem : ListViewItem {
 			public IFilter Filter { get; private set; }
 
-			public FilterListViewItem(IFilter filter)
+			public RuleListViewItem(IFilter filter)
 					: base(filter.ToString()) {
 				Filter = filter;
+			}
+
+			public void Update() {
+				Text = Filter.ToString();
 			}
 		}
 
