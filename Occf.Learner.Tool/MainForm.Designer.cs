@@ -37,22 +37,29 @@
 			this.btnInfer = new System.Windows.Forms.Button();
 			this.menuStrip = new System.Windows.Forms.MenuStrip();
 			this.menuItemLanguage = new System.Windows.Forms.ToolStripMenuItem();
-			this.lvSelectedElements = new System.Windows.Forms.ListView();
+			this.lvMarkedElements = new System.Windows.Forms.ListView();
 			this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-			this.lvInferedElements = new System.Windows.Forms.ListView();
+			this.lvWillBeMarkedElements = new System.Windows.Forms.ListView();
 			this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.columnHeader4 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.btnApply = new System.Windows.Forms.Button();
-			this.lvFile = new System.Windows.Forms.ListView();
+			this.lvModifyingFile = new System.Windows.Forms.ListView();
 			this.columnHeader5 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.columnHeader6 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.splitContainer1 = new System.Windows.Forms.SplitContainer();
 			this.splitContainer2 = new System.Windows.Forms.SplitContainer();
+			this.splitContainer5 = new System.Windows.Forms.SplitContainer();
 			this.lvRule = new System.Windows.Forms.ListView();
 			this.columnHeader7 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+			this.lvFreezingRule = new System.Windows.Forms.ListView();
+			this.columnHeader10 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.splitContainer3 = new System.Windows.Forms.SplitContainer();
 			this.btnApplyAll = new System.Windows.Forms.Button();
+			this.splitContainer4 = new System.Windows.Forms.SplitContainer();
+			this.lvFreezingFile = new System.Windows.Forms.ListView();
+			this.columnHeader8 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+			this.columnHeader9 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.contextMenuStrip.SuspendLayout();
 			this.menuStrip.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -63,10 +70,18 @@
 			this.splitContainer2.Panel1.SuspendLayout();
 			this.splitContainer2.Panel2.SuspendLayout();
 			this.splitContainer2.SuspendLayout();
+			((System.ComponentModel.ISupportInitialize)(this.splitContainer5)).BeginInit();
+			this.splitContainer5.Panel1.SuspendLayout();
+			this.splitContainer5.Panel2.SuspendLayout();
+			this.splitContainer5.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.splitContainer3)).BeginInit();
 			this.splitContainer3.Panel1.SuspendLayout();
 			this.splitContainer3.Panel2.SuspendLayout();
 			this.splitContainer3.SuspendLayout();
+			((System.ComponentModel.ISupportInitialize)(this.splitContainer4)).BeginInit();
+			this.splitContainer4.Panel1.SuspendLayout();
+			this.splitContainer4.Panel2.SuspendLayout();
+			this.splitContainer4.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// azuki
@@ -91,15 +106,14 @@
 			this.azuki.ForeColor = System.Drawing.Color.Black;
 			this.azuki.IsReadOnly = true;
 			this.azuki.Location = new System.Drawing.Point(0, 0);
+			this.azuki.Margin = new System.Windows.Forms.Padding(4);
 			this.azuki.Name = "azuki";
-			this.azuki.Size = new System.Drawing.Size(508, 621);
+			this.azuki.Size = new System.Drawing.Size(677, 776);
 			this.azuki.TabIndex = 0;
 			this.azuki.Text = "azukiControl1";
 			this.azuki.ViewWidth = 4129;
-			this.azuki.Click += new System.EventHandler(this.azuki_Click);
 			this.azuki.DragDrop += new System.Windows.Forms.DragEventHandler(this.azuki_DragDrop);
 			this.azuki.DragEnter += new System.Windows.Forms.DragEventHandler(this.azuki_DragEnter);
-			this.azuki.MouseClick += new System.Windows.Forms.MouseEventHandler(this.azuki_MouseClick);
 			// 
 			// contextMenuStrip
 			// 
@@ -107,30 +121,31 @@
             this.markToolStripMenuItem,
             this.unmarkToolStripMenuItem});
 			this.contextMenuStrip.Name = "contextMenuStrip";
-			this.contextMenuStrip.Size = new System.Drawing.Size(124, 48);
+			this.contextMenuStrip.Size = new System.Drawing.Size(138, 60);
 			// 
 			// markToolStripMenuItem
 			// 
 			this.markToolStripMenuItem.Name = "markToolStripMenuItem";
-			this.markToolStripMenuItem.Size = new System.Drawing.Size(123, 22);
+			this.markToolStripMenuItem.Size = new System.Drawing.Size(137, 28);
 			this.markToolStripMenuItem.Text = "Mark";
 			this.markToolStripMenuItem.Click += new System.EventHandler(this.markToolStripMenuItem_Click);
 			// 
 			// unmarkToolStripMenuItem
 			// 
 			this.unmarkToolStripMenuItem.Name = "unmarkToolStripMenuItem";
-			this.unmarkToolStripMenuItem.Size = new System.Drawing.Size(123, 22);
+			this.unmarkToolStripMenuItem.Size = new System.Drawing.Size(137, 28);
 			this.unmarkToolStripMenuItem.Text = "Unmark";
 			this.unmarkToolStripMenuItem.Click += new System.EventHandler(this.unmarkToolStripMenuItem_Click);
 			// 
 			// btnInfer
 			// 
 			this.btnInfer.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-			this.btnInfer.Location = new System.Drawing.Point(9, 625);
+			this.btnInfer.Location = new System.Drawing.Point(12, 781);
+			this.btnInfer.Margin = new System.Windows.Forms.Padding(4);
 			this.btnInfer.Name = "btnInfer";
-			this.btnInfer.Size = new System.Drawing.Size(61, 23);
+			this.btnInfer.Size = new System.Drawing.Size(97, 29);
 			this.btnInfer.TabIndex = 1;
-			this.btnInfer.Text = "Infer";
+			this.btnInfer.Text = "Infer Rule";
 			this.btnInfer.UseVisualStyleBackColor = true;
 			this.btnInfer.Click += new System.EventHandler(this.btnInfer_Click);
 			// 
@@ -140,31 +155,31 @@
             this.menuItemLanguage});
 			this.menuStrip.Location = new System.Drawing.Point(0, 0);
 			this.menuStrip.Name = "menuStrip";
-			this.menuStrip.Size = new System.Drawing.Size(1092, 26);
+			this.menuStrip.Padding = new System.Windows.Forms.Padding(8, 2, 0, 2);
+			this.menuStrip.Size = new System.Drawing.Size(1456, 31);
 			this.menuStrip.TabIndex = 2;
 			// 
 			// menuItemLanguage
 			// 
 			this.menuItemLanguage.Name = "menuItemLanguage";
-			this.menuItemLanguage.Size = new System.Drawing.Size(76, 22);
+			this.menuItemLanguage.Size = new System.Drawing.Size(93, 27);
 			this.menuItemLanguage.Text = "Language";
 			// 
-			// lvSelectedElements
+			// lvMarkedElements
 			// 
-			this.lvSelectedElements.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+			this.lvMarkedElements.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader1,
             this.columnHeader2});
-			this.lvSelectedElements.ContextMenuStrip = this.contextMenuStrip;
-			this.lvSelectedElements.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.lvSelectedElements.Location = new System.Drawing.Point(0, 0);
-			this.lvSelectedElements.Margin = new System.Windows.Forms.Padding(2);
-			this.lvSelectedElements.Name = "lvSelectedElements";
-			this.lvSelectedElements.ShowItemToolTips = true;
-			this.lvSelectedElements.Size = new System.Drawing.Size(165, 326);
-			this.lvSelectedElements.TabIndex = 8;
-			this.lvSelectedElements.UseCompatibleStateImageBehavior = false;
-			this.lvSelectedElements.View = System.Windows.Forms.View.Details;
-			this.lvSelectedElements.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.lvSelectedElements_MouseDoubleClick);
+			this.lvMarkedElements.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.lvMarkedElements.Location = new System.Drawing.Point(0, 0);
+			this.lvMarkedElements.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+			this.lvMarkedElements.Name = "lvMarkedElements";
+			this.lvMarkedElements.ShowItemToolTips = true;
+			this.lvMarkedElements.Size = new System.Drawing.Size(218, 408);
+			this.lvMarkedElements.TabIndex = 8;
+			this.lvMarkedElements.UseCompatibleStateImageBehavior = false;
+			this.lvMarkedElements.View = System.Windows.Forms.View.Details;
+			this.lvMarkedElements.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.lvElements_MouseDoubleClick);
 			// 
 			// columnHeader1
 			// 
@@ -175,23 +190,22 @@
 			this.columnHeader2.Text = "Text";
 			this.columnHeader2.Width = 219;
 			// 
-			// lvInferedElements
+			// lvWillBeMarkedElements
 			// 
-			this.lvInferedElements.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+			this.lvWillBeMarkedElements.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader3,
             this.columnHeader4});
-			this.lvInferedElements.ContextMenuStrip = this.contextMenuStrip;
-			this.lvInferedElements.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.lvInferedElements.ForeColor = System.Drawing.SystemColors.WindowText;
-			this.lvInferedElements.Location = new System.Drawing.Point(0, 0);
-			this.lvInferedElements.Margin = new System.Windows.Forms.Padding(2);
-			this.lvInferedElements.Name = "lvInferedElements";
-			this.lvInferedElements.ShowItemToolTips = true;
-			this.lvInferedElements.Size = new System.Drawing.Size(162, 326);
-			this.lvInferedElements.TabIndex = 9;
-			this.lvInferedElements.UseCompatibleStateImageBehavior = false;
-			this.lvInferedElements.View = System.Windows.Forms.View.Details;
-			this.lvInferedElements.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.lvInferedElements_MouseDoubleClick);
+			this.lvWillBeMarkedElements.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.lvWillBeMarkedElements.ForeColor = System.Drawing.SystemColors.WindowText;
+			this.lvWillBeMarkedElements.Location = new System.Drawing.Point(0, 0);
+			this.lvWillBeMarkedElements.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+			this.lvWillBeMarkedElements.Name = "lvWillBeMarkedElements";
+			this.lvWillBeMarkedElements.ShowItemToolTips = true;
+			this.lvWillBeMarkedElements.Size = new System.Drawing.Size(219, 408);
+			this.lvWillBeMarkedElements.TabIndex = 9;
+			this.lvWillBeMarkedElements.UseCompatibleStateImageBehavior = false;
+			this.lvWillBeMarkedElements.View = System.Windows.Forms.View.Details;
+			this.lvWillBeMarkedElements.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.lvElements_MouseDoubleClick);
 			// 
 			// columnHeader3
 			// 
@@ -205,33 +219,34 @@
 			// btnApply
 			// 
 			this.btnApply.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-			this.btnApply.Location = new System.Drawing.Point(75, 625);
-			this.btnApply.Margin = new System.Windows.Forms.Padding(2);
+			this.btnApply.Location = new System.Drawing.Point(116, 781);
+			this.btnApply.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
 			this.btnApply.Name = "btnApply";
-			this.btnApply.Size = new System.Drawing.Size(59, 23);
+			this.btnApply.Size = new System.Drawing.Size(90, 29);
 			this.btnApply.TabIndex = 10;
-			this.btnApply.Text = "Apply";
+			this.btnApply.Text = "Apply This";
 			this.btnApply.UseVisualStyleBackColor = true;
 			this.btnApply.Click += new System.EventHandler(this.btnApply_Click);
 			// 
-			// lvFile
+			// lvModifyingFile
 			// 
-			this.lvFile.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left)));
-			this.lvFile.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+			this.lvModifyingFile.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader5,
             this.columnHeader6});
-			this.lvFile.HideSelection = false;
-			this.lvFile.Location = new System.Drawing.Point(9, 27);
-			this.lvFile.Margin = new System.Windows.Forms.Padding(2);
-			this.lvFile.MultiSelect = false;
-			this.lvFile.Name = "lvFile";
-			this.lvFile.ShowItemToolTips = true;
-			this.lvFile.Size = new System.Drawing.Size(223, 593);
-			this.lvFile.TabIndex = 11;
-			this.lvFile.UseCompatibleStateImageBehavior = false;
-			this.lvFile.View = System.Windows.Forms.View.Details;
-			this.lvFile.ItemSelectionChanged += new System.Windows.Forms.ListViewItemSelectionChangedEventHandler(this.lvFile_ItemSelectionChanged);
+			this.lvModifyingFile.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.lvModifyingFile.HideSelection = false;
+			this.lvModifyingFile.Location = new System.Drawing.Point(0, 0);
+			this.lvModifyingFile.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+			this.lvModifyingFile.MultiSelect = false;
+			this.lvModifyingFile.Name = "lvModifyingFile";
+			this.lvModifyingFile.ShowItemToolTips = true;
+			this.lvModifyingFile.Size = new System.Drawing.Size(297, 370);
+			this.lvModifyingFile.TabIndex = 11;
+			this.lvModifyingFile.UseCompatibleStateImageBehavior = false;
+			this.lvModifyingFile.View = System.Windows.Forms.View.Details;
+			this.lvModifyingFile.ItemSelectionChanged += new System.Windows.Forms.ListViewItemSelectionChangedEventHandler(this.lvModifyingFile_ItemSelectionChanged);
+			this.lvModifyingFile.Click += new System.EventHandler(this.lvFile_Click);
+			this.lvModifyingFile.MouseClick += new System.Windows.Forms.MouseEventHandler(this.PairedListView_MouseClick);
 			// 
 			// columnHeader5
 			// 
@@ -247,7 +262,8 @@
 			this.splitContainer1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-			this.splitContainer1.Location = new System.Drawing.Point(237, 27);
+			this.splitContainer1.Location = new System.Drawing.Point(316, 34);
+			this.splitContainer1.Margin = new System.Windows.Forms.Padding(4);
 			this.splitContainer1.Name = "splitContainer1";
 			// 
 			// splitContainer1.Panel1
@@ -257,27 +273,48 @@
 			// splitContainer1.Panel2
 			// 
 			this.splitContainer1.Panel2.Controls.Add(this.splitContainer2);
-			this.splitContainer1.Size = new System.Drawing.Size(843, 621);
-			this.splitContainer1.SplitterDistance = 508;
+			this.splitContainer1.Size = new System.Drawing.Size(1124, 776);
+			this.splitContainer1.SplitterDistance = 677;
+			this.splitContainer1.SplitterWidth = 5;
 			this.splitContainer1.TabIndex = 12;
 			// 
 			// splitContainer2
 			// 
 			this.splitContainer2.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.splitContainer2.Location = new System.Drawing.Point(0, 0);
+			this.splitContainer2.Margin = new System.Windows.Forms.Padding(4);
 			this.splitContainer2.Name = "splitContainer2";
 			this.splitContainer2.Orientation = System.Windows.Forms.Orientation.Horizontal;
 			// 
 			// splitContainer2.Panel1
 			// 
-			this.splitContainer2.Panel1.Controls.Add(this.lvRule);
+			this.splitContainer2.Panel1.Controls.Add(this.splitContainer5);
 			// 
 			// splitContainer2.Panel2
 			// 
 			this.splitContainer2.Panel2.Controls.Add(this.splitContainer3);
-			this.splitContainer2.Size = new System.Drawing.Size(331, 621);
-			this.splitContainer2.SplitterDistance = 291;
+			this.splitContainer2.Size = new System.Drawing.Size(442, 776);
+			this.splitContainer2.SplitterDistance = 363;
+			this.splitContainer2.SplitterWidth = 5;
 			this.splitContainer2.TabIndex = 0;
+			// 
+			// splitContainer5
+			// 
+			this.splitContainer5.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.splitContainer5.Location = new System.Drawing.Point(0, 0);
+			this.splitContainer5.Name = "splitContainer5";
+			this.splitContainer5.Orientation = System.Windows.Forms.Orientation.Horizontal;
+			// 
+			// splitContainer5.Panel1
+			// 
+			this.splitContainer5.Panel1.Controls.Add(this.lvRule);
+			// 
+			// splitContainer5.Panel2
+			// 
+			this.splitContainer5.Panel2.Controls.Add(this.lvFreezingRule);
+			this.splitContainer5.Size = new System.Drawing.Size(442, 363);
+			this.splitContainer5.SplitterDistance = 181;
+			this.splitContainer5.TabIndex = 1;
 			// 
 			// lvRule
 			// 
@@ -286,59 +323,129 @@
             this.columnHeader7});
 			this.lvRule.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.lvRule.Location = new System.Drawing.Point(0, 0);
+			this.lvRule.Margin = new System.Windows.Forms.Padding(4);
 			this.lvRule.Name = "lvRule";
-			this.lvRule.Size = new System.Drawing.Size(331, 291);
+			this.lvRule.Size = new System.Drawing.Size(442, 181);
 			this.lvRule.TabIndex = 0;
 			this.lvRule.UseCompatibleStateImageBehavior = false;
 			this.lvRule.View = System.Windows.Forms.View.Details;
 			this.lvRule.ItemChecked += new System.Windows.Forms.ItemCheckedEventHandler(this.lvRule_ItemChecked);
+			this.lvRule.MouseClick += new System.Windows.Forms.MouseEventHandler(this.PairedListView_MouseClick);
 			// 
 			// columnHeader7
 			// 
 			this.columnHeader7.Text = "Filter";
 			this.columnHeader7.Width = 326;
 			// 
+			// lvFreezingRule
+			// 
+			this.lvFreezingRule.CheckBoxes = true;
+			this.lvFreezingRule.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.columnHeader10});
+			this.lvFreezingRule.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.lvFreezingRule.Location = new System.Drawing.Point(0, 0);
+			this.lvFreezingRule.Margin = new System.Windows.Forms.Padding(4);
+			this.lvFreezingRule.Name = "lvFreezingRule";
+			this.lvFreezingRule.Size = new System.Drawing.Size(442, 178);
+			this.lvFreezingRule.TabIndex = 1;
+			this.lvFreezingRule.UseCompatibleStateImageBehavior = false;
+			this.lvFreezingRule.View = System.Windows.Forms.View.Details;
+			this.lvFreezingRule.ItemChecked += new System.Windows.Forms.ItemCheckedEventHandler(this.lvRule_ItemChecked);
+			this.lvFreezingRule.MouseClick += new System.Windows.Forms.MouseEventHandler(this.PairedListView_MouseClick);
+			// 
+			// columnHeader10
+			// 
+			this.columnHeader10.Text = "Filter";
+			this.columnHeader10.Width = 326;
+			// 
 			// splitContainer3
 			// 
 			this.splitContainer3.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.splitContainer3.Location = new System.Drawing.Point(0, 0);
+			this.splitContainer3.Margin = new System.Windows.Forms.Padding(4);
 			this.splitContainer3.Name = "splitContainer3";
 			// 
 			// splitContainer3.Panel1
 			// 
-			this.splitContainer3.Panel1.Controls.Add(this.lvSelectedElements);
+			this.splitContainer3.Panel1.Controls.Add(this.lvMarkedElements);
 			// 
 			// splitContainer3.Panel2
 			// 
-			this.splitContainer3.Panel2.Controls.Add(this.lvInferedElements);
-			this.splitContainer3.Size = new System.Drawing.Size(331, 326);
-			this.splitContainer3.SplitterDistance = 165;
+			this.splitContainer3.Panel2.Controls.Add(this.lvWillBeMarkedElements);
+			this.splitContainer3.Size = new System.Drawing.Size(442, 408);
+			this.splitContainer3.SplitterDistance = 218;
+			this.splitContainer3.SplitterWidth = 5;
 			this.splitContainer3.TabIndex = 0;
 			// 
 			// btnApplyAll
 			// 
 			this.btnApplyAll.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-			this.btnApplyAll.Location = new System.Drawing.Point(138, 625);
-			this.btnApplyAll.Margin = new System.Windows.Forms.Padding(2);
+			this.btnApplyAll.Location = new System.Drawing.Point(212, 781);
+			this.btnApplyAll.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
 			this.btnApplyAll.Name = "btnApplyAll";
-			this.btnApplyAll.Size = new System.Drawing.Size(94, 23);
+			this.btnApplyAll.Size = new System.Drawing.Size(97, 29);
 			this.btnApplyAll.TabIndex = 13;
 			this.btnApplyAll.Text = "Apply All";
 			this.btnApplyAll.UseVisualStyleBackColor = true;
 			this.btnApplyAll.Click += new System.EventHandler(this.btnApplyAll_Click);
 			// 
+			// splitContainer4
+			// 
+			this.splitContainer4.Location = new System.Drawing.Point(12, 34);
+			this.splitContainer4.Name = "splitContainer4";
+			this.splitContainer4.Orientation = System.Windows.Forms.Orientation.Horizontal;
+			// 
+			// splitContainer4.Panel1
+			// 
+			this.splitContainer4.Panel1.Controls.Add(this.lvModifyingFile);
+			// 
+			// splitContainer4.Panel2
+			// 
+			this.splitContainer4.Panel2.Controls.Add(this.lvFreezingFile);
+			this.splitContainer4.Size = new System.Drawing.Size(297, 740);
+			this.splitContainer4.SplitterDistance = 370;
+			this.splitContainer4.TabIndex = 14;
+			// 
+			// lvFreezingFile
+			// 
+			this.lvFreezingFile.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.columnHeader8,
+            this.columnHeader9});
+			this.lvFreezingFile.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.lvFreezingFile.HideSelection = false;
+			this.lvFreezingFile.Location = new System.Drawing.Point(0, 0);
+			this.lvFreezingFile.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+			this.lvFreezingFile.MultiSelect = false;
+			this.lvFreezingFile.Name = "lvFreezingFile";
+			this.lvFreezingFile.ShowItemToolTips = true;
+			this.lvFreezingFile.Size = new System.Drawing.Size(297, 366);
+			this.lvFreezingFile.TabIndex = 12;
+			this.lvFreezingFile.UseCompatibleStateImageBehavior = false;
+			this.lvFreezingFile.View = System.Windows.Forms.View.Details;
+			this.lvFreezingFile.MouseClick += new System.Windows.Forms.MouseEventHandler(this.PairedListView_MouseClick);
+			// 
+			// columnHeader8
+			// 
+			this.columnHeader8.Text = "Name";
+			// 
+			// columnHeader9
+			// 
+			this.columnHeader9.Text = "Path";
+			this.columnHeader9.Width = 159;
+			// 
 			// MainForm
 			// 
-			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
+			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(1092, 659);
+			this.ClientSize = new System.Drawing.Size(1456, 824);
+			this.Controls.Add(this.splitContainer4);
 			this.Controls.Add(this.btnApplyAll);
 			this.Controls.Add(this.splitContainer1);
-			this.Controls.Add(this.lvFile);
 			this.Controls.Add(this.btnApply);
 			this.Controls.Add(this.btnInfer);
 			this.Controls.Add(this.menuStrip);
 			this.MainMenuStrip = this.menuStrip;
+			this.Margin = new System.Windows.Forms.Padding(4);
 			this.Name = "MainForm";
 			this.Text = "Form1";
 			this.Load += new System.EventHandler(this.MainForm_Load);
@@ -353,10 +460,18 @@
 			this.splitContainer2.Panel2.ResumeLayout(false);
 			((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).EndInit();
 			this.splitContainer2.ResumeLayout(false);
+			this.splitContainer5.Panel1.ResumeLayout(false);
+			this.splitContainer5.Panel2.ResumeLayout(false);
+			((System.ComponentModel.ISupportInitialize)(this.splitContainer5)).EndInit();
+			this.splitContainer5.ResumeLayout(false);
 			this.splitContainer3.Panel1.ResumeLayout(false);
 			this.splitContainer3.Panel2.ResumeLayout(false);
 			((System.ComponentModel.ISupportInitialize)(this.splitContainer3)).EndInit();
 			this.splitContainer3.ResumeLayout(false);
+			this.splitContainer4.Panel1.ResumeLayout(false);
+			this.splitContainer4.Panel2.ResumeLayout(false);
+			((System.ComponentModel.ISupportInitialize)(this.splitContainer4)).EndInit();
+			this.splitContainer4.ResumeLayout(false);
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
@@ -371,14 +486,14 @@
 		private System.Windows.Forms.ContextMenuStrip contextMenuStrip;
 		private System.Windows.Forms.ToolStripMenuItem markToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem unmarkToolStripMenuItem;
-		private System.Windows.Forms.ListView lvSelectedElements;
+		private System.Windows.Forms.ListView lvMarkedElements;
 		private System.Windows.Forms.ColumnHeader columnHeader1;
 		private System.Windows.Forms.ColumnHeader columnHeader2;
-		private System.Windows.Forms.ListView lvInferedElements;
+		private System.Windows.Forms.ListView lvWillBeMarkedElements;
 		private System.Windows.Forms.ColumnHeader columnHeader3;
 		private System.Windows.Forms.ColumnHeader columnHeader4;
 		private System.Windows.Forms.Button btnApply;
-		private System.Windows.Forms.ListView lvFile;
+		private System.Windows.Forms.ListView lvModifyingFile;
 		private System.Windows.Forms.ColumnHeader columnHeader5;
 		private System.Windows.Forms.ColumnHeader columnHeader6;
 		private System.Windows.Forms.SplitContainer splitContainer1;
@@ -387,6 +502,13 @@
 		private System.Windows.Forms.ListView lvRule;
 		private System.Windows.Forms.Button btnApplyAll;
 		private System.Windows.Forms.ColumnHeader columnHeader7;
+		private System.Windows.Forms.SplitContainer splitContainer4;
+		private System.Windows.Forms.ListView lvFreezingFile;
+		private System.Windows.Forms.ColumnHeader columnHeader8;
+		private System.Windows.Forms.ColumnHeader columnHeader9;
+		private System.Windows.Forms.SplitContainer splitContainer5;
+		private System.Windows.Forms.ListView lvFreezingRule;
+		private System.Windows.Forms.ColumnHeader columnHeader10;
 	}
 }
 

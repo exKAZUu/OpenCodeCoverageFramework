@@ -134,47 +134,50 @@ statement
                             || e.Name.LocalName == "compound_stmt");
 			 */
 
-			yield return new NopFilter(elementName);
+			var filters = Enumerable.Empty<IFilter>();
+
+			filters = filters.Concat(new NopFilter(elementName));
 			//yield return LearnMustBeRule(elementName, new ChildrenCountExtractor(), accepted);
-			yield return LearnMustNotBeRule(elementName, new ChildrenCountExtractor(), accepted, denied);
+			filters = filters.Concat(LearnMustNotBeRule(elementName, new ChildrenCountExtractor(), accepted, denied));
 
 			//yield return LearnMustBeRule(elementName, new ChildrenSequenceExtractor(), accepted);
-			yield return LearnMustNotBeRule(elementName, new ChildrenSequenceExtractor(), accepted, denied);
+			filters = filters.Concat(LearnMustNotBeRule(elementName, new ChildrenSequenceExtractor(), accepted, denied));
 
 			//yield return LearnMustBeRule(elementName, new SelfSequenceExtractor(), accepted);
-			yield return LearnMustNotBeRule(elementName, new SelfSequenceExtractor(), accepted, denied);
+			filters = filters.Concat(LearnMustNotBeRule(elementName, new SelfSequenceExtractor(), accepted, denied));
 
 			//yield return LearnMustBeRule(elementName, new ParentWithOnlyChildSequenceExtractor(), accepted);
-			yield return
-					LearnMustNotBeRule(elementName, new ParentWithOnlyChildSequenceExtractor(), accepted, denied);
+			filters = filters.Concat(LearnMustNotBeRule(elementName, new ParentWithOnlyChildSequenceExtractor(), accepted, denied));
 
 			//yield return LearnMustBeRule(elementName, new OnlyChildSequenceExtractor(), accepted);
-			yield return LearnMustNotBeRule(elementName, new OnlyChildSequenceExtractor(), accepted, denied);
+			filters = filters.Concat(LearnMustNotBeRule(elementName, new OnlyChildSequenceExtractor(), accepted, denied));
 
-			foreach (var rule in LearnMustNotBeRule(elementName, new ChildrenSetExtractor(), accepted)) {
-				yield return rule;
-			}
-			yield return LearnMustNotHaveRule(elementName, new ChildrenSetExtractor(), accepted, denied);
+			filters = filters.Concat(LearnMustNotBeRule(elementName, new ChildrenSetExtractor(), accepted));
+			filters = filters.Concat(LearnMustNotHaveRule(elementName, new ChildrenSetExtractor(), accepted, denied));
 
-			foreach (var rule in LearnMustNotBeRule(elementName, new SelfSetExtractor(), accepted)) {
-				yield return rule;
-			}
-			yield return LearnMustNotHaveRule(elementName, new SelfSetExtractor(), accepted, denied);
+			filters = filters.Concat(LearnMustNotBeRule(elementName, new SelfSetExtractor(), accepted));
+			filters = filters.Concat(LearnMustNotHaveRule(elementName, new SelfSetExtractor(), accepted, denied));
+
+			return filters;
 		}
 
-		private static MustBeFilter<T> LearnMustBeRule<T>(
+		private static IEnumerable<MustBeFilter<T>> LearnMustBeRule<T>(
 				string elementName, IPropertyExtractor<T> extractor, IEnumerable<XElement> accepted) {
 			var acceptedProperties = accepted.Select(extractor.ExtractProperty).ToHashSet();
-			return new MustBeFilter<T>(elementName, acceptedProperties, extractor);
+			if (!acceptedProperties.IsEmpty()) {
+				yield return new MustBeFilter<T>(elementName, acceptedProperties, extractor);
+			}
 		}
 
-		private static MustNotBeFilter<T> LearnMustNotBeRule<T>(
+		private static IEnumerable<MustNotBeFilter<T>> LearnMustNotBeRule<T>(
 				string elementName, IPropertyExtractor<T> extractor, IEnumerable<XElement> accepted,
 				IEnumerable<XElement> denied) {
 			var acceptedProperties = accepted.Select(extractor.ExtractProperty).ToHashSet();
 			var deniedProperties = denied.Select(extractor.ExtractProperty).ToHashSet();
 			deniedProperties.ExceptWith(acceptedProperties);
-			return new MustNotBeFilter<T>(elementName, deniedProperties, extractor);
+			if (!deniedProperties.IsEmpty()) {
+				yield return new MustNotBeFilter<T>(elementName, deniedProperties, extractor);
+			}
 		}
 
 		private static IEnumerable<MustHaveFilter<T>> LearnMustNotBeRule<T>(
@@ -187,13 +190,15 @@ statement
 			}
 		}
 
-		private static MustNotHaveFilter<T> LearnMustNotHaveRule<T>(
+		private static IEnumerable<MustNotHaveFilter<T>> LearnMustNotHaveRule<T>(
 				string elementName, IPropertyExtractor<IEnumerable<T>> extractor, IEnumerable<XElement> accepted,
 				IEnumerable<XElement> denied) {
 			var acceptedProperties = accepted.SelectMany(extractor.ExtractProperty).ToHashSet();
 			var deniedProperties = denied.SelectMany(extractor.ExtractProperty).ToHashSet();
 			deniedProperties.ExceptWith(acceptedProperties);
-			return new MustNotHaveFilter<T>(elementName, deniedProperties, extractor);
+			if (!deniedProperties.IsEmpty()) {
+				yield return new MustNotHaveFilter<T>(elementName, deniedProperties, extractor);
+			}
 		}
 
 		public static string NameOrValue(this XElement element) {

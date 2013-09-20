@@ -3,14 +3,14 @@ using System.Linq;
 using System.Xml.Linq;
 
 namespace Occf.Learner.Core {
-	public class FilteringRule {
+	public class ExtractingRule {
 		public Dictionary<string, List<IFilter>> FilterDictionary { get; private set; }
 
 		public IEnumerable<IFilter> Filters {
 			get { return FilterDictionary.Values.SelectMany(f => f); }
 		}
 
-		public FilteringRule(IEnumerable<IFilter> filters) {
+		public ExtractingRule(IEnumerable<IFilter> filters) {
 			FilterDictionary = new Dictionary<string, List<IFilter>>();
 			foreach (var filter in filters) {
 				var name = filter.ElementName;
@@ -23,7 +23,7 @@ namespace Occf.Learner.Core {
 			}
 		}
 
-		public IEnumerable<XElement> Apply(XElement ast) {
+		public IEnumerable<XElement> Extract(XElement ast) {
 			foreach (var nameAndRules in FilterDictionary) {
 				var elements = ast.DescendantsAndSelf(nameAndRules.Key);
 				var rules = nameAndRules.Value;

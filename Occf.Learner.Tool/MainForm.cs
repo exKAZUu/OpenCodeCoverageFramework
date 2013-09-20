@@ -15,9 +15,9 @@ using Sgry.Azuki.Highlighter;
 
 namespace Occf.Learner.Tool {
 	public partial class MainForm : Form {
+		private static readonly int[] MaxLengths = { int.MaxValue / 2, 4, 8 };
 		private CodeToXml _activeCodeToXml;
-		private List<CodeFile> _codeFiles;
-		private CodeFile _activeCodeFile;
+		private CodeFile _activeFile;
 		private ListViewItem _lastSelectedItem;
 
 		public string Code {
@@ -26,13 +26,12 @@ namespace Occf.Learner.Tool {
 		}
 
 		public MainForm() {
-			_codeFiles = new List<CodeFile>();
-
 			InitializeComponent();
 			Marking.Register(new MarkingInfo(0, "selected"));
 			Marking.Register(new MarkingInfo(1, "selected_head"));
 			Marking.Register(new MarkingInfo(2, "infered_head"));
-			azuki.ColorScheme.SetMarkingDecoration(0, new BgColorTextDecoration(Color.Yellow));
+			azuki.ColorScheme.SetMarkingDecoration(0,
+					new BgColorTextDecoration(Color.Yellow));
 			azuki.ColorScheme.SetMarkingDecoration(1,
 					new UnderlineTextDecoration(LineStyle.Solid, Color.Red));
 			azuki.ColorScheme.SetMarkingDecoration(2,
@@ -55,10 +54,13 @@ namespace Occf.Learner.Tool {
 					menuItem.Checked = true;
 
 					Code = "";
-					lvFile.Items.Clear();
+					_activeFile = null;
+					lvModifyingFile.Items.Clear();
+					lvFreezingFile.Items.Clear();
 					lvRule.Items.Clear();
-					lvInferedElements.Items.Clear();
-					lvSelectedElements.Items.Clear();
+					lvFreezingRule.Items.Clear();
+					lvWillBeMarkedElements.Items.Clear();
+					lvMarkedElements.Items.Clear();
 				};
 				if (codeToXml is JavaScriptCodeToXml) {
 					menuItem.PerformClick();
@@ -67,10 +69,14 @@ namespace Occf.Learner.Tool {
 		}
 
 		private void btnInfer_Click(object sender, EventArgs e) {
-			lvRule.Items.Clear();
-
-			var datas = _codeFiles.Select(f => new LearningData(f.Ast, f.Range2Elements.Values)).ToList();
+			NormalizeAllRange2Element();
+			var datas = lvModifyingFile.Items.Cast<FileListViewItem>()
+					.Concat(lvFreezingFile.Items.Cast<FileListViewItem>())
+					.Select(item => item.File)
+					.Select(f => new LearningData(f.Ast, f.Range2Elements.Values))
+					.ToList();
 			var filters = RuleLearner.Learn(datas).ToList();
+			lvRule.Items.Clear();
 			foreach (var filter in filters) {
 				var item = new FilterListViewItem(filter);
 				lvRule.Items.Add(item);
@@ -79,68 +85,46 @@ namespace Occf.Learner.Tool {
 		}
 
 		private void btnApply_Click(object sender, EventArgs e) {
-			var elements = ApplyRules();
-			foreach (var element in elements) {
-				MarkSelectedElement(element, false);
-			}
-			NormalizeAllRange2Elements();
-			azuki.Invalidate();
+			var rule = InferRule();
+			_activeFile.Range2Elements = ExtractRange2Elements(_activeFile, rule);
+			NormalizeAllRange2Element();
+			RedrawActiveFile();
 		}
 
 		private void btnApplyAll_Click(object sender, EventArgs e) {
-			btnApply.PerformClick();
-			var rules = lvRule.CheckedItems.Cast<FilterListViewItem>().Select(i => i.Filter);
-			var rule = new FilteringRule(rules);
-			foreach (var codeFile in _codeFiles) {
-				var elements = rule.Apply(codeFile.Ast).ToList();
-				foreach (var element in elements) {
-					var range = CodeRange.Locate(element);
-					if (!codeFile.Range2Elements.ContainsKey(range)) {
-						codeFile.Range2Elements.Add(range, element);
-					}
-				}
+			var rule = InferRule();
+			foreach (var file in lvModifyingFile.Items.Cast<FileListViewItem>().Select(i => i.File)) {
+				file.Range2Elements = ExtractRange2Elements(file, rule);
 			}
+			NormalizeAllRange2Element();
+			RedrawActiveFile();
 		}
 
-		private void azuki_Click(object sender, EventArgs e) {}
-
-		private void azuki_MouseClick(object sender, MouseEventArgs e) {}
-
 		private void markToolStripMenuItem_Click(object sender, EventArgs e) {
-			int start, end;
-			azuki.GetSelection(out start, out end);
-			var range = CodeRange.ConvertFromIndicies(Code, ref start, ref end);
+			// Calculate the selected range
+			var selectedRange = GetSelectedRange();
+			// Get the selected element
 			// TODO: Should be use FindInnerElement or FindOuterElement ?
-			var element = range.FindOuterElement(_activeCodeFile.Ast);
-			Console.WriteLine(element);
-			MarkSelectedElement(element, false);
-			NormalizeAllRange2Elements();
-			azuki.Invalidate();
+			var element = selectedRange.FindOuterElement(_activeFile.Ast);
+			var range = CodeRange.Locate(element);
+			if (!_activeFile.Range2Elements.ContainsKey(range)) {
+				_activeFile.Range2Elements.Add(range, element);
+				DrawMarkers(_activeFile.Range2Elements, 0, 1);
+				ListElements(_activeFile.Range2Elements, lvMarkedElements);
+			}
 		}
 
 		private void unmarkToolStripMenuItem_Click(object sender, EventArgs e) {
-			int start, end;
-			azuki.GetSelection(out start, out end);
-			var selectedRange = CodeRange.ConvertFromIndiciesSkippingWhitespaces(Code, ref start, ref end);
-			var ranges = _activeCodeFile.Range2Elements.Keys.Where(r => r.Contains(selectedRange));
-			var range =
-					ranges.OrderBy(r => (r.EndLine - r.StartLine) * 65536 + (r.EndPosition - r.StartPosition))
-							.First();
+			var selectedRange = GetSelectedRange();
+			var range = _activeFile.Range2Elements.Keys.Where(r => r.Contains(selectedRange))
+					.OrderBy(r => (r.EndLine - r.StartLine) * 65536 + (r.EndPosition - r.StartPosition))
+					.FirstOrDefault();
 			if (range == default(CodeRange)) {
 				return;
 			}
-			_activeCodeFile.Range2Elements.Remove(range);
-			ReflectRange2Elements();
-		}
-
-		private void ReflectRange2Elements() {
-			lvSelectedElements.Items.Clear();
-			azuki.Document.Unmark(0, azuki.TextLength, 0);
-			azuki.Document.Unmark(0, azuki.TextLength, 1);
-			foreach (var element in _activeCodeFile.Range2Elements.Values) {
-				MarkSelectedElement(element, true);
-			}
-			azuki.Invalidate();
+			_activeFile.Range2Elements.Remove(range);
+			DrawMarkers(_activeFile.Range2Elements, 0, 1);
+			ListElements(_activeFile.Range2Elements, lvMarkedElements);
 		}
 
 		private void azuki_DragEnter(object sender, DragEventArgs e) {
@@ -153,70 +137,108 @@ namespace Occf.Learner.Tool {
 
 		private void azuki_DragDrop(object sender, DragEventArgs e) {
 			var fileNames = (string[])e.Data.GetData(DataFormats.FileDrop, false);
-			var count = lvFile.Items.Count;
+			var count = lvModifyingFile.Items.Count;
 			foreach (var fileName in fileNames) {
 				var file = new FileInfo(fileName);
-				var item = new ListViewItem(new[] { file.Name, file.FullName });
-				lvFile.Items.Add(item);
-				_codeFiles.Add(new CodeFile(_activeCodeToXml, file.FullName));
+				var codeFile = new CodeFile(_activeCodeToXml, file);
+				var item = new FileListViewItem(codeFile);
+				lvModifyingFile.Items.Add(item);
 			}
-			lvFile.Items[count].Selected = true;
+			lvModifyingFile.Items[count].Selected = true;
 		}
 
-		private void lvFile_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e) {
-			if (e.Item != null && e.Item != _lastSelectedItem) {
-				_lastSelectedItem = e.Item;
-				lvSelectedElements.Items.Clear();
+		private void lvModifyingFile_ItemSelectionChanged(
+				object sender, ListViewItemSelectionChangedEventArgs e) {
+			var item = e.Item as FileListViewItem;
+			if (item != null && item != _lastSelectedItem) {
+				_lastSelectedItem = item;
+				ChangeActiveFile(item.File);
+			}
+		}
 
-				_activeCodeFile = _codeFiles[e.Item.Index];
-				Code = _activeCodeFile.Code;
-				foreach (var element in _activeCodeFile.Range2Elements.Values) {
-					MarkSelectedElement(element, true);
+		private void ChangeActiveFile(CodeFile activeFile) {
+			_activeFile = activeFile;
+			Code = _activeFile.Code;
+			RedrawActiveFile();
+			var rule = InferRule();
+			var range2Elements = ExtractRange2Elements(_activeFile, rule);
+			DrawMarkers(range2Elements, 2);
+			ListElements(range2Elements, lvWillBeMarkedElements);
+		}
+
+		private void PairedListView_MouseClick(object sender, MouseEventArgs e) {
+			var src = (ListView)sender;
+			ListView dst;
+			if (src == lvModifyingFile) {
+				dst = lvFreezingFile;
+			} else if (src == lvFreezingFile) {
+				dst = lvModifyingFile;
+			} else if (src == lvRule) {
+				dst = lvFreezingRule;
+			} else {
+				dst = lvRule;
+			}
+
+			if (e.Button == MouseButtons.Right) {
+				foreach (ListViewItem item in src.SelectedItems) {
+					item.Remove();
+					dst.Items.Add(item);
 				}
-				ApplyRules();
+			}
+		}
+
+		private void lvElements_MouseDoubleClick(object sender, MouseEventArgs e) {
+			var listView = (ListView)sender;
+			var item = listView.SelectedItems.Cast<ElementListViewItem>().FirstOrDefault();
+			if (item != null) {
+				var indicies = item.Range.ConvertToIndicies(Code);
+				azuki.SetSelection(indicies.Item1, indicies.Item2);
 			}
 		}
 
 		private void lvRule_ItemChecked(object sender, ItemCheckedEventArgs e) {
-			ApplyRules();
+			var rule = InferRule();
+			var range2Elements = ExtractRange2Elements(_activeFile, rule);
+			DrawMarkers(range2Elements, 2);
+			ListElements(range2Elements, lvWillBeMarkedElements);
 		}
 
-		private List<XElement> ApplyRules() {
-			lvInferedElements.Items.Clear();
-			azuki.Document.Unmark(0, azuki.TextLength, 2);
-
-			var rules = lvRule.CheckedItems.Cast<FilterListViewItem>().Select(i => i.Filter);
-			var rule = new FilteringRule(rules);
-			var elements = rule.Apply(_activeCodeFile.Ast).ToList();
-			foreach (var element in elements) {
-				int inclusiveStart, exclusiveEnd;
-				var range = CodeRange.Locate(element);
-				range.ConvertToIndicies(azuki.Text, out inclusiveStart, out exclusiveEnd);
-				azuki.Document.Mark(inclusiveStart, Math.Min(exclusiveEnd, inclusiveStart + 4), 2);
-				lvInferedElements.Items.Add(new ElementListViewItem(range, element));
-			}
-			azuki.Invalidate();
-			return elements;
-		}
-
-		private void MarkSelectedElement(XElement element, bool markingOnly) {
-			int start, end;
-			var range = CodeRange.Locate(element);
-			if (!markingOnly && _activeCodeFile.Range2Elements.ContainsKey(range)) {
+		private void lvFile_Click(object sender, EventArgs e) {
+			var listView = (ListView)sender;
+			if (listView.SelectedItems.Count == 0) {
 				return;
 			}
-			range.ConvertToIndicies(Code, out start, out end);
-			azuki.Document.Mark(start, end, 0);
-			azuki.Document.Mark(start, Math.Min(end, start + 4), 1);
-			if (!markingOnly) {
-				_activeCodeFile.Range2Elements.Add(range, element);
+			var item = listView.SelectedItems.Cast<FileListViewItem>()
+				.FirstOrDefault();
+			if (item != null && item != _lastSelectedItem) {
+				_lastSelectedItem = item;
+				ChangeActiveFile(item.File);
 			}
-			lvSelectedElements.Items.Add(new ElementListViewItem(range, element));
 		}
 
-		private void NormalizeAllRange2Elements() {
+		#region Helper Methods
+
+		private ExtractingRule InferRule() {
+			var filters = lvRule.CheckedItems.Cast<FilterListViewItem>()
+					.Concat(lvFreezingRule.CheckedItems.Cast<FilterListViewItem>())
+					.Select(item => item.Filter);
+			return new ExtractingRule(filters);
+		}
+
+		private Dictionary<CodeRange, XElement> ExtractRange2Elements(CodeFile file, ExtractingRule rule) {
+			var elements = rule.Extract(file.Ast);
+			// Elements having the same range can appear so can't use ToDictiornary
+			var ret = new Dictionary<CodeRange, XElement>();
+			foreach (var element in elements) {
+				var range = CodeRange.Locate(element);
+				ret[range] = element;
+			}
+			return ret;
+		}
+
+		private void NormalizeAllRange2Element() {
 			var name2Count = new Dictionary<string, int>();
-			var elements = _codeFiles.SelectMany(f => f.Range2Elements.Values)
+			var elements = _modifyingFiles.SelectMany(f => f.Range2Elements.Values)
 					.SelectMany(e => e.DescendantsOfOnlyChildAndSelf());
 			foreach (var element in elements) {
 				int count = 0;
@@ -224,7 +246,7 @@ namespace Occf.Learner.Tool {
 				name2Count[element.Name.LocalName] = count + 1;
 			}
 
-			foreach (var codeFile in _codeFiles) {
+			foreach (var codeFile in _modifyingFiles) {
 				var newRange2Elements = new Dictionary<CodeRange, XElement>();
 				foreach (var nameAndElement in codeFile.Range2Elements) {
 					var newElement = nameAndElement.Value.DescendantsOfOnlyChildAndSelf()
@@ -234,10 +256,62 @@ namespace Occf.Learner.Tool {
 				}
 				codeFile.Range2Elements = newRange2Elements;
 			}
+		}
 
-			lvSelectedElements.Items.Clear();
-			foreach (var rangeAndElement in _activeCodeFile.Range2Elements) {
-				lvSelectedElements.Items.Add(new ElementListViewItem(rangeAndElement.Key, rangeAndElement.Value));
+		private CodeRange GetSelectedRange() {
+			int start, end;
+			azuki.GetSelection(out start, out end);
+			return CodeRange.ConvertFromIndiciesSkippingWhitespaces(Code, ref start, ref end);
+		}
+
+		/// <summary>
+		/// Draws markers on the editor with the specified dictionary of ranges and elements and the specified marking ids.
+		/// </summary>
+		/// <param name="range2Elements"></param>
+		/// <param name="markingIds"></param>
+		private void DrawMarkers(IDictionary<CodeRange, XElement> range2Elements, params int[] markingIds) {
+			foreach (var markingId in markingIds) {
+				azuki.Document.Unmark(0, azuki.TextLength, markingId);
+			}
+			foreach (var rangeAndElement in range2Elements) {
+				var range = rangeAndElement.Key;
+				int inclusiveStart, exclusiveEnd;
+				range.ConvertToIndicies(azuki.Text, out inclusiveStart, out exclusiveEnd);
+				foreach (var markingId in markingIds) {
+					var end = Math.Min(exclusiveEnd, inclusiveStart + MaxLengths[markingId]);
+					azuki.Document.Mark(inclusiveStart, end, markingId);
+				}
+			}
+			azuki.Invalidate();
+		}
+
+		/// <summary>
+		/// Shows the specified dictionary of ranges and elements on the list.
+		/// </summary>
+		private void ListElements(IDictionary<CodeRange, XElement> range2Elements, ListView listView) {
+			listView.Items.Clear();
+			foreach (var rangeAndElement in _activeFile.Range2Elements) {
+				var item = new ElementListViewItem(rangeAndElement.Key, rangeAndElement.Value);
+				listView.Items.Add(item);
+			}
+		}
+
+		private void RedrawActiveFile() {
+			DrawMarkers(_activeFile.Range2Elements, 0, 1, 2);
+			ListElements(_activeFile.Range2Elements, lvMarkedElements);
+			ListElements(_activeFile.Range2Elements, lvWillBeMarkedElements);
+		}
+
+		#endregion
+
+		#region Inner Classes
+
+		public class FileListViewItem : ListViewItem {
+			public CodeFile File { get; private set; }
+
+			public FileListViewItem(CodeFile file)
+					: base(file.Info.Name, file.Info.FullName) {
+				File = file;
 			}
 		}
 
@@ -273,20 +347,6 @@ namespace Occf.Learner.Tool {
 			public HighlightHook HookProc { get; set; }
 		}
 
-		private void lvSelectedElements_MouseDoubleClick(object sender, MouseEventArgs e) {
-			var item = lvSelectedElements.SelectedItems.Cast<ElementListViewItem>().FirstOrDefault();
-			if (item != null) {
-				var indicies = item.Range.ConvertToIndicies(Code);
-				azuki.SetSelection(indicies.Item1, indicies.Item2);
-			}
-		}
-
-		private void lvInferedElements_MouseDoubleClick(object sender, MouseEventArgs e) {
-			var item = lvInferedElements.SelectedItems.Cast<ElementListViewItem>().FirstOrDefault();
-			if (item != null) {
-				var indicies = item.Range.ConvertToIndicies(Code);
-				azuki.SetSelection(indicies.Item1, indicies.Item2);
-			}
-		}
+		#endregion
 	}
 }

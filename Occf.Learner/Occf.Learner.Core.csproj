@@ -94,7 +94,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="FilteringRule.cs" />
+    <Compile Include="ExtractingRule.cs" />
     <Compile Include="MustBeFilter.cs" />
     <Compile Include="MustHaveFilter.cs" />
     <Compile Include="MustNotBeFilter.cs" />
