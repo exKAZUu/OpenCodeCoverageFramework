@@ -137,19 +137,22 @@ statement
 			var filters = Enumerable.Empty<IFilter>();
 
 			filters = filters.Concat(new NopFilter(elementName));
-			//yield return LearnMustBeRule(elementName, new ChildrenCountExtractor(), accepted);
+			filters = filters.Concat(LearnMustBeRule(elementName, new ChildrenCountExtractor(), accepted));
 			filters = filters.Concat(LearnMustNotBeRule(elementName, new ChildrenCountExtractor(), accepted, denied));
 
-			//yield return LearnMustBeRule(elementName, new ChildrenSequenceExtractor(), accepted);
+			filters = filters.Concat(LearnMustBeRule(elementName, new ChildrenSequenceExtractor(), accepted));
 			filters = filters.Concat(LearnMustNotBeRule(elementName, new ChildrenSequenceExtractor(), accepted, denied));
 
-			//yield return LearnMustBeRule(elementName, new SelfSequenceExtractor(), accepted);
+			filters = filters.Concat(LearnMustBeRule(elementName, new SelfSequenceExtractor(), accepted));
 			filters = filters.Concat(LearnMustNotBeRule(elementName, new SelfSequenceExtractor(), accepted, denied));
 
-			//yield return LearnMustBeRule(elementName, new ParentWithOnlyChildSequenceExtractor(), accepted);
-			filters = filters.Concat(LearnMustNotBeRule(elementName, new ParentWithOnlyChildSequenceExtractor(), accepted, denied));
+			filters = filters.Concat(LearnMustBeRule(elementName, new AncestorsWithoutSiblingsExtractor(), accepted));
+			filters = filters.Concat(LearnMustNotBeRule(elementName, new AncestorsWithoutSiblingsExtractor(), accepted, denied));
 
-			//yield return LearnMustBeRule(elementName, new OnlyChildSequenceExtractor(), accepted);
+			filters = filters.Concat(LearnMustBeRule(elementName, new AncestorsWithoutSiblingsAndParentExtractor(), accepted));
+			filters = filters.Concat(LearnMustNotBeRule(elementName, new AncestorsWithoutSiblingsAndParentExtractor(), accepted, denied));
+
+			filters = filters.Concat(LearnMustBeRule(elementName, new OnlyChildSequenceExtractor(), accepted));
 			filters = filters.Concat(LearnMustNotBeRule(elementName, new OnlyChildSequenceExtractor(), accepted, denied));
 
 			filters = filters.Concat(LearnMustNotBeRule(elementName, new ChildrenSetExtractor(), accepted));

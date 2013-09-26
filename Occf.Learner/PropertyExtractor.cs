@@ -27,7 +27,20 @@ namespace Occf.Learner.Core {
 		}
 	}
 
-	public class ParentWithOnlyChildSequenceExtractor : PropertyExtractor<string> {
+	public class AncestorsWithoutSiblingsAndParentExtractor : PropertyExtractor<string> {
+		public override string ExtractProperty(XElement e) {
+			var elements = new List<XElement>();
+			if (e.Parent != null) {
+				do {
+					e = e.Parent;
+					elements.Add(e);
+				} while (e.Parent != null && e.Parent.Elements().Count() == 1);
+			}
+			return string.Join("/", elements.Select(e2 => e2.Name.LocalName));
+		}
+	}
+
+	public class AncestorsWithoutSiblingsExtractor : PropertyExtractor<string> {
 		public override string ExtractProperty(XElement e) {
 			var elements = new List<XElement>();
 			while (e.Parent != null && e.Parent.Elements().Count() == 1) {
