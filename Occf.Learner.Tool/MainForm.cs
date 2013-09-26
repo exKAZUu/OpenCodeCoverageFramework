@@ -8,7 +8,7 @@ using System.Xml.Linq;
 using Code2Xml.Core.CodeToXmls;
 using Code2Xml.Core.Location;
 using Code2Xml.Core.Plugin;
-using Code2Xml.Languages.JavaScript.CodeToXmls;
+using Code2Xml.Languages.Java.CodeToXmls;
 using Occf.Learner.Core;
 using Sgry.Azuki;
 using Sgry.Azuki.Highlighter;
@@ -80,7 +80,7 @@ namespace Occf.Learner.Tool {
 					lvWillBeMarkedElements.Items.Clear();
 					lvMarkedElements.Items.Clear();
 				};
-				if (codeToXml is JavaScriptCodeToXml) {
+				if (codeToXml is JavaCodeToXml) {
 					menuItem.PerformClick();
 				}
 			}
@@ -88,23 +88,40 @@ namespace Occf.Learner.Tool {
 
 		private void btnInfer_Click(object sender, EventArgs e) {
 			NormalizeAllRange2Element(); // To infer good rules
-			var datas = Files
-					.Select(f => new LearningData(f.Ast, f.Range2Elements.Values))
+			var learningRecrods = Files
+					.Select(f => new LearningRecord(f.Ast, f.Range2Elements.Values))
 					.ToList();
-			var filters = RuleLearner.Learn(datas).ToList();
-			lvModifiableRule.Items.Clear();
+			var filters = RuleLearner.Learn(learningRecrods).ToList();
 			_eventEnabled = false;
+			var asts = lvModifiableFile.Items.Cast<FileListViewItem>()
+					.Concat(lvFreezedFile.Items.Cast<FileListViewItem>())
+					.Select(item => item.File.Ast)
+					.ToList();
+			var newModifiableItems = new List<RuleListViewItem>();
 			foreach (var filter in filters) {
-				var item = new RuleListViewItem(filter);
-				var updatedItem = lvFreezedRule.Items.Cast<RuleListViewItem>()
-						.FirstOrDefault(i => i.Filter.TryUpdate(filter));
-				if (updatedItem == null) {
-					lvModifiableRule.Items.Add(item);
-					item.Checked = true;			//TODO: should use "filter is NopFilter;" ?
+				var modifiableRule = lvModifiableRule.Items.Cast<RuleListViewItem>()
+						.FirstOrDefault(i => i.Filter.TryUpdateProperties(filter));
+				var freezedRule = lvFreezedRule.Items.Cast<RuleListViewItem>()
+						.FirstOrDefault(i => i.Filter.TryUpdateProperties(filter));
+				if (modifiableRule == null && freezedRule == null) {
+					var item = new RuleListViewItem(filter, Files);
+					if (filter is NopFilter) {
+						item.Checked = true; //TODO: should use "filter is NopFilter;" ?
+					}
+					newModifiableItems.Add(item);
 				} else {
-					updatedItem.Update();
-					updatedItem.Checked = true;		//TODO: should use "filter is NopFilter;" ?
+					if (modifiableRule != null) {
+						modifiableRule.Update(Files);
+					newModifiableItems.Add(modifiableRule);
+					}
+					if (freezedRule != null) {
+						freezedRule.Update(Files);
+					}
 				}
+			}
+			lvModifiableRule.Items.Clear();
+			foreach (var item in newModifiableItems) {
+				lvModifiableRule.Items.Add(item);
 			}
 			_eventEnabled = true;
 			lvRule_ItemChecked(null, null);
@@ -163,10 +180,15 @@ namespace Occf.Learner.Tool {
 		}
 
 		private void azuki_DragDrop(object sender, DragEventArgs e) {
-			var fileNames = (string[])e.Data.GetData(DataFormats.FileDrop, false);
+			var paths = (string[])e.Data.GetData(DataFormats.FileDrop, false);
 			var count = lvModifiableFile.Items.Count;
-			foreach (var fileName in fileNames) {
-				var file = new FileInfo(fileName);
+			var filePaths = paths.SelectMany(path =>
+					Directory.Exists(path)
+							? Directory.EnumerateFiles(path, "*", SearchOption.AllDirectories)
+									.Where(filePath => _activeCodeToXml.TargetExtensions.Contains(Path.GetExtension(filePath)))
+							: Enumerable.Repeat(path, 1));
+			foreach (var filePath in filePaths) {
+				var file = new FileInfo(filePath);
 				var codeFile = new CodeFile(_activeCodeToXml, file);
 				var item = new FileListViewItem(codeFile);
 				lvModifiableFile.Items.Add(item);
@@ -207,17 +229,18 @@ namespace Occf.Learner.Tool {
 					item.File.ReadOnly = readOnly;
 					azuki.ContextMenuStrip = _activeFile.ReadOnly ? null : contextMenuStrip;
 				}
+				btnApplyAll.Enabled = CanApplyAll();
 			}
 		}
 
 		private void lvRule_ItemChecked(object sender, ItemCheckedEventArgs e) {
-			if (!_eventEnabled) return;
+			if (!_eventEnabled) {
+				return;
+			}
 			var rule = InferRule();
 			var range2Elements = rule.ExtractRange2Elements(_activeFile.Ast);
-			var equal = _activeFile.RangesEquals(range2Elements);
-			btnApply.Enabled = !_activeFile.ReadOnly || equal;
-			btnApplyAll.Enabled = btnApply.Enabled
-			                      && FreezingFiles.All(f => f.RangesEquals(rule.ExtractRange2Elements(f.Ast)));
+			btnApply.Enabled = CanApplyThis(range2Elements);
+			btnApplyAll.Enabled = CanApplyAll(rule);
 			DrawMarkers(range2Elements, 2);
 			ListElements(range2Elements, lvWillBeMarkedElements);
 		}
@@ -328,7 +351,19 @@ namespace Occf.Learner.Tool {
 			var range2Elements = rule.ExtractRange2Elements(_activeFile.Ast);
 			DrawMarkers(range2Elements, 2);
 			ListElements(range2Elements, lvWillBeMarkedElements);
+			btnApply.Enabled = CanApplyThis(range2Elements);
 			azuki.ContextMenuStrip = _activeFile.ReadOnly ? null : contextMenuStrip;
+		}
+
+		private bool CanApplyThis(Dictionary<CodeRange, XElement> range2Elements) {
+			var equal = _activeFile.RangesEquals(range2Elements);
+			return !_activeFile.ReadOnly || equal;
+		}
+
+		private bool CanApplyAll(ExtractingRule rule = null) {
+			rule = rule ?? InferRule();
+			return btnApply.Enabled && FreezingFiles.All(
+					f => f.RangesEquals(rule.ExtractRange2Elements(f.Ast)));
 		}
 
 		#endregion
@@ -347,13 +382,20 @@ namespace Occf.Learner.Tool {
 		public class RuleListViewItem : ListViewItem {
 			public IFilter Filter { get; private set; }
 
-			public RuleListViewItem(IFilter filter)
-					: base(filter.ToString()) {
+			public RuleListViewItem(IFilter filter, IEnumerable<CodeFile> files)
+					: base(GetName(filter, files)) {
 				Filter = filter;
 			}
 
-			public void Update() {
-				Text = Filter.ToString();
+			private static string GetName(IFilter filter, IEnumerable<CodeFile> files) {
+				var rule = new ExtractingRule(Enumerable.Repeat(filter, 1));
+				var exactMatch = files.Where(f => f.ReadOnly).All(
+						f => f.RangesEquals(filter.ElementName, rule.ExtractRange2Elements(f.Ast)));
+				return (exactMatch ? "* " : "") + files.Select(f => f.Ast).Select(filter.CountRemovableTargets).Sum() + ": " + filter;
+			}
+
+			public void Update(IEnumerable<CodeFile> files) {
+				Text = GetName(Filter, files);
 			}
 		}
 

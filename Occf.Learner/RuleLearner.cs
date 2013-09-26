@@ -5,26 +5,29 @@ using System.Xml.Linq;
 using Paraiba.Linq;
 
 namespace Occf.Learner.Core {
-	public class LearningData {
+	public class LearningRecord {
 		public XElement Ast { get; private set; }
 
 		public IEnumerable<XElement> Elements { get; private set; }
 
-		public LearningData(XElement ast, IEnumerable<XElement> elements) {
+		public LearningRecord(XElement ast, IEnumerable<XElement> elements) {
 			Ast = ast;
 			Elements = elements;
 		}
 	}
 
 	public static class RuleLearner {
-		public static IEnumerable<IFilter> Learn(IList<LearningData> datas) {
-			var name2Elements = ClassifyElements(datas);
+		public static IEnumerable<IFilter> Learn(IList<LearningRecord> learningRecords) {
+			var name2Elements = ClassifyElements(learningRecords);
 			foreach (var nameAndElements in name2Elements) {
 				var name = nameAndElements.Key;
-				var all = datas.SelectMany(data => data.Ast.DescendantsAndSelf(name)).ToHashSet();
+				var all = learningRecords.SelectMany(r => r.Ast.DescendantsAndSelf(name)).ToHashSet();
 				var accepted = nameAndElements.Value;
 
-				var filters = Learn(name, all, accepted).ToList();
+				var filters = Learn(name, all, accepted)
+						.OrderBy(filter => filter.CountRemovableTargets(all))
+						.ThenBy(filter => filter.PropertiesCount)
+						.ToList();
 				foreach (var filter in filters) {
 					yield return filter;
 				}
@@ -41,7 +44,7 @@ namespace Occf.Learner.Core {
 			}
 		}
 
-		private static Dictionary<string, HashSet<XElement>> ClassifyElements(IList<LearningData> datas) {
+		private static Dictionary<string, HashSet<XElement>> ClassifyElements(IList<LearningRecord> datas) {
 			var name2Elements = new Dictionary<string, HashSet<XElement>>();
 			foreach (var element in datas.SelectMany(data => data.Elements)) {
 				HashSet<XElement> set;
@@ -137,29 +140,38 @@ statement
 			var filters = Enumerable.Empty<IFilter>();
 
 			filters = filters.Concat(new NopFilter(elementName));
-			filters = filters.Concat(LearnMustBeRule(elementName, new ChildrenCountExtractor(), accepted));
-			filters = filters.Concat(LearnMustNotBeRule(elementName, new ChildrenCountExtractor(), accepted, denied));
+			//filters = filters.Concat(
+			//		LearnMustBeRule(elementName, new ChildrenCountExtractor(), accepted));
+			//filters = filters.Concat(
+			//		LearnMustNotBeRule(elementName, new ChildrenCountExtractor(), accepted, denied));
 
-			filters = filters.Concat(LearnMustBeRule(elementName, new ChildrenSequenceExtractor(), accepted));
-			filters = filters.Concat(LearnMustNotBeRule(elementName, new ChildrenSequenceExtractor(), accepted, denied));
+			//filters = filters.Concat(
+			//		LearnMustBeRule(elementName, new AncestorsWithoutSiblingsExtractor(), accepted));
+			//filters = filters.Concat(
+			//		LearnMustNotBeRule(elementName, new AncestorsWithoutSiblingsExtractor(), accepted, denied));
 
-			filters = filters.Concat(LearnMustBeRule(elementName, new SelfSequenceExtractor(), accepted));
-			filters = filters.Concat(LearnMustNotBeRule(elementName, new SelfSequenceExtractor(), accepted, denied));
+			//filters = filters.Concat(
+			//		LearnMustBeRule(elementName, new AncestorsWithoutSiblingsAndParentExtractor(), accepted));
+			//filters = filters.Concat(
+			//		LearnMustNotBeRule(elementName, new AncestorsWithoutSiblingsAndParentExtractor(), accepted,
+			//				denied));
 
-			filters = filters.Concat(LearnMustBeRule(elementName, new AncestorsWithoutSiblingsExtractor(), accepted));
-			filters = filters.Concat(LearnMustNotBeRule(elementName, new AncestorsWithoutSiblingsExtractor(), accepted, denied));
+			//filters = filters.Concat(
+			//		LearnMustBeRule(elementName, new OnlyChildSequenceExtractor(), accepted));
+			//filters = filters.Concat(
+			//		LearnMustNotBeRule(elementName, new OnlyChildSequenceExtractor(), accepted, denied));
 
-			filters = filters.Concat(LearnMustBeRule(elementName, new AncestorsWithoutSiblingsAndParentExtractor(), accepted));
-			filters = filters.Concat(LearnMustNotBeRule(elementName, new AncestorsWithoutSiblingsAndParentExtractor(), accepted, denied));
+			for (int i = -5; i <= 5; i++) {
+				filters = filters.Concat(
+						LearnMustBeRule(elementName, new ElementSequenceExtractor(i), accepted));
+				//filters = filters.Concat(
+				//		LearnMustNotBeRule(elementName, new ElementSequenceExtractor(i), accepted, denied));
 
-			filters = filters.Concat(LearnMustBeRule(elementName, new OnlyChildSequenceExtractor(), accepted));
-			filters = filters.Concat(LearnMustNotBeRule(elementName, new OnlyChildSequenceExtractor(), accepted, denied));
-
-			filters = filters.Concat(LearnMustNotBeRule(elementName, new ChildrenSetExtractor(), accepted));
-			filters = filters.Concat(LearnMustNotHaveRule(elementName, new ChildrenSetExtractor(), accepted, denied));
-
-			filters = filters.Concat(LearnMustNotBeRule(elementName, new SelfSetExtractor(), accepted));
-			filters = filters.Concat(LearnMustNotHaveRule(elementName, new SelfSetExtractor(), accepted, denied));
+				//filters = filters.Concat(
+				//		LearnMustNotBeRule(elementName, new ElementSetExtractor(i), accepted));
+				//filters = filters.Concat(
+				//		LearnMustNotHaveRule(elementName, new ElementSetExtractor(i), accepted, denied));
+			}
 
 			return filters;
 		}
@@ -188,7 +200,7 @@ statement
 			var acceptedProperties = accepted.Select(extractor.ExtractProperty)
 					.Aggregate((acc, values) => acc.Intersect(values))
 					.ToHashSet();
-			if (acceptedProperties.Count > 0) {
+			if (!acceptedProperties.IsEmpty()) {
 				yield return new MustHaveFilter<T>(elementName, acceptedProperties, extractor);
 			}
 		}
@@ -209,10 +221,11 @@ statement
 		}
 
 		public static IEnumerable<XElement> DescendantsOfOnlyChildAndSelf(this XElement element) {
-			do {
-				yield return element;
+			yield return element;
+			while (element.Elements().Count() == 1) {
 				element = element.Elements().First();
-			} while (element.Elements().Count() == 1);
+				yield return element;
+			}
 		}
 
 		public static IEnumerable<XElement> DescendantsOfOnlyChild(this XElement element) {

@@ -1,8 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Xml.Linq;
 using Code2Xml.Core.CodeToXmls;
 using Code2Xml.Core.Location;
+using Occf.Learner.Core;
 using Paraiba.Linq;
 using Paraiba.Text;
 
@@ -27,6 +29,11 @@ namespace Occf.Learner.Tool {
 
 		public bool RangesEquals(Dictionary<CodeRange, XElement> range2Elements) {
 			return Range2Elements.Values.ToHashSet().SetEquals(range2Elements.Values.ToHashSet());
+		}
+
+		public bool RangesEquals(string elementName, Dictionary<CodeRange, XElement> range2Elements) {
+			return Range2Elements.Values.Where(e => e.Name.LocalName == elementName).ToHashSet()
+				.SetEquals(range2Elements.Values.Where(e => e.Name.LocalName == elementName).ToHashSet());
 		}
 	}
 }

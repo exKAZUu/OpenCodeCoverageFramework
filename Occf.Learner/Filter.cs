@@ -6,14 +6,21 @@ using System.Xml.Linq;
 namespace Occf.Learner.Core {
 	public interface IFilter {
 		string ElementName { get; }
+		int PropertiesCount { get; }
 		bool IsAcceptable(XElement target);
 		IEnumerable<XElement> Select(IEnumerable<XElement> targets);
+		int CountRemovableTargets(XElement ast);
 		int CountRemovableTargets(IEnumerable<XElement> targets);
-		bool TryUpdate(IFilter rule);
+		bool TryUpdateProperties(IFilter rule);
 	}
 
 	public abstract class Filter<TProperty, TExtractedProperty> : IFilter {
 		public string ElementName { get; private set; }
+
+		public int PropertiesCount {
+			get { return Properties == null ? 0 : Properties.Count; }
+		}
+
 		protected ISet<TProperty> Properties;
 		protected readonly IPropertyExtractor<TExtractedProperty> Extractor;
 
@@ -30,11 +37,15 @@ namespace Occf.Learner.Core {
 			return targets.Where(IsAcceptable);
 		}
 
+		public int CountRemovableTargets(XElement ast) {
+			return CountRemovableTargets(ast.Descendants(ElementName));
+		}
+
 		public int CountRemovableTargets(IEnumerable<XElement> targets) {
 			return targets.Count() - Select(targets).Count();
 		}
 
-		public bool TryUpdate(IFilter rule) {
+		public bool TryUpdateProperties(IFilter rule) {
 			if (GetType() != rule.GetType()) {
 				return false;
 			}
@@ -50,8 +61,8 @@ namespace Occf.Learner.Core {
 			var name = GetType().Name;
 			var index = name.IndexOf("Filter");
 			if (Extractor != null) {
-				return ElementName + " " + name.Substring(0, index) + " " + Extractor +
-				       " [" + String.Join(",", Properties.Select(e => e.ToString())) + "]";
+				return ElementName + " " + name.Substring(0, index) + " " + Extractor + " " +
+				       Properties.Count + ": [" + String.Join(",", Properties.Select(e => e.ToString())) + "]";
 			} else {
 				return ElementName + " " + name.Substring(0, index);
 			}

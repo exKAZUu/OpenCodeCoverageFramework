@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
+using Paraiba.Xml.Linq;
 
 namespace Occf.Learner.Core {
 	public interface IPropertyExtractor<out T> {
@@ -10,14 +11,31 @@ namespace Occf.Learner.Core {
 	public abstract class PropertyExtractor<T> : IPropertyExtractor<T> {
 		public abstract T ExtractProperty(XElement e);
 
-		public override bool Equals(object obj) {
-			return GetType() == obj.GetType();
-		}
-
 		public override string ToString() {
 			var name = GetType().Name;
 			var index = name.IndexOf("Extractor");
 			return name.Substring(0, index);
+		}
+
+		protected bool Equals(PropertyExtractor<T> other) {
+			return true;
+		}
+
+		public override bool Equals(object obj) {
+			if (ReferenceEquals(null, obj)) {
+				return false;
+			}
+			if (ReferenceEquals(this, obj)) {
+				return true;
+			}
+			if (obj.GetType() != GetType()) {
+				return false;
+			}
+			return Equals((PropertyExtractor<T>)obj);
+		}
+
+		public override int GetHashCode() {
+			return GetType().GetHashCode();
 		}
 	}
 
@@ -47,7 +65,7 @@ namespace Occf.Learner.Core {
 				e = e.Parent;
 				elements.Add(e);
 			}
-			return string.Join("/", elements.Select(e2 => e2.Name.LocalName));
+			return string.Join("/", elements.Select(e2 => e2.NameOrValue()));
 		}
 	}
 
@@ -58,37 +76,109 @@ namespace Occf.Learner.Core {
 				e = e.Elements().First();
 				elements.Add(e);
 			}
-			return string.Join("/", elements.Select(e2 => e2.Name.LocalName));
+			return string.Join("/", elements.Select(e2 => e2.NameOrValue()));
 		}
 	}
 
-	public class ChildrenSequenceExtractor : PropertyExtractor<string> {
+	public class ElementSequenceExtractor : PropertyExtractor<string> {
+		private readonly int _depth;
+
+		public ElementSequenceExtractor(int depth) {
+			_depth = depth;
+		}
+
 		public override string ExtractProperty(XElement e) {
-			return string.Join("/", e.Elements().Select(e2 => e2.NameOrValue()));
-		}
-	}
-
-	public class SelfSequenceExtractor : PropertyExtractor<string> {
-		public override string ExtractProperty(XElement e) {
-			if (e.Parent == null) {
-				return "";
+			var elements = Enumerable.Empty<XElement>();
+			if (_depth < 0) {
+				var ancestor = e.Parents().ElementAtOrDefault(-1 * _depth - 1);
+				if (ancestor != null) {
+					elements = ancestor.Elements();
+				}
+			} else {
+				elements = e.Elements();
+				for (int i = 0; i < _depth; i++) {
+					elements = elements.Elements();
+				}
 			}
-			return string.Join("/", e.Parent.Elements().Select(e2 => e2.NameOrValue()));
+			return string.Join("/", elements.Select(e2 => e2.NameOrValue()));
 		}
-	}
 
-	public class ChildrenSetExtractor : PropertyExtractor<IEnumerable<string>> {
-		public override IEnumerable<string> ExtractProperty(XElement e) {
-			return e.Elements().Select(e2 => e2.NameOrValue());
+		public override string ToString() {
+			var name = GetType().Name;
+			var index = name.IndexOf("Extractor");
+			return name.Substring(0, index) + "(" + _depth + ")";
 		}
-	}
 
-	public class SelfSetExtractor : PropertyExtractor<IEnumerable<string>> {
-		public override IEnumerable<string> ExtractProperty(XElement e) {
-			if (e.Parent == null) {
-				return new string[0];
+		protected bool Equals(ElementSequenceExtractor other) {
+			return _depth == other._depth;
+		}
+
+		public override bool Equals(object obj) {
+			if (ReferenceEquals(null, obj)) {
+				return false;
 			}
-			return e.Parent.Elements().Select(e2 => e2.NameOrValue());
+			if (ReferenceEquals(this, obj)) {
+				return true;
+			}
+			if (obj.GetType() != GetType()) {
+				return false;
+			}
+			return Equals((ElementSequenceExtractor)obj);
+		}
+
+		public override int GetHashCode() {
+			return _depth;
+		}
+	}
+
+	public class ElementSetExtractor : PropertyExtractor<IEnumerable<string>> {
+		private readonly int _depth;
+
+		public ElementSetExtractor(int depth) {
+			_depth = depth;
+		}
+
+		public override IEnumerable<string> ExtractProperty(XElement e) {
+			var es = Enumerable.Empty<XElement>();
+			if (_depth < 0) {
+				var ancestor = e.Parents().ElementAtOrDefault(-1 * _depth - 1);
+				if (ancestor != null) {
+					es = ancestor.Elements();
+				}
+			} else {
+				es = e.Elements();
+				for (int i = 0; i < _depth; i++) {
+					es = es.Elements();
+				}
+			}
+			return es.Select(e2 => e2.NameOrValue());
+		}
+
+		public override string ToString() {
+			var name = GetType().Name;
+			var index = name.IndexOf("Extractor");
+			return name.Substring(0, index) + "(" + _depth + ")";
+		}
+
+		protected bool Equals(ElementSetExtractor other) {
+			return _depth == other._depth;
+		}
+
+		public override bool Equals(object obj) {
+			if (ReferenceEquals(null, obj)) {
+				return false;
+			}
+			if (ReferenceEquals(this, obj)) {
+				return true;
+			}
+			if (obj.GetType() != GetType()) {
+				return false;
+			}
+			return Equals((ElementSetExtractor)obj);
+		}
+
+		public override int GetHashCode() {
+			return _depth;
 		}
 	}
 }
