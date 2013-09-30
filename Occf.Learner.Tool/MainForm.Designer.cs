@@ -98,9 +98,9 @@
             | Sgry.Azuki.DrawingOption.ShowsDirtBar) 
             | Sgry.Azuki.DrawingOption.HighlightsMatchedBracket)));
 			this.azuki.FirstVisibleLine = 0;
-			this.azuki.Font = new System.Drawing.Font("MS UI Gothic", 9F);
+			this.azuki.Font = new System.Drawing.Font("MS UI Gothic", 12F);
 			fontInfo1.Name = "MS UI Gothic";
-			fontInfo1.Size = 9;
+			fontInfo1.Size = 12;
 			fontInfo1.Style = System.Drawing.FontStyle.Regular;
 			this.azuki.FontInfo = fontInfo1;
 			this.azuki.ForeColor = System.Drawing.Color.Black;
@@ -111,7 +111,7 @@
 			this.azuki.Size = new System.Drawing.Size(677, 776);
 			this.azuki.TabIndex = 0;
 			this.azuki.Text = "azukiControl1";
-			this.azuki.ViewWidth = 4129;
+			this.azuki.ViewWidth = 4138;
 			this.azuki.DragDrop += new System.Windows.Forms.DragEventHandler(this.azuki_DragDrop);
 			this.azuki.DragEnter += new System.Windows.Forms.DragEventHandler(this.azuki_DragEnter);
 			// 
@@ -175,7 +175,7 @@
 			this.lvMarkedElements.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
 			this.lvMarkedElements.Name = "lvMarkedElements";
 			this.lvMarkedElements.ShowItemToolTips = true;
-			this.lvMarkedElements.Size = new System.Drawing.Size(218, 408);
+			this.lvMarkedElements.Size = new System.Drawing.Size(218, 265);
 			this.lvMarkedElements.TabIndex = 8;
 			this.lvMarkedElements.UseCompatibleStateImageBehavior = false;
 			this.lvMarkedElements.View = System.Windows.Forms.View.Details;
@@ -184,6 +184,7 @@
 			// columnHeader1
 			// 
 			this.columnHeader1.Text = "Name";
+			this.columnHeader1.Width = 77;
 			// 
 			// columnHeader2
 			// 
@@ -201,7 +202,7 @@
 			this.lvWillBeMarkedElements.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
 			this.lvWillBeMarkedElements.Name = "lvWillBeMarkedElements";
 			this.lvWillBeMarkedElements.ShowItemToolTips = true;
-			this.lvWillBeMarkedElements.Size = new System.Drawing.Size(219, 408);
+			this.lvWillBeMarkedElements.Size = new System.Drawing.Size(219, 265);
 			this.lvWillBeMarkedElements.TabIndex = 9;
 			this.lvWillBeMarkedElements.UseCompatibleStateImageBehavior = false;
 			this.lvWillBeMarkedElements.View = System.Windows.Forms.View.Details;
@@ -294,7 +295,7 @@
 			// 
 			this.splitContainer2.Panel2.Controls.Add(this.splitContainer3);
 			this.splitContainer2.Size = new System.Drawing.Size(442, 776);
-			this.splitContainer2.SplitterDistance = 363;
+			this.splitContainer2.SplitterDistance = 506;
 			this.splitContainer2.SplitterWidth = 5;
 			this.splitContainer2.TabIndex = 0;
 			// 
@@ -312,8 +313,8 @@
 			// splitContainer5.Panel2
 			// 
 			this.splitContainer5.Panel2.Controls.Add(this.lvFreezedRule);
-			this.splitContainer5.Size = new System.Drawing.Size(442, 363);
-			this.splitContainer5.SplitterDistance = 181;
+			this.splitContainer5.Size = new System.Drawing.Size(442, 506);
+			this.splitContainer5.SplitterDistance = 351;
 			this.splitContainer5.TabIndex = 1;
 			// 
 			// lvModifiableRule
@@ -325,7 +326,7 @@
 			this.lvModifiableRule.Location = new System.Drawing.Point(0, 0);
 			this.lvModifiableRule.Margin = new System.Windows.Forms.Padding(4);
 			this.lvModifiableRule.Name = "lvModifiableRule";
-			this.lvModifiableRule.Size = new System.Drawing.Size(442, 181);
+			this.lvModifiableRule.Size = new System.Drawing.Size(442, 351);
 			this.lvModifiableRule.TabIndex = 0;
 			this.lvModifiableRule.UseCompatibleStateImageBehavior = false;
 			this.lvModifiableRule.View = System.Windows.Forms.View.Details;
@@ -346,7 +347,7 @@
 			this.lvFreezedRule.Location = new System.Drawing.Point(0, 0);
 			this.lvFreezedRule.Margin = new System.Windows.Forms.Padding(4);
 			this.lvFreezedRule.Name = "lvFreezedRule";
-			this.lvFreezedRule.Size = new System.Drawing.Size(442, 178);
+			this.lvFreezedRule.Size = new System.Drawing.Size(442, 151);
 			this.lvFreezedRule.TabIndex = 1;
 			this.lvFreezedRule.UseCompatibleStateImageBehavior = false;
 			this.lvFreezedRule.View = System.Windows.Forms.View.Details;
@@ -372,7 +373,7 @@
 			// splitContainer3.Panel2
 			// 
 			this.splitContainer3.Panel2.Controls.Add(this.lvWillBeMarkedElements);
-			this.splitContainer3.Size = new System.Drawing.Size(442, 408);
+			this.splitContainer3.Size = new System.Drawing.Size(442, 265);
 			this.splitContainer3.SplitterDistance = 218;
 			this.splitContainer3.SplitterWidth = 5;
 			this.splitContainer3.TabIndex = 0;
