@@ -34,8 +34,8 @@ namespace Occf.Learner.Core {
 
 				var filtered = filters.Aggregate((IEnumerable<XElement>)all,
 						(current, rule) => rule.Select(current));
-				Console.WriteLine("ElementName: " + name + " (" + all.Count + ", " + accepted.Count + ", "
-				                  + filtered.Count() + ")");
+				Console.WriteLine("ElementName: " + name +
+				                  " (" + all.Count + ", " + accepted.Count + ", " + filtered.Count() + ")");
 
 				foreach (var rule in filters) {
 					var count = rule.CountRemovableTargets(all);
@@ -164,8 +164,8 @@ statement
 			for (int i = -5; i <= 5; i++) {
 				filters = filters.Concat(
 						LearnMustBeRule(elementName, new ElementSequenceExtractor(i), accepted));
-				//filters = filters.Concat(
-				//		LearnMustNotBeRule(elementName, new ElementSequenceExtractor(i), accepted, denied));
+				filters = filters.Concat(
+						LearnMustNotBeRule(elementName, new ElementSequenceExtractor(i), accepted, denied));
 
 				//filters = filters.Concat(
 				//		LearnMustNotBeRule(elementName, new ElementSetExtractor(i), accepted));

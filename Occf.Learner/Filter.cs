@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
+using Code2Xml.Core.Antlr;
 
 namespace Occf.Learner.Core {
 	public interface IFilter {
 		string ElementName { get; }
+		int LivingTime { get; }
 		int PropertiesCount { get; }
 		bool IsAcceptable(XElement target);
 		IEnumerable<XElement> Select(IEnumerable<XElement> targets);
@@ -16,6 +18,8 @@ namespace Occf.Learner.Core {
 
 	public abstract class Filter<TProperty, TExtractedProperty> : IFilter {
 		public string ElementName { get; private set; }
+
+		public int LivingTime { get; private set; }
 
 		public int PropertiesCount {
 			get { return Properties == null ? 0 : Properties.Count; }
@@ -53,18 +57,24 @@ namespace Occf.Learner.Core {
 			if (ElementName != rule.ElementName || !Equals(Extractor, ruleWithSet.Extractor)) {
 				return false;
 			}
-			Properties = ruleWithSet.Properties;
+			if (Properties == ruleWithSet.Properties || Properties.SetEquals(ruleWithSet.Properties)) {
+				LivingTime++;
+			} else {
+				Properties = ruleWithSet.Properties;
+			}
+				Properties = ruleWithSet.Properties;
 			return true;
 		}
 
 		public override string ToString() {
 			var name = GetType().Name;
 			var index = name.IndexOf("Filter");
+			var head = "t(" + LivingTime + ") " + ElementName + " " + name.Substring(0, index);
 			if (Extractor != null) {
-				return ElementName + " " + name.Substring(0, index) + " " + Extractor + " " +
+				return head + " " + Extractor + " " +
 				       Properties.Count + ": [" + String.Join(",", Properties.Select(e => e.ToString())) + "]";
 			} else {
-				return ElementName + " " + name.Substring(0, index);
+				return head;
 			}
 		}
 	}

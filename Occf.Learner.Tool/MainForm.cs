@@ -34,7 +34,7 @@ namespace Occf.Learner.Tool {
 			}
 		}
 
-		private IEnumerable<CodeFile> FreezingFiles {
+		private IEnumerable<CodeFile> FreezedFiles {
 			get {
 				return lvFreezedFile.Items.Cast<FileListViewItem>()
 						.Select(item => item.File);
@@ -88,39 +88,40 @@ namespace Occf.Learner.Tool {
 
 		private void btnInfer_Click(object sender, EventArgs e) {
 			NormalizeAllRange2Element(); // To infer good rules
-			var learningRecrods = Files
+			var learningRecrods = FreezedFiles
+					.Concat(Enumerable.Repeat(_activeFile, 1))
 					.Select(f => new LearningRecord(f.Ast, f.Range2Elements.Values))
 					.ToList();
 			var filters = RuleLearner.Learn(learningRecrods).ToList();
-			_eventEnabled = false;
-			var asts = lvModifiableFile.Items.Cast<FileListViewItem>()
-					.Concat(lvFreezedFile.Items.Cast<FileListViewItem>())
-					.Select(item => item.File.Ast)
-					.ToList();
 			var newModifiableItems = new List<RuleListViewItem>();
+			_eventEnabled = false;
 			foreach (var filter in filters) {
-				var modifiableRule = lvModifiableRule.Items.Cast<RuleListViewItem>()
+				var freezedRuleItem = lvFreezedRule.Items.Cast<RuleListViewItem>()
 						.FirstOrDefault(i => i.Filter.TryUpdateProperties(filter));
-				var freezedRule = lvFreezedRule.Items.Cast<RuleListViewItem>()
-						.FirstOrDefault(i => i.Filter.TryUpdateProperties(filter));
-				if (modifiableRule == null && freezedRule == null) {
-					var item = new RuleListViewItem(filter, Files);
-					if (filter is NopFilter) {
-						item.Checked = true; //TODO: should use "filter is NopFilter;" ?
-					}
-					newModifiableItems.Add(item);
-				} else {
-					if (modifiableRule != null) {
-						modifiableRule.Update(Files);
-					newModifiableItems.Add(modifiableRule);
-					}
-					if (freezedRule != null) {
-						freezedRule.Update(Files);
-					}
+				if (freezedRuleItem != null) {
+					freezedRuleItem.Update(Files);
+					continue;
 				}
+
+				var modifiableRuleItem = lvModifiableRule.Items.Cast<RuleListViewItem>()
+						.FirstOrDefault(i => i.Filter.TryUpdateProperties(filter));
+				if (modifiableRuleItem != null) {
+					modifiableRuleItem.Update(Files);
+					newModifiableItems.Add(modifiableRuleItem);
+					continue;
+				}
+
+				var item = new RuleListViewItem(filter, Files);
+				if (filter is NopFilter) {
+					item.Checked = true; //TODO: should use "filter is NopFilter;" ?
+				}
+				newModifiableItems.Add(item);
 			}
 			lvModifiableRule.Items.Clear();
-			foreach (var item in newModifiableItems) {
+			var sortedModifiableItems = newModifiableItems
+				.OrderByDescending(i => i.ExactMatch)
+				.ThenByDescending(i => i.Filter.LivingTime);
+			foreach (var item in sortedModifiableItems) {
 				lvModifiableRule.Items.Add(item);
 			}
 			_eventEnabled = true;
@@ -229,7 +230,10 @@ namespace Occf.Learner.Tool {
 					item.File.ReadOnly = readOnly;
 					azuki.ContextMenuStrip = _activeFile.ReadOnly ? null : contextMenuStrip;
 				}
-				btnApplyAll.Enabled = CanApplyAll();
+				var rule = InferRule();
+				var range2Elements = rule.ExtractRange2Elements(_activeFile.Ast);
+				btnApply.Enabled = CanApplyThis(range2Elements);
+				btnApplyAll.Enabled = CanApplyAll(rule);
 			}
 		}
 
@@ -356,13 +360,12 @@ namespace Occf.Learner.Tool {
 		}
 
 		private bool CanApplyThis(Dictionary<CodeRange, XElement> range2Elements) {
-			var equal = _activeFile.RangesEquals(range2Elements);
-			return !_activeFile.ReadOnly || equal;
+			return !_activeFile.ReadOnly || _activeFile.RangesEquals(range2Elements);
 		}
 
 		private bool CanApplyAll(ExtractingRule rule = null) {
 			rule = rule ?? InferRule();
-			return btnApply.Enabled && FreezingFiles.All(
+			return btnApply.Enabled && FreezedFiles.All(
 					f => f.RangesEquals(rule.ExtractRange2Elements(f.Ast)));
 		}
 
@@ -382,20 +385,21 @@ namespace Occf.Learner.Tool {
 		public class RuleListViewItem : ListViewItem {
 			public IFilter Filter { get; private set; }
 
-			public RuleListViewItem(IFilter filter, IEnumerable<CodeFile> files)
-					: base(GetName(filter, files)) {
-				Filter = filter;
-			}
+			public bool ExactMatch { get; private set; }
 
-			private static string GetName(IFilter filter, IEnumerable<CodeFile> files) {
-				var rule = new ExtractingRule(Enumerable.Repeat(filter, 1));
-				var exactMatch = files.Where(f => f.ReadOnly).All(
-						f => f.RangesEquals(filter.ElementName, rule.ExtractRange2Elements(f.Ast)));
-				return (exactMatch ? "* " : "") + files.Select(f => f.Ast).Select(filter.CountRemovableTargets).Sum() + ": " + filter;
+			public RuleListViewItem(IFilter filter, IEnumerable<CodeFile> files) {
+				Filter = filter;
+				Update(files);
 			}
 
 			public void Update(IEnumerable<CodeFile> files) {
-				Text = GetName(Filter, files);
+				var filter = Filter;
+				var rule = new ExtractingRule(Enumerable.Repeat(filter, 1));
+				var fileList = files.ToList();
+				ExactMatch = fileList.Where(f => f.ReadOnly).All(
+						f => f.RangesEquals(filter.ElementName, rule.ExtractRange2Elements(f.Ast)));
+				Text = (ExactMatch ? "* " : "")
+				       + fileList.Select(f => f.Ast).Select(filter.CountRemovableTargets).Sum() + ": " + filter;
 			}
 		}
 
