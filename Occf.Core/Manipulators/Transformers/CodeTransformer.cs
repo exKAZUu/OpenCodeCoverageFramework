@@ -79,18 +79,18 @@ namespace Occf.Core.Manipulators.Transformers {
             support.AstTransformer.SupplementDefaultCase(root);
 
             InsertIntoStatement(info, root, support, relativePath);
-            InsertIntoBranchAndCondition(info, root, support, relativePath);
+            //InsertIntoBranchAndCondition(info, root, support, relativePath);
 
             // Add the measurement code as a statement into switch and foreach
             // after inserting the measurement code into statements
-            InsertIntoSwitchCase(info, root, support, relativePath);
-            InsertIntoForeach(info, root, support, relativePath);
+            //InsertIntoSwitchCase(info, root, support, relativePath);
+            //InsertIntoForeach(info, root, support, relativePath);
 
             // Add the measurement code as a prediction into variable initializers
             // after inserting the measurement code into predictions
-            InsertIntoVariableInitializer(info, root, support, relativePath);
+            //InsertIntoVariableInitializer(info, root, support, relativePath);
 
-            // Add import for loggin executed items
+            // Add import for logging executed items
             support.AstTransformer.InsertImport(root);
         }
 

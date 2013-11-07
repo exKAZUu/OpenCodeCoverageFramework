@@ -103,7 +103,7 @@ namespace Occf.Tools.Window {
 					OccfCodeGenerator.WriteCoveragedCode(
 							profile, info, new FileInfo(filePath), outDir);
 				}
-				CoverageInfo.WriteCoverageInfo(new DirectoryInfo(outDirPath), info);
+				info.Write(new DirectoryInfo(outDirPath));
 			};
 			ProgressForm.Start(this, filePathList.Count, action);
 		}

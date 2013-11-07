@@ -24,7 +24,7 @@ using Paraiba.Xml.Linq;
 
 namespace Occf.Languages.Java.Manipulators.Taggers {
 	public class JavaTagger : Tagger {
-		public static IList<string> GetTag(XElement element) {
+		public static List<string> GetTag(XElement element) {
 			var result = element.Ancestors("compilationUnit")
 					.Elements("packageDeclaration")
 					.Select(e => e.ElementAt(1).Value)
@@ -41,22 +41,8 @@ namespace Occf.Languages.Java.Manipulators.Taggers {
 			return result;
 		}
 
-		public override string Tag(XElement elements) {
-			var tag = "";
-			var outerNodes = elements.Ancestors()
-					.Where(
-							e => e.Name.LocalName == "normalClassDeclaration" ||
-									e.Name.LocalName == "methodDeclaration");
-			foreach (var outerNode in outerNodes) {
-				var node = outerNode.Element("IDENTIFIER");
-				tag = node.Value + '>' + tag;
-				if (outerNode.Name.LocalName == "normalClassDeclaration") {
-					tag = "class " + tag;
-				} else {
-					tag = "method " + tag;
-				}
-			}
-			return tag;
+		public override List<string> Tag(XElement element) {
+            return GetTag(element);
 		}
 	}
 }

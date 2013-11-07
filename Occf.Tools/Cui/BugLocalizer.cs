@@ -197,8 +197,8 @@ namespace Occf.Tools.Cui {
 
             var covInfoFile = FileUtil.GetCoverageInfo(rootDir);
             var testInfoFile = FileUtil.GetTestInfo(rootDir);
-            var covInfo = CoverageInfo.ReadCoverageInfo(covInfoFile);
-            var testInfo = TestInfo.ReadTestInfo(testInfoFile);
+            var covInfo = CoverageInfo.Read(covInfoFile);
+            var testInfo = TestInfo.Read(testInfoFile);
 
             testInfo.InitializeForStoringData(true);
             ReadJUnitResult(resultFile, testInfo);

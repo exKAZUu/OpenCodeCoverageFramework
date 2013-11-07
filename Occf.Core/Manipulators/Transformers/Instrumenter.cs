@@ -18,7 +18,7 @@
 
 using System.IO;
 using System.Xml.Linq;
-using Code2Xml.Core.Position;
+using Code2Xml.Core.Location;
 using Paraiba.IO;
 
 namespace Occf.Core.Manipulators.Transformers {
@@ -41,7 +41,7 @@ namespace Occf.Core.Manipulators.Transformers {
 		/// <param name="position"> The position of the function. </param>
 		/// <returns> The function id. </returns>
 		protected abstract long RegisterFunction(
-				long fileId, string functionName, CodePosition position);
+				long fileId, string functionName, CodeRange position);
 
 		/// <summary>
 		///   Registers a statement with the specified file and function id which contains the statement and returns the branch id.
@@ -51,7 +51,7 @@ namespace Occf.Core.Manipulators.Transformers {
 		/// <param name="position"> The position of the statement. </param>
 		/// <returns> The statement id. </returns>
 		protected abstract long RegisterStatement(
-				long fileId, long funcId, CodePosition position);
+				long fileId, long funcId, CodeRange position);
 
 		/// <summary>
 		///   Registers a branch such as if, while, do-while, for and ? (ternary expression) with the specified file and function id which contains the branch and returns the branch id.
@@ -61,7 +61,7 @@ namespace Occf.Core.Manipulators.Transformers {
 		/// <param name="position"> The position of the branch. </param>
 		/// <returns> The branch id. </returns>
 		protected abstract long RegisterBranch(
-				long fileId, long funcId, CodePosition position);
+				long fileId, long funcId, CodeRange position);
 
 		/// <summary>
 		///   Registers a test case and returns the test case id.
@@ -79,7 +79,7 @@ namespace Occf.Core.Manipulators.Transformers {
 		/// <returns>The modified test code.</returns>
 		public string InstrumentTestCase(
 				LanguageSupport support, FileInfo fileInfo, DirectoryInfo baseDirInfo) {
-			var relativePath = ParaibaPath.GetRelativePath( fileInfo.FullName, baseDirInfo.FullName);
+			var relativePath = ParaibaPath.GetRelativePath(fileInfo.FullName, baseDirInfo.FullName);
 
 			var root = support.CodeToXml.GenerateFromFile(fileInfo.FullName);
 			var inserter = support.AstTransformer;
@@ -121,7 +121,7 @@ namespace Occf.Core.Manipulators.Transformers {
 			var funcs = analyzer.FindFunctions(root);
 			foreach (var func in funcs) {
 				var funcName = analyzer.GetFunctionName(func);
-				var funcId = RegisterFunction(fileId, funcName, CodePositions.Create(func));
+				var funcId = RegisterFunction(fileId, funcName, CodeRange.Locate(func));
 
 				InstrumentStatement(support, fileId, funcId, inserter, func);
 				InstrumentBranch(support, fileId, funcId, inserter, func);
@@ -137,7 +137,7 @@ namespace Occf.Core.Manipulators.Transformers {
 				LanguageSupport support, long fileId, long funcId, AstTransformer inserter, XElement func) {
 			var stmts = support.AstAnalyzer.FindStatements(func);
 			foreach (var stmt in stmts) {
-				var position = CodePositions.Create(stmt);
+				var position = CodeRange.Locate(stmt);
 				var stmtId = RegisterStatement(fileId, funcId, position);
 				inserter.InsertStatementBefore(stmt, stmtId, CodeTransformer.Done, ElementType.Statement);
 			}
@@ -147,7 +147,7 @@ namespace Occf.Core.Manipulators.Transformers {
 				LanguageSupport support, long fileId, long funcId, AstTransformer inserter, XElement func) {
 			var branches = support.AstAnalyzer.FindBranches(func);
 			foreach (var branch in branches) {
-				var position = CodePositions.Create(branch);
+				var position = CodeRange.Locate(branch);
 				var branchId = RegisterBranch(fileId, funcId, position);
 				inserter.InsertPredicate(branch, branchId, ElementType.Decision);
 			}

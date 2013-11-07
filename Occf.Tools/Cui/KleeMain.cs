@@ -24,166 +24,168 @@ using NDesk.Options;
 using Occf.Core.Utils;
 
 namespace Occf.Tools.Cui {
-	internal class KleeMain {
-		private const string S = "  ";
-		private const int W = 20;
+    internal class KleeMain {
+        private const string S = "  ";
+        private const int W = 20;
+        private const string lineIndent = "#line 0";
 
-		private static readonly string Usage =
-				Program.Header +
-						"" + "\n" +
-						"Usage: Occf klee_main -r <root_dir> <main_file_path> [<main_file_path>]" + "\n" +
-						"" + "\n" +
-						S + "-r, -root <root>".PadRight(W)
-						+ "path of root directory. (including source and test code)" + "\n" +
+        private static readonly string Usage =
+                Program.Header +
+                        "" + "\n" +
+                        "Usage: Occf klee_main -r <root_dir> <main_file_path> [<main_file_path>]"
+                        + "\n" +
+                        "" + "\n" +
+                        S + "-r, -root <root>".PadRight(W)
+                        + "path of root directory. (including source and test code)" + "\n" +
                         S + "-l, -lib <lib>".PadRight(W)
                         + "insert include \"stdlib\" and \"stdio\"." + "\n" +
-                        S + "".PadRight(W) + " <lib> : \"lib\" is stdlib, \"io\" is stdio, \"all\" is both." + "\n" +
+                        S + "".PadRight(W)
+                        + " <lib> : \"lib\" is stdlib, \"io\" is stdio, \"all\" is both." + "\n" +
                         S + "<main_file_path>".PadRight(W)
-						+ "path of main file of execute klee tests." + "\n" +
-						"";
+                        + "path of main file of execute klee tests." + "\n" +
+                        "";
 
-		public static bool Run(IList<string> args) {
-			var mainFilePaths = new List<string>();
-			var rootDirPath = "";
-		    var libtype = "";
+        public static bool Run(IList<string> args) {
+            var mainFilePaths = new List<string>();
+            var rootDirPath = "";
+            var libtype = "";
 
-			// parse options
-			var p = new OptionSet {
-					{ "r|root=", v => rootDirPath = v },
+            // parse options
+            var p = new OptionSet {
+                    { "r|root=", v => rootDirPath = v },
                     { "l|lib=", v => libtype = v },
-			};
+            };
 
-			// コマンドをパース "-"指定されないのだけargs[]に残る
-			try {
-				args = p.Parse(args);
-			} catch {
-				Console.WriteLine("catch");
-				return Program.Print(Usage);
-			}
+            // コマンドをパース "-"指定されないのだけargs[]に残る
+            try {
+                args = p.Parse(args);
+            } catch {
+                Console.WriteLine("catch");
+                return Program.Print(Usage);
+            }
 
-			mainFilePaths = args.ToList();
+            mainFilePaths = args.ToList();
 
-			if (args.Count < 1) {
-				return Program.Print(Usage);
-			}
+            if (args.Count < 1) {
+                return Program.Print(Usage);
+            }
 
-			if (string.IsNullOrEmpty(rootDirPath)) {
-				return Program.Print(Usage);
-			}
+            if (string.IsNullOrEmpty(rootDirPath)) {
+                return Program.Print(Usage);
+            }
 
-			var rootDir = new DirectoryInfo(rootDirPath);
-			if (!rootDir.Exists) {
-				return
-						Program.Print(
-								"Root directory doesn't exist.\nroot:" + rootDir.FullName);
-			}
-			
-			var fileInfos = new List<FileInfo>();
-			foreach (var path in mainFilePaths) {
-				if (!string.IsNullOrEmpty(path)) {
-					var fileInfo = new FileInfo(path);
-					if (!fileInfo.Exists) {
-						return
-								Program.Print(
-										"Error: file path doesn't exist.\nfile_path:" + fileInfo.FullName);
-					}
-					fileInfos.Add(fileInfo);
-				}
-			}
+            var rootDir = new DirectoryInfo(rootDirPath);
+            if (!rootDir.Exists) {
+                return
+                        Program.Print(
+                                "Root directory doesn't exist.\nroot:" + rootDir.FullName);
+            }
 
-            if (!string.IsNullOrEmpty(libtype)) {
-                if (libtype != "lib" && libtype != "io" && libtype != "all") {
-                    return
-                            Program.Print(Usage);
+            var fileInfos = new List<FileInfo>();
+            foreach (var path in mainFilePaths) {
+                if (!string.IsNullOrEmpty(path)) {
+                    var fileInfo = new FileInfo(path);
+                    if (!fileInfo.Exists) {
+                        return
+                                Program.Print(
+                                        "Error: file path doesn't exist.\nfile_path:"
+                                                + fileInfo.FullName);
+                    }
+                    fileInfos.Add(fileInfo);
                 }
             }
 
-			MainFileInsertReader(fileInfos, rootDir, libtype);
-			//InsertToMainFail(mainFile, rootDir);
+            if (!string.IsNullOrEmpty(libtype)) {
+                if (libtype != "lib" && libtype != "io" && libtype != "all") {
+                    return Program.Print(Usage);
+                }
+            }
 
-			return true;
-		}
+            MainFileInsertReader(fileInfos, rootDir, libtype);
+            //InsertToMainFail(mainFile, rootDir);
 
-		private static void MainFileInsertReader(IEnumerable<FileInfo> fileInfos, 
-                                                    DirectoryInfo rootDir, string libType) {
-			foreach (var info in fileInfos) {
-				InsertToMainFail(info, rootDir, libType);
-			}
-		}
+            return true;
+        }
 
-		private static void InsertToMainFail(FileInfo defFile, DirectoryInfo rootDir, string libType) {
-			
-			var defFileFullName = defFile.FullName;
-			var backUpFileFullName = defFileFullName + OccfNames.KleeBackUpSuffix;
-			var backUpFileName = defFile.Name + OccfNames.KleeBackUpSuffix;
+        private static void MainFileInsertReader(
+                IEnumerable<FileInfo> fileInfos, DirectoryInfo rootDir, string libType) {
+            foreach (var info in fileInfos) {
+                InsertToMainFail(info, rootDir, libType);
+            }
+        }
 
-			var insertedMethod = false;
-		    var insertedAtExit = false;
+        private static void InsertToMainFail(
+                FileInfo defFile, DirectoryInfo rootDir, string libType) {
+            var defFileFullName = defFile.FullName;
+            var backUpFileFullName = defFileFullName + OccfNames.KleeBackUpSuffix;
+            var backUpFileName = defFile.Name + OccfNames.KleeBackUpSuffix;
 
-			//先にバックアップファイルが存在していた場合は削除
-			if (File.Exists(backUpFileFullName)) {
-				Console.WriteLine("delete existing \"" + backUpFileName + "\" and create it newly");
-				File.Delete(backUpFileFullName);
-			}
+            var insertedMethod = false;
+            var insertedAtExit = false;
+
+            //先にバックアップファイルが存在していた場合は削除
+            if (File.Exists(backUpFileFullName)) {
+                Console.WriteLine("delete existing \"" + backUpFileName + "\" and create it newly");
+                File.Delete(backUpFileFullName);
+            }
             //バックアップ兼データ読み込み用ファイルの作成
-			File.Copy(defFileFullName, backUpFileFullName);
+            File.Copy(defFileFullName, backUpFileFullName);
 
-			using (var reader = new StreamReader(backUpFileFullName)) {
-				using (var writer = new StreamWriter(defFile.FullName, false)) {
-					string line;
-					var lineNum = 1;
-					var mainFlag = false;
-					var bracesCount = 0;
-					var rootFullName = rootDir.FullName.Replace("\\", "/");
+            using (var reader = new StreamReader(backUpFileFullName))
+            using (var writer = new StreamWriter(defFile.FullName, false)) {
+                string line;
+                var lineNum = 1;
+                var mainFlag = false;
+                var bracesCount = 0;
+                var rootFullName = rootDir.FullName.Replace("\\", "/");
 
-				    const string lineIndent = "#line 0";
-                    //const string atexitMarker = "klee_make_symbolic";
+                //const string atexitMarker = "klee_make_symbolic";
 
-                    //include の埋め込み
-				    WriteInclude(writer,libType);
+                //include の埋め込み
+                WriteInclude(writer, libType);
 
-					while ((line = reader.ReadLine()) != null) {
-						var lineLength = line.Length;
-						
-						//main 判定　"main" メソッドの抽出と{}による終了判定
-						var mainIndex1 = line.IndexOf(" main ", StringComparison.Ordinal);
-						var mainIndex2 = line.IndexOf(" main(", StringComparison.Ordinal);
+                while ((line = reader.ReadLine()) != null) {
+                    var lineLength = line.Length;
 
-						if (!(mainFlag) && (mainIndex1 >= 0 || mainIndex2 >= 0)) {
-							var mainIndex = mainIndex1 > mainIndex2 ? mainIndex1 : mainIndex2;
-							for (var i = mainIndex + 5; i < lineLength; i++) {
-								var sent1 = line.Substring(i, 1);
+                    //main 判定　"main" メソッドの抽出と{}による終了判定
+                    var mainIndex1 = line.IndexOf(" main ", StringComparison.Ordinal);
+                    var mainIndex2 = line.IndexOf(" main(", StringComparison.Ordinal);
 
-								if (sent1 == "(") {
-									mainFlag = true;
-                                    // main直前 OccfExit()の挿入
-                                    WriteOccfExit(writer, lineIndent, rootFullName);
-								    insertedMethod = true;
-									bracesCount = 0;
-									break;
-								}
-								if (sent1 == " ") {
-									break;
-								}
-							}
-						}
+                    if (!(mainFlag) && (mainIndex1 >= 0 || mainIndex2 >= 0)) {
+                        var mainIndex = mainIndex1 > mainIndex2 ? mainIndex1 : mainIndex2;
+                        for (var i = mainIndex + 5; i < lineLength; i++) {
+                            var sent1 = line.Substring(i, 1);
 
-						//main終端判定
-						if (mainFlag && lineLength >= 1) {
-							for (var i = 0; i < lineLength; i++) {
-								var sent1 = line.Substring(i, 1);
+                            if (sent1 == "(") {
+                                mainFlag = true;
+                                // main直前 OccfExit()の挿入
+                                WriteOccfExit(writer, rootFullName);
+                                insertedMethod = true;
+                                bracesCount = 0;
+                                break;
+                            }
+                            if (sent1 == " ") {
+                                break;
+                            }
+                        }
+                    }
 
-								if (sent1.Equals("{")) {
-									bracesCount++;
-								} else if (sent1.Equals("}")) {
-									bracesCount--;
-									if (bracesCount <= 0) {
-										mainFlag = false;
-									}
-								}
-							}
-						}
-                        /* atexitの挿入位置を変更　main判定された行の次の行
+                    //main終端判定
+                    if (mainFlag && lineLength >= 1) {
+                        for (var i = 0; i < lineLength; i++) {
+                            var sent1 = line.Substring(i, 1);
+
+                            if (sent1.Equals("{")) {
+                                bracesCount++;
+                            } else if (sent1.Equals("}")) {
+                                bracesCount--;
+                                if (bracesCount <= 0) {
+                                    mainFlag = false;
+                                }
+                            }
+                        }
+                    }
+                    /* atexitの挿入位置を変更　main判定された行の次の行
                          * 詳しくはmain判定された直後の{のがある行の次の行
                         // klee_make_symbolic判定mainflagがONでかつklee_makeを検出時
                         if (mainFlag && line.Contains(atexitMarker)) {
@@ -193,56 +195,52 @@ namespace Occf.Tools.Cui {
                             insertedAtExit = true;
                         }*/
 
-						writer.WriteLine(line);
+                    writer.WriteLine(line);
 
-                        // main フラグ立って{ がある次の行に挿入
-                        if (mainFlag && !insertedAtExit && bracesCount==1)
-                        {
-                            //var spaceNum = line.IndexOfAny(atexitMarker.ToCharArray());
-                            //atexit()の挿入
-                            WriteAtExit(writer, lineIndent, 0);
-                            insertedAtExit = true;
-                        }
-                        
-                        
-                        
-                        lineNum++;
-					}
-					reader.Close();
-					writer.Close();
-				}
-			}
+                    // main フラグ立って{ がある次の行に挿入
+                    if (mainFlag && !insertedAtExit && bracesCount == 1) {
+                        //var spaceNum = line.IndexOfAny(atexitMarker.ToCharArray());
+                        //atexit()の挿入
+                        WriteAtExit(writer, 0);
+                        insertedAtExit = true;
+                    }
 
-			//上位のバックアップファイル(Line ins)がある場合はバックアップファイルを残さない
-			if(File.Exists(defFileFullName+OccfNames.LineBackUpSuffix)) {
-				File.Delete(backUpFileFullName);
-			}
+                    lineNum++;
+                }
+                reader.Close();
+                writer.Close();
+            }
 
-			if (insertedAtExit) { // exit trueじゃないとmethod trueにならないので片方でOK
-				Console.WriteLine("wrote:" + defFile.FullName);
-			} else if(insertedMethod){
+            //上位のバックアップファイル(Line ins)がある場合はバックアップファイルを残さない
+            if (File.Exists(defFileFullName + OccfNames.LineBackUpSuffix)) {
+                File.Delete(backUpFileFullName);
+            }
+
+            if (insertedAtExit) { // exit trueじゃないとmethod trueにならないので片方でOK
+                Console.WriteLine("wrote:" + defFile.FullName);
+            } else if (insertedMethod) {
                 Console.WriteLine("failed:" + defFile.FullName + " is only wrote OCCF Method");
-			} else {
-			    Console.WriteLine("unwrote:" + defFile.FullName);
-			}
-		}
-
-        private static void WriteInclude(StreamWriter writer, string libType) {
-            switch (libType){
-                case "lib":
-                    writer.WriteLine("#include <stdlib.h>");
-                    break;
-                case "io":
-                    writer.WriteLine("#include <stdio.h>");
-                    break;
-                case "all":
-                    writer.WriteLine("#include <stdlib.h>");
-                    writer.WriteLine("#include <stdio.h>");
-                    break;
+            } else {
+                Console.WriteLine("unwrote:" + defFile.FullName);
             }
         }
 
-        private static void WriteAtExit(StreamWriter writer,string lineIndent, int spaceNum) {
+        private static void WriteInclude(StreamWriter writer, string libType) {
+            switch (libType) {
+            case "lib":
+                writer.WriteLine("#include <stdlib.h>");
+                break;
+            case "io":
+                writer.WriteLine("#include <stdio.h>");
+                break;
+            case "all":
+                writer.WriteLine("#include <stdlib.h>");
+                writer.WriteLine("#include <stdio.h>");
+                break;
+            }
+        }
+
+        private static void WriteAtExit(StreamWriter writer, int spaceNum) {
             //const string atexit = "atexit(occf_exit);";
             const string atexit = "\t atexit(occf_exit);";
             writer.WriteLine("");
@@ -254,7 +252,7 @@ namespace Occf.Tools.Cui {
             writer.WriteLine("");
         }
 
-        private static void WriteOccfExit(StreamWriter writer, string lineIndent, string rootFullName) {
+        private static void WriteOccfExit(StreamWriter writer, string rootFullName) {
             writer.WriteLine("");
             writer.WriteLine(lineIndent);
             //writer.WriteLine("char *occftmp = getenv(\"KTEST_FILE\");");
@@ -265,17 +263,18 @@ namespace Occf.Tools.Cui {
             //writer.WriteLine(lineIndent);
             //writer.WriteLine("\t char *occftmp = getenv(\"KTEST_FILE\");");
             writer.WriteLine(lineIndent);
-            writer.WriteLine("\t FILE *occffile = fopen(\"" + rootFullName + "/" + OccfNames.SuccessfulTests + "\", \"a\");");
+            writer.WriteLine("\tFILE *occffile = fopen(\"" + rootFullName + "/"
+                    + OccfNames.SuccessfulTests + "\", \"a\");");
             writer.WriteLine(lineIndent);
-            writer.WriteLine("\t fputs(occftmp, occffile);");
+            writer.WriteLine("\tfputs(occftmp, occffile);");
             writer.WriteLine(lineIndent);
-            writer.WriteLine("\t fputc('\\n', occffile);");
+            writer.WriteLine("\tfputc('\\n', occffile);");
             writer.WriteLine(lineIndent);
-            writer.WriteLine("\t fclose(occffile);");
+            writer.WriteLine("\tfclose(occffile);");
             writer.WriteLine(lineIndent);
             writer.WriteLine("}");
             writer.WriteLine(lineIndent);
             writer.WriteLine("");
         }
-	}
+    }
 }

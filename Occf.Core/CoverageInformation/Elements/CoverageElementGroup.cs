@@ -19,7 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Code2Xml.Core.Position;
+using Code2Xml.Core.Location;
 
 namespace Occf.Core.CoverageInformation.Elements {
 	[Serializable]
@@ -54,12 +54,16 @@ namespace Occf.Core.CoverageInformation.Elements {
 
 		#region ICoverageElement Members
 
-		public CodePosition Position {
+		public CodeRange Position {
 			get { return ParentElement.Position; }
 		}
 
 		public CoverageState State {
 			get { return Targets.Aggregate(ParentElement.State, (s, t) => s & t.State); }
+		}
+
+		public List<string> Qualifiers {
+			get { return ParentElement.Qualifiers; }
 		}
 
 		public string Tag {

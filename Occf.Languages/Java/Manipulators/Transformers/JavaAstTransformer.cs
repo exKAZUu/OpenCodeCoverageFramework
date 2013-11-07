@@ -34,7 +34,7 @@ using Paraiba.Xml.Linq;
 namespace Occf.Languages.Java.Manipulators.Transformers {
     public class JavaAstTransformer : AntlrAstTransformer<JavaParser> {
         protected override string MethodPrefix {
-            get { return ""; }
+            get { return "net.exkazuu.CoverageWriter."; }
         }
 
         protected override AntlrCodeToXml<JavaParser> CodeToXml {
@@ -50,9 +50,6 @@ namespace Occf.Languages.Java.Manipulators.Transformers {
         }
 
         public override void InsertImport(XElement target) {
-            var ast = new XElement("TOKEN",
-                    "import static jp.ac.waseda.cs.washi.CoverageWriter.*;\r\n");
-            target.AddFirst(ast);
         }
 
         public override void SupplementBlock(XElement root) {
@@ -87,7 +84,7 @@ namespace Occf.Languages.Java.Manipulators.Transformers {
                     relativePath, string.Join(".", JavaTagger.GetTag(target)), target);
             var blockElement = target.Element("block").NthElement(1);
             var code = CreateTestCaseIdentifierCode(target, id, 2, ElementType.TestCase);
-            var node = JavaCodeToXml.Instance.GenerateWithoutPosition(code, p => p.statement());
+            var node = JavaCodeToXml.Instance.Generate(code, p => p.statement(), false, false);
             if (blockElement.Name.LocalName == "blockStatement") {
                 blockElement.AddFirst(node);
             } else {
@@ -97,8 +94,6 @@ namespace Occf.Languages.Java.Manipulators.Transformers {
         }
 
         protected override IEnumerable<XElement> FindLackingBlockNodes(XElement root) {
-            SupplementEmptyMethod(root);
-
             var ifs = JavaElements.If(root)
                     .SelectMany(JavaElements.IfAndElseProcesses);
             var whiles = JavaElements.While(root)
@@ -114,6 +109,8 @@ namespace Occf.Languages.Java.Manipulators.Transformers {
         }
 
         private static void SupplementEmptyMethod(XElement root) {
+			// TODO: This transformation causes compile errors due to unrechable code
+			// e.g. return; return;
             var methods = root.Descendants("methodDeclaration")
                     .Where(e => e.Elements().Any(e2 => e2.Value == "void"))
                     .Select(e => e.Element("block"))
@@ -124,7 +121,7 @@ namespace Occf.Languages.Java.Manipulators.Transformers {
                                     .FirstElement()
                                     .Value == "throw"))
                     .Select(e => e.LastElement());
-            var node = JavaCodeToXml.Instance.GenerateWithoutPosition("return;", p => p.statement());
+            var node = JavaCodeToXml.Instance.Generate("return;", p => p.statement(), false, false);
             foreach (var method in methods) {
                 method.AddBeforeSelf(node);
             }

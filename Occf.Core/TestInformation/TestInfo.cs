@@ -46,25 +46,24 @@ namespace Occf.Core.TestInformation {
 			}
 		}
 
-		public static TestInfo ReadTestInfo(FileInfo infoFile) {
-			return ReadTestInfo(infoFile, new BinaryFormatter());
+		public static TestInfo Read(FileInfo infoFile) {
+			return Read(infoFile, new BinaryFormatter());
 		}
 
-		public static TestInfo ReadTestInfo(FileInfo infoFile, BinaryFormatter formatter) {
+		public static TestInfo Read(FileInfo infoFile, BinaryFormatter formatter) {
 			using (var fs = new FileStream(infoFile.FullName, FileMode.Open)) {
 				return (TestInfo)formatter.Deserialize(fs);
 			}
 		}
 
-		public static void WriteTestInfo(DirectoryInfo rootDir, TestInfo testInfo) {
-			WriteTestInfo(rootDir, testInfo, new BinaryFormatter());
+		public void Write(DirectoryInfo rootDir) {
+			Write(rootDir, new BinaryFormatter());
 		}
 
-		public static void WriteTestInfo(
-				DirectoryInfo rootDir, TestInfo testInfo, BinaryFormatter formatter) {
+		public void Write(DirectoryInfo rootDir, BinaryFormatter formatter) {
 			var testPath = Path.Combine(rootDir.FullName, OccfNames.TestInfo);
 			using (var fs = new FileStream(testPath, FileMode.Create)) {
-				formatter.Serialize(fs, testInfo);
+				formatter.Serialize(fs, this);
 			}
 		}
 	}

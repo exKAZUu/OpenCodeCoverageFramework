@@ -16,10 +16,13 @@
 
 #endregion
 
+using System.Collections.Generic;
 using System.Xml.Linq;
 
 namespace Occf.Core.Manipulators.Taggers {
-	public abstract class Tagger {
-		public abstract string Tag(XElement elements);
+	public class Tagger {
+		public virtual List<string> Tag(XElement element) {
+			return new List<string>();
+		}
 	}
 }
