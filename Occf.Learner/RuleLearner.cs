@@ -217,7 +217,7 @@ statement
 		}
 
 		public static string NameOrValue(this XElement element) {
-			return element.Name.LocalName != "TOKEN" ? element.Name.LocalName : element.Value;
+			return char.IsLower(element.Name.LocalName[0]) ? element.Name.LocalName : element.Value;
 		}
 
 		public static IEnumerable<XElement> DescendantsOfOnlyChildAndSelf(this XElement element) {

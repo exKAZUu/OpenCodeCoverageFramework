@@ -2,9 +2,18 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Xml.Linq;
+using Accord.MachineLearning.DecisionTrees;
+using Accord.MachineLearning.DecisionTrees.Learning;
+using Accord.MachineLearning.VectorMachines;
+using Accord.MachineLearning.VectorMachines.Learning;
+using Accord.Statistics.Kernels;
+using AForge;
 using NUnit.Framework;
 using Occf.Core.Manipulators;
 using Occf.Core.Tests;
+using Paraiba.Linq;
+using Paraiba.Xml.Linq;
 
 namespace Occf.Learner.Core.Tests {
 	[TestFixture]
@@ -79,6 +88,167 @@ namespace Occf.Learner.Core.Tests {
 			var accepted = profile.AstAnalyzer.FindStatements(ast).ToList();
 			var rules = RuleLearner.Learn(new[] { new LearningRecord(ast, accepted) });
 			return rules;
+		}
+
+		[Test]
+		public void TestMachineLearning() {
+			var all = new HashSet<XElement>();
+			var accepted = new HashSet<XElement>();
+			var inPaths = new[] {
+				@"C:\Users\exKAZUu\Projects\PageObjectGenerator\src\main\java\com\google\testing\pogen\GenerateCommand.java",
+				@"C:\Users\exKAZUu\Projects\PageObjectGenerator\src\main\java\com\google\testing\pogen\Command.java",
+				//@"C:\Users\exKAZUu\Projects\PageObjectGenerator\src\main\java\com\google\testing\pogen\PageObjectGenerator.java",
+				//@"C:\Users\exKAZUu\Projects\PageObjectGenerator\src\main\java\com\google\testing\pogen\generator\template\TemplateUpdaterWithClassAttribute.java",
+			};
+			foreach (var inPath in inPaths) {
+				var allAndAccepted = CalculateAllAndAccepted(inPath);
+				all.UnionWith(allAndAccepted.Item1);
+				accepted.UnionWith(allAndAccepted.Item2);
+			}
+
+			var prop2Index = new Dictionary<string, int>();
+			var variables = new List<DecisionVariable>();
+			var extractors = Enumerable.Range(-10, 21)
+					.Select(i => new ElementSequenceExtractor(i))
+					.ToList();
+			for (int i = 0; i < extractors.Count; i++) {
+				foreach (var elem in accepted) {
+					var propWithIndex = i + extractors[i].ExtractProperty(elem);
+					if (!prop2Index.ContainsKey(propWithIndex)) {
+						prop2Index[propWithIndex] = variables.Count;
+						variables.Add(new DecisionVariable(propWithIndex, DecisionVariableKind.Discrete));
+					}
+				}
+			}
+			var denied = all; // Should not use all after this
+			denied.ExceptWith(accepted);
+
+			var learningRecords = Enumerable.Empty<double[]>();
+			var learningResults = new List<int>();
+			learningRecords =
+					learningRecords.Concat(
+							accepted.Concat(denied)
+									.Select(e => { return GetLearningRecord(e, variables, extractors, prop2Index); }));
+			learningResults.AddRange(Enumerable.Repeat(-1, accepted.Count));
+			learningResults.AddRange(Enumerable.Repeat(1, denied.Count));
+			var inputs = learningRecords.ToArray();
+			var outputs = learningResults.ToArray();
+
+			{
+				var tree = new DecisionTree(variables, 2);
+				var learning = new C45Learning(tree);
+				learning.Run(inputs, outputs);
+				Func<double[], double> judge = record => tree.Compute(record);
+				VerifyLearning(judge, variables, extractors, prop2Index);
+			}
+
+			{
+				var tree = new DecisionTree(variables, 2);
+				var learning = new ID3Learning(tree);
+				learning.Run(inputs.Select(ds => ds.Select(d => (int)d).ToArray()).ToArray(), outputs);
+				Func<double[], double> judge = record => tree.Compute(record);
+				VerifyLearning(judge, variables, extractors, prop2Index);
+			}
+
+			{
+				DoubleRange range; // valid range will be returned as an out parameter
+				var kernel = new Linear();
+				var svm = new KernelSupportVectorMachine(kernel, variables.Count);
+				var smo = new SequentialMinimalOptimization(svm, inputs, outputs);
+				smo.Run();
+				VerifyLearning(svm.Compute, variables, extractors, prop2Index);
+			}
+
+			{
+				DoubleRange range; // valid range will be returned as an out parameter
+				var kernel = new Gaussian();
+				var svm = new KernelSupportVectorMachine(kernel, variables.Count);
+				var smo = new SequentialMinimalOptimization(svm, inputs, outputs);
+				smo.Run();
+				VerifyLearning(svm.Compute, variables, extractors, prop2Index);
+			}
+		}
+
+		private void VerifyLearning(
+				Func<double[], double> judge, List<DecisionVariable> variables,
+				IEnumerable<PropertyExtractor<string>> extractors, Dictionary<string, int> prop2Index) {
+			var profile = LanguageSupports.GetCoverageModeByClassName("Java");
+			var files = Directory.GetFiles(@"C:\Users\exKAZUu\Projects\PageObjectGenerator\src", "*.java",
+					SearchOption.AllDirectories);
+			var count = 0;
+			var failedIndicies = new List<int>();
+			foreach (var inPath in files) {
+				Console.WriteLine(inPath);
+				var codeFile = new FileInfo(inPath);
+				var ast = profile.CodeToXml.GenerateFromFile(codeFile.FullName);
+				var accepted = GetAcceptedElements(ast);
+				var all = ast.Descendants("expression").ToHashSet();
+				foreach (var e in all) {
+					var record = GetLearningRecord(e, variables, extractors, prop2Index);
+					var value = judge(record);
+					var expected = value <= 0;
+					var actual = accepted.Contains(e);
+					if (expected != actual) {
+						var props = extractors.Select(ext => ext.ExtractProperty(e)).ToList();
+						Console.WriteLine("expected: " + expected + "(" + value + ")" + ", actual: " + actual);
+						failedIndicies.Add(count);
+					}
+					else if (Math.Abs(value) < 0.1) {
+						Console.WriteLine("expected: " + expected + "(" + value + ")" + ", actual: " + actual);
+					}
+					count++;
+				}
+			}
+			Console.WriteLine(failedIndicies.Count + ": " + string.Join(",", failedIndicies));
+			Console.WriteLine("-------------------------------------------");
+		}
+
+		private static double[] GetLearningRecord(
+				XElement e, List<DecisionVariable> variables, IEnumerable<PropertyExtractor<string>> extractors,
+				Dictionary<string, int> prop2Index) {
+			var record = new double[variables.Count];
+			extractors.ForEach((extractor, i) => {
+				var propWithIndex = i + extractor.ExtractProperty(e);
+				int index;
+				if (prop2Index.TryGetValue(propWithIndex, out index)) {
+					record[index] = 1;
+				}
+			});
+			return record;
+		}
+
+		private static Tuple<HashSet<XElement>, HashSet<XElement>> CalculateAllAndAccepted(string inPath) {
+			var profile = LanguageSupports.GetCoverageModeByClassName("Java");
+			var codeFile = new FileInfo(inPath);
+			var ast = profile.CodeToXml.GenerateFromFile(codeFile.FullName);
+			var accepted = GetAcceptedElements(ast);
+			var all = ast.Descendants("expression").ToHashSet();
+			return Tuple.Create(all, accepted);
+		}
+
+		private static HashSet<XElement> GetAcceptedElements(XElement ast) {
+			var profile = LanguageSupports.GetCoverageModeByClassName("Java");
+			//return profile.AstAnalyzer.FindStatements(ast).ToHashSet();
+
+			var ifConds = ast.Descendants("statement")
+					.Where(e => e.FirstElement().Value == "if")
+					.Select(e => e.NthElement(1).NthElement(1));
+			var preConds = ast.Descendants("expression")
+					.Where(e => {
+						var primary = e.SafeParent().SafeParent().SafeParent().SafeParent();
+						if (primary.SafeName() != "primary") {
+							return false;
+						}
+						if (primary.NthElementOrDefault(0).SafeValue() != "Preconditions") {
+							return false;
+						}
+						if (primary.NthElementOrDefault(2).SafeValue() != "checkArgument") {
+							return false;
+						}
+						return true;
+					});
+			var accepted = ifConds.Concat(preConds).ToHashSet();
+			return accepted;
 		}
 	}
 }
