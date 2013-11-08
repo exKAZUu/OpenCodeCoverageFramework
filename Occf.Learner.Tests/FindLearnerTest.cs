@@ -96,9 +96,21 @@ namespace Occf.Learner.Core.Tests {
 			var accepted = new HashSet<XElement>();
 			var inPaths = new[] {
 				@"C:\Users\exKAZUu\Projects\PageObjectGenerator\src\main\java\com\google\testing\pogen\GenerateCommand.java",
-				@"C:\Users\exKAZUu\Projects\PageObjectGenerator\src\main\java\com\google\testing\pogen\Command.java",
+				//@"C:\Users\exKAZUu\Projects\PageObjectGenerator\src\main\java\com\google\testing\pogen\generator\test\java\NameConverter.java",
+				//@"C:\Users\exKAZUu\Projects\PageObjectGenerator\src\main\java\com\google\testing\pogen\Command.java",
+				//@"C:\Users\exKAZUu\Projects\PageObjectGenerator\src\main\java\com\google\testing\pogen\generator\template\TemplateUpdaterWithClassAttribute.java",
+				//@"C:\Users\exKAZUu\Projects\PageObjectGenerator\src\main\java\com\google\testing\pogen\parser\template\TemplateParser.java",
+				//@"C:\Users\exKAZUu\Projects\PageObjectGenerator\src\main\java\com\google\testing\pogen\generator\template\TemplateUpdaterWithoutClassAttribute.java",
+				//@"C:\Users\exKAZUu\Projects\PageObjectGenerator\src\main\java\com\google\testing\pogen\MeasureCommand.java",
+				//@"C:\Users\exKAZUu\Projects\PageObjectGenerator\src\PageObjectGenerator - コピー.java",
+				//@"C:\Users\exKAZUu\Projects\PageObjectGenerator\src\main\java\com\google\testing\pogen\parser\template\RegexVariableExtractor.java",
+				//@"C:\Users\exKAZUu\Projects\PageObjectGenerator\src\main\java\com\google\testing\pogen\generator\template\TemplateUpdater.java",
 				//@"C:\Users\exKAZUu\Projects\PageObjectGenerator\src\main\java\com\google\testing\pogen\PageObjectGenerator.java",
 				//@"C:\Users\exKAZUu\Projects\PageObjectGenerator\src\main\java\com\google\testing\pogen\generator\template\TemplateUpdaterWithClassAttribute.java",
+				//@"C:\Users\exKAZUu\Projects\pageobjectgenerator\src\main\java\com\google\testing\pogen\measurer\VariableCoverage.java",
+				//@"C:\Users\exKAZUu\Projects\pageobjectgenerator\src\main\java\com\google\testing\pogen\FileProcessException.java",
+				//@"C:\Users\exKAZUu\Projects\pageobjectgenerator\src\main\java\com\google\testing\pogen\PageObjectGenerator.java",
+				//@"C:\Users\exKAZUu\Projects\PageObjectGenerator\src\main\java\com\google\testing\pogen\parser\template\HtmlTagInfo.java",
 			};
 			foreach (var inPath in inPaths) {
 				var allAndAccepted = CalculateAllAndAccepted(inPath);
@@ -142,13 +154,13 @@ namespace Occf.Learner.Core.Tests {
 				VerifyLearning(judge, variables, extractors, prop2Index);
 			}
 
-			{
-				var tree = new DecisionTree(variables, 2);
-				var learning = new ID3Learning(tree);
-				learning.Run(inputs.Select(ds => ds.Select(d => (int)d).ToArray()).ToArray(), outputs);
-				Func<double[], double> judge = record => tree.Compute(record);
-				VerifyLearning(judge, variables, extractors, prop2Index);
-			}
+			//{
+			//	var tree = new DecisionTree(variables, 2);
+			//	var learning = new ID3Learning(tree);
+			//	learning.Run(inputs.Select(ds => ds.Select(d => (int)d).ToArray()).ToArray(), outputs);
+			//	Func<double[], double> judge = record => tree.Compute(record);
+			//	VerifyLearning(judge, variables, extractors, prop2Index);
+			//}
 
 			{
 				DoubleRange range; // valid range will be returned as an out parameter
@@ -159,24 +171,34 @@ namespace Occf.Learner.Core.Tests {
 				VerifyLearning(svm.Compute, variables, extractors, prop2Index);
 			}
 
-			{
-				DoubleRange range; // valid range will be returned as an out parameter
-				var kernel = new Gaussian();
-				var svm = new KernelSupportVectorMachine(kernel, variables.Count);
-				var smo = new SequentialMinimalOptimization(svm, inputs, outputs);
-				smo.Run();
-				VerifyLearning(svm.Compute, variables, extractors, prop2Index);
-			}
+			//{
+			//	DoubleRange range; // valid range will be returned as an out parameter
+			//	var kernel = new Gaussian();
+			//	var svm = new KernelSupportVectorMachine(kernel, variables.Count);
+			//	var smo = new SequentialMinimalOptimization(svm, inputs, outputs);
+			//	smo.Run();
+			//	VerifyLearning(svm.Compute, variables, extractors, prop2Index);
+			//}
 		}
 
 		private void VerifyLearning(
 				Func<double[], double> judge, List<DecisionVariable> variables,
 				IEnumerable<PropertyExtractor<string>> extractors, Dictionary<string, int> prop2Index) {
 			var profile = LanguageSupports.GetCoverageModeByClassName("Java");
-			var files = Directory.GetFiles(@"C:\Users\exKAZUu\Projects\PageObjectGenerator\src", "*.java",
-					SearchOption.AllDirectories);
+			var files = Directory.GetFiles(@"C:\Users\exKAZUu\Projects\PageObjectGenerator", "*.java",
+					SearchOption.AllDirectories)
+					//.Concat(Directory.GetFiles(@"C:\Users\exKAZUu\Projects\jenkins", "*.java",
+					//		SearchOption.AllDirectories))
+					//.Concat(Directory.GetFiles(@"C:\Users\exKAZUu\Projects\storm", "*.java",
+					//		SearchOption.AllDirectories))
+					.Concat(Directory.GetFiles(@"C:\Users\exKAZUu\Projects\xUtils", "*.java",
+							SearchOption.AllDirectories))
+					.Concat(Directory.GetFiles(@"C:\Users\exKAZUu\Projects\presto", "*.java",
+							SearchOption.AllDirectories));
 			var count = 0;
 			var failedIndicies = new List<int>();
+			var minProb = Double.MaxValue;
+			var minProbPath = "";
 			foreach (var inPath in files) {
 				Console.WriteLine(inPath);
 				var codeFile = new FileInfo(inPath);
@@ -190,16 +212,20 @@ namespace Occf.Learner.Core.Tests {
 					var actual = accepted.Contains(e);
 					if (expected != actual) {
 						var props = extractors.Select(ext => ext.ExtractProperty(e)).ToList();
-						Console.WriteLine("expected: " + expected + "(" + value + ")" + ", actual: " + actual);
+						//Console.WriteLine(count + ": expected: " + expected + "(" + value + ")" + ", actual: "
+						//                  + actual);
 						failedIndicies.Add(count);
 					}
-					else if (Math.Abs(value) < 0.1) {
-						Console.WriteLine("expected: " + expected + "(" + value + ")" + ", actual: " + actual);
+					var prob = Math.Abs(value);
+					if (minProb > prob) {
+						minProb = prob;
+						minProbPath = inPath;
 					}
 					count++;
 				}
 			}
 			Console.WriteLine(failedIndicies.Count + ": " + string.Join(",", failedIndicies));
+			Console.WriteLine(minProb + ": " + minProbPath);
 			Console.WriteLine("-------------------------------------------");
 		}
 
@@ -231,7 +257,7 @@ namespace Occf.Learner.Core.Tests {
 			//return profile.AstAnalyzer.FindStatements(ast).ToHashSet();
 
 			var ifConds = ast.Descendants("statement")
-					.Where(e => e.FirstElement().Value == "if")
+					.Where(e => e.FirstElementOrDefault().SafeValue() == "if")
 					.Select(e => e.NthElement(1).NthElement(1));
 			var preConds = ast.Descendants("expression")
 					.Where(e => {
