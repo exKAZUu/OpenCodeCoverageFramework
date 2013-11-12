@@ -55,7 +55,7 @@ namespace Occf.Learner.Core.Tests {
 			var profile = LanguageSupports.GetCoverageModeByClassName("C");
 			var inPath = Path.Combine(Fixture.GetCoverageInputPath(), fileName);
 			var codeFile = new FileInfo(inPath);
-			var ast = profile.CodeToXml.GenerateFromFile(codeFile.FullName);
+			var ast = profile.Processor.GenerateXml(codeFile);
 			var statements = profile.AstAnalyzer.FindStatements(ast).ToList();
 			RuleLearner.Learn(new[] { new LearningRecord(ast, statements) });
 			//var statements2 = rule.Find(ast).ToList();
@@ -84,7 +84,7 @@ namespace Occf.Learner.Core.Tests {
 			var profile = LanguageSupports.GetCoverageModeByClassName("Java");
 			var inPath = Path.Combine(Fixture.GetCoverageInputPath(), fileName);
 			var codeFile = new FileInfo(inPath);
-			var ast = profile.CodeToXml.GenerateFromFile(codeFile.FullName);
+			var ast = profile.Processor.GenerateXml(codeFile);
 			var accepted = profile.AstAnalyzer.FindStatements(ast).ToList();
 			var rules = RuleLearner.Learn(new[] { new LearningRecord(ast, accepted) });
 			return rules;
@@ -202,7 +202,7 @@ namespace Occf.Learner.Core.Tests {
 			foreach (var inPath in files) {
 				Console.WriteLine(inPath);
 				var codeFile = new FileInfo(inPath);
-				var ast = profile.CodeToXml.GenerateFromFile(codeFile.FullName);
+				var ast = profile.Processor.GenerateXml(codeFile);
 				var accepted = GetAcceptedElements(ast);
 				var all = ast.Descendants("expression").ToHashSet();
 				foreach (var e in all) {
@@ -246,7 +246,7 @@ namespace Occf.Learner.Core.Tests {
 		private static Tuple<HashSet<XElement>, HashSet<XElement>> CalculateAllAndAccepted(string inPath) {
 			var profile = LanguageSupports.GetCoverageModeByClassName("Java");
 			var codeFile = new FileInfo(inPath);
-			var ast = profile.CodeToXml.GenerateFromFile(codeFile.FullName);
+			var ast = profile.Processor.GenerateXml(codeFile);
 			var accepted = GetAcceptedElements(ast);
 			var all = ast.Descendants("expression").ToHashSet();
 			return Tuple.Create(all, accepted);

@@ -20,34 +20,20 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
-using Code2Xml.Core.Antlr;
 using Code2Xml.Core.CodeToXmls;
-using Code2Xml.Core.XmlToCodes;
+using Code2Xml.Languages.ANTLRv3.Processors.C;
 using Code2Xml.Languages.C.CodeToXmls;
-using Code2Xml.Languages.C.XmlToCodes;
 using Occf.Core.Manipulators.Transformers;
 using Occf.Core.TestInformation;
 using Paraiba.Xml.Linq;
 
 namespace Occf.Languages.Cpp.Manipulators.Transformers {
-	public class CppAstTransformer : AntlrAstTransformer<CParser> {
+	public class CppAstTransformer : AntlrAstTransformer {
 		protected override string MethodPrefix {
 			get { return ""; }
 		}
 
-		protected override AntlrCodeToXml<CParser> CodeToXml {
-			get { return CCodeToXml.Instance; }
-		}
-
-		protected override XmlToCode XmlToCode {
-			get { return CXmlToCode.Instance; }
-		}
-
-		protected override Func<CParser, XAstParserRuleReturnScope> ParseStatementFunc {
-			get { return p => p.statement(); }
-		}
-
-        protected override Tuple<string, string> CreatePredicateCoverageCode(
+		protected override Tuple<string, string> CreatePredicateCoverageCode(
                 XElement target, long id, ElementType type) {
             return Tuple.Create("(WritePredicate(" + id + "," + (int)type + ",", "))");
         }

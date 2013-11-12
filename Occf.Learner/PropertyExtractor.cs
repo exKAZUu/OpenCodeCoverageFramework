@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
+using Code2Xml.Core;
 using Paraiba.Xml.Linq;
 
 namespace Occf.Learner.Core {
@@ -156,6 +157,7 @@ namespace Occf.Learner.Core {
 				elements = new[] { e };
 				var depth = _depth + 1;
 				while (depth > 0 && elements.Any()) {
+					elements = elements.Where(e2 => e2.Name() != Code2XmlConstants.TokenGroupName);
 					if (elements.Elements().Count() > 1) {
 						depth--;
 					}
@@ -201,19 +203,20 @@ namespace Occf.Learner.Core {
 		}
 
 		public override IEnumerable<string> ExtractProperty(XElement e) {
-			var es = Enumerable.Empty<XElement>();
+			var elements = Enumerable.Empty<XElement>();
 			if (_depth < 0) {
 				var ancestor = e.Parents().ElementAtOrDefault(-1 * _depth - 1);
 				if (ancestor != null) {
-					es = ancestor.Elements();
+					elements = ancestor.Elements();
 				}
 			} else {
-				es = e.Elements();
+				elements = e.Elements();
 				for (int i = 0; i < _depth; i++) {
-					es = es.Elements();
+					elements = elements.Where(e2 => e2.Name() != Code2XmlConstants.TokenGroupName);
+					elements = elements.Elements();
 				}
 			}
-			return es.Select(e2 => e2.NameOrValue());
+			return elements.Select(e2 => e2.NameOrValue());
 		}
 
 		public override string ToString() {

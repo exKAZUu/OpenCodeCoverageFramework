@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
-using Code2Xml.Core.Antlr;
 
 namespace Occf.Learner.Core {
 	public interface IFilter {
@@ -62,7 +61,7 @@ namespace Occf.Learner.Core {
 			} else {
 				Properties = ruleWithSet.Properties;
 			}
-				Properties = ruleWithSet.Properties;
+			Properties = ruleWithSet.Properties;
 			return true;
 		}
 

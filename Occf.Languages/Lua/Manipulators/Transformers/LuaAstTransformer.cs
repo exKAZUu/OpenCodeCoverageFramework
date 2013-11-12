@@ -20,34 +20,19 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
-using Code2Xml.Core.Antlr;
 using Code2Xml.Core.CodeToXmls;
-using Code2Xml.Core.XmlToCodes;
 using Code2Xml.Languages.Lua.CodeToXmls;
-using Code2Xml.Languages.Lua.XmlToCodes;
 using Occf.Core.Manipulators.Transformers;
 using Occf.Core.TestInformation;
 using Occf.Languages.Lua.Manipulators.Analyzers;
 
 namespace Occf.Languages.Lua.Manipulators.Transformers {
-    public class LuaAstTransformer : AntlrAstTransformer<LuaParser> {
+    public class LuaAstTransformer : AntlrAstTransformer {
         protected override string MethodPrefix {
             get { return ""; }
         }
 
-        protected override AntlrCodeToXml<LuaParser> CodeToXml {
-            get { return LuaCodeToXml.Instance; }
-        }
-
-        protected override XmlToCode XmlToCode {
-            get { return LuaXmlToCode.Instance; }
-        }
-
-        protected override Func<LuaParser, XAstParserRuleReturnScope> ParseStatementFunc {
-            get { return p => p.stat(); }
-        }
-
-        public override void InsertImport(XElement target) {}
+	    public override void InsertImport(XElement target) {}
 
         public override void SupplementBlock(XElement root) {
         }

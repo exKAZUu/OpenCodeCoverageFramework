@@ -19,10 +19,8 @@
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
-using Code2Xml.Core.CodeToXmls;
-using Code2Xml.Core.XmlToCodes;
-using Code2Xml.Languages.C.CodeToXmls;
-using Code2Xml.Languages.C.XmlToCodes;
+using Code2Xml.Core.Processors;
+using Code2Xml.Objects;
 using Occf.Core.Manipulators;
 using Occf.Core.Manipulators.Analyzers;
 using Occf.Core.Manipulators.Taggers;
@@ -43,17 +41,13 @@ namespace Occf.Languages.C.Manipulators {
 		public override string Name {
 			get { return "C"; }
 		}
+		
+	    public override Processor Processor {
+		    get { return Processors.CUsingAntlr3; }
+	    }
 
 		public override IEnumerable<string> FilePatterns {
 			get { return _filePatterns ?? (_filePatterns = new[] { "*.c" }); }
-		}
-
-		public override CodeToXml CodeToXml {
-			get { return CCodeToXml.Instance; }
-		}
-
-		public override XmlToCode XmlToCode {
-			get { return CXmlToCode.Instance; }
 		}
 
 		public override AstTransformer AstTransformer {

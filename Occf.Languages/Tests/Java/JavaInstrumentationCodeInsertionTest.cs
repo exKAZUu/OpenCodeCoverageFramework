@@ -61,7 +61,7 @@ namespace Occf.Languages.Tests.Java {
 			var codeFile = new FileInfo(inPath);
 
 			var relativePath = ParaibaPath.GetRelativePath(codeFile.FullName, info.BasePath);
-			var ast = profile.CodeToXml.GenerateFromFile(codeFile.FullName);
+			var ast = profile.Processor.GenerateXml(codeFile);
 
 			File.WriteAllText(Fixture.GetOutputPath(fileName) + ".xml", ast.ToString());
 

@@ -81,7 +81,7 @@ namespace Occf.Core.Manipulators.Transformers {
 				LanguageSupport support, FileInfo fileInfo, DirectoryInfo baseDirInfo) {
 			var relativePath = ParaibaPath.GetRelativePath(fileInfo.FullName, baseDirInfo.FullName);
 
-			var root = support.CodeToXml.GenerateFromFile(fileInfo.FullName);
+			var root = support.Processor.GenerateXml(fileInfo);
 			var inserter = support.AstTransformer;
 
 			var fileId = RegisterFile(fileInfo);
@@ -95,7 +95,7 @@ namespace Occf.Core.Manipulators.Transformers {
 			// Add import for logging executed items
 			inserter.InsertImport(root);
 
-			return support.XmlToCode.Generate(root);
+			return support.Processor.GenerateCode(root);
 		}
 
 		/// <summary>
@@ -106,7 +106,7 @@ namespace Occf.Core.Manipulators.Transformers {
 		/// <returns>The modified production code.</returns>
 		public string InstrumentStatementAndPredicate(
 				LanguageSupport support, FileInfo fileInfo) {
-			var root = support.CodeToXml.GenerateFromFile(fileInfo.FullName);
+			var root = support.Processor.GenerateXml(fileInfo);
 			var inserter = support.AstTransformer;
 
 			var fileId = RegisterFile(fileInfo);
@@ -130,7 +130,7 @@ namespace Occf.Core.Manipulators.Transformers {
 			// Add import for logging executed items
 			inserter.InsertImport(root);
 
-			return support.XmlToCode.Generate(root);
+			return support.Processor.GenerateCode(root);
 		}
 
 		private void InstrumentStatement(

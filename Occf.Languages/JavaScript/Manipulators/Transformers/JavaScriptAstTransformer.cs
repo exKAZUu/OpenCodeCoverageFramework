@@ -20,34 +20,19 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
-using Code2Xml.Core.Antlr;
 using Code2Xml.Core.CodeToXmls;
-using Code2Xml.Core.XmlToCodes;
 using Code2Xml.Languages.JavaScript.CodeToXmls;
-using Code2Xml.Languages.JavaScript.XmlToCodes;
 using Occf.Core.Manipulators.Transformers;
 using Occf.Core.TestInformation;
 using Occf.Languages.JavaScript.Manipulators.Analyzers;
 
 namespace Occf.Languages.JavaScript.Manipulators.Transformers {
-    public class JavaScriptAstTransformer : AntlrAstTransformer<JavaScriptParser> {
+    public class JavaScriptAstTransformer : AntlrAstTransformer {
         protected override string MethodPrefix {
             get { return ""; }
         }
 
-        protected override AntlrCodeToXml<JavaScriptParser> CodeToXml {
-            get { return JavaScriptCodeToXml.Instance; }
-        }
-
-        protected override XmlToCode XmlToCode {
-            get { return JavaScriptXmlToCode.Instance; }
-        }
-
-        protected override Func<JavaScriptParser, XAstParserRuleReturnScope> ParseStatementFunc {
-            get { return p => p.statement(); }
-        }
-
-        public override void InsertImport(XElement target) {}
+	    public override void InsertImport(XElement target) {}
 
         public override void SupplementBlock(XElement root) {
             SupplementBlock(root, "statementBlock", "{", "}");

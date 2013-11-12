@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
+using Code2Xml.Core;
 using Paraiba.Linq;
+using Paraiba.Xml.Linq;
 
 namespace Occf.Learner.Core {
 	public class LearningRecord {
@@ -217,7 +219,14 @@ statement
 		}
 
 		public static string NameOrValue(this XElement element) {
-			return char.IsLower(element.Name.LocalName[0]) ? element.Name.LocalName : element.Value;
+			if (char.IsLower(element.Name.LocalName[0]))
+				return element.Name();
+			if (element.Name() == Code2XmlConstants.TokenGroupName) {
+				var tokenElement = element.Element(Code2XmlConstants.TokenName);
+				if (tokenElement != null)
+					return tokenElement.Value;
+			}
+			return element.Value;
 		}
 
 		public static IEnumerable<XElement> DescendantsOfOnlyChildAndSelf(this XElement element) {

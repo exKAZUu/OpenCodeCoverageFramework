@@ -20,34 +20,17 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
-using Code2Xml.Core.Antlr;
-using Code2Xml.Core.CodeToXmls;
-using Code2Xml.Core.XmlToCodes;
-using Code2Xml.Languages.CSharp.CodeToXmls;
-using Code2Xml.Languages.CSharp.XmlToCodes;
 using Occf.Core.Manipulators.Transformers;
 using Occf.Core.TestInformation;
 using Occf.Languages.CSharp.Manipulators.Analyzers;
 
 namespace Occf.Languages.CSharp.Manipulators.Transformers {
-    public class CSharpAstTransformer : AntlrAstTransformer<csParser> {
+    public class CSharpAstTransformer : AntlrAstTransformer {
         protected override string MethodPrefix {
             get { return ""; }
         }
 
-        protected override AntlrCodeToXml<csParser> CodeToXml {
-            get { return CSharpCodeToXml.Instance; }
-        }
-
-        protected override XmlToCode XmlToCode {
-            get { return CSharpXmlToCode.Instance; }
-        }
-
-        protected override Func<csParser, XAstParserRuleReturnScope> ParseStatementFunc {
-            get { return p => p.statement(); }
-        }
-
-        public override void InsertImport(XElement target) {}
+	    public override void InsertImport(XElement target) {}
 
         public override void SupplementBlock(XElement root) {
             SupplementBlock(root, "block", "{", "}");

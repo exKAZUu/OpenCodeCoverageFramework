@@ -9,10 +9,11 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Occf.Learner.Tool</RootNamespace>
     <AssemblyName>Occf.Learner.Tool</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -41,49 +42,25 @@
     <Reference Include="Azuki">
       <HintPath>..\lib\Azuki.dll</HintPath>
     </Reference>
-    <Reference Include="Code2Xml.Core, Version=1.8.2.69, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Code2Xml.Core, Version=2.0.3.77, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Code2Xml.1.8.2.69\lib\Code2Xml.Core.dll</HintPath>
+      <HintPath>..\packages\Code2Xml.2.0.3.77\lib\Code2Xml.Core.dll</HintPath>
     </Reference>
-    <Reference Include="Code2Xml.Languages.C, Version=1.1.0.71, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Code2Xml.Languages.ANTLRv3, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Code2Xml.1.8.2.69\lib\Code2Xml.Languages.C.dll</HintPath>
+      <HintPath>..\packages\Code2Xml.2.0.3.77\lib\Code2Xml.Languages.ANTLRv3.dll</HintPath>
     </Reference>
-    <Reference Include="Code2Xml.Languages.CSharp, Version=1.1.0.51, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Code2Xml.Languages.ExternalProcessors, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Code2Xml.1.8.2.69\lib\Code2Xml.Languages.CSharp.dll</HintPath>
+      <HintPath>..\packages\Code2Xml.2.0.3.77\lib\Code2Xml.Languages.ExternalProcessors.dll</HintPath>
     </Reference>
-    <Reference Include="Code2Xml.Languages.Java, Version=1.1.0.57, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Code2Xml.Languages.Obsolete, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Code2Xml.1.8.2.69\lib\Code2Xml.Languages.Java.dll</HintPath>
+      <HintPath>..\packages\Code2Xml.2.0.3.77\lib\Code2Xml.Languages.Obsolete.dll</HintPath>
     </Reference>
-    <Reference Include="Code2Xml.Languages.JavaScript, Version=1.1.0.60, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Code2Xml.Objects, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Code2Xml.1.8.2.69\lib\Code2Xml.Languages.JavaScript.dll</HintPath>
-    </Reference>
-    <Reference Include="Code2Xml.Languages.Lua, Version=1.1.0.44, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Code2Xml.1.8.2.69\lib\Code2Xml.Languages.Lua.dll</HintPath>
-    </Reference>
-    <Reference Include="Code2Xml.Languages.Python2, Version=1.1.0.50, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Code2Xml.1.8.2.69\lib\Code2Xml.Languages.Python2.dll</HintPath>
-    </Reference>
-    <Reference Include="Code2Xml.Languages.Python3, Version=1.1.0.52, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Code2Xml.1.8.2.69\lib\Code2Xml.Languages.Python3.dll</HintPath>
-    </Reference>
-    <Reference Include="Code2Xml.Languages.Ruby18, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Code2Xml.1.8.2.69\lib\Code2Xml.Languages.Ruby18.dll</HintPath>
-    </Reference>
-    <Reference Include="Code2Xml.Languages.Ruby19, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Code2Xml.1.8.2.69\lib\Code2Xml.Languages.Ruby19.dll</HintPath>
-    </Reference>
-    <Reference Include="Code2Xml.Languages.SrcML, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Code2Xml.1.8.2.69\lib\Code2Xml.Languages.SrcML.dll</HintPath>
+      <HintPath>..\packages\Code2Xml.2.0.3.77\lib\Code2Xml.Objects.dll</HintPath>
     </Reference>
     <Reference Include="Paraiba">
       <HintPath>..\packages\Paraiba.1.1.0.90\lib\net40\Paraiba.dll</HintPath>
@@ -123,6 +100,7 @@
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
     </Compile>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">

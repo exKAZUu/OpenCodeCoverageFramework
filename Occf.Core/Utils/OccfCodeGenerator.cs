@@ -41,13 +41,13 @@ namespace Occf.Core.Utils {
 		public static string GetIdentifiedTest(
 				FileInfo testFile, TestInfo info, LanguageSupport support, out string relativePath) {
 			relativePath = ParaibaPath.GetRelativePath(testFile.FullName, info.BasePath);
-			var ast = support.CodeToXml.GenerateFromFile(testFile.FullName);
+			var ast = support.Processor.GenerateXml(testFile);
 
 			// テストケース識別用コードの埋め込み
 			CodeTransformer.InsertIntoTestCase(info, ast, support, relativePath);
 
 			// コード生成
-			return support.XmlToCode.Generate(ast);
+			return support.Processor.GenerateCode(ast);
 		}
 
 		public static string WriteCoveragedCode(
@@ -66,14 +66,14 @@ namespace Occf.Core.Utils {
 		public static string GetCoveragedCode(
 				FileInfo codeFile, CoverageInfo info, LanguageSupport support, out string relativePath) {
 			relativePath = ParaibaPath.GetRelativePath(codeFile.FullName, info.BasePath);
-			var ast = support.CodeToXml.GenerateFromFile(codeFile.FullName);
+			var ast = support.Processor.GenerateXml(codeFile);
 
 			// 測定用コードの埋め込み
 			var path = relativePath;
 			CodeTransformer.InstrumentStatementAndPredicate(info, ast, support, path);
 
 			// コード生成
-			return support.XmlToCode.Generate(ast);
+			return support.Processor.GenerateCode(ast);
 		}
 
 		private static string WriteCode(string relativePath, DirectoryInfo outDir, string code) {
