@@ -140,7 +140,7 @@ namespace Occf.Learner.Core.Tests {
 			learningRecords =
 					learningRecords.Concat(
 							accepted.Concat(denied)
-									.Select(e => { return GetLearningRecord(e, variables, extractors, prop2Index); }));
+									.Select(e => GetLearningRecord(e, variables, extractors, prop2Index)));
 			learningResults.AddRange(Enumerable.Repeat(-1, accepted.Count));
 			learningResults.AddRange(Enumerable.Repeat(1, denied.Count));
 			var inputs = learningRecords.ToArray();
@@ -191,16 +191,17 @@ namespace Occf.Learner.Core.Tests {
 					//		SearchOption.AllDirectories))
 					//.Concat(Directory.GetFiles(@"C:\Users\exKAZUu\Projects\storm", "*.java",
 					//		SearchOption.AllDirectories))
-					.Concat(Directory.GetFiles(@"C:\Users\exKAZUu\Projects\xUtils", "*.java",
-							SearchOption.AllDirectories))
-					.Concat(Directory.GetFiles(@"C:\Users\exKAZUu\Projects\presto", "*.java",
-							SearchOption.AllDirectories));
+					//.Concat(Directory.GetFiles(@"C:\Users\exKAZUu\Projects\xUtils", "*.java",
+					//		SearchOption.AllDirectories))
+					//.Concat(Directory.GetFiles(@"C:\Users\exKAZUu\Projects\presto", "*.java",
+					//		SearchOption.AllDirectories))
+					;
 			var count = 0;
 			var failedIndicies = new List<int>();
 			var minProb = Double.MaxValue;
 			var minProbPath = "";
 			foreach (var inPath in files) {
-				Console.WriteLine(inPath);
+				//Console.WriteLine(inPath);
 				var codeFile = new FileInfo(inPath);
 				var ast = profile.Processor.GenerateXml(codeFile);
 				var accepted = GetAcceptedElements(ast);

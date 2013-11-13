@@ -102,33 +102,33 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\packages\Antlr.3.5.0.2\lib\Antlr3.Runtime.dll</HintPath>
     </Reference>
-    <Reference Include="Code2Xml.Core, Version=2.0.3.77, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Code2Xml.Core, Version=2.0.5.79, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\Code2Xml.2.0.3.77\lib\Code2Xml.Core.dll</HintPath>
+      <HintPath>..\..\packages\Code2Xml.2.0.5.79\lib\Code2Xml.Core.dll</HintPath>
     </Reference>
     <Reference Include="Code2Xml.Languages.ANTLRv3, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\Code2Xml.2.0.3.77\lib\Code2Xml.Languages.ANTLRv3.dll</HintPath>
+      <HintPath>..\..\packages\Code2Xml.2.0.5.79\lib\Code2Xml.Languages.ANTLRv3.dll</HintPath>
     </Reference>
     <Reference Include="Code2Xml.Languages.ExternalProcessors, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\Code2Xml.2.0.3.77\lib\Code2Xml.Languages.ExternalProcessors.dll</HintPath>
+      <HintPath>..\..\packages\Code2Xml.2.0.5.79\lib\Code2Xml.Languages.ExternalProcessors.dll</HintPath>
     </Reference>
     <Reference Include="Code2Xml.Languages.Obsolete, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\Code2Xml.2.0.3.77\lib\Code2Xml.Languages.Obsolete.dll</HintPath>
+      <HintPath>..\..\packages\Code2Xml.2.0.5.79\lib\Code2Xml.Languages.Obsolete.dll</HintPath>
     </Reference>
     <Reference Include="Code2Xml.Objects, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\Code2Xml.2.0.3.77\lib\Code2Xml.Objects.dll</HintPath>
+      <HintPath>..\..\packages\Code2Xml.2.0.5.79\lib\Code2Xml.Objects.dll</HintPath>
     </Reference>
-    <Reference Include="Paraiba, Version=1.1.0.90, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Paraiba, Version=1.1.1.91, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\Paraiba.1.1.0.90\lib\net40\Paraiba.dll</HintPath>
+      <HintPath>..\..\packages\Paraiba.1.1.1.91\lib\net40\Paraiba.dll</HintPath>
     </Reference>
-    <Reference Include="Paraiba.Experiment, Version=1.1.0.42, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Paraiba.Experiment, Version=1.1.1.91, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\Paraiba.Experiment.1.1.0.42\lib\net40\Paraiba.Experiment.dll</HintPath>
+      <HintPath>..\..\packages\Paraiba.Experiment.1.1.1.91\lib\net40\Paraiba.Experiment.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
