@@ -25,49 +25,49 @@ using Occf.Core.TestInformation;
 using Occf.Languages.CSharp.Manipulators.Analyzers;
 
 namespace Occf.Languages.CSharp.Manipulators.Transformers {
-    public class CSharpAstTransformer : AntlrAstTransformer {
-        protected override string MethodPrefix {
-            get { return ""; }
-        }
+	public class CSharpAstTransformer : AntlrAstTransformer {
+		protected override string MethodPrefix {
+			get { return ""; }
+		}
 
-	    public override void InsertImport(XElement target) {}
+		public override void InsertImport(XElement target) {}
 
-        public override void SupplementBlock(XElement root) {
-            SupplementBlock(root, "block", "{", "}");
-        }
+		public override void SupplementBlock(XElement root) {
+			SupplementBlock(root, "block", "{", "}");
+		}
 
-        public override void SupplementDefaultCase(XElement root) {
-            // TODO: Implement
-        }
+		public override void SupplementDefaultCase(XElement root) {
+			// TODO: Implement
+		}
 
-        public override void SupplementDefaultConstructor(XElement root) {
-            // TODO: Implement
-        }
+		public override void SupplementDefaultConstructor(XElement root) {
+			// TODO: Implement
+		}
 
-        public override TestCase InsertTestCaseId(XElement target, long id, string relativePath) {
-            // TODO: Implement
-            throw new NotImplementedException();
-        }
+		public override TestCase InsertTestCaseId(XElement target, long id, string relativePath) {
+			// TODO: Implement
+			throw new NotImplementedException();
+		}
 
-        protected override IEnumerable<XElement> FindLackingBlockNodes(XElement root) {
-            var ifs = CSharpElements.If(root)
-                    .Select(CSharpElements.IfProcess);
-            var elses = CSharpElements.Else(root)
-                    .Select(CSharpElements.ElseProcess);
-            var whiles = CSharpElements.While(root)
-                    .Select(CSharpElements.WhileProcess);
-            var dos = CSharpElements.DoWhile(root)
-                    .Select(CSharpElements.DoWhileProcess);
-            var fors = CSharpElements.For(root)
-                    .Select(CSharpElements.ForProcess);
-            var foreaches = CSharpElements.ForEach(root)
-                    .Select(CSharpElements.ForEachProcess);
+		protected override IEnumerable<XElement> FindLackingBlockNodes(XElement root) {
+			var ifs = CSharpElements.If(root)
+					.Select(CSharpElements.IfProcess);
+			var elses = CSharpElements.Else(root)
+					.Select(CSharpElements.ElseProcess);
+			var whiles = CSharpElements.While(root)
+					.Select(CSharpElements.WhileProcess);
+			var dos = CSharpElements.DoWhile(root)
+					.Select(CSharpElements.DoWhileProcess);
+			var fors = CSharpElements.For(root)
+					.Select(CSharpElements.ForProcess);
+			var foreaches = CSharpElements.ForEach(root)
+					.Select(CSharpElements.ForEachProcess);
 
-            return ifs.Concat(elses)
-                    .Concat(whiles)
-                    .Concat(dos)
-                    .Concat(fors)
-                    .Concat(foreaches);
-        }
-    }
+			return ifs.Concat(elses)
+					.Concat(whiles)
+					.Concat(dos)
+					.Concat(fors)
+					.Concat(foreaches);
+		}
+	}
 }

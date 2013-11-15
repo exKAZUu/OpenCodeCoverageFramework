@@ -22,36 +22,36 @@ using NUnit.Framework;
 using Occf.Core.Manipulators;
 
 namespace Occf.Languages.Tests.C {
-    public class CInstrumentationCodeInsertionTest {
-        private static IEnumerable<TestCaseData> TestCases {
-            get {
-                var names = new[] {
-                        "mul_mv.c",
-                        "mul_mv2.c",
-                        "mersenne.c",
-                        "multi.h",
-                        "bubblesort.c",
-                        "quicksort.c",
-                        "block1.c",
-                        "block2.c",
-                        "block3.c",
-                        "get_sign.c",
-                        "uint4.c",
-                };
-                return names.Select(name => new TestCaseData(name));
-            }
-        }
+	public class CInstrumentationCodeInsertionTest {
+		private static IEnumerable<TestCaseData> TestCases {
+			get {
+				var names = new[] {
+					"mul_mv.c",
+					"mul_mv2.c",
+					"mersenne.c",
+					"multi.h",
+					"bubblesort.c",
+					"quicksort.c",
+					"block1.c",
+					"block2.c",
+					"block3.c",
+					"get_sign.c",
+					"uint4.c",
+				};
+				return names.Select(name => new TestCaseData(name));
+			}
+		}
 
-        [Test, TestCaseSource("TestCases")]
-        public void VerifyInstrumentationCode(string fileName) {
-            var profile = LanguageSupports.GetCoverageModeByClassName("C");
-            CodeInsertTest.VerifyCodeInsertion(profile, fileName);
-        }
+		[Test, TestCaseSource("TestCases")]
+		public void VerifyInstrumentationCode(string fileName) {
+			var profile = LanguageSupports.GetCoverageModeByClassName("C");
+			CodeInsertTest.VerifyCodeInsertion(profile, fileName);
+		}
 
-        [Test, TestCaseSource("TestCases")]
-        public void InsertInstrumentationCode(string fileName) {
-            var profile = LanguageSupports.GetCoverageModeByClassName("C");
-            CodeInsertTest.InsertInstrumentationCode(profile, fileName);
-        }
-    }
+		[Test, TestCaseSource("TestCases")]
+		public void InsertInstrumentationCode(string fileName) {
+			var profile = LanguageSupports.GetCoverageModeByClassName("C");
+			CodeInsertTest.InsertInstrumentationCode(profile, fileName);
+		}
+	}
 }

@@ -22,28 +22,28 @@ using NUnit.Framework;
 using Occf.Core.Manipulators;
 
 namespace Occf.Languages.Tests.Python3 {
-    public class Python3InstrumentationCodeInsertionTest {
-        private static IEnumerable<TestCaseData> TestCases {
-            get {
-                var names = new[] {
-                        "Block1.py",
-                        "Block2.py",
-                        "Block3.py",
-                };
-                return names.Select(name => new TestCaseData(name));
-            }
-        }
+	public class Python3InstrumentationCodeInsertionTest {
+		private static IEnumerable<TestCaseData> TestCases {
+			get {
+				var names = new[] {
+					"Block1.py",
+					"Block2.py",
+					"Block3.py",
+				};
+				return names.Select(name => new TestCaseData(name));
+			}
+		}
 
-        [Test, TestCaseSource("TestCases")]
-        public void VerifyInstrumentationCode(string fileName) {
-            var profile = LanguageSupports.GetCoverageModeByClassName("Python3");
-            CodeInsertTest.VerifyCodeInsertion(profile, fileName);
-        }
+		[Test, TestCaseSource("TestCases")]
+		public void VerifyInstrumentationCode(string fileName) {
+			var profile = LanguageSupports.GetCoverageModeByClassName("Python3");
+			CodeInsertTest.VerifyCodeInsertion(profile, fileName);
+		}
 
-        [Test, TestCaseSource("TestCases")]
-        public void InsertInstrumentationCode(string fileName) {
-            var profile = LanguageSupports.GetCoverageModeByClassName("Python3");
-            CodeInsertTest.InsertInstrumentationCode(profile, fileName);
-        }
-    }
+		[Test, TestCaseSource("TestCases")]
+		public void InsertInstrumentationCode(string fileName) {
+			var profile = LanguageSupports.GetCoverageModeByClassName("Python3");
+			CodeInsertTest.InsertInstrumentationCode(profile, fileName);
+		}
+	}
 }

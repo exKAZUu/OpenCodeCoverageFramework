@@ -2,8 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
-using Code2Xml.Core.Processors;
-using Code2Xml.Objects;
+using Code2Xml.Core;
 using Occf.Core.Manipulators;
 using Occf.Core.Manipulators.Analyzers;
 using Occf.Core.Manipulators.Taggers;
@@ -26,7 +25,7 @@ namespace Occf.Languages.Java.Manipulators {
 		}
 
 		public override Processor Processor {
-			get { return Processors.JavaUsingAntlr3; }
+			get { return ProcessorLoader.JavaUsingAntlr3; }
 		}
 
 		public override IEnumerable<string> FilePatterns {

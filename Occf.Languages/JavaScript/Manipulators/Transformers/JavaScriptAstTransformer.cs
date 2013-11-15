@@ -20,56 +20,54 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
-using Code2Xml.Core.CodeToXmls;
-using Code2Xml.Languages.JavaScript.CodeToXmls;
 using Occf.Core.Manipulators.Transformers;
 using Occf.Core.TestInformation;
 using Occf.Languages.JavaScript.Manipulators.Analyzers;
 
 namespace Occf.Languages.JavaScript.Manipulators.Transformers {
-    public class JavaScriptAstTransformer : AntlrAstTransformer {
-        protected override string MethodPrefix {
-            get { return ""; }
-        }
+	public class JavaScriptAstTransformer : AntlrAstTransformer {
+		protected override string MethodPrefix {
+			get { return ""; }
+		}
 
-	    public override void InsertImport(XElement target) {}
+		public override void InsertImport(XElement target) {}
 
-        public override void SupplementBlock(XElement root) {
-            SupplementBlock(root, "statementBlock", "{", "}");
-        }
+		public override void SupplementBlock(XElement root) {
+			SupplementBlock(root, "statementBlock", "{", "}");
+		}
 
-        public override void SupplementDefaultCase(XElement root) {
-            // TODO: Implement
-        }
+		public override void SupplementDefaultCase(XElement root) {
+			// TODO: Implement
+		}
 
-        public override void SupplementDefaultConstructor(XElement root) {
-            // TODO: Implement
-        }
+		public override void SupplementDefaultConstructor(XElement root) {
+			// TODO: Implement
+		}
 
-        public override TestCase InsertTestCaseId(XElement target, long id, string relativePath) {
-            // TODO: Implement
-            throw new NotImplementedException();
-        }
+		public override TestCase InsertTestCaseId(XElement target, long id, string relativePath) {
+			// TODO: Implement
+			throw new NotImplementedException();
+		}
 
-        protected override IEnumerable<XElement> FindLackingBlockNodes(XElement root) {
-            var ifs = JavaScriptElements.If(root)
-                    .SelectMany(JavaScriptElements.IfAndElseProcesses);
-            var whiles = JavaScriptElements.While(root)
-                    .Select(JavaScriptElements.WhileProcess);
-            var dos = JavaScriptElements.DoWhile(root)
-                    .Select(JavaScriptElements.DoWhileProcess);
-            var fors = JavaScriptElements.For(root)
-                    .Select(JavaScriptElements.ForProcess);
-            var foreaches = JavaScriptElements.ForEach(root)
-                    .Select(JavaScriptElements.ForEachProcess);
-            var withs = JavaScriptElements.With(root)
-                    .Select(JavaScriptElements.WithProcess);
+		protected override IEnumerable<XElement> FindLackingBlockNodes(XElement root) {
+			var ifs = JavaScriptElements.If(root)
+					.SelectMany(JavaScriptElements.IfAndElseProcesses);
+			var whiles = JavaScriptElements.While(root)
+					.Select(JavaScriptElements.WhileProcess);
+			var dos = JavaScriptElements.DoWhile(root)
+					.Select(JavaScriptElements.DoWhileProcess);
+			var fors = JavaScriptElements.For(root)
+					.Select(JavaScriptElements.ForProcess);
+			var foreaches = JavaScriptElements.ForEach(root)
+					.Select(JavaScriptElements.ForEachProcess);
+			var withs = JavaScriptElements.With(root)
+					.Select(JavaScriptElements.WithProcess);
 
-            return ifs.Concat(whiles)
-                    .Concat(dos)
-                    .Concat(fors)
-                    .Concat(foreaches)
-                    .Concat(withs);
-        }
-    }
+			return ifs.Concat(whiles)
+					.Concat(dos)
+					.Concat(fors)
+					.Concat(foreaches)
+					.Concat(withs);
+		}
+	}
 }

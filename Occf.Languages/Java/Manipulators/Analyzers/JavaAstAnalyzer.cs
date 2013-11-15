@@ -23,6 +23,7 @@ using System.Xml.Linq;
 using Occf.Core.Manipulators;
 using Occf.Core.Manipulators.Analyzers;
 using Paraiba.Xml.Linq;
+using Code2Xml.Core;
 
 namespace Occf.Languages.Java.Manipulators.Analyzers {
 	public class JavaAstAnalyzer : AstAnalyzer<JavaAstAnalyzer> {

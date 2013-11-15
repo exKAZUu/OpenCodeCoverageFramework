@@ -18,7 +18,7 @@
 
 using System.Collections.Generic;
 using System.IO;
-using Code2Xml.Core.Processors;
+using Code2Xml.Core;
 using Occf.Core.Manipulators.Analyzers;
 using Occf.Core.Manipulators.Taggers;
 using Occf.Core.Manipulators.Transformers;
@@ -31,7 +31,7 @@ namespace Occf.Core.Manipulators {
 		public abstract IEnumerable<string> FilePatterns { get; }
 		public abstract string Name { get; }
 
-		public abstract Processor Processor { get;  }
+		public abstract Processor Processor { get; }
 
 		public abstract AstTransformer AstTransformer { get; }
 		public abstract AstAnalyzer AstAnalyzer { get; }

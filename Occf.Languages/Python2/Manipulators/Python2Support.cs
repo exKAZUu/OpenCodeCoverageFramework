@@ -1,8 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
-using Code2Xml.Core.Processors;
-using Code2Xml.Objects;
+using Code2Xml.Core;
 using Occf.Core.Manipulators;
 using Occf.Core.Manipulators.Analyzers;
 using Occf.Core.Manipulators.Taggers;
@@ -25,7 +24,7 @@ namespace Occf.Languages.Python2.Manipulators {
 		}
 
 		public override Processor Processor {
-			get { return Processors.Python2; }
+			get { return ProcessorLoader.Python2; }
 		}
 
 		public override IEnumerable<string> FilePatterns {

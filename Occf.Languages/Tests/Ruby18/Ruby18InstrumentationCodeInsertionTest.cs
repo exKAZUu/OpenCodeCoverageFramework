@@ -22,28 +22,28 @@ using NUnit.Framework;
 using Occf.Core.Manipulators;
 
 namespace Occf.Languages.Tests.Ruby18 {
-    public class Ruby18InstrumentationCodeInsertionTest {
-        private static IEnumerable<TestCaseData> TestCases {
-            get {
-                var names = new[] {
-                        "Block1.rb",
-                        "Block2.rb",
-                        "Block3.rb"
-                };
-                return names.Select(name => new TestCaseData(name));
-            }
-        }
+	public class Ruby18InstrumentationCodeInsertionTest {
+		private static IEnumerable<TestCaseData> TestCases {
+			get {
+				var names = new[] {
+					"Block1.rb",
+					"Block2.rb",
+					"Block3.rb"
+				};
+				return names.Select(name => new TestCaseData(name));
+			}
+		}
 
-        [Test, TestCaseSource("TestCases")]
-        public void VerifyInstrumentationCode(string fileName) {
-            var profile = LanguageSupports.GetCoverageModeByClassName("Ruby18");
-            CodeInsertTest.VerifyCodeInsertion(profile, fileName);
-        }
+		[Test, TestCaseSource("TestCases")]
+		public void VerifyInstrumentationCode(string fileName) {
+			var profile = LanguageSupports.GetCoverageModeByClassName("Ruby18");
+			CodeInsertTest.VerifyCodeInsertion(profile, fileName);
+		}
 
-        [Test, TestCaseSource("TestCases")]
-        public void InsertInstrumentationCode(string fileName) {
-            var profile = LanguageSupports.GetCoverageModeByClassName("Ruby18");
-            CodeInsertTest.InsertInstrumentationCode(profile, fileName);
-        }
-    }
+		[Test, TestCaseSource("TestCases")]
+		public void InsertInstrumentationCode(string fileName) {
+			var profile = LanguageSupports.GetCoverageModeByClassName("Ruby18");
+			CodeInsertTest.InsertInstrumentationCode(profile, fileName);
+		}
+	}
 }

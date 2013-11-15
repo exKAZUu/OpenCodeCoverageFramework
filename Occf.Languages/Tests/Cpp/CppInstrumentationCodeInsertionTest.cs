@@ -22,28 +22,28 @@ using NUnit.Framework;
 using Occf.Core.Manipulators;
 
 namespace Occf.Languages.Tests.Cpp {
-    public class CppInstrumentationCodeInsertionTest {
-        private static IEnumerable<TestCaseData> TestCases {
-            get {
-                var names = new[] {
-                        "block1.cpp",
-                        "block2.cpp",
-                        "block3.cpp",
-                };
-                return names.Select(name => new TestCaseData(name));
-            }
-        }
+	public class CppInstrumentationCodeInsertionTest {
+		private static IEnumerable<TestCaseData> TestCases {
+			get {
+				var names = new[] {
+					"block1.cpp",
+					"block2.cpp",
+					"block3.cpp",
+				};
+				return names.Select(name => new TestCaseData(name));
+			}
+		}
 
-        [Test, TestCaseSource("TestCases")]
-        public void VerifyInstrumentationCode(string fileName) {
-            var profile = LanguageSupports.GetCoverageModeByClassName("Cpp");
-            CodeInsertTest.VerifyCodeInsertion(profile, fileName);
-        }
+		[Test, TestCaseSource("TestCases")]
+		public void VerifyInstrumentationCode(string fileName) {
+			var profile = LanguageSupports.GetCoverageModeByClassName("Cpp");
+			CodeInsertTest.VerifyCodeInsertion(profile, fileName);
+		}
 
-        [Test, TestCaseSource("TestCases")]
-        public void InsertInstrumentationCode(string fileName) {
-            var profile = LanguageSupports.GetCoverageModeByClassName("Cpp");
-            CodeInsertTest.InsertInstrumentationCode(profile, fileName);
-        }
-    }
+		[Test, TestCaseSource("TestCases")]
+		public void InsertInstrumentationCode(string fileName) {
+			var profile = LanguageSupports.GetCoverageModeByClassName("Cpp");
+			CodeInsertTest.InsertInstrumentationCode(profile, fileName);
+		}
+	}
 }

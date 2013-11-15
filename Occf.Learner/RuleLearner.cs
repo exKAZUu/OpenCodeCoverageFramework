@@ -4,7 +4,6 @@ using System.Linq;
 using System.Xml.Linq;
 using Code2Xml.Core;
 using Paraiba.Linq;
-using Paraiba.Xml.Linq;
 
 namespace Occf.Learner.Core {
 	public class LearningRecord {
@@ -218,15 +217,8 @@ statement
 			}
 		}
 
-		public static string NameOrValue(this XElement element) {
-			if (char.IsLower(element.Name.LocalName[0]))
-				return element.Name();
-			if (element.Name() == Code2XmlConstants.TokenGroupName) {
-				var tokenElement = element.Element(Code2XmlConstants.TokenName);
-				if (tokenElement != null)
-					return tokenElement.Value;
-			}
-			return element.Value;
+		public static string NameOrTokenText(this XElement element) {
+			return element.IsTokenSet() ? element.TokenText() : element.Name();
 		}
 
 		public static IEnumerable<XElement> DescendantsOfOnlyChildAndSelf(this XElement element) {

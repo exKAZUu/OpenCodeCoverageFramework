@@ -18,40 +18,35 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Xml.Linq;
-using Code2Xml.Core.CodeToXmls;
-using Code2Xml.Languages.Lua.CodeToXmls;
 using Occf.Core.Manipulators.Transformers;
 using Occf.Core.TestInformation;
-using Occf.Languages.Lua.Manipulators.Analyzers;
 
 namespace Occf.Languages.Lua.Manipulators.Transformers {
-    public class LuaAstTransformer : AntlrAstTransformer {
-        protected override string MethodPrefix {
-            get { return ""; }
-        }
+	public class LuaAstTransformer : AntlrAstTransformer {
+		protected override string MethodPrefix {
+			get { return ""; }
+		}
 
-	    public override void InsertImport(XElement target) {}
+		public override void InsertImport(XElement target) {}
 
-        public override void SupplementBlock(XElement root) {
-        }
+		public override void SupplementBlock(XElement root) {}
 
-        public override void SupplementDefaultCase(XElement root) {
-            // TODO: Implement
-        }
+		public override void SupplementDefaultCase(XElement root) {
+			// TODO: Implement
+		}
 
-        public override void SupplementDefaultConstructor(XElement root) {
-            // TODO: Implement
-        }
+		public override void SupplementDefaultConstructor(XElement root) {
+			// TODO: Implement
+		}
 
-        public override TestCase InsertTestCaseId(XElement target, long id, string relativePath) {
-            // TODO: Implement
-            throw new NotImplementedException();
-        }
+		public override TestCase InsertTestCaseId(XElement target, long id, string relativePath) {
+			// TODO: Implement
+			throw new NotImplementedException();
+		}
 
-        protected override IEnumerable<XElement> FindLackingBlockNodes(XElement root) {
-            yield break;
-        }
-    }
+		protected override IEnumerable<XElement> FindLackingBlockNodes(XElement root) {
+			yield break;
+		}
+	}
 }

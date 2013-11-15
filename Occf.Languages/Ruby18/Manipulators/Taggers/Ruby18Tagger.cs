@@ -16,10 +16,8 @@
 
 #endregion
 
-using System.Xml.Linq;
 using Occf.Core.Manipulators.Taggers;
 
 namespace Occf.Languages.Ruby18.Manipulators.Taggers {
-	public class Ruby18Tagger : Tagger {
-	}
+	public class Ruby18Tagger : Tagger {}
 }

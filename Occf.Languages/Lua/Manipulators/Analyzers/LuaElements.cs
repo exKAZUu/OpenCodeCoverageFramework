@@ -51,7 +51,7 @@ namespace Occf.Languages.Lua.Manipulators.Analyzers {
 			return root.Descendants("stat")
 					.Where(
 							e => e.Elements().First().Value == "for" &&
-									e.Elements().ElementAt(2).Value == "=");
+							     e.Elements().ElementAt(2).Value == "=");
 		}
 
 		public static XElement ForProcess(XElement element) {
@@ -62,7 +62,7 @@ namespace Occf.Languages.Lua.Manipulators.Analyzers {
 			return root.Descendants("stat")
 					.Where(
 							e => e.Elements().First().Value == "for" &&
-									e.Elements().ElementAt(2).Value == "in");
+							     e.Elements().ElementAt(2).Value == "in");
 		}
 
 		public static XElement ForEachProcess(XElement element) {

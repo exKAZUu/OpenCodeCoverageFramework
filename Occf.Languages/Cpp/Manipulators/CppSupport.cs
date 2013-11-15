@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
-using Code2Xml.Core.Processors;
+using Code2Xml.Core;
 using Code2Xml.Languages.ExternalProcessors.Processors.SrcML;
 using Occf.Core.Manipulators;
 using Occf.Core.Manipulators.Analyzers;

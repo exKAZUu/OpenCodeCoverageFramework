@@ -36,7 +36,7 @@ namespace Occf.Languages.Python3.Manipulators.Transformers {
 		protected override IEnumerable<XElement> CreateStatementNode(
 				XElement target, long id, int value, ElementType type) {
 			var code = "CoverageWriter.WriteStatement(" + id + "," + (int)type + ","
-					+ value + ");";
+			           + value + ");";
 			if (target.Name.LocalName == "small_stmt") {
 				yield return Python3CodeToXml.Instance.Generate(code)
 						.Descendants(target.Name)
@@ -54,7 +54,7 @@ namespace Occf.Languages.Python3.Manipulators.Transformers {
 				XElement target, long id, ElementType type) {
 			var oldcode = Python3XmlToCode.Instance.Generate(target);
 			var code = "CoverageWriter.WritePredicate(" + id + "," + (int)type + ","
-					+ oldcode + ")";
+			           + oldcode + ")";
 			var node = Python3CodeToXml.Instance.Generate(code)
 					.Descendants(target.Name)
 					.First();
@@ -65,23 +65,27 @@ namespace Occf.Languages.Python3.Manipulators.Transformers {
 		public override void InsertInitializer(
 				XElement target, long id, ElementType type) {}
 
-	    public override void InsertEqual(XElement target, XElement left, XElement right, long id, ElementType type) {
-	        throw new NotImplementedException();
-	    }
+		public override void InsertEqual(
+				XElement target, XElement left, XElement right, long id, ElementType type) {
+			throw new NotImplementedException();
+		}
 
-	    public override void InsertNotEqual(XElement target, XElement left, XElement right, long id, ElementType type) {
-	        throw new NotImplementedException();
-	    }
+		public override void InsertNotEqual(
+				XElement target, XElement left, XElement right, long id, ElementType type) {
+			throw new NotImplementedException();
+		}
 
-	    public override void InsertLessThan(XElement target, XElement left, XElement right, long id, ElementType type) {
-	        throw new NotImplementedException();
-	    }
+		public override void InsertLessThan(
+				XElement target, XElement left, XElement right, long id, ElementType type) {
+			throw new NotImplementedException();
+		}
 
-	    public override void InsertGraterThan(XElement target, XElement left, XElement right, long id, ElementType type) {
-	        throw new NotImplementedException();
-	    }
+		public override void InsertGraterThan(
+				XElement target, XElement left, XElement right, long id, ElementType type) {
+			throw new NotImplementedException();
+		}
 
-	    public override void SupplementBlock(XElement root) {}
+		public override void SupplementBlock(XElement root) {}
 
 		public override void SupplementDefaultCase(XElement root) {}
 

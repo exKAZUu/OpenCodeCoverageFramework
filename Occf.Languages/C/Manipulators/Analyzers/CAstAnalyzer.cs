@@ -27,19 +27,19 @@ using Paraiba.Xml.Linq;
 namespace Occf.Languages.C.Manipulators.Analyzers {
 	public class CAstAnalyzer : AstAnalyzer<CAstAnalyzer> {
 		private static readonly string[] TargetNames = {
-				"logical_or_expression",
-				"logical_and_expression",
+			"logical_or_expression",
+			"logical_and_expression",
 		};
 
 		private static readonly string[] ParentNames = {
-				"logical_or_expression",
-				"logical_and_expression",
-				"primary_expression",
+			"logical_or_expression",
+			"logical_and_expression",
+			"primary_expression",
 		};
 
 		public override IEnumerable<XElement> FindFunctions(XElement root) {
-            // TODO: Implement
-            yield break;
+			// TODO: Implement
+			yield break;
 		}
 
 		public override string GetFunctionName(XElement functionElement) {
@@ -51,7 +51,7 @@ namespace Occf.Languages.C.Manipulators.Analyzers {
 			return root.Descendants("statement")
 					.Where(
 							e => e.FirstElement().Name.LocalName != "labeled_statement"
-									&& e.FirstElement().Name.LocalName != "compound_statement");
+							     && e.FirstElement().Name.LocalName != "compound_statement");
 		}
 
 		public override IEnumerable<XElement> FindVariableInitializers(XElement root) {
@@ -81,14 +81,14 @@ namespace Occf.Languages.C.Manipulators.Analyzers {
 
 		protected override bool IsAvailableParent(XElement element) {
 			return element.Elements().Count() == 1 ||
-					ParentNames.Contains(element.Name.LocalName);
+			       ParentNames.Contains(element.Name.LocalName);
 		}
 
-	    public override Tuple<XElement, XElement, ComparatorType> GetComparedElements(XElement root) {
-	        throw new NotImplementedException();
-	    }
+		public override Tuple<XElement, XElement, ComparatorType> GetComparedElements(XElement root) {
+			throw new NotImplementedException();
+		}
 
-	    public override IEnumerable<XElement> FindSwitches(XElement root) {
+		public override IEnumerable<XElement> FindSwitches(XElement root) {
 			return root.Descendants("selection_statement")
 					.Where(e => e.FirstElement().Value == "switch");
 		}
@@ -97,35 +97,35 @@ namespace Occf.Languages.C.Manipulators.Analyzers {
 			return root.Elements("labeled_statement")
 					.Where(
 							label => label.FirstElement().Value == "case"
-									|| label.FirstElement().Value == "default")
+							         || label.FirstElement().Value == "default")
 					// 親以外にswitch文がでてきてはいけない（直接の子供以外のラベルを除去）
 					.Where(
 							label => !label.ParentsWhile(root)
 									.Any(
 											parent => parent.Name.LocalName == "selection_statement"
-													&& parent.FirstElement().Value == "switch"))
+											          && parent.FirstElement().Value == "switch"))
 					// コロンを選択する
 					.Select(label => label.Elements().First(e => e.Value == ":"));
 		}
 
 		public override IEnumerable<XElement> FindForeach(XElement root) {
-            // TODO: Implement
-            yield break;
+			// TODO: Implement
+			yield break;
 		}
 
 		public override IEnumerable<XElement> FindForeachHead(XElement foreachElement) {
-            // TODO: Implement
-            yield break;
+			// TODO: Implement
+			yield break;
 		}
 
 		public override IEnumerable<XElement> FindForeachTail(XElement foreachElement) {
-            // TODO: Implement
-            yield break;
+			// TODO: Implement
+			yield break;
 		}
 
 		public override IEnumerable<XElement> FindTestCases(XElement root) {
-            // TODO: Implement
-            yield break;
+			// TODO: Implement
+			yield break;
 		}
 	}
 }

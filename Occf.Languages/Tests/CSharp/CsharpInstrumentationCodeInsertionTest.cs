@@ -22,28 +22,28 @@ using NUnit.Framework;
 using Occf.Core.Manipulators;
 
 namespace Occf.Languages.Tests.Csharp {
-    public class CsharpInstrumentationCodeInsertionTest {
-        private static IEnumerable<TestCaseData> TestCases {
-            get {
-                var names = new[] {
-                        "block1.cs",
-                        "block2.cs",
-                        "block3.cs",
-                };
-                return names.Select(name => new TestCaseData(name));
-            }
-        }
+	public class CsharpInstrumentationCodeInsertionTest {
+		private static IEnumerable<TestCaseData> TestCases {
+			get {
+				var names = new[] {
+					"block1.cs",
+					"block2.cs",
+					"block3.cs",
+				};
+				return names.Select(name => new TestCaseData(name));
+			}
+		}
 
-        [Test, TestCaseSource("TestCases")]
-        public void VerifyInstrumentationCode(string fileName) {
-            var profile = LanguageSupports.GetCoverageModeByClassName("CSharp");
-            CodeInsertTest.VerifyCodeInsertion(profile, fileName);
-        }
+		[Test, TestCaseSource("TestCases")]
+		public void VerifyInstrumentationCode(string fileName) {
+			var profile = LanguageSupports.GetCoverageModeByClassName("CSharp");
+			CodeInsertTest.VerifyCodeInsertion(profile, fileName);
+		}
 
-        [Test, TestCaseSource("TestCases")]
-        public void InsertInstrumentationCode(string fileName) {
-            var profile = LanguageSupports.GetCoverageModeByClassName("CSharp");
-            CodeInsertTest.InsertInstrumentationCode(profile, fileName);
-        }
-    }
+		[Test, TestCaseSource("TestCases")]
+		public void InsertInstrumentationCode(string fileName) {
+			var profile = LanguageSupports.GetCoverageModeByClassName("CSharp");
+			CodeInsertTest.InsertInstrumentationCode(profile, fileName);
+		}
+	}
 }

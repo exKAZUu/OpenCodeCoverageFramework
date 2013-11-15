@@ -16,11 +16,8 @@
 
 #endregion
 
-using System.Collections.Generic;
-using System.Xml.Linq;
 using Occf.Core.Manipulators.Taggers;
 
 namespace Occf.Languages.Lua.Manipulators.Taggers {
-	public class LuaTagger : Tagger {
-	}
+	public class LuaTagger : Tagger {}
 }

@@ -16,10 +16,8 @@
 
 #endregion
 
-using System.Xml.Linq;
 using Occf.Core.Manipulators.Taggers;
 
 namespace Occf.Languages.CSharp.Manipulators.Taggers {
-	public class CSharpTagger : Tagger {
-	}
+	public class CSharpTagger : Tagger {}
 }

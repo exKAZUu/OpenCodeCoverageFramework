@@ -16,11 +16,8 @@
 
 #endregion
 
-using System.Collections.Generic;
-using System.Xml.Linq;
 using Occf.Core.Manipulators.Taggers;
 
 namespace Occf.Languages.C.Manipulators.Taggers {
-	public class CTagger : Tagger {
-	}
+	public class CTagger : Tagger {}
 }

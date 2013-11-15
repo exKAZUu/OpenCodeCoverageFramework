@@ -20,9 +20,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
-using Code2Xml.Core.CodeToXmls;
-using Code2Xml.Languages.ANTLRv3.Processors.C;
-using Code2Xml.Languages.C.CodeToXmls;
 using Occf.Core.Manipulators.Transformers;
 using Occf.Core.TestInformation;
 using Paraiba.Xml.Linq;
@@ -34,47 +31,47 @@ namespace Occf.Languages.Cpp.Manipulators.Transformers {
 		}
 
 		protected override Tuple<string, string> CreatePredicateCoverageCode(
-                XElement target, long id, ElementType type) {
-            return Tuple.Create("(WritePredicate(" + id + "," + (int)type + ",", "))");
-        }
+				XElement target, long id, ElementType type) {
+			return Tuple.Create("(WritePredicate(" + id + "," + (int)type + ",", "))");
+		}
 
 		public override void InsertImport(XElement target) {
 			var ast = new XElement("TOKEN", "#include \"covman.h\"\r\n");
 			target.AddFirst(ast);
 		}
 
-	    public override void SupplementBlock(XElement root) {
-            SupplementBlock(root, "block", "{", "}");
-        }
+		public override void SupplementBlock(XElement root) {
+			SupplementBlock(root, "block", "{", "}");
+		}
 
-	    public override void SupplementDefaultCase(XElement root) {
-            // TODO: Implement
+		public override void SupplementDefaultCase(XElement root) {
+			// TODO: Implement
 		}
 
 		public override void SupplementDefaultConstructor(XElement root) {
-            // TODO: Implement
+			// TODO: Implement
 		}
 
 		protected override IEnumerable<XElement> FindLackingBlockNodes(XElement root) {
-		    var ifElseNodes = root.Descendants("then")
-                    .Select(e => e.FirstElement());
-		    var whileNodes = root.Descendants("while")
-		            .Select(e => e.LastElement());
-		    var doWhileNodes = root.Descendants("do")
-		            .Select(e => e.FirstElement());
-		    var forNodes = root.Descendants("for")
-		            .Select(e => e.LastElement());
-		    return ifElseNodes.Concat(whileNodes).Concat(doWhileNodes).Concat(forNodes);
+			var ifElseNodes = root.Descendants("then")
+					.Select(e => e.FirstElement());
+			var whileNodes = root.Descendants("while")
+					.Select(e => e.LastElement());
+			var doWhileNodes = root.Descendants("do")
+					.Select(e => e.FirstElement());
+			var forNodes = root.Descendants("for")
+					.Select(e => e.LastElement());
+			return ifElseNodes.Concat(whileNodes).Concat(doWhileNodes).Concat(forNodes);
 		}
 
 		private IEnumerable<XElement> GetLackingDefaultCaseNodes(XElement root) {
-            // TODO: Implement
-            yield break;
+			// TODO: Implement
+			yield break;
 		}
 
 		public override TestCase InsertTestCaseId(
 				XElement target, long id, string relativePath) {
-            // TODO: Implement
+			// TODO: Implement
 			throw new NotImplementedException();
 		}
 	}

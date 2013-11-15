@@ -33,7 +33,7 @@ namespace Occf.Languages.Java.Manipulators.Taggers {
 					element.AncestorsAndSelf()
 							.Where(
 									e => e.Name.LocalName == "normalClassDeclaration" ||
-											e.Name.LocalName == "methodDeclaration")
+									     e.Name.LocalName == "methodDeclaration")
 							// ReSharper disable PossibleNullReferenceException
 							.Select(e => e.Element("IDENTIFIER").Value)
 							// ReSharper restore PossibleNullReferenceException
@@ -42,7 +42,7 @@ namespace Occf.Languages.Java.Manipulators.Taggers {
 		}
 
 		public override List<string> Tag(XElement element) {
-            return GetTag(element);
+			return GetTag(element);
 		}
 	}
 }

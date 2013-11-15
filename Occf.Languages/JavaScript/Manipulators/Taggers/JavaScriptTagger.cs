@@ -16,10 +16,8 @@
 
 #endregion
 
-using System.Xml.Linq;
 using Occf.Core.Manipulators.Taggers;
 
 namespace Occf.Languages.JavaScript.Manipulators.Taggers {
-	public class JavaScriptTagger : Tagger {
-	}
+	public class JavaScriptTagger : Tagger {}
 }

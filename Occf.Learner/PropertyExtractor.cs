@@ -66,7 +66,7 @@ namespace Occf.Learner.Core {
 				e = e.Parent;
 				elements.Add(e);
 			}
-			return string.Join("/", elements.Select(e2 => e2.NameOrValue()));
+			return string.Join("/", elements.Select(e2 => e2.NameOrTokenText()));
 		}
 	}
 
@@ -77,7 +77,7 @@ namespace Occf.Learner.Core {
 				e = e.Elements().First();
 				elements.Add(e);
 			}
-			return string.Join("/", elements.Select(e2 => e2.NameOrValue()));
+			return string.Join("/", elements.Select(e2 => e2.NameOrTokenText()));
 		}
 	}
 
@@ -98,10 +98,11 @@ namespace Occf.Learner.Core {
 			} else {
 				elements = e.Elements();
 				for (int i = 0; i < _depth; i++) {
+					elements = elements.Where(e2 => !e2.IsTokenSet());
 					elements = elements.Elements();
 				}
 			}
-			return string.Join("/", elements.Select(e2 => e2.NameOrValue()));
+			return string.Join("/", elements.Select(e2 => e2.NameOrTokenText()));
 		}
 
 		public override string ToString() {
@@ -157,14 +158,14 @@ namespace Occf.Learner.Core {
 				elements = new[] { e };
 				var depth = _depth + 1;
 				while (depth > 0 && elements.Any()) {
-					elements = elements.Where(e2 => e2.Name() != Code2XmlConstants.TokenGroupName);
+					elements = elements.Where(e2 => !e2.IsTokenSet());
 					if (elements.Elements().Count() > 1) {
 						depth--;
 					}
 					elements = elements.Elements();
 				}
 			}
-			return string.Join("/", elements.Select(e2 => e2.NameOrValue()));
+			return string.Join("/", elements.Select(e2 => e2.NameOrTokenText()));
 		}
 
 		public override string ToString() {
@@ -212,11 +213,11 @@ namespace Occf.Learner.Core {
 			} else {
 				elements = e.Elements();
 				for (int i = 0; i < _depth; i++) {
-					elements = elements.Where(e2 => e2.Name() != Code2XmlConstants.TokenGroupName);
+					elements = elements.Where(e2 => !e2.IsTokenSet());
 					elements = elements.Elements();
 				}
 			}
-			return elements.Select(e2 => e2.NameOrValue());
+			return elements.Select(e2 => e2.NameOrTokenText());
 		}
 
 		public override string ToString() {
