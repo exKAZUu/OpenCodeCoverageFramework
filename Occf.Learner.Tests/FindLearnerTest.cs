@@ -159,33 +159,33 @@ namespace Occf.Learner.Core.Tests {
 				learningPathSet.add(ret.Item2);
 			}
 
-			//learningPathSet = learningPaths.ToHashSet();
+			//learningPathSet = seedPaths.ToHashSet();
 			//Console.WriteLine("SVM with Polynomial 2");
 			//while (true) {
 			//	var learningData = GenerateLearning(learningPathSet);
-			//	var ret = TrySvm(paths, learningPathSet, learningData, new Polynomial(2));
+			//	var ret = TrySvm(allPaths, learningPathSet, learningData, new Polynomial(2));
 			//	if (ret.Item1 >= threshold) {
 			//		break;
 			//	}
 			//	learningPathSet.add(ret.Item2);
 			//}
 
-			//learningPathSet = learningPaths.ToHashSet();
+			//learningPathSet = seedPaths.ToHashSet();
 			//Console.WriteLine("SVM with Gaussian");
 			//while (true) {
 			//	var learningData = GenerateLearning(learningPathSet);
-			//	var ret = TrySvm(paths, learningPathSet, learningData, new Gaussian());
+			//	var ret = TrySvm(allPaths, learningPathSet, learningData, new Gaussian());
 			//	if (ret.Item1 >= threshold) {
 			//		break;
 			//	}
 			//	learningPathSet.add(ret.Item2);
 			//}
 
-			//learningPathSet = learningPaths.ToHashSet();
+			//learningPathSet = seedPaths.ToHashSet();
 			//Console.WriteLine("SVM with Gaussian estimated");
 			//while (true) {
 			//	var learningData = GenerateLearning(learningPathSet);
-			//	var ret = TrySvm(paths, learningPathSet, learningData, Gaussian.Estimate(learningData.Inputs));
+			//	var ret = TrySvm(allPaths, learningPathSet, learningData, Gaussian.Estimate(learningData.Inputs));
 			//	if (ret.Item1 >= threshold) {
 			//		break;
 			//	}
@@ -204,12 +204,12 @@ namespace Occf.Learner.Core.Tests {
 				learningPathSet.add(ret.Item2);
 			}
 
-			//learningPathSet = learningPaths.ToHashSet();
+			//learningPathSet = seedPaths.ToHashSet();
 			//Console.WriteLine("SVM with ID3");
 			//while (true) {
 			//	var learningData = GenerateLearning(learningPathSet);
-			//	TryID3Learning(paths, learningPathSet, learningData);
-			//	var ret = TrySvm(paths, learningPathSet, learningData, new Linear());
+			//	TryID3Learning(allPaths, learningPathSet, learningData);
+			//	var ret = TrySvm(allPaths, learningPathSet, learningData, new Linear());
 
 			//	if (ret.Item1 >= threshold) {
 			//		break;

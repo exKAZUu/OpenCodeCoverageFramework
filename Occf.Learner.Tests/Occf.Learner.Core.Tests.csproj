@@ -91,9 +91,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="C45Learner.cs" />
+    <Compile Include="ExtractingJavaBranchTest.cs" />
     <Compile Include="FindLearnerTest.cs" />
+    <Compile Include="Id3Learner.cs" />
+    <Compile Include="JavaBranchExperiment.cs" />
+    <Compile Include="LearningAlgorithm.cs" />
+    <Compile Include="LearningData.cs" />
+    <Compile Include="LearningExperiment.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PropertyExtractorTest.cs" />
+    <Compile Include="SvmLearner.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
