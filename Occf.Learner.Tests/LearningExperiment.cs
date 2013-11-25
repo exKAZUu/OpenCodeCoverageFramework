@@ -7,18 +7,26 @@ using Accord.MachineLearning.DecisionTrees;
 using Code2Xml.Core;
 using Code2Xml.Languages.ANTLRv3.Core;
 using Paraiba.Linq;
+using Paraiba.Xml.Linq;
 
 namespace Occf.Learner.Core.Tests {
 	public abstract class LearningExperiment {
 		protected abstract Processor Processor { get; }
+		private readonly IList<string> _allPaths;
+		private readonly ISet<string> _elementNames;
+
+		protected LearningExperiment(IList<string> allPaths, params string[] elementNames) {
+			_allPaths = allPaths;
+			_elementNames = elementNames.ToHashSet();
+		}
 
 		public void LearnUntilBeStable(
-				IList<string> allPaths, IList<string> seedPaths, LearningAlgorithm learner, double threshold) {
+				IList<string> seedPaths, LearningAlgorithm learner, double threshold) {
 			var seedPathSet = seedPaths.ToHashSet();
 			Console.WriteLine(learner.Description);
 			while (true) {
 				string nextPath;
-				var ret = LearnAndApply(allPaths, seedPathSet, learner, out nextPath);
+				var ret = LearnAndApply(seedPathSet, learner, out nextPath);
 				if (ret >= threshold) {
 					break;
 				}
@@ -27,8 +35,7 @@ namespace Occf.Learner.Core.Tests {
 		}
 
 		private double LearnAndApply(
-				IList<string> allPaths, ISet<string> seedPaths, LearningAlgorithm algorithm,
-				out string nextPath) {
+				ISet<string> seedPaths, LearningAlgorithm algorithm, out string nextPath) {
 			var learningData = GenerateLearning(seedPaths);
 			var judge = algorithm.Learn(learningData);
 
@@ -36,7 +43,7 @@ namespace Occf.Learner.Core.Tests {
 			var failedIndicies = new List<int>();
 			var minProb = Double.MaxValue;
 			nextPath = "";
-			foreach (var path in allPaths) {
+			foreach (var path in _allPaths) {
 				Console.Write(".");
 				var codeFile = new FileInfo(path);
 				var ast = Processor.GenerateXml(codeFile);
@@ -78,6 +85,10 @@ namespace Occf.Learner.Core.Tests {
 				all.UnionWith(GetAllElements(ast));
 				accepted.UnionWith(GetAcceptedElements(ast));
 			}
+			if (!NormalizeElementNames(accepted).SetEquals(_elementNames)) {
+				Console.WriteLine("Failed to normalize element names!");
+			}
+
 			var prop2Index = new Dictionary<string, int>();
 			var variables = new List<DecisionVariable>();
 			var extractors = Enumerable.Range(-10, 21)
@@ -126,8 +137,71 @@ namespace Occf.Learner.Core.Tests {
 			return record;
 		}
 
-		protected abstract IEnumerable<XElement> GetAllElements(XElement ast);
+		private ISet<string> NormalizeElementNames(ICollection<XElement> accepted) {
+			var nameSet = new HashSet<string>();
+			var name2Count = new Dictionary<string, int>();
+			var elements = accepted
+					.SelectMany(e => e.AncestorsAndDescendantsWithNoSiblingAndSelf());
+			foreach (var element in elements) {
+				int count = 0;
+				name2Count.TryGetValue(element.Name(), out count);
+				name2Count[element.Name()] = count + 1;
+			}
+			foreach (var element in accepted) {
+				var newElement = element.DescendantsOfOnlyChildAndSelf()
+						.OrderByDescending(e => name2Count[e.Name()])
+						.First();
+				nameSet.add(newElement.Name());
+			}
+			return nameSet;
+		}
+
+		protected IEnumerable<XElement> GetAllElements(XElement ast) {
+			return ast.DescendantsAndSelf()
+					.Where(e => _elementNames.Contains(e.Name()));
+		}
 
 		protected abstract IEnumerable<XElement> GetAcceptedElements(XElement ast);
+	}
+
+	public static class Extension {
+		public static IEnumerable<XElement> AncestorsAndDescendantsWithNoSibling(this XElement element) {
+			return element.DescendantsOfOnlyChild().Concat(element.AncestorsWithNoSibling());
+		}
+
+		public static IEnumerable<XElement> AncestorsAndDescendantsWithNoSiblingAndSelf(
+				this XElement element) {
+			return element.DescendantsOfOnlyChildAndSelf().Concat(element.AncestorsWithNoSibling());
+		}
+
+		public static IEnumerable<XElement> AncestorsWithNoSiblingAndSelf(this XElement element) {
+			do {
+				yield return element;
+				element = element.Parent;
+			} while (element != null && element.Elements().Count() == 1);
+		}
+
+		public static IEnumerable<XElement> AncestorsWithNoSibling(this XElement element) {
+			element = element.Parent;
+			while (element != null && element.Elements().Count() == 1) {
+				yield return element;
+				element = element.Parent;
+			}
+		}
+
+		public static IEnumerable<XElement> DescendantsWithNoSiblingAndSelf(this XElement element) {
+			yield return element;
+			while (element.Elements().Count() == 1) {
+				element = element.FirstElement();
+				yield return element;
+			}
+		}
+
+		public static IEnumerable<XElement> DescendantsWithNoSibling(this XElement element) {
+			while (element.Elements().Count() == 1) {
+				element = element.FirstElement();
+				yield return element;
+			}
+		}
 	}
 }

@@ -8,7 +8,11 @@ namespace Occf.Learner.Core.Tests {
 		private readonly IKernel _kernel;
 
 		public override string Description {
-			get { return "SVM"; }
+			get { return "SVM with " + _kernel; }
+		}
+
+		public SvmLearner() {
+			_kernel = new Linear();
 		}
 
 		public SvmLearner(IKernel kernel) {

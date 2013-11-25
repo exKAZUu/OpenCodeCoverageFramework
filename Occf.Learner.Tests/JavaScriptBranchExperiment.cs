@@ -5,22 +5,18 @@ using Code2Xml.Core;
 using Paraiba.Xml.Linq;
 
 namespace Occf.Learner.Core.Tests {
-	public class JavaBranchExperiment : LearningExperiment {
-		protected override Processor Processor {
-			get { return ProcessorLoader.JavaUsingAntlr3; }
-		}
-
-		public JavaBranchExperiment(IList<string> allPaths)
+	public class JavaScriptBranchExperiment : LearningExperiment {
+		public JavaScriptBranchExperiment(IList<string> allPaths)
 				: base(allPaths, "expression") {}
 
+		protected override Processor Processor {
+			get { return ProcessorLoader.JavaScriptUsingAntlr3; }
+		}
+
 		protected override IEnumerable<XElement> GetAcceptedElements(XElement ast) {
-			var ifWhileDoWhile = new[] { "if", "while", "do" };
-			var ifWhileDoWhileConds = ast.Descendants("statement")
-					.Where(e => ifWhileDoWhile.Contains(e.FirstElementOrDefault().SafeValue()))
-					.Select(e => e.Element("parExpression").NthElement(1));
-			var forConds = ast.Descendants("forstatement")
-					.Where(e => e.Elements().Count(e2 => e2.Text() == ";") >= 2)
-					.Select(e => e.Element("expression"));
+			var ifConds = ast.Descendants("statement")
+					.Where(e => e.FirstElementOrDefault().SafeValue() == "ifStatement")
+					.Select(e => e.NthElement(1).NthElement(1));
 			var preConds = ast.Descendants("expression")
 					.Where(
 							e => {
@@ -36,7 +32,7 @@ namespace Occf.Learner.Core.Tests {
 								}
 								return true;
 							});
-			return ifWhileDoWhileConds.Concat(forConds).Concat(preConds);
+			return ifConds.Concat(preConds);
 		}
 	}
 }
