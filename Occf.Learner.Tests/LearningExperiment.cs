@@ -6,6 +6,7 @@ using System.Xml.Linq;
 using Accord.MachineLearning.DecisionTrees;
 using Code2Xml.Core;
 using Code2Xml.Languages.ANTLRv3.Core;
+using Paraiba.Collections.Generic;
 using Paraiba.Linq;
 using Paraiba.Xml.Linq;
 
@@ -14,8 +15,8 @@ namespace Occf.Learner.Core.Tests {
 		protected abstract Processor Processor { get; }
 		private readonly IList<string> _allPaths;
 		private readonly ISet<string> _elementNames;
-		private const int PropertyDepth = 40;
-		private const int DeniedThreshold = 3;
+		private const int PredicateDepth = 10;
+		private const int DeniedThreshold = 100;
 
 		protected LearningExperiment(IList<string> allPaths, params string[] elementNames) {
 			_allPaths = allPaths;
@@ -52,15 +53,11 @@ namespace Occf.Learner.Core.Tests {
 				var all = GetAllElements(ast);
 				var accepted = GetAcceptedElements(ast).ToHashSet();
 				foreach (var e in all) {
-					var record = GetLearningRecord(e, learningData);
-					var value = judge(record);
+					var input = GetClassifierInput(e, learningData);
+					var value = judge(input);
 					var expected = value <= 0;
 					var actual = accepted.Contains(e);
 					if (expected != actual) {
-						var props =
-								Enumerable.ToList(Enumerable.Select(learningData.Extractors, ext => ext.ExtractProperty(e)));
-						//Console.WriteLine(count + ": expected: " + expected + "(" + value + ")" + ", actual: "
-						//                  + actual);
 						failedIndicies.Add(count);
 					}
 					if (!seedPaths.Contains(path)) {
@@ -106,53 +103,54 @@ namespace Occf.Learner.Core.Tests {
 				Console.WriteLine("Failed to normalize element names!");
 			}
 
-			var prop2Index = new Dictionary<string, int>();
-			var variables = new List<DecisionVariable>();
-			var extractors =
-					Enumerable.ToList(Enumerable.Select(Enumerable.Range(-PropertyDepth / 2, PropertyDepth + 1),
-							i => new ElementSequenceExtractor(i)));
-			for (int i = 0; i < extractors.Count; i++) {
-				foreach (var elem in allAccepted) {
-					var propWithIndex = i + extractors[i].ExtractProperty(elem);
-					if (!prop2Index.ContainsKey(propWithIndex)) {
-						prop2Index[propWithIndex] = variables.Count;
-						variables.Add(new DecisionVariable(propWithIndex, DecisionVariableKind.Discrete));
+			var depth2Predicates = new Dictionary<int, HashSet<Predicate>>();
+			foreach (var elem in allAccepted) {
+				foreach (var predicate in PredicateGenerator.GeneratePredicates(elem, PredicateDepth)) {
+					HashSet<Predicate> predicates;
+					if (!depth2Predicates.TryGetValue(predicate.Depth, out predicates)) {
+						predicates = new HashSet<Predicate>();
+						depth2Predicates[predicate.Depth] = predicates;
 					}
+					predicates.Add(predicate);
 				}
 			}
 
+			var variables = new List<DecisionVariable>();
+			var count = depth2Predicates.Values.Sum(ps => ps.Count);
+			for (int i = 0; i < count; i++) {
+				variables.Add(new DecisionVariable(i.ToString(), DecisionVariableKind.Discrete));
+			}
+
 			Console.WriteLine("Accepted: " + allAccepted.Count + ", Denied: " + allDenied.Count
-			                  + ", Extracted: " + variables.Count);
+			                  + ", Predicates: " + count);
 
 			var learningRecords = Enumerable.Empty<double[]>();
 			var learningResults = new List<int>();
 			var learningData = new LearningData {
-				Extractors = extractors,
+				Depth2Predicates = depth2Predicates,
 				Variables = variables,
-				Prop2Index = prop2Index,
 			};
 			learningRecords =
 					learningRecords.Concat(
 							allAccepted.Concat(allDenied)
-									.Select(e => GetLearningRecord(e, learningData)));
+									.Select(e => GetClassifierInput(e, learningData)));
 			learningResults.AddRange(Enumerable.Repeat(-1, allAccepted.Count));
 			learningResults.AddRange(Enumerable.Repeat(1, allDenied.Count));
-			learningData.Inputs = Enumerable.ToArray(learningRecords);
+			learningData.Inputs = learningRecords.ToArray();
 			learningData.Outputs = learningResults.ToArray();
 			return learningData;
 		}
 
-		private static double[] GetLearningRecord(XElement e, LearningData learningData) {
-			var record = new double[learningData.Variables.Count];
-			learningData.Extractors.ForEach(
-					(extractor, i) => {
-						var propWithIndex = i + extractor.ExtractProperty(e);
-						int index;
-						if (learningData.Prop2Index.TryGetValue(propWithIndex, out index)) {
-							record[index] = 1;
-						}
-					});
-			return record;
+		private static double[] GetClassifierInput(XElement e, LearningData learningData) {
+			var input = new double[learningData.Variables.Count];
+			var count = 0;
+			foreach (var depthAndPredicates in learningData.Depth2Predicates) {
+				var depthInfo = new DepthInfo(e, depthAndPredicates.Key);
+				foreach (var predicate in depthAndPredicates.Value) {
+					input[count++] = predicate.Check(depthInfo) ? 1 : 0;
+				}
+			}
+			return input;
 		}
 
 		private ISet<string> NormalizeElementNames(ICollection<XElement> accepted) {
