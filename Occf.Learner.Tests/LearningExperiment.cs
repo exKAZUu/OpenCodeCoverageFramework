@@ -6,6 +6,7 @@ using System.Xml.Linq;
 using Accord.MachineLearning.DecisionTrees;
 using Code2Xml.Core;
 using Code2Xml.Languages.ANTLRv3.Core;
+using Paraiba.Collections.Generic;
 using Paraiba.Linq;
 using Paraiba.Xml.Linq;
 
@@ -110,11 +111,11 @@ namespace Occf.Learner.Core.Tests {
 
 			var prop2Index = new Dictionary<string, int>();
 			var variables = new List<DecisionVariable>();
-			var extractors =
-					Enumerable.ToList(Enumerable.Select(Enumerable.Range(-PropertyDepth / 2, PropertyDepth + 1),
-							i => new ElementSequenceExtractor(i)));
+			var extractors = Enumerable.Range(-PropertyDepth / 2, PropertyDepth + 1)
+					.Select(i => new ElementSequenceExtractor(i)).ToList()
+					.Shuffle();
 			for (int i = 0; i < extractors.Count; i++) {
-				foreach (var elem in allAccepted) {
+				foreach (var elem in allAccepted.ToList().Shuffle()) {
 					var propWithIndex = i + extractors[i].ExtractProperty(elem);
 					if (!prop2Index.ContainsKey(propWithIndex)) {
 						prop2Index[propWithIndex] = variables.Count;
@@ -139,21 +140,24 @@ namespace Occf.Learner.Core.Tests {
 									.Select(e => GetLearningRecord(e, learningData)));
 			learningResults.AddRange(Enumerable.Repeat(-1, allAccepted.Count));
 			learningResults.AddRange(Enumerable.Repeat(1, allDenied.Count));
-			learningData.Inputs = Enumerable.ToArray(learningRecords);
+			learningData.Inputs = learningRecords.ToArray();
 			learningData.Outputs = learningResults.ToArray();
 			return learningData;
 		}
 
 		private static double[] GetLearningRecord(XElement e, LearningData learningData) {
 			var record = new double[learningData.Variables.Count];
+			var count = 0;
 			learningData.Extractors.ForEach(
 					(extractor, i) => {
 						var propWithIndex = i + extractor.ExtractProperty(e);
 						int index;
 						if (learningData.Prop2Index.TryGetValue(propWithIndex, out index)) {
 							record[index] = 1;
+							count++;
 						}
 					});
+			Console.WriteLine("Input: " + count);
 			return record;
 		}
 
