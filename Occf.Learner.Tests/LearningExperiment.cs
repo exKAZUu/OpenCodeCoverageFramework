@@ -14,8 +14,8 @@ namespace Occf.Learner.Core.Tests {
 		protected abstract Processor Processor { get; }
 		private readonly IList<string> _allPaths;
 		private readonly ISet<string> _elementNames;
-		private const int PropertyDepth = 40;
-		private const int DeniedThreshold = 3;
+		private const int PropertyDepth = 20;
+		private const int DeniedThreshold = 300;
 
 		protected LearningExperiment(IList<string> allPaths, params string[] elementNames) {
 			_allPaths = allPaths;
