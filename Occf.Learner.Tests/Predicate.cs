@@ -5,7 +5,11 @@ using System.Text;
 
 namespace Occf.Learner.Core.Tests
 {
-	class Predicate
+	public class Predicate
+	{
+	}
+
+	public static class PredicateGenerator
 	{
 	}
 }
