@@ -16,7 +16,7 @@ namespace Occf.Learner.Core.Tests {
 		private readonly IList<string> _allPaths;
 		private readonly ISet<string> _elementNames;
 		private const int PredicateDepth = 10;
-		private const int DeniedThreshold = 100;
+		private const int DeniedThreshold = 300;
 
 		protected LearningExperiment(IList<string> allPaths, params string[] elementNames) {
 			_allPaths = allPaths;
@@ -28,12 +28,14 @@ namespace Occf.Learner.Core.Tests {
 			var seedPathSet = seedPaths.ToHashSet();
 			Console.WriteLine(learner.Description);
 			while (true) {
+				var time = Environment.TickCount;
 				string nextPath;
 				var ret = LearnAndApply(seedPathSet, learner, out nextPath);
 				if (ret >= threshold) {
 					break;
 				}
 				seedPathSet.add(nextPath);
+				Console.WriteLine("Time: " + (Environment.TickCount - time));
 			}
 		}
 
