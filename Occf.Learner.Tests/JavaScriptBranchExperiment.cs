@@ -14,25 +14,21 @@ namespace Occf.Learner.Core.Tests {
 		}
 
 		protected override IEnumerable<XElement> GetAcceptedElements(XElement ast) {
-			var ifConds = ast.Descendants("statement")
-					.Where(e => e.FirstElementOrDefault().SafeValue() == "ifStatement")
-					.Select(e => e.NthElement(1).NthElement(1));
-			var preConds = ast.Descendants("expression")
-					.Where(
-							e => {
-								var primary = e.SafeParent().SafeParent().SafeParent().SafeParent();
-								if (primary.SafeName() != "primary") {
-									return false;
-								}
-								if (primary.NthElementOrDefault(0).SafeValue() != "Preconditions") {
-									return false;
-								}
-								if (primary.NthElementOrDefault(2).SafeValue() != "checkArgument") {
-									return false;
-								}
-								return true;
-							});
-			return ifConds.Concat(preConds);
+			var ifConds = ast.Descendants("ifStatement")
+					.Select(e => e.Element("expression"));
+			var whileConds = ast.Descendants("whileStatement")
+					.Select(e => e.Element("expression"));
+			var doWhileConds = ast.Descendants("doWhileStatement")
+					.Select(e => e.Element("expression"));
+			var forConds = ast.Descendants("forStatement")
+					.Select(e => e.Elements().First(e2 => e2.TokenText() == ";"))
+					.Where(e => e.NextElement().Name() == "expression")
+					.Select(e => e.NextElement());
+			var preConds = ast.Descendants("callExpression")
+					.Where(e => e.FirstElement().Value == "console.log")
+					.Select(e => e.Element("arguments").Element("assignmentExpression"))
+					.Where(e => e != null);
+			return ifConds.Concat(whileConds).Concat(doWhileConds).Concat(forConds)/*.Concat(preConds)*/;
 		}
 	}
 }

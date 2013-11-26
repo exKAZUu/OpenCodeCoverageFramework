@@ -6,7 +6,7 @@ using ParserTests;
 
 namespace Occf.Learner.Core.Tests {
 	[TestFixture]
-	public class ExtractingJavaBranchTest {
+	public class JavaBranchExperimentTest {
 		[Test]
 		public void TestPageObjectGenerator() {
 			var path = Fixture.GetInputProjectPath("Java", "pageobjectgenerator");

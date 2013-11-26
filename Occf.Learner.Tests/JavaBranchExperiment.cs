@@ -19,7 +19,7 @@ namespace Occf.Learner.Core.Tests {
 					.Where(e => ifWhileDoWhile.Contains(e.FirstElementOrDefault().SafeValue()))
 					.Select(e => e.Element("parExpression").NthElement(1));
 			var forConds = ast.Descendants("forstatement")
-					.Where(e => e.Elements().Count(e2 => e2.Text() == ";") >= 2)
+					.Where(e => e.Elements().Count(e2 => e2.TokenText() == ";") >= 2)
 					.Select(e => e.Element("expression"));
 			var preConds = ast.Descendants("expression")
 					.Where(

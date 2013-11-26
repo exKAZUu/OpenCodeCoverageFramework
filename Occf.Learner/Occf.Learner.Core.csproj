@@ -37,26 +37,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Code2Xml\packages\Antlr.3.5.0.2\lib\Antlr3.Runtime.dll</HintPath>
     </Reference>
-    <Reference Include="Code2Xml.Core, Version=2.0.7.81, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Code2Xml\packages\Code2Xml.2.0.8.82\lib\Code2Xml.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="Code2Xml.Languages.ANTLRv3, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Code2Xml\packages\Code2Xml.2.0.8.82\lib\Code2Xml.Languages.ANTLRv3.dll</HintPath>
-    </Reference>
-    <Reference Include="Code2Xml.Languages.ExternalProcessors, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Code2Xml\packages\Code2Xml.2.0.8.82\lib\Code2Xml.Languages.ExternalProcessors.dll</HintPath>
-    </Reference>
-    <Reference Include="Code2Xml.Languages.Obsolete, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Code2Xml\packages\Code2Xml.2.0.8.82\lib\Code2Xml.Languages.Obsolete.dll</HintPath>
-    </Reference>
-    <Reference Include="Code2Xml.Objects, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Code2Xml\packages\Code2Xml.2.0.8.82\lib\Code2Xml.Objects.dll</HintPath>
-    </Reference>
     <Reference Include="Paraiba, Version=1.1.1.91, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Code2Xml\packages\Paraiba.1.1.1.91\lib\net40\Paraiba.dll</HintPath>
@@ -87,6 +67,32 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Code2Xml\Code2Xml.Core\Code2Xml.Core.csproj">
+      <Project>{bccd95a9-7685-4b15-9da3-e48cc0bf499b}</Project>
+      <Name>Code2Xml.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Code2Xml\Code2Xml.Languages\ANTLRv3\Code2Xml.Languages.ANTLRv3.csproj">
+      <Project>{942a56fd-13af-4ee6-a8d7-7ddf50374715}</Project>
+      <Name>Code2Xml.Languages.ANTLRv3</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Code2Xml\Code2Xml.Languages\ANTLRv4\Code2Xml.Languages.ANTLRv4.csproj">
+      <Project>{1de85da9-6ebf-49d1-8dda-75d9d25497f6}</Project>
+      <Name>Code2Xml.Languages.ANTLRv4</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Code2Xml\Code2Xml.Languages\ExternalProcessors\Code2Xml.Languages.ExternalProcessors.csproj">
+      <Project>{311ea4b7-dd3c-4945-9ae3-a86a3ede6a68}</Project>
+      <Name>Code2Xml.Languages.ExternalProcessors</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Code2Xml\Code2Xml.Languages\Obsolete\Code2Xml.Languages.Obsolete.csproj">
+      <Project>{d5dec839-57fb-408b-b162-d7a027379127}</Project>
+      <Name>Code2Xml.Languages.Obsolete</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Code2Xml\Code2Xml.Objects\Code2Xml.Objects.csproj">
+      <Project>{447b693b-b4d5-4b97-adf7-4f8546d9dd8e}</Project>
+      <Name>Code2Xml.Objects</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\nuget.targets" />

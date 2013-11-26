@@ -14,6 +14,8 @@ namespace Occf.Learner.Core.Tests {
 		protected abstract Processor Processor { get; }
 		private readonly IList<string> _allPaths;
 		private readonly ISet<string> _elementNames;
+		private const int PropertyDepth = 40;
+		private const int DeniedThreshold = 3;
 
 		protected LearningExperiment(IList<string> allPaths, params string[] elementNames) {
 			_allPaths = allPaths;
@@ -55,7 +57,8 @@ namespace Occf.Learner.Core.Tests {
 					var expected = value <= 0;
 					var actual = accepted.Contains(e);
 					if (expected != actual) {
-						var props = learningData.Extractors.Select(ext => ext.ExtractProperty(e)).ToList();
+						var props =
+								Enumerable.ToList(Enumerable.Select(learningData.Extractors, ext => ext.ExtractProperty(e)));
 						//Console.WriteLine(count + ": expected: " + expected + "(" + value + ")" + ", actual: "
 						//                  + actual);
 						failedIndicies.Add(count);
@@ -77,25 +80,39 @@ namespace Occf.Learner.Core.Tests {
 		}
 
 		private LearningData GenerateLearning(IEnumerable<string> paths) {
-			var all = new HashSet<XElement>();
-			var accepted = new HashSet<XElement>();
+			var allDenied = new HashSet<XElement>();
+			var allAccepted = new HashSet<XElement>();
 			foreach (var path in paths) {
 				var codeFile = new FileInfo(path);
 				var ast = Processor.GenerateXml(codeFile);
-				all.UnionWith(GetAllElements(ast));
-				accepted.UnionWith(GetAcceptedElements(ast));
+				var denied = GetAllElements(ast).ToHashSet();
+				var accepted = GetAcceptedElements(ast).ToHashSet();
+				denied.ExceptWith(accepted);
+				Console.WriteLine("Accepted: " + accepted.Count + ", Denied: " + denied.Count);
+				if (denied.Count > accepted.Count * DeniedThreshold) {
+					var newDenied = new HashSet<XElement>();
+					var rand = new Random();
+					foreach (var deniedElement in denied) {
+						if (rand.Next(denied.Count) < accepted.Count * DeniedThreshold) {
+							newDenied.Add(deniedElement);
+						}
+					}
+					denied = newDenied;
+				}
+				allDenied.UnionWith(denied);
+				allAccepted.UnionWith(accepted);
 			}
-			if (!NormalizeElementNames(accepted).SetEquals(_elementNames)) {
+			if (!NormalizeElementNames(allAccepted).SetEquals(_elementNames)) {
 				Console.WriteLine("Failed to normalize element names!");
 			}
 
 			var prop2Index = new Dictionary<string, int>();
 			var variables = new List<DecisionVariable>();
-			var extractors = Enumerable.Range(-10, 21)
-					.Select(i => new ElementSequenceExtractor(i))
-					.ToList();
+			var extractors =
+					Enumerable.ToList(Enumerable.Select(Enumerable.Range(-PropertyDepth / 2, PropertyDepth + 1),
+							i => new ElementSequenceExtractor(i)));
 			for (int i = 0; i < extractors.Count; i++) {
-				foreach (var elem in accepted) {
+				foreach (var elem in allAccepted) {
 					var propWithIndex = i + extractors[i].ExtractProperty(elem);
 					if (!prop2Index.ContainsKey(propWithIndex)) {
 						prop2Index[propWithIndex] = variables.Count;
@@ -103,8 +120,9 @@ namespace Occf.Learner.Core.Tests {
 					}
 				}
 			}
-			var denied = all; // Should not use all after this
-			denied.ExceptWith(accepted);
+
+			Console.WriteLine("Accepted: " + allAccepted.Count + ", Denied: " + allDenied.Count
+			                  + ", Extracted: " + variables.Count);
 
 			var learningRecords = Enumerable.Empty<double[]>();
 			var learningResults = new List<int>();
@@ -115,11 +133,11 @@ namespace Occf.Learner.Core.Tests {
 			};
 			learningRecords =
 					learningRecords.Concat(
-							accepted.Concat(denied)
+							allAccepted.Concat(allDenied)
 									.Select(e => GetLearningRecord(e, learningData)));
-			learningResults.AddRange(Enumerable.Repeat(-1, accepted.Count));
-			learningResults.AddRange(Enumerable.Repeat(1, denied.Count));
-			learningData.Inputs = learningRecords.ToArray();
+			learningResults.AddRange(Enumerable.Repeat(-1, allAccepted.Count));
+			learningResults.AddRange(Enumerable.Repeat(1, allDenied.Count));
+			learningData.Inputs = Enumerable.ToArray(learningRecords);
 			learningData.Outputs = learningResults.ToArray();
 			return learningData;
 		}
@@ -140,25 +158,24 @@ namespace Occf.Learner.Core.Tests {
 		private ISet<string> NormalizeElementNames(ICollection<XElement> accepted) {
 			var nameSet = new HashSet<string>();
 			var name2Count = new Dictionary<string, int>();
-			var elements = accepted
-					.SelectMany(e => e.AncestorsAndDescendantsWithNoSiblingAndSelf());
+			var elements = Enumerable.SelectMany(accepted,
+					e => e.AncestorsAndDescendantsWithNoSiblingAndSelf());
 			foreach (var element in elements) {
 				int count = 0;
 				name2Count.TryGetValue(element.Name(), out count);
 				name2Count[element.Name()] = count + 1;
 			}
 			foreach (var element in accepted) {
-				var newElement = element.DescendantsOfOnlyChildAndSelf()
-						.OrderByDescending(e => name2Count[e.Name()])
-						.First();
+				var newElement =
+						Enumerable.First(Enumerable.OrderByDescending(element.DescendantsOfOnlyChildAndSelf(),
+								e => name2Count[e.Name()]));
 				nameSet.add(newElement.Name());
 			}
 			return nameSet;
 		}
 
 		protected IEnumerable<XElement> GetAllElements(XElement ast) {
-			return ast.DescendantsAndSelf()
-					.Where(e => _elementNames.Contains(e.Name()));
+			return Enumerable.Where(ast.DescendantsAndSelf(), e => _elementNames.Contains(e.Name()));
 		}
 
 		protected abstract IEnumerable<XElement> GetAcceptedElements(XElement ast);
@@ -166,24 +183,25 @@ namespace Occf.Learner.Core.Tests {
 
 	public static class Extension {
 		public static IEnumerable<XElement> AncestorsAndDescendantsWithNoSibling(this XElement element) {
-			return element.DescendantsOfOnlyChild().Concat(element.AncestorsWithNoSibling());
+			return Enumerable.Concat(element.DescendantsOfOnlyChild(), element.AncestorsWithNoSibling());
 		}
 
 		public static IEnumerable<XElement> AncestorsAndDescendantsWithNoSiblingAndSelf(
 				this XElement element) {
-			return element.DescendantsOfOnlyChildAndSelf().Concat(element.AncestorsWithNoSibling());
+			return Enumerable.Concat(element.DescendantsOfOnlyChildAndSelf(),
+					element.AncestorsWithNoSibling());
 		}
 
 		public static IEnumerable<XElement> AncestorsWithNoSiblingAndSelf(this XElement element) {
 			do {
 				yield return element;
 				element = element.Parent;
-			} while (element != null && element.Elements().Count() == 1);
+			} while (element != null && Enumerable.Count(element.Elements()) == 1);
 		}
 
 		public static IEnumerable<XElement> AncestorsWithNoSibling(this XElement element) {
 			element = element.Parent;
-			while (element != null && element.Elements().Count() == 1) {
+			while (element != null && Enumerable.Count(element.Elements()) == 1) {
 				yield return element;
 				element = element.Parent;
 			}
@@ -191,14 +209,14 @@ namespace Occf.Learner.Core.Tests {
 
 		public static IEnumerable<XElement> DescendantsWithNoSiblingAndSelf(this XElement element) {
 			yield return element;
-			while (element.Elements().Count() == 1) {
+			while (Enumerable.Count(element.Elements()) == 1) {
 				element = element.FirstElement();
 				yield return element;
 			}
 		}
 
 		public static IEnumerable<XElement> DescendantsWithNoSibling(this XElement element) {
-			while (element.Elements().Count() == 1) {
+			while (Enumerable.Count(element.Elements()) == 1) {
 				element = element.FirstElement();
 				yield return element;
 			}
