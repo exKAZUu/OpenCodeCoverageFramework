@@ -27,12 +27,14 @@ namespace Occf.Learner.Core.Tests {
 			var seedPathSet = seedPaths.ToHashSet();
 			Console.WriteLine(learner.Description);
 			while (true) {
+				var time = Environment.TickCount;
 				string nextPath;
 				var ret = LearnAndApply(seedPathSet, learner, out nextPath);
 				if (ret >= threshold) {
 					break;
 				}
 				seedPathSet.add(nextPath);
+				Console.WriteLine("Time: " + (Environment.TickCount - time));
 			}
 		}
 
