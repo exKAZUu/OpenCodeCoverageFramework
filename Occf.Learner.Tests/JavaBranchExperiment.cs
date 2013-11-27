@@ -36,7 +36,8 @@ namespace Occf.Learner.Core.Tests {
 								}
 								return true;
 							});
-			return ifWhileDoWhileConds.Concat(forConds).Concat(preConds);
+			return preConds;
+			//return ifWhileDoWhileConds.Concat(forConds).Concat(preConds);
 		}
 	}
 }

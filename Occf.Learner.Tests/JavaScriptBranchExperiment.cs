@@ -31,4 +31,21 @@ namespace Occf.Learner.Core.Tests {
 			return ifConds.Concat(whileConds).Concat(doWhileConds).Concat(forConds)/*.Concat(preConds)*/;
 		}
 	}
+
+	public class JavaScriptConsoleLogExperiment : LearningExperiment {
+		public JavaScriptConsoleLogExperiment(IList<string> allPaths)
+				: base(allPaths, "assignmentExpression") {}
+
+		protected override Processor Processor {
+			get { return ProcessorLoader.JavaScriptUsingAntlr3; }
+		}
+
+		protected override IEnumerable<XElement> GetAcceptedElements(XElement ast) {
+			var preConds = ast.Descendants("callExpression")
+					.Where(e => e.FirstElement().Value == "console.log")
+					.Select(e => e.Element("arguments").Element("assignmentExpression"))
+					.Where(e => e != null);
+			return preConds;
+		}
+	}
 }
