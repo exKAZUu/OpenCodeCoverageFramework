@@ -6,7 +6,6 @@ using System.Xml.Linq;
 using Accord.MachineLearning.DecisionTrees;
 using Code2Xml.Core;
 using Code2Xml.Languages.ANTLRv3.Core;
-using Paraiba.Collections.Generic;
 using Paraiba.Linq;
 using Paraiba.Xml.Linq;
 
@@ -146,36 +145,38 @@ namespace Occf.Learner.Core.Tests {
 		private static double[] GetClassifierInput(XElement e, LearningData learningData) {
 			var input = new double[learningData.Variables.Count];
 			var count = 0;
+			var count2 = 0;
 			foreach (var depthAndPredicates in learningData.Depth2Predicates) {
 				var depthInfo = new DepthInfo(e, depthAndPredicates.Key);
 				foreach (var predicate in depthAndPredicates.Value) {
 					input[count++] = predicate.Check(depthInfo) ? 1 : 0;
+					count2 += (predicate.Check(depthInfo) ? 1 : 0);
 				}
 			}
+			//Console.WriteLine("Input: " + count2);
 			return input;
 		}
 
 		private ISet<string> NormalizeElementNames(ICollection<XElement> accepted) {
 			var nameSet = new HashSet<string>();
 			var name2Count = new Dictionary<string, int>();
-			var elements = Enumerable.SelectMany(accepted,
-					e => e.AncestorsAndDescendantsWithNoSiblingAndSelf());
+			var elements = accepted.SelectMany(e => e.AncestorsAndDescendantsWithNoSiblingAndSelf());
 			foreach (var element in elements) {
 				int count = 0;
 				name2Count.TryGetValue(element.Name(), out count);
 				name2Count[element.Name()] = count + 1;
 			}
 			foreach (var element in accepted) {
-				var newElement =
-						Enumerable.First(Enumerable.OrderByDescending(element.DescendantsOfOnlyChildAndSelf(),
-								e => name2Count[e.Name()]));
+				var newElement = element
+						.DescendantsOfOnlyChildAndSelf()
+						.OrderByDescending(e => name2Count[e.Name()]).First();
 				nameSet.add(newElement.Name());
 			}
 			return nameSet;
 		}
 
 		protected IEnumerable<XElement> GetAllElements(XElement ast) {
-			return Enumerable.Where(ast.DescendantsAndSelf(), e => _elementNames.Contains(e.Name()));
+			return ast.DescendantsAndSelf().Where(e => _elementNames.Contains(e.Name()));
 		}
 
 		protected abstract IEnumerable<XElement> GetAcceptedElements(XElement ast);
@@ -183,25 +184,25 @@ namespace Occf.Learner.Core.Tests {
 
 	public static class Extension {
 		public static IEnumerable<XElement> AncestorsAndDescendantsWithNoSibling(this XElement element) {
-			return Enumerable.Concat(element.DescendantsOfOnlyChild(), element.AncestorsWithNoSibling());
+			return element.DescendantsOfOnlyChild().Concat(element.AncestorsWithNoSibling());
 		}
 
 		public static IEnumerable<XElement> AncestorsAndDescendantsWithNoSiblingAndSelf(
 				this XElement element) {
-			return Enumerable.Concat(element.DescendantsOfOnlyChildAndSelf(),
-					element.AncestorsWithNoSibling());
+			return element.DescendantsOfOnlyChildAndSelf()
+					.Concat(element.AncestorsWithNoSibling());
 		}
 
 		public static IEnumerable<XElement> AncestorsWithNoSiblingAndSelf(this XElement element) {
 			do {
 				yield return element;
 				element = element.Parent;
-			} while (element != null && Enumerable.Count(element.Elements()) == 1);
+			} while (element != null && element.Elements().Count() == 1);
 		}
 
 		public static IEnumerable<XElement> AncestorsWithNoSibling(this XElement element) {
 			element = element.Parent;
-			while (element != null && Enumerable.Count(element.Elements()) == 1) {
+			while (element != null && element.Elements().Count() == 1) {
 				yield return element;
 				element = element.Parent;
 			}
@@ -209,14 +210,14 @@ namespace Occf.Learner.Core.Tests {
 
 		public static IEnumerable<XElement> DescendantsWithNoSiblingAndSelf(this XElement element) {
 			yield return element;
-			while (Enumerable.Count(element.Elements()) == 1) {
+			while (element.Elements().Count() == 1) {
 				element = element.FirstElement();
 				yield return element;
 			}
 		}
 
 		public static IEnumerable<XElement> DescendantsWithNoSibling(this XElement element) {
-			while (Enumerable.Count(element.Elements()) == 1) {
+			while (element.Elements().Count() == 1) {
 				element = element.FirstElement();
 				yield return element;
 			}

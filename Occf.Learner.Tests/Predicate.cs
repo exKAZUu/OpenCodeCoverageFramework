@@ -38,10 +38,23 @@ namespace Occf.Learner.Core.Tests {
 			}
 		}
 
-		private string _sequence;
+		private string _elementSequence;
 
-		public string Sequence {
-			get { return _sequence ?? (_sequence = MatchingElementSequencePredicate.GetSequence(Elements)); }
+		public string ElementSequence {
+			get {
+				return _elementSequence
+				       ?? (_elementSequence = MatchingElementSequencePredicate.GetSequence(Elements));
+			}
+		}
+
+		private string _elementAndTokenSequence;
+
+		public string ElementAndTokenSequence {
+			get {
+				return _elementAndTokenSequence
+				       ?? (_elementAndTokenSequence =
+						       MatchingElementAndTokenSequencePredicate.GetSequence(Elements));
+			}
 		}
 
 		public DepthInfo(XElement root, int depth) {
@@ -214,7 +227,7 @@ namespace Occf.Learner.Core.Tests {
 		}
 
 		public override bool Check(DepthInfo info) {
-			return info.Sequence == Sequence;
+			return info.ElementSequence == Sequence;
 		}
 
 		protected bool Equals(MatchingElementSequencePredicate other) {
@@ -258,7 +271,7 @@ namespace Occf.Learner.Core.Tests {
 		}
 
 		public override bool Check(DepthInfo info) {
-			return info.Sequence == Sequence;
+			return info.ElementAndTokenSequence == Sequence;
 		}
 
 		protected bool Equals(MatchingElementAndTokenSequencePredicate other) {
@@ -321,14 +334,14 @@ namespace Occf.Learner.Core.Tests {
 			var depth = 0;
 			foreach (var element in root.AncestorsAndSelf(depthCount)) {
 				var elements = element.SiblingsAndSelf();
-				//yield return LocatingPredicate.Create(depth, element);
-				//foreach (var predicate in ContainingTokenTextPredicate.Create(depth, elements)) {
-				//	yield return predicate;
-				//}
-				//foreach (var predicate in ContainingElementNamePredicate.Create(depth, elements)) {
-				//	yield return predicate;
-				//}
-				//yield return MatchingElementSequencePredicate.Create(depth, elements);
+				yield return LocatingPredicate.Create(depth, element);
+				foreach (var predicate in ContainingTokenTextPredicate.Create(depth, elements)) {
+					yield return predicate;
+				}
+				foreach (var predicate in ContainingElementNamePredicate.Create(depth, elements)) {
+					yield return predicate;
+				}
+				yield return MatchingElementSequencePredicate.Create(depth, elements);
 				yield return MatchingElementAndTokenSequencePredicate.Create(depth, elements);
 				depth--;
 			}
@@ -336,13 +349,13 @@ namespace Occf.Learner.Core.Tests {
 			depth = 0;
 			foreach (var elements in root.DescendantsElements(depthCount)) {
 				depth++;
-				//foreach (var predicate in ContainingTokenTextPredicate.Create(depth, elements)) {
-				//	yield return predicate;
-				//}
-				//foreach (var predicate in ContainingElementNamePredicate.Create(depth, elements)) {
-				//	yield return predicate;
-				//}
-				//yield return MatchingElementSequencePredicate.Create(depth, elements);
+				foreach (var predicate in ContainingTokenTextPredicate.Create(depth, elements)) {
+					yield return predicate;
+				}
+				foreach (var predicate in ContainingElementNamePredicate.Create(depth, elements)) {
+					yield return predicate;
+				}
+				yield return MatchingElementSequencePredicate.Create(depth, elements);
 				yield return MatchingElementAndTokenSequencePredicate.Create(depth, elements);
 			}
 		}
