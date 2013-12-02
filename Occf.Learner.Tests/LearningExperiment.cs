@@ -12,24 +12,24 @@ using Paraiba.Xml.Linq;
 namespace Occf.Learner.Core.Tests {
 	public abstract class LearningExperiment {
 		protected abstract Processor Processor { get; }
-		private readonly IList<string> _allPaths;
 		private readonly ISet<string> _elementNames;
 		private const int PredicateDepth = 10;
 		private const int DeniedThreshold = 300;
 
-		protected LearningExperiment(IList<string> allPaths, params string[] elementNames) {
-			_allPaths = allPaths;
+		protected LearningExperiment(params string[] elementNames) {
 			_elementNames = elementNames.ToHashSet();
 		}
 
 		public void LearnUntilBeStable(
-				IList<string> seedPaths, LearningAlgorithm learner, double threshold) {
+				IEnumerable<string> allPaths, IList<string> seedPaths, LearningAlgorithm learner,
+				double threshold) {
+			var allPathList = allPaths.ToList();
 			var seedPathSet = seedPaths.ToHashSet();
 			Console.WriteLine(learner.Description);
 			while (true) {
 				var time = Environment.TickCount;
 				string nextPath;
-				var ret = LearnAndApply(seedPathSet, learner, out nextPath);
+				var ret = LearnAndApply(allPathList, seedPathSet, learner, out nextPath);
 				if (ret >= threshold) {
 					break;
 				}
@@ -39,7 +39,7 @@ namespace Occf.Learner.Core.Tests {
 		}
 
 		private double LearnAndApply(
-				ISet<string> seedPaths, LearningAlgorithm algorithm, out string nextPath) {
+				IList<string> allPaths, ISet<string> seedPaths, LearningAlgorithm algorithm, out string nextPath) {
 			var learningData = GenerateLearning(seedPaths);
 			var judge = algorithm.Learn(learningData);
 
@@ -47,7 +47,7 @@ namespace Occf.Learner.Core.Tests {
 			var failedIndicies = new List<int>();
 			var minProb = Double.MaxValue;
 			nextPath = "";
-			foreach (var path in _allPaths) {
+			foreach (var path in allPaths) {
 				Console.Write(".");
 				var codeFile = new FileInfo(path);
 				var ast = Processor.GenerateXml(codeFile);

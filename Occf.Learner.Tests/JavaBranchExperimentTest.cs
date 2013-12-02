@@ -8,7 +8,8 @@ namespace Occf.Learner.Core.Tests {
 	[TestFixture]
 	public class JavaBranchExperimentTest {
 		[Test]
-		public void TestPageObjectGenerator() {
+		[TestCase("pageobjectgenerator", "seed.java", new JavaIfExper\iment())]
+		public void TestPageObjectGenerator(string projectName, string seedFile) {
 			var path = Fixture.GetInputProjectPath("Java", "pageobjectgenerator");
 
 			var allPaths = Directory.GetFiles(path, "*.java", SearchOption.AllDirectories)
@@ -20,7 +21,7 @@ namespace Occf.Learner.Core.Tests {
 						"test", "java", "TestCodeGenerator.java"),
 			};
 
-			var exp = new JavaBranchExperiment(allPaths);
+			var exp = new JavaIfExperiment(allPaths);
 			var learner = new SvmLearner(new Linear());
 			exp.LearnUntilBeStable(seedPaths, learner, 0.5);
 		}

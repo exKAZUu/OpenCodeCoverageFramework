@@ -81,7 +81,7 @@
     <Compile Include="JavaBranchExperimentTest.cs" />
     <Compile Include="FindLearnerTest.cs" />
     <Compile Include="Id3Learner.cs" />
-    <Compile Include="JavaBranchExperiment.cs" />
+    <Compile Include="JavaIfExperiment.cs" />
     <Compile Include="JavaScriptBranchExperiment.cs" />
     <Compile Include="LearningAlgorithm.cs" />
     <Compile Include="LearningData.cs" />
