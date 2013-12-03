@@ -11,11 +11,11 @@ namespace Occf.Learner.Core.Tests {
 		public XElement Target { get; private set; }
 		public IList<XElement> Elements { get; private set; }
 
-		private int _location;
+		private string _location;
 
-		public int Location {
+		public string Location {
 			get {
-				if (_location < 0) {
+				if (_location == null) {
 					_location = LocatingPredicate.Locate(Target);
 				}
 				return _location;
@@ -78,29 +78,29 @@ namespace Occf.Learner.Core.Tests {
 		public DepthInfo(XElement root, int depth) {
 			if (depth <= 0) {
 				Target = root.AncestorsAndSelf(-depth).Last();
-				Elements = Target.SiblingsAndSelf();
+				Elements = Target.SiblingsAndSelf().ToList();
 			} else {
 				Elements = root.DescendantsElements(depth).Last();
 			}
-			_location = -1;
 		}
 	}
 
 	public abstract class Predicate {
-		public int Depth { get; private set; }
-
-		protected Predicate(int depth) {
-			Depth = depth;
-		}
-
 		public abstract bool Check(DepthInfo info);
 	}
 
-	public class LocatingPredicate : Predicate {
-		public int Location { get; private set; }
+	public abstract class DepthBasedPredicate : Predicate {
+		public int Depth { get; private set; }
 
-		private LocatingPredicate(int depth, int location) : base(depth) {
-			Contract.Requires(location <= 0);
+		protected DepthBasedPredicate(int depth) {
+			Depth = depth;
+		}
+	}
+
+	public class LocatingPredicate : DepthBasedPredicate {
+		public string Location { get; private set; }
+
+		private LocatingPredicate(int depth, string location) : base(depth) {
 			Location = location;
 		}
 
@@ -127,7 +127,7 @@ namespace Occf.Learner.Core.Tests {
 
 		public override int GetHashCode() {
 			unchecked {
-				return (Depth * 397) ^ Location;
+				return (Depth * 397) ^ Location.GetHashCode();
 			}
 		}
 
@@ -135,13 +135,90 @@ namespace Occf.Learner.Core.Tests {
 			return new LocatingPredicate(depth, Locate(element));
 		}
 
-		public static int Locate(XElement target) {
-			var name = target.Name();
-			return target.ElementsBeforeSelf().Count(e => e.Name() == name);
+		public static string Locate(XElement target) {
+			return target.Attribute("id").Value;
 		}
 	}
 
-	public class ContainingTokenTextPredicate : Predicate {
+	public class SurroundingElementsPredicate {
+		public string Key { get; set; }
+		public string Value { get; private set; }
+
+		public SurroundingElementsPredicate(string key, string value) {
+			Contract.Requires(value != null);
+			Key = key;
+			Value = value;
+		}
+
+		public bool Check(Dictionary<string, CountingSet<string>> dict) {
+			CountingSet<string> values;
+			if (!dict.TryGetValue(Key, out values)) {
+				return false;
+			}
+			return values.Contains(Value);
+		}
+
+		public static IEnumerable<SurroundingElementsPredicate> Create(
+				XElement target, int length) {
+			return GetSurroundingElements(target, length)
+					.SelectMany(kv => kv.Value.Select(value =>
+							new SurroundingElementsPredicate(kv.Key, value)));
+		}
+
+		public static Dictionary<string, CountingSet<string>> GetSurroundingElements(
+				XElement target, int length) {
+			return GetSurroundingElements(Enumerable.Repeat(target, 1), length);
+		}
+
+		public static Dictionary<string, CountingSet<string>> GetSurroundingElements(
+				IEnumerable<XElement> targets, int length) {
+			var ret = new Dictionary<string, CountingSet<string>>();
+			foreach (var target in targets) {
+				var dict = target.SurroundingElementsWithSelf(length)
+						.Select(
+								kv => Tuple.Create(kv.Key, kv.Value.Select(e => e.NameOrTokenWithId()).ToCountingSet()))
+						.ToDictionary(kv => kv.Item1, kv => kv.Item2);
+				foreach (var kv in dict) {
+					CountingSet<string> set;
+					if (ret.TryGetValue(kv.Key, out set)) {
+						set.UnionWith(kv.Value);
+					} else {
+						ret.Add(kv.Key, kv.Value);
+					}
+				}
+			}
+			return ret;
+		}
+
+		protected bool Equals(SurroundingElementsPredicate other) {
+			return string.Equals(Key, other.Key) && string.Equals(Value, other.Value);
+		}
+
+		public override bool Equals(object obj) {
+			if (ReferenceEquals(null, obj)) {
+				return false;
+			}
+			if (ReferenceEquals(this, obj)) {
+				return true;
+			}
+			if (obj.GetType() != GetType()) {
+				return false;
+			}
+			return Equals((SurroundingElementsPredicate)obj);
+		}
+
+		public override int GetHashCode() {
+			unchecked {
+				return ((Key != null ? Key.GetHashCode() : 0) * 397) ^ (Value != null ? Value.GetHashCode() : 0);
+			}
+		}
+
+		public override string ToString() {
+			return string.Format("Key: {0}, Value: {1}", Key, Value);
+		}
+	}
+
+	public class ContainingTokenTextPredicate : DepthBasedPredicate {
 		public string Text { get; private set; }
 
 		private ContainingTokenTextPredicate(int depth, string text) : base(depth) {
@@ -183,13 +260,15 @@ namespace Occf.Learner.Core.Tests {
 		}
 
 		public static HashSet<string> GetTokenTexts(IList<XElement> elements) {
-			return elements //.Where(e => e.IsTokenSet())
-					.Select(e => e.TokenText(5))
+			return elements.Descendants()
+					.Where(e => e.IsTokenSet())
+					.Take(30)
+					.Select(e => e.TokenText())
 					.ToHashSet();
 		}
 	}
 
-	public class ContainingElementNamePredicate : Predicate {
+	public class ContainingElementNamePredicate : DepthBasedPredicate {
 		public string Name { get; private set; }
 
 		private ContainingElementNamePredicate(int depth, string name) : base(depth) {
@@ -236,7 +315,7 @@ namespace Occf.Learner.Core.Tests {
 		}
 	}
 
-	public class MatchingElementSequencePredicate : Predicate {
+	public class MatchingElementSequencePredicate : DepthBasedPredicate {
 		public string Sequence { get; private set; }
 
 		private MatchingElementSequencePredicate(int depth, string sequence) : base(depth) {
@@ -282,7 +361,7 @@ namespace Occf.Learner.Core.Tests {
 		}
 	}
 
-	public class MatchingBeforeElementSequencePredicate : Predicate {
+	public class MatchingBeforeElementSequencePredicate : DepthBasedPredicate {
 		public string Sequence { get; private set; }
 
 		private MatchingBeforeElementSequencePredicate(int depth, string sequence) : base(depth) {
@@ -328,7 +407,7 @@ namespace Occf.Learner.Core.Tests {
 		}
 	}
 
-	public class MatchingAfterElementSequencePredicate : Predicate {
+	public class MatchingAfterElementSequencePredicate : DepthBasedPredicate {
 		public string Sequence { get; private set; }
 
 		private MatchingAfterElementSequencePredicate(int depth, string sequence) : base(depth) {
@@ -374,7 +453,7 @@ namespace Occf.Learner.Core.Tests {
 		}
 	}
 
-	public class MatchingElementAndTokenSequencePredicate : Predicate {
+	public class MatchingElementAndTokenSequencePredicate : DepthBasedPredicate {
 		public string Sequence { get; private set; }
 
 		private MatchingElementAndTokenSequencePredicate(int depth, string sequence) : base(depth) {
@@ -419,11 +498,84 @@ namespace Occf.Learner.Core.Tests {
 	}
 
 	public static class PredicateGenerator {
-		public static List<XElement> SiblingsAndSelf(this XElement element) {
-			var elemens = element.ElementsBeforeSelf().ToList();
-			elemens.Add(element);
-			elemens.AddRange(element.ElementsAfterSelf());
-			return elemens;
+		public static string NameWithId(this XElement element) {
+			return element.Name() + element.Attribute("id").Value;
+		}
+
+		public static string NameOrTokenWithId(this XElement element) {
+			return element.IsTokenSet()
+					? element.Name() + element.Attribute("id").Value + element.TokenText()
+					: element.Name() + element.Attribute("id").Value;
+		}
+
+		public static Dictionary<string, List<XElement>> SurroundingElementsWithSelf(
+				this XElement element, int length) {
+			var ret = new Dictionary<string, List<XElement>>();
+			var childKeys = new List<string> { "" };
+			ret[""] = new List<XElement> { };
+			var parentKey = "";
+			var parent = element;
+			var i = 1;
+			for (; i <= length; i++) {
+				var newChildKeys = new List<string>();
+				foreach (var childKey in childKeys) {
+					foreach (var e in ret[childKey].Where(e2 => !e2.IsTokenSet())) {
+						var key = childKey + e.NameWithId() + ">";
+						ret[key] = e.Elements().ToList();
+						newChildKeys.Add(key);
+					}
+				}
+				{
+					var key = parentKey + parent.NameWithId() + "-";
+					ret[key] = parent.Siblings(10).ToList();
+					newChildKeys.Add(key);
+				}
+				childKeys = newChildKeys;
+				parentKey += parent.NameWithId() + "<";
+				parent = parent.Parent;
+				if (parent == null) {
+					break;
+				}
+				ret[parentKey] = new List<XElement> { parent };
+			}
+			for (; i <= length; i++) {
+				var newChildKeys = new List<string>();
+				foreach (var childKey in childKeys) {
+					foreach (var e in ret[childKey].Where(e2 => !e2.IsTokenSet())) {
+						var key = childKey + e.NameWithId() + ">";
+						ret[key] = e.Elements().ToList();
+						newChildKeys.Add(key);
+					}
+				}
+				childKeys = newChildKeys;
+			}
+			return ret;
+		}
+
+		public static IEnumerable<XElement> Siblings(this XElement element, int length) {
+			foreach (var e in element.ElementsBeforeSelf().Reverse().Take(length).Reverse()) {
+				yield return e;
+			}
+			foreach (var e in element.ElementsAfterSelf().Take(length)) {
+				yield return e;
+			}
+		}
+
+		public static IEnumerable<XElement> Siblings(this XElement element) {
+			foreach (var e in element.ElementsBeforeSelf()) {
+				yield return e;
+			}
+			foreach (var e in element.ElementsAfterSelf()) {
+				yield return e;
+			}
+		}
+
+		public static IEnumerable<XElement> SiblingsAndSelf(this XElement element) {
+			var p = element.Parent;
+			if (p == null) {
+				return Enumerable.Repeat(element, 1);
+			}
+			return p.Elements();
 		}
 
 		public static IEnumerable<XElement> AncestorsAndSelf(this XElement element, int depthCount) {
@@ -442,26 +594,31 @@ namespace Occf.Learner.Core.Tests {
 			}
 		}
 
-		public static IEnumerable<Predicate> GeneratePredicates(XElement root, int depthCount) {
+		public static IEnumerable<DepthBasedPredicate> InferDepthBasedPredicate(
+				XElement root, int depthCount) {
+			yield break;
 			var depth = 0;
-			foreach (var element in root.AncestorsAndSelf(4)) {
-				var elements = element.SiblingsAndSelf();
+			//foreach (var element in root.AncestorsAndSelf(4)) {
+			//	var elements = element.SiblingsAndSelf();
+			//	foreach (var predicate in ContainingTokenTextPredicate.Create(depth, elements)) {
+			//		yield return predicate;
+			//	}
+			//	depth--;
+			//}
+			//depth = 0;
+			foreach (var element in root.AncestorsAndSelf(depthCount)) {
+				var elements = element.SiblingsAndSelf().ToList();
+				yield return LocatingPredicate.Create(depth, element);
+				//yield return MatchingBeforeElementSequencePredicate.Create(depth, element);
+				//yield return MatchingAfterElementSequencePredicate.Create(depth, element);
 				foreach (var predicate in ContainingTokenTextPredicate.Create(depth, elements)) {
 					yield return predicate;
 				}
-				depth--;
-			}
-			depth = 0;
-			foreach (var element in root.AncestorsAndSelf(depthCount)) {
-				var elements = element.SiblingsAndSelf();
-				yield return LocatingPredicate.Create(depth, element);
-				yield return MatchingBeforeElementSequencePredicate.Create(depth, element);
-				yield return MatchingAfterElementSequencePredicate.Create(depth, element);
 				foreach (var predicate in ContainingElementNamePredicate.Create(depth, elements)) {
 					yield return predicate;
 				}
-				yield return MatchingElementSequencePredicate.Create(depth, elements);
-				yield return MatchingElementAndTokenSequencePredicate.Create(depth, elements);
+				//yield return MatchingElementSequencePredicate.Create(depth, elements);
+				//yield return MatchingElementAndTokenSequencePredicate.Create(depth, elements);
 				depth--;
 			}
 
@@ -474,8 +631,8 @@ namespace Occf.Learner.Core.Tests {
 				foreach (var predicate in ContainingElementNamePredicate.Create(depth, elements)) {
 					yield return predicate;
 				}
-				yield return MatchingElementSequencePredicate.Create(depth, elements);
-				yield return MatchingElementAndTokenSequencePredicate.Create(depth, elements);
+				//yield return MatchingElementSequencePredicate.Create(depth, elements);
+				//yield return MatchingElementAndTokenSequencePredicate.Create(depth, elements);
 			}
 		}
 	}

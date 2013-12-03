@@ -6,15 +6,17 @@ using System.Xml.Linq;
 using Accord.MachineLearning.DecisionTrees;
 using Code2Xml.Core;
 using Code2Xml.Languages.ANTLRv3.Core;
+using Occf.Learner.Core.Tests.LearningAlgorithms;
 using Paraiba.Collections.Generic;
 using Paraiba.Linq;
 using Paraiba.Xml.Linq;
 
 namespace Occf.Learner.Core.Tests {
 	public abstract class LearningExperiment {
+		public int WrongCount { get; set; }
 		protected abstract Processor Processor { get; }
 		private readonly ISet<string> _elementNames;
-		private const int PredicateDepth = 10;
+		private int _predicateDepth = 10;
 		private const int DeniedThreshold = 300;
 
 		protected LearningExperiment(params string[] elementNames) {
@@ -22,98 +24,154 @@ namespace Occf.Learner.Core.Tests {
 		}
 
 		public void LearnUntilBeStable(
-				IEnumerable<string> allPaths, IList<string> seedPaths, LearningAlgorithm learner,
+				IEnumerable<string> allPaths, ICollection<string> seedPaths, LearningAlgorithm learner,
 				double threshold) {
 			var allPathList = allPaths.ToList();
+			var learningPathSet = seedPaths.ToList();
 			var seedPathSet = seedPaths.ToHashSet();
-			Console.WriteLine(learner.Description);
+			Console.WriteLine(learner);
 			while (true) {
 				var time = Environment.TickCount;
 				string nextPath;
-				var ret = LearnAndApply(allPathList, seedPathSet, learner, out nextPath);
+				var ret = LearnAndApply(allPathList, seedPathSet, learningPathSet, learner, out nextPath);
 				if (ret >= threshold) {
 					break;
 				}
-				seedPathSet.add(nextPath);
+				learningPathSet.Add(nextPath);
 				Console.WriteLine("Time: " + (Environment.TickCount - time));
 			}
+			Console.WriteLine("Required files: " + learningPathSet.Count);
+		}
+
+		public class LearningItem {
+			public string Path { get; set; }
+			public long FileSize { get; set; }
+			public int AcceptedCount { get; set; }
+			public double Probability { get; set; }
 		}
 
 		private double LearnAndApply(
-				IList<string> allPaths, ISet<string> seedPaths, LearningAlgorithm algorithm, out string nextPath) {
-			var learningData = GenerateLearning(seedPaths);
-			var judge = algorithm.Learn(learningData);
+				IEnumerable<string> allPaths, ISet<string> seedPathSet, IList<string> learningPaths,
+				LearningAlgorithm algorithm, out string nextPath) {
+			LearningData learningData = null;
+			Func<double[], Tuple<bool, double>> judge = null;
+			for (int i = learningPaths.Count - 1; i >= 0; i--) {
+				double error;
+				learningData = CreatePredicatesAndLearningData(seedPathSet, learningPaths);
+				judge = algorithm.Learn(learningData, out error);
+				if (error == 0) {
+					break;
+				}
+				seedPathSet.Add(learningPaths[i]);
+				_predicateDepth++;
+				Console.WriteLine("Error: " + error + ", " + learningPaths[i] + ", " + _predicateDepth);
+			}
+			var learningPathSet = learningPaths.ToHashSet();
+			var items = new List<LearningItem>();
 
-			var wronglyAdded = 0;
-			var wronglyMissed = 0;
-			var count = 0;
+			var correctlyAccepted = 0;
+			var correctlyDenied = 0;
+			var wronglyAccepted = 0;
+			var wronglyDenied = 0;
 			var minProb = Double.MaxValue;
-			nextPath = "";
 			foreach (var path in allPaths) {
 				Console.Write(".");
 				var codeFile = new FileInfo(path);
 				var ast = Processor.GenerateXml(codeFile);
 				var all = GetAllElements(ast);
 				var accepted = GetAcceptedElements(ast).ToHashSet();
+
+				var acceptedCount = 0;
+				var prob = Double.MaxValue;
 				foreach (var e in all) {
 					var input = GetClassifierInput(e, learningData);
-					var value = judge(input);
-					var expected = value <= 0;
+					var tuple = judge(input);
+					prob = Math.Min(prob, Math.Abs(tuple.Item2));
+					var expected = tuple.Item1;
 					var actual = accepted.Contains(e);
 					if (expected != actual) {
 						if (actual) {
-							wronglyMissed++;
+							wronglyDenied++;
 						} else {
-							wronglyAdded++;
+							wronglyAccepted++;
+						}
+					} else {
+						if (actual) {
+							correctlyAccepted++;
+						} else {
+							correctlyDenied++;
 						}
 					}
-					if (!seedPaths.Contains(path)) {
-						var prob = Math.Abs(value);
-						if (minProb > prob) {
-							minProb = prob;
-							nextPath = path;
-						}
+					if (expected) {
+						acceptedCount++;
 					}
-					count++;
+				}
+				if (!learningPathSet.Contains(path)) {
+					minProb = Math.Min(minProb, prob);
+					items.Add(new LearningItem {
+						Path = path,
+						FileSize = codeFile.Length,
+						AcceptedCount = acceptedCount,
+						Probability = minProb,
+					});
 				}
 			}
+			//var minItem = items.Where(i => i.AcceptedCount > 0)
+			//		.OrderBy(i => i.Probability)
+			//		.Take(10).MinElementOrDefault(i => i.FileSize);
+			var minItem = items.Where(i => i.AcceptedCount > 0)
+					.OrderBy(i => i.Probability)
+					.FirstOrDefault();
+			if (minItem != null) {
+				nextPath = minItem.Path;
+			} else {
+				nextPath = items
+						.MinElementOrDefault(i => i.Probability).Path;
+			}
 			Console.WriteLine("done");
-			Console.WriteLine("WA: " + wronglyAdded + ", WM: " + wronglyMissed + ", " + minProb);
+			Console.WriteLine("WA: " + wronglyAccepted + ", WD: " + wronglyDenied + ", CA: "
+			                  + correctlyAccepted + ", CD: " + correctlyDenied + ", " + minProb);
 			Console.WriteLine(nextPath);
+			WrongCount = wronglyAccepted + wronglyDenied;
 			return minProb;
 		}
 
-		private LearningData GenerateLearning(IEnumerable<string> paths) {
-			var allDenied = new HashSet<XElement>();
-			var allAccepted = new HashSet<XElement>();
-			foreach (var path in paths) {
-				var codeFile = new FileInfo(path);
-				var ast = Processor.GenerateXml(codeFile);
-				var denied = GetAllElements(ast).ToHashSet();
-				var accepted = GetAcceptedElements(ast).ToHashSet();
-				denied.ExceptWith(accepted);
-				Console.WriteLine("Accepted: " + accepted.Count + ", Denied: " + denied.Count);
-				var threshold = Math.Max(accepted.Count * DeniedThreshold, 100);
-				if (denied.Count > threshold) {
-					var newDenied = new HashSet<XElement>();
-					var rand = new Random();
-					foreach (var deniedElement in denied) {
-						if (rand.Next(denied.Count) < threshold) {
-							newDenied.Add(deniedElement);
-						}
-					}
-					denied = newDenied;
-				}
-				allDenied.UnionWith(denied);
-				allAccepted.UnionWith(accepted);
-			}
-			if (!NormalizeElementNames(allAccepted).SetEquals(_elementNames)) {
-				Console.WriteLine("Failed to normalize element names!");
-			}
+		private LearningData CreatePredicatesAndLearningData(
+				IEnumerable<string> seedPaths, IEnumerable<string> learningPaths) {
+			var seedRejected = new HashSet<XElement>();
+			var allRejected = new HashSet<XElement>();
+			Console.Write("Seed data: ");
+			var seedAccepted = GatherAcceptedAndRejected(seedPaths, seedRejected);
+			Console.Write("Learning data: ");
+			var allAccepted = GatherAcceptedAndRejected(learningPaths, allRejected);
+			var acceptedDepth2Predicates = CreatePredicates(seedAccepted);
+			var rejectedDepth2Predicates = CreatePredicates(seedRejected);
+			var depth2Predicates = MergePredicates(acceptedDepth2Predicates.Item1,
+					rejectedDepth2Predicates.Item1);
+			acceptedDepth2Predicates.Item2.AddRange(rejectedDepth2Predicates.Item2);
+			return CreateLearningData(depth2Predicates, acceptedDepth2Predicates.Item2, allAccepted,
+					allRejected);
+		}
 
+		private static Dictionary<int, HashSet<Predicate>> MergePredicates(
+				Dictionary<int, HashSet<Predicate>> depth2Predicates,
+				Dictionary<int, HashSet<Predicate>> merged) {
+			foreach (var depthAndPredicates in merged) {
+				var predicates = depth2Predicates.GetValueOrDefault(depthAndPredicates.Key);
+				if (predicates == null) {
+					depth2Predicates.Add(depthAndPredicates.Key, depthAndPredicates.Value);
+				} else {
+					predicates.AddRange(depthAndPredicates.Value);
+				}
+			}
+			return depth2Predicates;
+		}
+
+		private Tuple<Dictionary<int, HashSet<Predicate>>, HashSet<SurroundingElementsPredicate>> CreatePredicates(
+				ICollection<XElement> elements) {
 			var depth2Predicate2Count = new Dictionary<int, Dictionary<Predicate, int>>();
-			foreach (var elem in allAccepted) {
-				foreach (var predicate in PredicateGenerator.GeneratePredicates(elem, PredicateDepth)) {
+			foreach (var elem in elements) {
+				foreach (var predicate in PredicateGenerator.InferDepthBasedPredicate(elem, _predicateDepth)) {
 					Dictionary<Predicate, int> predicates;
 					if (!depth2Predicate2Count.TryGetValue(predicate.Depth, out predicates)) {
 						predicates = new Dictionary<Predicate, int>();
@@ -132,14 +190,31 @@ namespace Occf.Learner.Core.Tests {
 					}
 				}
 			}
+			var dict = SurroundingElementsPredicate.GetSurroundingElements(elements, _predicateDepth);
+			foreach (var kv in dict) {
+				kv.Value.ClearItemsIf((key, count) => count < 3);
+			}
+			var newPredicates = dict
+					.SelectMany(kv => kv.Value
+							.Select(item => new SurroundingElementsPredicate(kv.Key, item)))
+					.ToHashSet();
+			return Tuple.Create(depth2Predicates, newPredicates);
+		}
+
+		private LearningData CreateLearningData(
+				Dictionary<int, HashSet<Predicate>> depth2Predicates,
+				HashSet<SurroundingElementsPredicate> newPredicates, ICollection<XElement> allAccepted,
+				ICollection<XElement> allRejected) {
+			// TODO
+			newPredicates = newPredicates.Where(p => p.Value.EndsWith("console") || p.Value.EndsWith("log")).ToHashSet();
 
 			var variables = new List<DecisionVariable>();
-			var count = depth2Predicates.Values.Sum(ps => ps.Count);
+			var count = depth2Predicates.Values.Sum(ps => ps.Count) + newPredicates.Count;
 			for (int i = 0; i < count; i++) {
 				variables.Add(new DecisionVariable(i.ToString(), DecisionVariableKind.Discrete));
 			}
 
-			Console.WriteLine("Accepted: " + allAccepted.Count + ", Denied: " + allDenied.Count
+			Console.WriteLine("Accepted: " + allAccepted.Count + ", Rejected: " + allRejected.Count
 			                  + ", Predicates: " + count);
 
 			var learningRecords = Enumerable.Empty<double[]>();
@@ -147,19 +222,61 @@ namespace Occf.Learner.Core.Tests {
 			var learningData = new LearningData {
 				Depth2Predicates = depth2Predicates,
 				Variables = variables,
+				NewPredicates = newPredicates,
 			};
+			foreach (var predicate in newPredicates) {
+				Console.WriteLine(predicate);
+			}
 			learningRecords =
 					learningRecords.Concat(
-							allAccepted.Concat(allDenied)
+							allAccepted.Concat(allRejected)
 									.Select(e => GetClassifierInput(e, learningData)));
 			learningResults.AddRange(Enumerable.Repeat(-1, allAccepted.Count));
-			learningResults.AddRange(Enumerable.Repeat(1, allDenied.Count));
+			learningResults.AddRange(Enumerable.Repeat(1, allRejected.Count));
 			learningData.Inputs = learningRecords.ToArray();
 			learningData.Outputs = learningResults.ToArray();
 			return learningData;
 		}
 
-		private static double[] GetClassifierInput(XElement e, LearningData learningData) {
+		private HashSet<XElement> GatherAcceptedAndRejected(
+				IEnumerable<string> paths, ISet<XElement> allRejected) {
+			var allAccepted = new HashSet<XElement>();
+			foreach (var path in paths) {
+				var codeFile = new FileInfo(path);
+				var ast = Processor.GenerateXml(codeFile);
+				var rejected = GetAllElements(ast).ToHashSet(); // Can return duplicated elements
+				var accepted = GetAcceptedElements(ast).ToList(); // Can return duplicated elements
+				var accptedCount = allAccepted.Count;
+				allAccepted.UnionWith(accepted);
+				accptedCount = allAccepted.Count - accptedCount;
+				rejected.ExceptWith(accepted);
+				Console.WriteLine("Accepted: " + accptedCount + ", Rejected: " + rejected.Count);
+				rejected = FilterRejected(accptedCount, rejected);
+				allRejected.UnionWith(rejected);
+			}
+			if (!NormalizeElementNames(allAccepted).SetEquals(_elementNames)) {
+				Console.WriteLine("Failed to normalize element names: "
+				                  + string.Join(",", NormalizeElementNames(allAccepted)));
+			}
+			return allAccepted;
+		}
+
+		private static HashSet<XElement> FilterRejected(int accptedCount, HashSet<XElement> rejected) {
+			var threshold = Math.Max(accptedCount * DeniedThreshold, 100);
+			if (rejected.Count > threshold) {
+				var newRejected = new HashSet<XElement>();
+				var rand = new Random();
+				foreach (var deniedElement in rejected) {
+					if (rand.Next(rejected.Count) < threshold) {
+						newRejected.Add(deniedElement);
+					}
+				}
+				rejected = newRejected;
+			}
+			return rejected;
+		}
+
+		private double[] GetClassifierInput(XElement e, LearningData learningData) {
 			var input = new double[learningData.Variables.Count];
 			var count = 0;
 			var count2 = 0;
@@ -169,6 +286,11 @@ namespace Occf.Learner.Core.Tests {
 					input[count++] = predicate.Check(depthInfo) ? 1 : 0;
 					count2 += (predicate.Check(depthInfo) ? 1 : 0);
 				}
+			}
+			var dict = SurroundingElementsPredicate.GetSurroundingElements(e, _predicateDepth);
+			foreach (var predicate in learningData.NewPredicates) {
+				input[count++] = predicate.Check(dict) ? 1 : 0;
+				count2 += (predicate.Check(dict) ? 1 : 0);
 			}
 			//Console.WriteLine("Input: " + count2);
 			return input;
