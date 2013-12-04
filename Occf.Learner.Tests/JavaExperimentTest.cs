@@ -15,13 +15,14 @@ namespace Occf.Learner.Core.Tests {
 	public class JavaExperimentTest {
 		private static IEnumerable<TestCaseData> TestCases {
 			get {
-				var exps = new OriginalLearningExperiment[] {
-					new JavaIfExperiment(),
-					new JavaWhileExperiment(),
+				var exps = new LearningExperiment[] {
+					//new JavaBranchExperiment(),
+					//new JavaIfExperiment(),
+					//new JavaWhileExperiment(),
 					new JavaDoWhileExperiment(),
-					new JavaForExperiment(),
-					new JavaPreconditionsExperiment(),
-					new JavaStatementExperiment(), 
+					//new JavaForExperiment(),
+					//new JavaPreconditionsExperiment(),
+					//new JavaStatementExperiment(), 
 				};
 				var algorithms = new LearningAlgorithm[] {
 					new SvmLearner(new Linear()),
@@ -34,8 +35,8 @@ namespace Occf.Learner.Core.Tests {
 							new List<string> { Fixture.GetInputCodePath(langName, "Seed.java"), }),
 					//Tuple.Create(Fixture.GetInputProjectPath(langName, "presto"),
 					//		new List<string> { Fixture.GetInputCodePath(langName, "Seed.java"), }),
-					//Tuple.Create(Fixture.GetInputProjectPath(langName, "storm"),
-					//		new List<string> { Fixture.GetInputCodePath(langName, "Seed.java"), }),
+					Tuple.Create(Fixture.GetInputProjectPath(langName, "storm"),
+							new List<string> { Fixture.GetInputCodePath(langName, "Seed.java"), }),
 				};
 				foreach (var exp in exps) {
 					foreach (var algorithm in algorithms) {
@@ -49,7 +50,7 @@ namespace Occf.Learner.Core.Tests {
 
 		[Test, TestCaseSource("TestCases")]
 		public void Test(
-				OriginalLearningExperiment exp, LearningAlgorithm algorithm, string projectPath, IList<string> seedPaths) {
+				LearningExperiment exp, LearningAlgorithm algorithm, string projectPath, IList<string> seedPaths) {
 			var allPaths = Directory.GetFiles(projectPath, "*.java", SearchOption.AllDirectories)
 					.ToList();
 			exp.LearnUntilBeStable(allPaths, seedPaths, algorithm, 0.5);
@@ -57,7 +58,32 @@ namespace Occf.Learner.Core.Tests {
 		}
 	}
 
-	public class JavaIfExperiment : OriginalLearningExperiment {
+	public class JavaBranchExperiment : LearningExperiment {
+		protected override Processor Processor {
+			get { return ProcessorLoader.JavaUsingAntlr3; }
+		}
+
+		public JavaBranchExperiment() : base("expression") {}
+
+		protected override IEnumerable<XElement> GetAcceptedElements(XElement ast) {
+			// ifトークンが存在するかどうか
+			var ifConds = ast.Descendants("statement")
+					.Where(e => e.FirstElementOrDefault().SafeValue() == "if")
+					.Select(e => e.Element("parExpression").NthElement(1));
+			var whileConds = ast.Descendants("statement")
+					.Where(e => e.FirstElementOrDefault().SafeValue() == "while")
+					.Select(e => e.Element("parExpression").NthElement(1));
+			var doConds =  ast.Descendants("statement")
+					.Where(e => e.FirstElementOrDefault().SafeValue() == "do")
+					.Select(e => e.Element("parExpression").NthElement(1));
+			var forConds = ast.Descendants("forstatement")
+					.Where(e => e.Elements().Count(e2 => e2.TokenText() == ";") >= 2)
+					.Select(e => e.Element("expression"));
+			return ifConds.Concat(whileConds).Concat(doConds).Concat(forConds);
+		}
+	}
+
+	public class JavaIfExperiment : LearningExperiment {
 		protected override Processor Processor {
 			get { return ProcessorLoader.JavaUsingAntlr3; }
 		}
@@ -72,7 +98,7 @@ namespace Occf.Learner.Core.Tests {
 		}
 	}
 
-	public class JavaWhileExperiment : OriginalLearningExperiment {
+	public class JavaWhileExperiment : LearningExperiment {
 		protected override Processor Processor {
 			get { return ProcessorLoader.JavaUsingAntlr3; }
 		}
@@ -87,7 +113,7 @@ namespace Occf.Learner.Core.Tests {
 		}
 	}
 
-	public class JavaDoWhileExperiment : OriginalLearningExperiment {
+	public class JavaDoWhileExperiment : LearningExperiment {
 		protected override Processor Processor {
 			get { return ProcessorLoader.JavaUsingAntlr3; }
 		}
@@ -102,7 +128,7 @@ namespace Occf.Learner.Core.Tests {
 		}
 	}
 
-	public class JavaForExperiment : OriginalLearningExperiment {
+	public class JavaForExperiment : LearningExperiment {
 		protected override Processor Processor {
 			get { return ProcessorLoader.JavaUsingAntlr3; }
 		}
@@ -110,14 +136,14 @@ namespace Occf.Learner.Core.Tests {
 		public JavaForExperiment() : base("expression") {}
 
 		protected override IEnumerable<XElement> GetAcceptedElements(XElement ast) {
-			// ifトークンが存在するかどうか
+			// expressionの位置
 			return ast.Descendants("forstatement")
 					.Where(e => e.Elements().Count(e2 => e2.TokenText() == ";") >= 2)
 					.Select(e => e.Element("expression"));
 		}
 	}
 
-	public class JavaPreconditionsExperiment : OriginalLearningExperiment {
+	public class JavaPreconditionsExperiment : LearningExperiment {
 		protected override Processor Processor {
 			get { return ProcessorLoader.JavaUsingAntlr3; }
 		}
@@ -144,7 +170,7 @@ namespace Occf.Learner.Core.Tests {
 		}
 	}
 
-	public class JavaStatementExperiment : OriginalLearningExperiment {
+	public class JavaStatementExperiment : LearningExperiment {
 		protected override Processor Processor {
 			get { return ProcessorLoader.JavaUsingAntlr3; }
 		}

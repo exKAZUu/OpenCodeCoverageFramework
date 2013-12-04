@@ -91,6 +91,10 @@ namespace Occf.Learner.Core.Tests {
 			return false;
 		}
 
+		public bool ClearItem(T item) {
+			return _dict.Remove(item);
+		}
+
 		public int ClearItemsIf(Func<T, bool> predicate) {
 			var count = 0;
 			foreach (var key in _dict.Keys) {
@@ -128,6 +132,12 @@ namespace Occf.Learner.Core.Tests {
 		public void UnionWith(CountingSet<T> set) {
 			foreach (var kv in set.ItemsWithCount) {
 				Add(kv.Key, kv.Value);
+			}
+		}
+
+		public void ExceptFor(CountingSet<T> set) {
+			foreach (var kv in set.ItemsWithCount) {
+				Remove(kv.Key, kv.Value);
 			}
 		}
 	}

@@ -54,6 +54,7 @@ namespace Occf.Learner.Core.Tests {
 			}
 			_rejectedElements = _allElements.Values.SelectMany(e => e).ToHashSet();
 			_rejectedElements.ExceptWith(_acceptedElements);
+			_learningElements.UnionWith(_seedElements);
 			while (true) {
 				var time = Environment.TickCount;
 				var ret = LearnAndApply(learner);
@@ -97,55 +98,81 @@ namespace Occf.Learner.Core.Tests {
 			var wronglyAccepted = 0;
 			var wronglyRejected = 0;
 
-			var positiveList = new List<Tuple<double, XElement>> { Tuple.Create<double, XElement>(1, null) };
-			var negativeList = new List<Tuple<double, XElement>> { Tuple.Create<double, XElement>(1, null) };
-			foreach (var e in _acceptedElements) {
-				var input = GetClassifierInput(e, learningData);
-				var tuple = judge(input);
-				var actual = tuple.Item1;
-				var prob = tuple.Item2;
-				if (actual) {
-					correctlyAccepted++;
-				} else {
-					wronglyRejected++;
+			var positiveList = new List<Tuple<double, XElement, string>>
+			{ Tuple.Create<double, XElement, string>(1, null, null) };
+			var negativeList = new List<Tuple<double, XElement, string>>
+			{ Tuple.Create<double, XElement, string>(1, null, null) };
+			foreach (var kv in _allElements) {
+				var path = kv.Key;
+				var elements = kv.Value;
+				foreach (var e in elements) {
+					var input = GetClassifierInput(e, learningData);
+					var tuple = judge(input);
+					var actual = tuple.Item1;
+					var expected = _acceptedElements.contains(e);
+					var prob = tuple.Item2;
+					if (actual) {
+						if (expected) {
+							correctlyAccepted++;
+						} else {
+							if (wronglyAccepted == 0) {
+								Console.WriteLine("WA (" + prob + "): " + e.SafeParent().SafeParent().SafeParent());
+							}
+							wronglyAccepted++;
+						}
+					} else {
+						if (expected) {
+							if (wronglyRejected == 0) {
+								Console.WriteLine("WR (" + prob + "): " + e.SafeParent().SafeParent().SafeParent());
+							}
+							wronglyRejected++;
+						} else {
+							correctlyRejected++;
+						}
+					}
+					UpdateLists(prob, e, path, positiveList, negativeList);
 				}
-				UpdateLists(prob, positiveList, e, negativeList);
-			}
-			foreach (var e in _rejectedElements) {
-				var input = GetClassifierInput(e, learningData);
-				var tuple = judge(input);
-				var actual = tuple.Item1;
-				var prob = tuple.Item2;
-				if (actual) {
-					wronglyAccepted++;
-				} else {
-					correctlyRejected++;
-				}
-				UpdateLists(prob, positiveList, e, negativeList);
+				Console.Write(".");
 			}
 			Console.WriteLine("done");
 			Console.WriteLine("WA: " + wronglyAccepted + ", WD: " + wronglyRejected + ", CA: "
-			                  + correctlyAccepted + ", CD: " + correctlyRejected + ", Count: " + _learningElements.Count);
+			                  + correctlyAccepted + ", CD: " + correctlyRejected + ", Count: "
+			                  + _learningElements.Count);
 			Console.WriteLine("Positive: " + positiveList[0].Item1 + ", Negative: "
 			                  + negativeList[0].Item1);
+			Console.WriteLine("Accepted: " + _learningElements.Count(e => _acceptedElements.Contains(e))
+			                  + " / " + _acceptedElements.Count);
 			WrongCount = wronglyAccepted + wronglyRejected;
-			_learningElements.UnionWith(positiveList.Where(e => e != null).Select(e => e.Item2));
-			_learningElements.UnionWith(negativeList.Where(e => e != null).Select(e => e.Item2));
+			if (positiveList[0].Item1 < negativeList[0].Item1) {
+				if (positiveList[0].Item3 != null) {
+					_learningElements.UnionWith(_allElements[positiveList[0].Item3]);
+					Console.WriteLine(positiveList[0].Item3);
+				}
+			} else {
+				if (negativeList[0].Item3 != null) {
+					_learningElements.UnionWith(_allElements[negativeList[0].Item3]);
+					Console.WriteLine(negativeList[0].Item3);
+				}
+			}
+			//_learningElements.UnionWith(positiveList.Where(e => e.Item2 != null).Select(e => e.Item2));
+			//_learningElements.UnionWith(negativeList.Where(e => e.Item2 != null).Select(e => e.Item2));
 			return Math.Min(positiveList[0].Item1, negativeList[0].Item1);
 		}
 
-		private void UpdateLists(double prob, List<Tuple<double, XElement>> positiveList, XElement e, List<Tuple<double, XElement>> negativeList) {
+		private void UpdateLists(
+				double prob, XElement e, string path, List<Tuple<double, XElement, string>> positiveList,
+				List<Tuple<double, XElement, string>> negativeList) {
 			if (_learningElements.Contains(e)) {
 				return;
 			}
 			if (prob > 0) {
-				positiveList.Add(Tuple.Create(prob, e));
+				positiveList.Add(Tuple.Create(prob, e, path));
 				positiveList.Sort((t1, t2) => t1.Item1.CompareTo(t2.Item1));
 				if (positiveList.Count > LearningCount) {
 					positiveList.RemoveAt(LearningCount);
 				}
 			} else {
-				negativeList.Add(Tuple.Create(-prob, e));
+				negativeList.Add(Tuple.Create(-prob, e, path));
 				negativeList.Sort((t1, t2) => t1.Item1.CompareTo(t2.Item1));
 				if (negativeList.Count > LearningCount) {
 					negativeList.RemoveAt(LearningCount);
@@ -157,13 +184,52 @@ namespace Occf.Learner.Core.Tests {
 			var seedRejected = new HashSet<XElement>();
 			var learningRejected = new HashSet<XElement>();
 			Console.Write("Seed data: ");
-			var seedAccepted = GatherAcceptedAndRejected(seedRejected);
+			var seedAccepted = GatherAcceptedAndRejected(_seedElements, seedRejected);
 			Console.Write("Learning data: ");
-			var learningAccepted = GatherAcceptedAndRejected(learningRejected);
+			var learningAccepted = GatherAcceptedAndRejected(_learningElements, learningRejected);
 			var acceptedDepth2Predicates = CreatePredicates(seedAccepted);
 			var rejectedDepth2Predicates = CreatePredicates(seedRejected);
 			acceptedDepth2Predicates.UnionWith(rejectedDepth2Predicates);
-			return CreateLearningData(acceptedDepth2Predicates, learningAccepted, learningRejected);
+			var np1 = TryCreatePredicates(learningAccepted);
+			var np2 = TryCreatePredicates2(learningAccepted, learningRejected, np1);
+			np1.UnionWith(np2);
+			return CreateLearningData(np1, learningAccepted, learningRejected);
+		}
+
+		private HashSet<SurroundingElementsPredicate> TryCreatePredicates(IEnumerable<XElement> elements) {
+			var dict = SurroundingElementsPredicate.GetSurroundingElements(elements, _predicateDepth);
+			foreach (var kv in dict) {
+				kv.Value.ClearItemsIf((key, count) => count != elements.Count());
+			}
+			var newPredicates = dict
+					.SelectMany(kv => kv.Value
+							.Select(item => new SurroundingElementsPredicate(kv.Key, item)))
+					.ToHashSet();
+			return newPredicates;
+		}
+
+		private HashSet<SurroundingElementsPredicate> TryCreatePredicates2(
+				IEnumerable<XElement> accepted, IEnumerable<XElement> rejected,
+				HashSet<SurroundingElementsPredicate> predicates) {
+			var dict = SurroundingElementsPredicate.GetSurroundingElements(
+					rejected.Where(e => CheckPredicate(e, predicates)), _predicateDepth);
+			var dict2 = SurroundingElementsPredicate.GetSurroundingElements(accepted, _predicateDepth);
+			foreach (var kv in dict2) {
+				var values = dict.GetValueOrDefault(kv.Key);
+				if (values != null) {
+					foreach (var v in kv.Value) {
+						values.ClearItem(v);
+					}
+				}
+			}
+			foreach (var kv in dict) {
+				kv.Value.ClearItemsIf((key, count) => count < 2);
+			}
+			var newPredicates = dict
+					.SelectMany(kv => kv.Value
+							.Select(item => new SurroundingElementsPredicate(kv.Key, item)))
+					.ToHashSet();
+			return newPredicates;
 		}
 
 		private HashSet<SurroundingElementsPredicate> CreatePredicates(IEnumerable<XElement> elements) {
@@ -213,9 +279,10 @@ namespace Occf.Learner.Core.Tests {
 			return learningData;
 		}
 
-		private HashSet<XElement> GatherAcceptedAndRejected(HashSet<XElement> rejected) {
+		private HashSet<XElement> GatherAcceptedAndRejected(
+				IEnumerable<XElement> elements, HashSet<XElement> rejected) {
 			var accepted = new HashSet<XElement>();
-			foreach (var e in _seedElements) {
+			foreach (var e in elements) {
 				if (_acceptedElementsWithSeed.contains(e)) {
 					accepted.Add(e);
 				} else {
@@ -226,6 +293,7 @@ namespace Occf.Learner.Core.Tests {
 				Console.WriteLine("Failed to normalize element names: "
 				                  + string.Join(",", NormalizeElementNames(accepted)));
 			}
+			Console.WriteLine("Accepted: " + accepted.Count + ", Rejected: " + rejected.Count);
 			return accepted;
 		}
 
@@ -242,6 +310,11 @@ namespace Occf.Learner.Core.Tests {
 				rejected = newRejected;
 			}
 			return rejected;
+		}
+
+		private bool CheckPredicate(XElement e, HashSet<SurroundingElementsPredicate> predicates) {
+			var dict = SurroundingElementsPredicate.GetSurroundingElements(e, _predicateDepth);
+			return predicates.All(predicate => predicate.Check(dict));
 		}
 
 		private double[] GetClassifierInput(XElement e, LearningData learningData) {

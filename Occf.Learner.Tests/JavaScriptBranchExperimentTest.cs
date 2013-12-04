@@ -15,7 +15,7 @@ namespace Occf.Learner.Core.Tests {
 	public class JavaScriptExperimentTest {
 				private static IEnumerable<TestCaseData> TestCases {
 			get {
-				var exps = new LearningExperiment[] {
+				var exps = new OriginalLearningExperiment[] {
 					new JavaScriptBranchExperiment(),
 					new JavaScriptConsoleLogExperiment(),
 				};
@@ -45,7 +45,7 @@ namespace Occf.Learner.Core.Tests {
 
 		[Test, TestCaseSource("TestCases")]
 		public void Test(
-				LearningExperiment exp, LearningAlgorithm algorithm, string projectPath, IList<string> seedPaths) {
+				OriginalLearningExperiment exp, LearningAlgorithm algorithm, string projectPath, IList<string> seedPaths) {
 			var allPaths = Directory.GetFiles(projectPath, "*.js", SearchOption.AllDirectories)
 					.ToList();
 			exp.LearnUntilBeStable(allPaths, seedPaths, algorithm, 0.5);
@@ -53,7 +53,7 @@ namespace Occf.Learner.Core.Tests {
 		}
 	}
 
-	public class JavaScriptBranchExperiment : LearningExperiment {
+	public class JavaScriptBranchExperiment : OriginalLearningExperiment {
 		public JavaScriptBranchExperiment() : base("expression") {}
 
 		protected override Processor Processor {
@@ -75,7 +75,7 @@ namespace Occf.Learner.Core.Tests {
 		}
 	}
 
-	public class JavaScriptConsoleLogExperiment : LearningExperiment {
+	public class JavaScriptConsoleLogExperiment : OriginalLearningExperiment {
 		public JavaScriptConsoleLogExperiment() : base("assignmentExpression") {}
 
 		protected override Processor Processor {
