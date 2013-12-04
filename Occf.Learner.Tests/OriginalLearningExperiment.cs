@@ -8,6 +8,7 @@ using Code2Xml.Core;
 using Code2Xml.Languages.ANTLRv3.Core;
 using Occf.Learner.Core.Tests.LearningAlgorithms;
 using Paraiba.Collections.Generic;
+using Paraiba.Core;
 using Paraiba.Linq;
 
 namespace Occf.Learner.Core.Tests {
@@ -191,8 +192,13 @@ namespace Occf.Learner.Core.Tests {
 				}
 			}
 			var dict = SurroundingElementsPredicate.GetSurroundingElements(elements, _predicateDepth);
+			//foreach (var kv in dict) {
+			//	foreach (var kv2 in kv.Value.ItemsWithCount) {
+			//		Console.WriteLine(kv2.Value + ": " +kv.Key + kv2.Key);
+			//	}
+			//}
 			foreach (var kv in dict) {
-				kv.Value.ClearItemsIf((key, count) => count < 3);
+				kv.Value.ClearItemsIf((key, count) => count < 2);
 			}
 			var newPredicates = dict
 					.SelectMany(kv => kv.Value
@@ -205,10 +211,6 @@ namespace Occf.Learner.Core.Tests {
 				Dictionary<int, HashSet<Predicate>> depth2Predicates,
 				HashSet<SurroundingElementsPredicate> newPredicates, ICollection<XElement> allAccepted,
 				ICollection<XElement> allRejected) {
-			// TODO
-			newPredicates =
-					newPredicates.Where(p => p.Value.EndsWith("console") || p.Value.EndsWith("log")).ToHashSet();
-
 			var variables = new List<DecisionVariable>();
 			var count = depth2Predicates.Values.Sum(ps => ps.Count) + newPredicates.Count;
 			for (int i = 0; i < count; i++) {
@@ -225,9 +227,9 @@ namespace Occf.Learner.Core.Tests {
 				Variables = variables,
 				NewPredicates = newPredicates,
 			};
-			foreach (var predicate in newPredicates) {
-				Console.WriteLine(predicate);
-			}
+			//foreach (var predicate in newPredicates) {
+			//	Console.WriteLine(predicate);
+			//}
 			learningRecords =
 					learningRecords.Concat(
 							allAccepted.Concat(allRejected)

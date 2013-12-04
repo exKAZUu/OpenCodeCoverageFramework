@@ -15,7 +15,7 @@ namespace Occf.Learner.Core.Tests {
 	public class JavaExperimentTest {
 		private static IEnumerable<TestCaseData> TestCases {
 			get {
-				var exps = new LearningExperiment[] {
+				var exps = new OriginalLearningExperiment[] {
 					new JavaIfExperiment(),
 					new JavaWhileExperiment(),
 					new JavaDoWhileExperiment(),
@@ -49,7 +49,7 @@ namespace Occf.Learner.Core.Tests {
 
 		[Test, TestCaseSource("TestCases")]
 		public void Test(
-				LearningExperiment exp, LearningAlgorithm algorithm, string projectPath, IList<string> seedPaths) {
+				OriginalLearningExperiment exp, LearningAlgorithm algorithm, string projectPath, IList<string> seedPaths) {
 			var allPaths = Directory.GetFiles(projectPath, "*.java", SearchOption.AllDirectories)
 					.ToList();
 			exp.LearnUntilBeStable(allPaths, seedPaths, algorithm, 0.5);
@@ -57,7 +57,7 @@ namespace Occf.Learner.Core.Tests {
 		}
 	}
 
-	public class JavaIfExperiment : LearningExperiment {
+	public class JavaIfExperiment : OriginalLearningExperiment {
 		protected override Processor Processor {
 			get { return ProcessorLoader.JavaUsingAntlr3; }
 		}
@@ -72,7 +72,7 @@ namespace Occf.Learner.Core.Tests {
 		}
 	}
 
-	public class JavaWhileExperiment : LearningExperiment {
+	public class JavaWhileExperiment : OriginalLearningExperiment {
 		protected override Processor Processor {
 			get { return ProcessorLoader.JavaUsingAntlr3; }
 		}
@@ -87,7 +87,7 @@ namespace Occf.Learner.Core.Tests {
 		}
 	}
 
-	public class JavaDoWhileExperiment : LearningExperiment {
+	public class JavaDoWhileExperiment : OriginalLearningExperiment {
 		protected override Processor Processor {
 			get { return ProcessorLoader.JavaUsingAntlr3; }
 		}
@@ -102,7 +102,7 @@ namespace Occf.Learner.Core.Tests {
 		}
 	}
 
-	public class JavaForExperiment : LearningExperiment {
+	public class JavaForExperiment : OriginalLearningExperiment {
 		protected override Processor Processor {
 			get { return ProcessorLoader.JavaUsingAntlr3; }
 		}
@@ -117,7 +117,7 @@ namespace Occf.Learner.Core.Tests {
 		}
 	}
 
-	public class JavaPreconditionsExperiment : LearningExperiment {
+	public class JavaPreconditionsExperiment : OriginalLearningExperiment {
 		protected override Processor Processor {
 			get { return ProcessorLoader.JavaUsingAntlr3; }
 		}
@@ -144,7 +144,7 @@ namespace Occf.Learner.Core.Tests {
 		}
 	}
 
-	public class JavaStatementExperiment : LearningExperiment {
+	public class JavaStatementExperiment : OriginalLearningExperiment {
 		protected override Processor Processor {
 			get { return ProcessorLoader.JavaUsingAntlr3; }
 		}

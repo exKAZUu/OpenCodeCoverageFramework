@@ -512,7 +512,7 @@ namespace Occf.Learner.Core.Tests {
 				this XElement element, int length) {
 			var ret = new Dictionary<string, List<XElement>>();
 			var childKeys = new List<string> { "" };
-			ret[""] = new List<XElement> { };
+			ret[""] = new List<XElement> { element };
 			var parentKey = "";
 			var parent = element;
 			var i = 1;
@@ -549,6 +549,7 @@ namespace Occf.Learner.Core.Tests {
 				}
 				childKeys = newChildKeys;
 			}
+			ret.Remove("");
 			return ret;
 		}
 
