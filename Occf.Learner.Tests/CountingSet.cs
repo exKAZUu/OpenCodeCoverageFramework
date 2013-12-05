@@ -140,6 +140,12 @@ namespace Occf.Learner.Core.Tests {
 				Remove(kv.Key, kv.Value);
 			}
 		}
+
+		public void ExceptForIgnoringCount(CountingSet<T> set) {
+			foreach (var kv in set.ItemsWithCount) {
+				ClearItem(kv.Key);
+			}
+		}
 	}
 
 	public static class CountingSet {

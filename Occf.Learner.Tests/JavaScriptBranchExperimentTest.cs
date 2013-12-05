@@ -15,8 +15,12 @@ namespace Occf.Learner.Core.Tests {
 	public class JavaScriptExperimentTest {
 				private static IEnumerable<TestCaseData> TestCases {
 			get {
-				var exps = new OriginalLearningExperiment[] {
+				var exps = new NewLearningExperiment[] {
 					new JavaScriptBranchExperiment(),
+					new JavaScriptIfExperiment(),
+					new JavaScriptWhileExperiment(),
+					new JavaScriptDoWhileExperiment(),
+					new JavaScriptForExperiment(),
 					new JavaScriptConsoleLogExperiment(),
 				};
 				var algorithms = new LearningAlgorithm[] {
@@ -45,7 +49,7 @@ namespace Occf.Learner.Core.Tests {
 
 		[Test, TestCaseSource("TestCases")]
 		public void Test(
-				OriginalLearningExperiment exp, LearningAlgorithm algorithm, string projectPath, IList<string> seedPaths) {
+				NewLearningExperiment exp, LearningAlgorithm algorithm, string projectPath, IList<string> seedPaths) {
 			var allPaths = Directory.GetFiles(projectPath, "*.js", SearchOption.AllDirectories)
 					.ToList();
 			exp.LearnUntilBeStable(allPaths, seedPaths, algorithm, 0.5);
@@ -53,7 +57,7 @@ namespace Occf.Learner.Core.Tests {
 		}
 	}
 
-	public class JavaScriptBranchExperiment : OriginalLearningExperiment {
+	public class JavaScriptBranchExperiment : NewLearningExperiment {
 		public JavaScriptBranchExperiment() : base("expression") {}
 
 		protected override Processor Processor {
@@ -75,7 +79,61 @@ namespace Occf.Learner.Core.Tests {
 		}
 	}
 
-	public class JavaScriptConsoleLogExperiment : OriginalLearningExperiment {
+	public class JavaScriptIfExperiment : NewLearningExperiment {
+		public JavaScriptIfExperiment() : base("expression") {}
+
+		protected override Processor Processor {
+			get { return ProcessorLoader.JavaScriptUsingAntlr3; }
+		}
+
+		protected override IEnumerable<XElement> GetAcceptedElements(XElement ast) {
+			return ast.Descendants("ifStatement")
+					.Select(e => e.Element("expression"));
+		}
+	}
+
+	public class JavaScriptWhileExperiment : NewLearningExperiment {
+		public JavaScriptWhileExperiment() : base("expression") {}
+
+		protected override Processor Processor {
+			get { return ProcessorLoader.JavaScriptUsingAntlr3; }
+		}
+
+		protected override IEnumerable<XElement> GetAcceptedElements(XElement ast) {
+			return ast.Descendants("whileStatement")
+					.Select(e => e.Element("expression"));
+		}
+	}
+
+	public class JavaScriptDoWhileExperiment : NewLearningExperiment {
+		public JavaScriptDoWhileExperiment() : base("expression") {}
+
+		protected override Processor Processor {
+			get { return ProcessorLoader.JavaScriptUsingAntlr3; }
+		}
+
+		protected override IEnumerable<XElement> GetAcceptedElements(XElement ast) {
+			return ast.Descendants("doWhileStatement")
+					.Select(e => e.Element("expression"));
+		}
+	}
+
+	public class JavaScriptForExperiment : NewLearningExperiment {
+		public JavaScriptForExperiment() : base("expression") {}
+
+		protected override Processor Processor {
+			get { return ProcessorLoader.JavaScriptUsingAntlr3; }
+		}
+
+		protected override IEnumerable<XElement> GetAcceptedElements(XElement ast) {
+			return ast.Descendants("forStatement")
+					.Select(e => e.Elements().First(e2 => e2.TokenText() == ";"))
+					.Where(e => e.NextElement().Name() == "expression")
+					.Select(e => e.NextElement());
+		}
+	}
+
+	public class JavaScriptConsoleLogExperiment : NewLearningExperiment {
 		public JavaScriptConsoleLogExperiment() : base("assignmentExpression") {}
 
 		protected override Processor Processor {

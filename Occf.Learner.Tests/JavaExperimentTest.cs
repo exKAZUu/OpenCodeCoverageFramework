@@ -15,7 +15,7 @@ namespace Occf.Learner.Core.Tests {
 	public class JavaExperimentTest {
 		private static IEnumerable<TestCaseData> TestCases {
 			get {
-				var exps = new LearningExperiment[] {
+				var exps = new NewLearningExperiment[] {
 					//new JavaBranchExperiment(),
 					//new JavaIfExperiment(),
 					//new JavaWhileExperiment(),
@@ -31,12 +31,12 @@ namespace Occf.Learner.Core.Tests {
 				};
 				const string langName = "Java";
 				var learningSets = new[] {
-					//Tuple.Create(Fixture.GetInputProjectPath(langName, "pageobjectgenerator"),
-					//		new List<string> { Fixture.GetInputCodePath(langName, "Seed.java"), }),
+					Tuple.Create(Fixture.GetInputProjectPath(langName, "pageobjectgenerator"),
+							new List<string> { Fixture.GetInputCodePath(langName, "Seed.java"), }),
 					Tuple.Create(Fixture.GetInputProjectPath(langName, "presto"),
 							new List<string> { Fixture.GetInputCodePath(langName, "Seed.java"), }),
-					//Tuple.Create(Fixture.GetInputProjectPath(langName, "storm"),
-					//		new List<string> { Fixture.GetInputCodePath(langName, "Seed.java"), }),
+					Tuple.Create(Fixture.GetInputProjectPath(langName, "storm"),
+							new List<string> { Fixture.GetInputCodePath(langName, "Seed.java"), }),
 				};
 				foreach (var exp in exps) {
 					foreach (var algorithm in algorithms) {
@@ -50,7 +50,7 @@ namespace Occf.Learner.Core.Tests {
 
 		[Test, TestCaseSource("TestCases")]
 		public void Test(
-				LearningExperiment exp, LearningAlgorithm algorithm, string projectPath, IList<string> seedPaths) {
+				NewLearningExperiment exp, LearningAlgorithm algorithm, string projectPath, IList<string> seedPaths) {
 			var allPaths = Directory.GetFiles(projectPath, "*.java", SearchOption.AllDirectories)
 					.ToList();
 			exp.LearnUntilBeStable(allPaths, seedPaths, algorithm, 0.5);
@@ -58,7 +58,7 @@ namespace Occf.Learner.Core.Tests {
 		}
 	}
 
-	public class JavaBranchExperiment : LearningExperiment {
+	public class JavaBranchExperiment : NewLearningExperiment {
 		protected override Processor Processor {
 			get { return ProcessorLoader.JavaUsingAntlr3; }
 		}
@@ -83,7 +83,7 @@ namespace Occf.Learner.Core.Tests {
 		}
 	}
 
-	public class JavaIfExperiment : LearningExperiment {
+	public class JavaIfExperiment : NewLearningExperiment {
 		protected override Processor Processor {
 			get { return ProcessorLoader.JavaUsingAntlr3; }
 		}
@@ -98,7 +98,7 @@ namespace Occf.Learner.Core.Tests {
 		}
 	}
 
-	public class JavaWhileExperiment : LearningExperiment {
+	public class JavaWhileExperiment : NewLearningExperiment {
 		protected override Processor Processor {
 			get { return ProcessorLoader.JavaUsingAntlr3; }
 		}
@@ -113,7 +113,7 @@ namespace Occf.Learner.Core.Tests {
 		}
 	}
 
-	public class JavaDoWhileExperiment : LearningExperiment {
+	public class JavaDoWhileExperiment : NewLearningExperiment {
 		protected override Processor Processor {
 			get { return ProcessorLoader.JavaUsingAntlr3; }
 		}
@@ -128,7 +128,7 @@ namespace Occf.Learner.Core.Tests {
 		}
 	}
 
-	public class JavaForExperiment : LearningExperiment {
+	public class JavaForExperiment : NewLearningExperiment {
 		protected override Processor Processor {
 			get { return ProcessorLoader.JavaUsingAntlr3; }
 		}
@@ -143,7 +143,7 @@ namespace Occf.Learner.Core.Tests {
 		}
 	}
 
-	public class JavaPreconditionsExperiment : LearningExperiment {
+	public class JavaPreconditionsExperiment : NewLearningExperiment {
 		protected override Processor Processor {
 			get { return ProcessorLoader.JavaUsingAntlr3; }
 		}
@@ -173,7 +173,7 @@ namespace Occf.Learner.Core.Tests {
 		}
 	}
 
-	public class JavaStatementExperiment : LearningExperiment {
+	public class JavaStatementExperiment : NewLearningExperiment {
 		protected override Processor Processor {
 			get { return ProcessorLoader.JavaUsingAntlr3; }
 		}

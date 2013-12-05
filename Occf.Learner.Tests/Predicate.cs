@@ -176,7 +176,7 @@ namespace Occf.Learner.Core.Tests {
 			foreach (var target in targets) {
 				var dict = target.SurroundingElementsWithSelf(length)
 						.Select(kv => Tuple.Create(kv.Key,
-								kv.Value.Select(e => e.NameOrTokenWithId()).ToCountingSet()))
+								kv.Value.Select(e => e.NameOrTokenWithId()).ToHashSet().ToCountingSet()))
 						.ToDictionary(kv => kv.Item1, kv => kv.Item2);
 				foreach (var kv in dict) {
 					CountingSet<string> set;
