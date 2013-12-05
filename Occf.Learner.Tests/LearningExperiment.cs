@@ -45,6 +45,8 @@ namespace Occf.Learner.Core.Tests {
 				_allElements.Add(path, GetAllElements(ast).ToHashSet());
 				_acceptedElements.UnionWith(GetAcceptedElements(ast));
 			}
+			var t = _acceptedElements.Select(e => e.SafeParent().SafeParent().SafeParent().SafeParent().SafeParent()).ToList();
+
 			_acceptedElementsWithSeed.UnionWith(_acceptedElements);
 			foreach (var path in seedPaths) {
 				var codeFile = new FileInfo(path);
@@ -192,7 +194,7 @@ namespace Occf.Learner.Core.Tests {
 			acceptedDepth2Predicates.UnionWith(rejectedDepth2Predicates);
 			var np1 = TryCreatePredicates(learningAccepted);
 			var np2 = TryCreatePredicates2(learningAccepted, learningRejected, np1);
-			np1.UnionWith(np2);
+			//np1.UnionWith(np2);
 			return CreateLearningData(np1, learningAccepted, learningRejected);
 		}
 
