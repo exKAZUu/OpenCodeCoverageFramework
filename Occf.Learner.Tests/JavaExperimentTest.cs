@@ -31,12 +31,12 @@ namespace Occf.Learner.Core.Tests {
 				};
 				const string langName = "Java";
 				var learningSets = new[] {
-					Tuple.Create(Fixture.GetInputProjectPath(langName, "pageobjectgenerator"),
-							new List<string> { Fixture.GetInputCodePath(langName, "Seed.java"), }),
-					//Tuple.Create(Fixture.GetInputProjectPath(langName, "presto"),
+					//Tuple.Create(Fixture.GetInputProjectPath(langName, "pageobjectgenerator"),
 					//		new List<string> { Fixture.GetInputCodePath(langName, "Seed.java"), }),
-					Tuple.Create(Fixture.GetInputProjectPath(langName, "storm"),
+					Tuple.Create(Fixture.GetInputProjectPath(langName, "presto"),
 							new List<string> { Fixture.GetInputCodePath(langName, "Seed.java"), }),
+					//Tuple.Create(Fixture.GetInputProjectPath(langName, "storm"),
+					//		new List<string> { Fixture.GetInputCodePath(langName, "Seed.java"), }),
 				};
 				foreach (var exp in exps) {
 					foreach (var algorithm in algorithms) {
