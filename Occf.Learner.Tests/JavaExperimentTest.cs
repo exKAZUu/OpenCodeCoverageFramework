@@ -19,9 +19,9 @@ namespace Occf.Learner.Core.Tests {
 					//new JavaBranchExperiment(),
 					//new JavaIfExperiment(),
 					//new JavaWhileExperiment(),
-					new JavaDoWhileExperiment(),
+					//new JavaDoWhileExperiment(),
 					//new JavaForExperiment(),
-					//new JavaPreconditionsExperiment(),
+					new JavaPreconditionsExperiment(),
 					//new JavaStatementExperiment(), 
 				};
 				var algorithms = new LearningAlgorithm[] {
@@ -33,8 +33,8 @@ namespace Occf.Learner.Core.Tests {
 				var learningSets = new[] {
 					Tuple.Create(Fixture.GetInputProjectPath(langName, "pageobjectgenerator"),
 							new List<string> { Fixture.GetInputCodePath(langName, "Seed.java"), }),
-					//Tuple.Create(Fixture.GetInputProjectPath(langName, "presto"),
-					//		new List<string> { Fixture.GetInputCodePath(langName, "Seed.java"), }),
+					Tuple.Create(Fixture.GetInputProjectPath(langName, "presto"),
+							new List<string> { Fixture.GetInputCodePath(langName, "Seed.java"), }),
 					Tuple.Create(Fixture.GetInputProjectPath(langName, "storm"),
 							new List<string> { Fixture.GetInputCodePath(langName, "Seed.java"), }),
 				};
@@ -163,6 +163,9 @@ namespace Occf.Learner.Core.Tests {
 									return false;
 								}
 								if (primary.NthElementOrDefault(2).SafeValue() != "checkArgument") {
+									return false;
+								}
+								if (e.ElementsBeforeSelf().Any()) {
 									return false;
 								}
 								return true;
