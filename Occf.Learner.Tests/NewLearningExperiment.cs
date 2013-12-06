@@ -22,7 +22,7 @@ namespace Occf.Learner.Core.Tests {
 		private List<XElement> _seedRejected;
 		private HashSet<BigInteger> _learnedDiffs; 
 		private int _predicateDepth = 10;
-		private const int LearningCount = 10;
+		private const int LearningCount = 20;
 
 		protected NewLearningExperiment(params string[] elementNames) {
 			_elementNames = elementNames.ToHashSet();
@@ -60,9 +60,11 @@ namespace Occf.Learner.Core.Tests {
 			_seedAccepted.AddRange(seedAccepted);
 			_seedRejected.AddRange(seedRejected);
 
+			var count = 2;
+
 			while (true) {
 				var time = Environment.TickCount;
-				if (LearnAndApply()) {
+				if (LearnAndApply() && --count == 0) {
 					break;
 				}
 				Console.WriteLine("Time: " + (Environment.TickCount - time));

@@ -37,8 +37,8 @@ namespace Occf.Learner.Core.Tests {
 							new List<string> { Fixture.GetInputCodePath(langName, "seed.js"), }),
 					Tuple.Create(Fixture.GetInputProjectPath(langName, "ionic"),
 							new List<string> { Fixture.GetInputCodePath(langName, "seed.js"), }),
-					Tuple.Create(Fixture.GetInputProjectPath(langName, "reportr"),
-							new List<string> { Fixture.GetInputCodePath(langName, "seed.js"), }),
+					//Tuple.Create(Fixture.GetInputProjectPath(langName, "reportr"),
+					//		new List<string> { Fixture.GetInputCodePath(langName, "seed.js"), }),
 				};
 				foreach (var exp in exps) {
 					foreach (var algorithm in algorithms) {
@@ -173,7 +173,7 @@ namespace Occf.Learner.Core.Tests {
 
 		protected override IEnumerable<XElement> GetAcceptedElements(XElement ast) {
 			return ast.Descendants("statement")
-					.Where(e => e.FirstElement().Name() == "labeledStatement");
+					.Where(e => e.FirstElement().Name() == "labelledStatement");
 		}
 	}
 
