@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -13,15 +13,18 @@ using ParserTests;
 namespace Occf.Learner.Core.Tests {
 	[TestFixture]
 	public class JavaScriptExperimentTest {
-				private static IEnumerable<TestCaseData> TestCases {
+		private static IEnumerable<TestCaseData> TestCases {
 			get {
 				var exps = new NewLearningExperiment[] {
-					new JavaScriptBranchExperiment(),
+					//new JavaScriptBranchExperiment(),
 					new JavaScriptIfExperiment(),
 					new JavaScriptWhileExperiment(),
 					new JavaScriptDoWhileExperiment(),
 					new JavaScriptForExperiment(),
 					new JavaScriptConsoleLogExperiment(),
+					new JavaScriptBlockExperiment(),
+					new JavaScriptLabeledStatementExperiment(), 
+					new JavaScriptEmptyStatementExperiment(),
 				};
 				var algorithms = new LearningAlgorithm[] {
 					new SvmLearner(new Linear()),
@@ -30,12 +33,12 @@ namespace Occf.Learner.Core.Tests {
 				};
 				const string langName = "JavaScript";
 				var learningSets = new[] {
-					//Tuple.Create(Fixture.GetInputProjectPath(langName, "cheet.js"),
-					//		new List<string> { Fixture.GetInputCodePath(langName, "seed.js"), }),
+					Tuple.Create(Fixture.GetInputProjectPath(langName, "cheet.js"),
+							new List<string> { Fixture.GetInputCodePath(langName, "seed.js"), }),
 					Tuple.Create(Fixture.GetInputProjectPath(langName, "ionic"),
 							new List<string> { Fixture.GetInputCodePath(langName, "seed.js"), }),
-					//Tuple.Create(Fixture.GetInputProjectPath(langName, "reportr"),
-					//		new List<string> { Fixture.GetInputCodePath(langName, "seed.js"), }),
+					Tuple.Create(Fixture.GetInputProjectPath(langName, "reportr"),
+							new List<string> { Fixture.GetInputCodePath(langName, "seed.js"), }),
 				};
 				foreach (var exp in exps) {
 					foreach (var algorithm in algorithms) {
@@ -56,7 +59,6 @@ namespace Occf.Learner.Core.Tests {
 			Assert.That(exp.WrongCount, Is.EqualTo(0));
 		}
 	}
-
 	public class JavaScriptBranchExperiment : NewLearningExperiment {
 		public JavaScriptBranchExperiment() : base("expression") {}
 
@@ -146,6 +148,45 @@ namespace Occf.Learner.Core.Tests {
 					.Select(e => e.Element("arguments").Element("assignmentExpression"))
 					.Where(e => e != null);
 			return preConds;
+		}
+	}
+
+	public class JavaScriptBlockExperiment : NewLearningExperiment {
+		protected override Processor Processor {
+			get { return ProcessorLoader.JavaScriptUsingAntlr3; }
+		}
+
+		public JavaScriptBlockExperiment() : base("statement") {}
+
+		protected override IEnumerable<XElement> GetAcceptedElements(XElement ast) {
+			return ast.Descendants("statement")
+					.Where(e => e.FirstElement().Name() == "statementBlock");
+		}
+	}
+
+	public class JavaScriptLabeledStatementExperiment : NewLearningExperiment {
+		protected override Processor Processor {
+			get { return ProcessorLoader.JavaScriptUsingAntlr3; }
+		}
+
+		public JavaScriptLabeledStatementExperiment() : base("statement") {}
+
+		protected override IEnumerable<XElement> GetAcceptedElements(XElement ast) {
+			return ast.Descendants("statement")
+					.Where(e => e.FirstElement().Name() == "labeledStatement");
+		}
+	}
+
+	public class JavaScriptEmptyStatementExperiment : NewLearningExperiment {
+		protected override Processor Processor {
+			get { return ProcessorLoader.JavaScriptUsingAntlr3; }
+		}
+
+		public JavaScriptEmptyStatementExperiment() : base("statement") {}
+
+		protected override IEnumerable<XElement> GetAcceptedElements(XElement ast) {
+			return ast.Descendants("statement")
+					.Where(e => e.FirstElement().Name() == "emptyStatement");
 		}
 	}
 }

@@ -69,6 +69,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Numerics" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -76,11 +77,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="JavaScriptExperimentTest.cs" />
     <Compile Include="NewLearningExperiment.cs" />
     <Compile Include="OriginalLearningExperiment.cs" />
     <Compile Include="CountingSet.cs" />
     <Compile Include="LearningAlgorithms\C45Learner.cs" />
-    <Compile Include="JavaScriptBranchExperimentTest.cs" />
     <Compile Include="JavaExperimentTest.cs" />
     <Compile Include="FindLearnerTest.cs" />
     <Compile Include="LearningAlgorithms\NaiveBayesLearner.cs" />
