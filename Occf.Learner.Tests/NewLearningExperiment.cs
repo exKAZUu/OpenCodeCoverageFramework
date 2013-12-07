@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -20,7 +19,7 @@ namespace Occf.Learner.Core.Tests {
 		private Dictionary<string, HashSet<XElement>> _rejectedElementDict;
 		private List<XElement> _seedAccepted;
 		private List<XElement> _seedRejected;
-		private HashSet<BigInteger> _learnedDiffs; 
+		private HashSet<BigInteger> _learnedDiffs;
 		private int _predicateDepth = 10;
 		private const int LearningCount = 20;
 
@@ -169,7 +168,9 @@ namespace Occf.Learner.Core.Tests {
 			return nextElements.Count(t => t.Item4) == 0;
 		}
 
-		private void UpdateNextElements(int count, BigInteger diffs, List<Tuple<int, XElement, string, bool, BigInteger>> nextElements, XElement e, string path, bool accepted) {
+		private void UpdateNextElements(
+				int count, BigInteger diffs, List<Tuple<int, XElement, string, bool, BigInteger>> nextElements,
+				XElement e, string path, bool accepted) {
 			if (count > 0) {
 				if (!_learnedDiffs.Contains(diffs)) {
 					_learnedDiffs.Add(diffs);
