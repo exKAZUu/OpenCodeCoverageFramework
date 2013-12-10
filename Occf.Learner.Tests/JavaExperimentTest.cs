@@ -17,12 +17,15 @@ namespace Occf.Learner.Core.Tests {
 			get {
 				var exps = new NewLearningExperiment[] {
 					//new JavaBranchExperiment(),
-					//new JavaIfExperiment(),
-					//new JavaWhileExperiment(),
-					//new JavaDoWhileExperiment(),
-					//new JavaForExperiment(),
+					new JavaIfExperiment(),
+					new JavaWhileExperiment(),
+					new JavaDoWhileExperiment(),
+					new JavaForExperiment(),
 					new JavaPreconditionsExperiment(),
 					//new JavaStatementExperiment(), 
+					new JavaBlockExperiment(),
+					new JavaLabeledStatementExperiment(), 
+					new JavaEmptyStatementExperiment(),
 				};
 				var algorithms = new LearningAlgorithm[] {
 					new SvmLearner(new Linear()),
@@ -198,6 +201,53 @@ namespace Occf.Learner.Core.Tests {
 						}
 						return true;
 					});
+		}
+	}
+
+	public class JavaBlockExperiment : NewLearningExperiment {
+		protected override Processor Processor {
+			get { return ProcessorLoader.JavaUsingAntlr3; }
+		}
+
+		public JavaBlockExperiment() : base("statement") {}
+
+		protected override IEnumerable<XElement> GetAcceptedElements(XElement ast) {
+			return ast.Descendants("statement")
+					.Where(e => e.FirstElement().Name() == "block");
+		}
+	}
+
+	public class JavaLabeledStatementExperiment : NewLearningExperiment {
+		protected override Processor Processor {
+			get { return ProcessorLoader.JavaUsingAntlr3; }
+		}
+
+		public JavaLabeledStatementExperiment() : base("statement") {}
+
+		protected override IEnumerable<XElement> GetAcceptedElements(XElement ast) {
+			return ast.Descendants("statement")
+					.Where(e => {
+						// ラベルはループ文に付くため，ラベルの中身は除外
+						var second = e.Parent.NthElementOrDefault(1);
+						if (second != null && second.Value == ":"
+						    && e.Parent.Name() == "statement") {
+							return true;
+						}
+						return false;
+					});
+		}
+	}
+
+	public class JavaEmptyStatementExperiment : NewLearningExperiment {
+		protected override Processor Processor {
+			get { return ProcessorLoader.JavaUsingAntlr3; }
+		}
+
+		public JavaEmptyStatementExperiment() : base("statement") {}
+
+		protected override IEnumerable<XElement> GetAcceptedElements(XElement ast) {
+			return ast.Descendants("statement")
+					.Where(e => e.FirstElement().Value == ";");
 		}
 	}
 }

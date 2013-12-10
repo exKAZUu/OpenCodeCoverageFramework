@@ -2,8 +2,11 @@
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
+using System.Runtime.InteropServices;
+using System.Security.Policy;
 using System.Xml.Linq;
 using Code2Xml.Core;
+using Code2Xml.Languages.ANTLRv3.Core;
 using Paraiba.Linq;
 
 namespace Occf.Learner.Core.Tests {
@@ -506,6 +509,60 @@ namespace Occf.Learner.Core.Tests {
 			return element.IsTokenSet()
 					? element.Name() + element.Attribute("id").Value + element.TokenText()
 					: element.Name() + element.Attribute("id").Value;
+		}
+
+		public static HashSet<string> GetCommonKeys(this IEnumerable<XElement> targets, int length) {
+			HashSet<string> commonKeys = null;
+			foreach (var target in targets) {
+				var keys = target.GetSurroundingKeys(length);
+				if (commonKeys == null) {
+					commonKeys = keys;
+				} else {
+					commonKeys.IntersectWith(keys);
+				}
+			}
+			return commonKeys;
+		}
+
+		public static HashSet<string> GetSurroundingKeys(this XElement element, int length) {
+			var ret = new HashSet<string>();
+			var childElements = new List<Tuple<XElement, string>> { Tuple.Create(element, element.Name()) };
+			var parentElement = Tuple.Create(element, element.Name());
+			var i = 1;
+			for (; i <= length; i++) {
+				var newChildElements = new List<Tuple<XElement, string>>();
+				foreach (var t in childElements.Where(t2 => !t2.Item1.IsTokenSet())) {
+					foreach (var e in t.Item1.Elements()) {
+						var key = t.Item2 + ">" + e.NameOrTokenWithId();
+						newChildElements.Add(Tuple.Create(e, key));
+					}
+				}
+				foreach (var e in parentElement.Item1.Siblings(10)) {
+					var key = parentElement.Item2 + "-" + e.NameOrTokenWithId();
+					newChildElements.Add(Tuple.Create(e, key));
+				}
+				ret.UnionWith(newChildElements.Select(t => t.Item2));
+				childElements = newChildElements;
+				parentElement = Tuple.Create(parentElement.Item1.Parent,
+						parentElement.Item2 + "<" + parentElement.Item1.NameOrTokenWithId());
+				if (parentElement.Item1 == null) {
+					break;
+				}
+				ret.Add(parentElement.Item2);
+			}
+			for (; i <= length; i++) {
+				var newChildElements = new List<Tuple<XElement, string>>();
+				foreach (var t in childElements.Where(t2 => !t2.Item1.IsTokenSet())) {
+					foreach (var e in t.Item1.Elements()) {
+						var key = t.Item2 + ">" + e.NameOrTokenWithId();
+						newChildElements.Add(Tuple.Create(e, key));
+					}
+				}
+				ret.UnionWith(newChildElements.Select(t => t.Item2));
+				childElements = newChildElements;
+			}
+			ret.Add(element.NameOrTokenWithId());
+			return ret;
 		}
 
 		public static Dictionary<string, List<XElement>> SurroundingElementsWithSelf(

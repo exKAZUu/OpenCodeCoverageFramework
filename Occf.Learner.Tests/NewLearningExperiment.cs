@@ -1,9 +1,9 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Xml.Linq;
 using Code2Xml.Core;
 using Occf.Learner.Core.Tests.LearningAlgorithms;
@@ -19,8 +19,9 @@ namespace Occf.Learner.Core.Tests {
 		private Dictionary<string, HashSet<XElement>> _rejectedElementDict;
 		private List<XElement> _seedAccepted;
 		private List<XElement> _seedRejected;
+		private HashSet<BigInteger> _learnedDiffs;
 		private int _predicateDepth = 10;
-		private const int LearningCount = 10;
+		private const int LearningCount = 20;
 
 		protected NewLearningExperiment(params string[] elementNames) {
 			_elementNames = elementNames.ToHashSet();
@@ -29,7 +30,7 @@ namespace Occf.Learner.Core.Tests {
 		public void LearnUntilBeStable(
 				ICollection<string> allPaths, ICollection<string> seedPaths, LearningAlgorithm learner,
 				double threshold) {
-			Console.WriteLine(learner);
+			_learnedDiffs = new HashSet<BigInteger>();
 			_acceptedElementDict = new Dictionary<string, HashSet<XElement>>();
 			_rejectedElementDict = new Dictionary<string, HashSet<XElement>>();
 			foreach (var path in allPaths) {
@@ -58,9 +59,11 @@ namespace Occf.Learner.Core.Tests {
 			_seedAccepted.AddRange(seedAccepted);
 			_seedRejected.AddRange(seedRejected);
 
+			var count = 2;
+
 			while (true) {
 				var time = Environment.TickCount;
-				if (LearnAndApply()) {
+				if (LearnAndApply() && --count == 0) {
 					break;
 				}
 				Console.WriteLine("Time: " + (Environment.TickCount - time));
@@ -68,10 +71,11 @@ namespace Occf.Learner.Core.Tests {
 			Console.WriteLine("Required elements: " + (_seedAccepted.Count + _seedRejected.Count));
 		}
 
-		private HashSet<SurroundingElementsPredicate> CreatePredicates() {
-			var preds = TryCreatePredicates(_seedAccepted);
+		private HashSet<string> LearnCommonKeys() {
+			var commonKeys = _seedAccepted.GetCommonKeys(_predicateDepth);
 			XElement lastElement = null;
-			while (_seedRejected.Any(e => GetClassifierInput(e, preds).IsEmpty())) {
+			BigInteger diffs;
+			while (_seedRejected.Any(e => GetClassifierInput(e, commonKeys, out diffs) == 0)) {
 				if (lastElement == null) {
 					Console.WriteLine("Failed to learn rules.");
 				}
@@ -80,7 +84,7 @@ namespace Occf.Learner.Core.Tests {
 				}
 				lastElement = _seedAccepted[_seedAccepted.Count - 1];
 				_seedAccepted.RemoveAt(_seedAccepted.Count - 1);
-				preds = TryCreatePredicates(_seedAccepted);
+				commonKeys = _seedAccepted.GetCommonKeys(_predicateDepth);
 			}
 			if (lastElement != null) {
 				Console.WriteLine(lastElement.TokenText());
@@ -90,25 +94,26 @@ namespace Occf.Learner.Core.Tests {
 				}
 				throw new Exception("You must add more seeds.");
 			}
-			return preds;
+			return commonKeys;
 		}
 
 		private bool LearnAndApply() {
-			var preds = CreatePredicates();
-			Debug.Assert(_seedAccepted.All(e => GetClassifierInput(e, preds).IsEmpty()));
+			var commonKeys = LearnCommonKeys();
+			BigInteger diffs;
+			Debug.Assert(_seedAccepted.All(e => GetClassifierInput(e, commonKeys, out diffs) == 0));
 
 			var correctlyAccepted = 0;
 			var correctlyRejected = 0;
 			var wronglyAccepted = 0;
 			var wronglyRejected = 0;
-			var nextElements = new List<Tuple<int, XElement, string, bool, List<int>>>();
+			var nextElements = new List<Tuple<int, XElement, string, bool, BigInteger>>();
 
 			foreach (var kv in _acceptedElementDict) {
 				var path = kv.Key;
 				var elements = kv.Value;
 				foreach (var e in elements) {
-					var diffs = GetClassifierInput(e, preds).ToList();
-					var actual = diffs.Count == 0;
+					var diffCount = GetClassifierInput(e, commonKeys, out diffs);
+					var actual = diffCount == 0;
 					if (actual) {
 						correctlyAccepted++;
 					} else {
@@ -117,7 +122,7 @@ namespace Occf.Learner.Core.Tests {
 						}
 						wronglyRejected++;
 					}
-					UpdateNextElements(diffs, nextElements, e, path, true);
+					UpdateNextElements(diffCount, diffs, nextElements, e, path, true);
 				}
 				Console.Write(".");
 			}
@@ -126,8 +131,8 @@ namespace Occf.Learner.Core.Tests {
 				var path = kv.Key;
 				var elements = kv.Value;
 				foreach (var e in elements) {
-					var diffs = GetClassifierInput(e, preds).ToList();
-					var actual = diffs.Count == 0;
+					var diffCount = GetClassifierInput(e, commonKeys, out diffs);
+					var actual = diffCount == 0;
 					if (actual) {
 						if (wronglyAccepted == 0) {
 							//Console.WriteLine("WA (" + prob + "): " + e.SafeParent().SafeParent().SafeParent());
@@ -136,22 +141,25 @@ namespace Occf.Learner.Core.Tests {
 					} else {
 						correctlyRejected++;
 					}
-					UpdateNextElements(diffs, nextElements, e, path, false);
+					UpdateNextElements(diffCount, diffs, nextElements, e, path, false);
 				}
 				Console.Write(".");
 			}
 			Console.WriteLine("done");
 			Console.WriteLine("WA: " + wronglyAccepted + ", WR: " + wronglyRejected + ", CA: "
 			                  + correctlyAccepted + ", CR: " + correctlyRejected + ", L: "
-			                  + (_seedAccepted.Count + _seedRejected.Count) + ", P: " + preds.Count);
+			                  + (_seedAccepted.Count + _seedRejected.Count) + ", P: " + commonKeys.Count);
 			Console.WriteLine("Accepted: " + _seedAccepted.Count
 			                  + " / " + _acceptedElementDict.Sum(kv => kv.Value.Count));
+			Console.WriteLine("Rejected: " + _seedRejected.Count
+			                  + " / " + _rejectedElementDict.Sum(kv => kv.Value.Count));
 			WrongCount = wronglyAccepted + wronglyRejected;
 			if (nextElements.Count > 0) {
 				Console.WriteLine("Diff: " + nextElements[0].Item1);
 				foreach (var t in nextElements) {
 					if (t.Item4) {
 						_seedAccepted.Add(t.Item2);
+						_learnedDiffs.Clear();
 					} else {
 						_seedRejected.Add(t.Item2);
 					}
@@ -160,14 +168,12 @@ namespace Occf.Learner.Core.Tests {
 			return nextElements.Count(t => t.Item4) == 0;
 		}
 
-		private static int Hash(IEnumerable<int> diffs) {
-			return diffs.Aggregate(1, (current, diff) => current * diff);
-		}
-
-		private static void UpdateNextElements(List<int> diffs, List<Tuple<int, XElement, string, bool, List<int>>> nextElements, XElement e, string path, bool accepted) {
-			var count = diffs.Count;
+		private void UpdateNextElements(
+				int count, BigInteger diffs, List<Tuple<int, XElement, string, bool, BigInteger>> nextElements,
+				XElement e, string path, bool accepted) {
 			if (count > 0) {
-				if (!nextElements.Any(t => t.Item1 == count && Hash(t.Item5) == Hash(diffs))) {
+				if (!_learnedDiffs.Contains(diffs)) {
+					_learnedDiffs.Add(diffs);
 					nextElements.Add(Tuple.Create(count, e, path, accepted, diffs));
 					nextElements.Sort((t1, t2) => t1.Item1.CompareTo(t2.Item1));
 					if (nextElements.Count > LearningCount) {
@@ -177,29 +183,18 @@ namespace Occf.Learner.Core.Tests {
 			}
 		}
 
-		private HashSet<SurroundingElementsPredicate> TryCreatePredicates(IEnumerable<XElement> elements) {
-			var elementCount = elements.Count();
-			var dict = SurroundingElementsPredicate.GetSurroundingElements(elements, _predicateDepth);
-			foreach (var kv in dict) {
-				kv.Value.ClearItemsIf((key, count) => count != elementCount);
-			}
-			var newPredicates = dict
-					.SelectMany(kv => kv.Value
-							.Select(item => new SurroundingElementsPredicate(kv.Key, item)))
-					.ToHashSet();
-			return newPredicates;
-		}
-
-		private IEnumerable<int> GetClassifierInput(
-				XElement e, IEnumerable<SurroundingElementsPredicate> predicates) {
-			var dict = SurroundingElementsPredicate.GetSurroundingElements(e, _predicateDepth);
-			var index = 0;
-			foreach (var predicate in predicates) {
-				if (!predicate.Check(dict)) {
-					yield return index;
+		private int GetClassifierInput(XElement e, IEnumerable<string> commonKeys, out BigInteger diffs) {
+			var keys = e.GetSurroundingKeys(_predicateDepth);
+			var count = 0;
+			diffs = BigInteger.Zero;
+			foreach (var commonKey in commonKeys) {
+				if (!keys.Contains(commonKey)) {
+					count++;
+					diffs++;
 				}
-				index++;
+				diffs <<= 1;
 			}
+			return count;
 		}
 
 		protected IEnumerable<XElement> GetAllElements(XElement ast) {

@@ -16,6 +16,10 @@ namespace Occf.Learner.Core.Tests {
 			get { return _dict; }
 		}
 
+		public CountingSet() {
+			_dict = new Dictionary<T, int>();
+		}
+
 		public CountingSet(IEnumerable<T> values) {
 			_dict = new Dictionary<T, int>();
 			foreach (var key in values) {
@@ -135,13 +139,13 @@ namespace Occf.Learner.Core.Tests {
 			}
 		}
 
-		public void ExceptFor(CountingSet<T> set) {
+		public void ExceptWith(CountingSet<T> set) {
 			foreach (var kv in set.ItemsWithCount) {
 				Remove(kv.Key, kv.Value);
 			}
 		}
 
-		public void ExceptForIgnoringCount(CountingSet<T> set) {
+		public void ClearItemsWith(CountingSet<T> set) {
 			foreach (var kv in set.ItemsWithCount) {
 				ClearItem(kv.Key);
 			}
