@@ -59,16 +59,39 @@ namespace Occf.Learner.Core.Tests {
 			_seedAccepted.AddRange(seedAccepted);
 			_seedRejected.AddRange(seedRejected);
 
-			var count = 2;
+			var originalSeedAccepted = _seedAccepted.ToList();
+			var originalSeedRejected = _seedRejected.ToList();
 
 			while (true) {
 				var time = Environment.TickCount;
-				if (LearnAndApply() && --count == 0) {
+				if (LearnAndApply()) {
 					break;
 				}
 				Console.WriteLine("Time: " + (Environment.TickCount - time));
 			}
 			Console.WriteLine("Required elements: " + (_seedAccepted.Count + _seedRejected.Count));
+
+			var unionKeys = originalSeedAccepted.GetUnionKeys(_predicateDepth);
+			const int width = 300;
+			foreach (var e in originalSeedAccepted) {
+				var i = GetBit(e, unionKeys);
+				Console.WriteLine(PredicateGenerator.BigIntegerToString(i, width));
+			}
+			Console.WriteLine(string.Join("", Enumerable.Repeat("-", 100)));
+			foreach (var e in _seedAccepted) {
+				var i = GetBit(e, unionKeys);
+				Console.WriteLine(PredicateGenerator.BigIntegerToString(i, width));
+			}
+			Console.WriteLine(string.Join("", Enumerable.Repeat("-", 100)));
+			var commonKeys = _seedAccepted.GetCommonKeys(_predicateDepth);
+			Console.Write(string.Join("", Enumerable.Repeat("0", width - unionKeys.Count)));
+			foreach (var key in unionKeys) {
+				if (commonKeys.Contains(key)) {
+					Console.Write("1");
+				} else {
+					Console.Write("0");
+				}
+			}
 		}
 
 		private HashSet<string> LearnCommonKeys() {
@@ -195,6 +218,18 @@ namespace Occf.Learner.Core.Tests {
 				diffs <<= 1;
 			}
 			return count;
+		}
+
+		private BigInteger GetBit(XElement e, IEnumerable<string> predicateKeys) {
+			var keys = e.GetSurroundingKeys(_predicateDepth);
+			var ret = BigInteger.Zero;
+			foreach (var predicateKey in predicateKeys) {
+				if (keys.Contains(predicateKey)) {
+					ret++;
+				}
+				ret <<= 1;
+			}
+			return ret;
 		}
 
 		protected IEnumerable<XElement> GetAllElements(XElement ast) {

@@ -21,11 +21,11 @@ namespace Occf.Learner.Core.Tests {
 					new JavaWhileExperiment(),
 					new JavaDoWhileExperiment(),
 					new JavaForExperiment(),
-					new JavaPreconditionsExperiment(),
+					//new JavaPreconditionsExperiment(),
 					//new JavaStatementExperiment(), 
-					new JavaBlockExperiment(),
-					new JavaLabeledStatementExperiment(), 
-					new JavaEmptyStatementExperiment(),
+					//new JavaBlockExperiment(),
+					//new JavaLabeledStatementExperiment(), 
+					//new JavaEmptyStatementExperiment(),
 				};
 				var algorithms = new LearningAlgorithm[] {
 					new SvmLearner(new Linear()),

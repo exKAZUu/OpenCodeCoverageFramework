@@ -2,11 +2,9 @@
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Security.Policy;
+using System.Numerics;
 using System.Xml.Linq;
 using Code2Xml.Core;
-using Code2Xml.Languages.ANTLRv3.Core;
 using Paraiba.Linq;
 
 namespace Occf.Learner.Core.Tests {
@@ -501,6 +499,34 @@ namespace Occf.Learner.Core.Tests {
 	}
 
 	public static class PredicateGenerator {
+		public static string BigIntegerToString(BigInteger i, int width) {
+			var ret = "";
+			while (i != BigInteger.Zero) {
+				if ((i & BigInteger.One) != BigInteger.Zero) {
+					ret = "1" + ret;
+				} else {
+					ret = "0" + ret;
+				}
+				width--;
+				i >>= 1;
+			}
+			while (--width >= 0) {
+				ret = "0" + ret;
+			}
+			return ret;
+		}
+
+		public static BigInteger StringToBigInteger(string s) {
+			var ret = BigInteger.Zero;
+			foreach (var ch in s) {
+				ret <<= 1;
+				if (ch == '1') {
+					ret |= BigInteger.One;
+				}
+			}
+			return ret;
+		}
+
 		public static string NameWithId(this XElement element) {
 			return element.Name() + element.Attribute("id").Value;
 		}
@@ -509,6 +535,15 @@ namespace Occf.Learner.Core.Tests {
 			return element.IsTokenSet()
 					? element.Name() + element.Attribute("id").Value + element.TokenText()
 					: element.Name() + element.Attribute("id").Value;
+		}
+
+		public static HashSet<string> GetUnionKeys(this IEnumerable<XElement> targets, int length) {
+			var commonKeys = new HashSet<string>();
+			foreach (var target in targets) {
+				var keys = target.GetSurroundingKeys(length);
+				commonKeys.UnionWith(keys);
+			}
+			return commonKeys;
 		}
 
 		public static HashSet<string> GetCommonKeys(this IEnumerable<XElement> targets, int length) {
