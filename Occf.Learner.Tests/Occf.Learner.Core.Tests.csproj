@@ -78,6 +78,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ClassificationTest.cs" />
+    <Compile Include="NewLearningExperimentWithGrouping.cs" />
     <Compile Include="JavaScriptExperimentTest.cs" />
     <Compile Include="NewLearningExperiment.cs" />
     <Compile Include="OriginalLearningExperiment.cs" />
