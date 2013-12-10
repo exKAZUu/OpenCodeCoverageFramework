@@ -76,6 +76,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ClassificationTest.cs" />
     <Compile Include="NewLearningExperiment.cs" />
     <Compile Include="OriginalLearningExperiment.cs" />
     <Compile Include="CountingSet.cs" />
