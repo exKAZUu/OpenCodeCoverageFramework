@@ -15,7 +15,7 @@ namespace Occf.Learner.Core.Tests {
 	public class JavaScriptExperimentTest {
 		private static IEnumerable<TestCaseData> TestCases {
 			get {
-				var exps = new NewLearningExperiment[] {
+				var exps = new BitLearningExperiment[] {
 					//new JavaScriptBranchExperiment(),
 					new JavaScriptIfExperiment(),
 					new JavaScriptWhileExperiment(),
@@ -52,14 +52,14 @@ namespace Occf.Learner.Core.Tests {
 
 		[Test, TestCaseSource("TestCases")]
 		public void Test(
-				NewLearningExperiment exp, LearningAlgorithm algorithm, string projectPath, IList<string> seedPaths) {
+				BitLearningExperiment exp, LearningAlgorithm algorithm, string projectPath, IList<string> seedPaths) {
 			var allPaths = Directory.GetFiles(projectPath, "*.js", SearchOption.AllDirectories)
 					.ToList();
 			exp.LearnUntilBeStable(allPaths, seedPaths, algorithm, 0.5);
 			Assert.That(exp.WrongCount, Is.EqualTo(0));
 		}
 	}
-	public class JavaScriptBranchExperiment : NewLearningExperiment {
+	public class JavaScriptBranchExperiment : BitLearningExperiment {
 		public JavaScriptBranchExperiment() : base("expression") {}
 
 		protected override Processor Processor {
@@ -81,7 +81,7 @@ namespace Occf.Learner.Core.Tests {
 		}
 	}
 
-	public class JavaScriptIfExperiment : NewLearningExperiment {
+	public class JavaScriptIfExperiment : BitLearningExperiment {
 		public JavaScriptIfExperiment() : base("expression") {}
 
 		protected override Processor Processor {
@@ -94,7 +94,7 @@ namespace Occf.Learner.Core.Tests {
 		}
 	}
 
-	public class JavaScriptWhileExperiment : NewLearningExperiment {
+	public class JavaScriptWhileExperiment : BitLearningExperiment {
 		public JavaScriptWhileExperiment() : base("expression") {}
 
 		protected override Processor Processor {
@@ -107,7 +107,7 @@ namespace Occf.Learner.Core.Tests {
 		}
 	}
 
-	public class JavaScriptDoWhileExperiment : NewLearningExperiment {
+	public class JavaScriptDoWhileExperiment : BitLearningExperiment {
 		public JavaScriptDoWhileExperiment() : base("expression") {}
 
 		protected override Processor Processor {
@@ -120,7 +120,7 @@ namespace Occf.Learner.Core.Tests {
 		}
 	}
 
-	public class JavaScriptForExperiment : NewLearningExperiment {
+	public class JavaScriptForExperiment : BitLearningExperiment {
 		public JavaScriptForExperiment() : base("expression") {}
 
 		protected override Processor Processor {
@@ -135,7 +135,7 @@ namespace Occf.Learner.Core.Tests {
 		}
 	}
 
-	public class JavaScriptConsoleLogExperiment : NewLearningExperiment {
+	public class JavaScriptConsoleLogExperiment : BitLearningExperiment {
 		public JavaScriptConsoleLogExperiment() : base("assignmentExpression") {}
 
 		protected override Processor Processor {
@@ -151,7 +151,7 @@ namespace Occf.Learner.Core.Tests {
 		}
 	}
 
-	public class JavaScriptBlockExperiment : NewLearningExperiment {
+	public class JavaScriptBlockExperiment : BitLearningExperiment {
 		protected override Processor Processor {
 			get { return ProcessorLoader.JavaScriptUsingAntlr3; }
 		}
@@ -164,7 +164,7 @@ namespace Occf.Learner.Core.Tests {
 		}
 	}
 
-	public class JavaScriptLabeledStatementExperiment : NewLearningExperiment {
+	public class JavaScriptLabeledStatementExperiment : BitLearningExperiment {
 		protected override Processor Processor {
 			get { return ProcessorLoader.JavaScriptUsingAntlr3; }
 		}
@@ -177,7 +177,7 @@ namespace Occf.Learner.Core.Tests {
 		}
 	}
 
-	public class JavaScriptEmptyStatementExperiment : NewLearningExperiment {
+	public class JavaScriptEmptyStatementExperiment : BitLearningExperiment {
 		protected override Processor Processor {
 			get { return ProcessorLoader.JavaScriptUsingAntlr3; }
 		}
