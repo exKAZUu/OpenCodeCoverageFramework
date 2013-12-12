@@ -15,17 +15,17 @@ namespace Occf.Learner.Core.Tests {
 	public class JavaExperimentTest {
 		private static IEnumerable<TestCaseData> TestCases {
 			get {
-				var exps = new BitLearningExperimentWithGrouping[] {
-					new JavaBranchExperiment(),
-					//new JavaIfExperiment(),
-					//new JavaWhileExperiment(),
-					//new JavaDoWhileExperiment(),
-					//new JavaForExperiment(),
-					//new JavaPreconditionsExperiment(),
+				var exps = new BitLearningExperiment[] {
+					//new JavaBranchExperiment(),
 					//new JavaStatementExperiment(), 
-					//new JavaBlockExperiment(),
-					//new JavaLabeledStatementExperiment(), 
-					//new JavaEmptyStatementExperiment(),
+					new JavaIfExperiment(),
+					new JavaWhileExperiment(),
+					new JavaDoWhileExperiment(),
+					new JavaForExperiment(),
+					new JavaPreconditionsExperiment(),
+					new JavaBlockExperiment(),
+					new JavaLabeledStatementExperiment(), 
+					new JavaEmptyStatementExperiment(),
 				};
 				var algorithms = new LearningAlgorithm[] {
 					new SvmLearner(new Linear()),
@@ -36,10 +36,10 @@ namespace Occf.Learner.Core.Tests {
 				var learningSets = new[] {
 					Tuple.Create(Fixture.GetInputProjectPath(langName, "pageobjectgenerator"),
 							new List<string> { Fixture.GetInputCodePath(langName, "Seed.java"), }),
-					//Tuple.Create(Fixture.GetInputProjectPath(langName, "presto"),
-					//		new List<string> { Fixture.GetInputCodePath(langName, "Seed.java"), }),
-					//Tuple.Create(Fixture.GetInputProjectPath(langName, "storm"),
-					//		new List<string> { Fixture.GetInputCodePath(langName, "Seed.java"), }),
+					Tuple.Create(Fixture.GetInputProjectPath(langName, "presto"),
+							new List<string> { Fixture.GetInputCodePath(langName, "Seed.java"), }),
+					Tuple.Create(Fixture.GetInputProjectPath(langName, "storm"),
+							new List<string> { Fixture.GetInputCodePath(langName, "Seed.java"), }),
 				};
 				foreach (var exp in exps) {
 					foreach (var algorithm in algorithms) {
@@ -53,7 +53,7 @@ namespace Occf.Learner.Core.Tests {
 
 		[Test, TestCaseSource("TestCases")]
 		public void Test(
-				BitLearningExperimentWithGrouping exp, LearningAlgorithm algorithm, string projectPath, IList<string> seedPaths) {
+				BitLearningExperiment exp, LearningAlgorithm algorithm, string projectPath, IList<string> seedPaths) {
 			var allPaths = Directory.GetFiles(projectPath, "*.java", SearchOption.AllDirectories)
 					.ToList();
 			exp.LearnUntilBeStable(allPaths, seedPaths, algorithm, 0.5);
@@ -61,7 +61,7 @@ namespace Occf.Learner.Core.Tests {
 		}
 	}
 
-	public class JavaBranchExperiment : BitLearningExperimentWithGrouping {
+	public class JavaBranchExperiment : BitLearningExperiment {
 		protected override Processor Processor {
 			get { return ProcessorLoader.JavaUsingAntlr3; }
 		}
@@ -86,7 +86,7 @@ namespace Occf.Learner.Core.Tests {
 		}
 	}
 
-	public class JavaIfExperiment : BitLearningExperimentWithGrouping {
+	public class JavaIfExperiment : BitLearningExperiment {
 		protected override Processor Processor {
 			get { return ProcessorLoader.JavaUsingAntlr3; }
 		}
@@ -101,7 +101,7 @@ namespace Occf.Learner.Core.Tests {
 		}
 	}
 
-	public class JavaWhileExperiment : BitLearningExperimentWithGrouping {
+	public class JavaWhileExperiment : BitLearningExperiment {
 		protected override Processor Processor {
 			get { return ProcessorLoader.JavaUsingAntlr3; }
 		}
@@ -116,7 +116,7 @@ namespace Occf.Learner.Core.Tests {
 		}
 	}
 
-	public class JavaDoWhileExperiment : BitLearningExperimentWithGrouping {
+	public class JavaDoWhileExperiment : BitLearningExperiment {
 		protected override Processor Processor {
 			get { return ProcessorLoader.JavaUsingAntlr3; }
 		}
@@ -131,7 +131,7 @@ namespace Occf.Learner.Core.Tests {
 		}
 	}
 
-	public class JavaForExperiment : BitLearningExperimentWithGrouping {
+	public class JavaForExperiment : BitLearningExperiment {
 		protected override Processor Processor {
 			get { return ProcessorLoader.JavaUsingAntlr3; }
 		}
@@ -146,7 +146,7 @@ namespace Occf.Learner.Core.Tests {
 		}
 	}
 
-	public class JavaPreconditionsExperiment : BitLearningExperimentWithGrouping {
+	public class JavaPreconditionsExperiment : BitLearningExperiment {
 		protected override Processor Processor {
 			get { return ProcessorLoader.JavaUsingAntlr3; }
 		}
@@ -176,7 +176,7 @@ namespace Occf.Learner.Core.Tests {
 		}
 	}
 
-	public class JavaStatementExperiment : BitLearningExperimentWithGrouping {
+	public class JavaStatementExperiment : BitLearningExperiment {
 		protected override Processor Processor {
 			get { return ProcessorLoader.JavaUsingAntlr3; }
 		}
@@ -204,7 +204,7 @@ namespace Occf.Learner.Core.Tests {
 		}
 	}
 
-	public class JavaBlockExperiment : BitLearningExperimentWithGrouping {
+	public class JavaBlockExperiment : BitLearningExperiment {
 		protected override Processor Processor {
 			get { return ProcessorLoader.JavaUsingAntlr3; }
 		}
@@ -217,7 +217,7 @@ namespace Occf.Learner.Core.Tests {
 		}
 	}
 
-	public class JavaLabeledStatementExperiment : BitLearningExperimentWithGrouping {
+	public class JavaLabeledStatementExperiment : BitLearningExperiment {
 		protected override Processor Processor {
 			get { return ProcessorLoader.JavaUsingAntlr3; }
 		}
@@ -238,7 +238,7 @@ namespace Occf.Learner.Core.Tests {
 		}
 	}
 
-	public class JavaEmptyStatementExperiment : BitLearningExperimentWithGrouping {
+	public class JavaEmptyStatementExperiment : BitLearningExperiment {
 		protected override Processor Processor {
 			get { return ProcessorLoader.JavaUsingAntlr3; }
 		}

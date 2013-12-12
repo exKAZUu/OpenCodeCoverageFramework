@@ -133,6 +133,18 @@ namespace Occf.Learner.Core.Tests {
 			return _dict.Values.Sum();
 		}
 
+		public void UnionWith(IEnumerable<T> keys) {
+			foreach (var key in keys) {
+				Add(key);
+			}
+		}
+
+		public void ExceptWith(IEnumerable<T> keys) {
+			foreach (var key in keys) {
+				Remove(key);
+			}
+		}
+
 		public void UnionWith(CountingSet<T> set) {
 			foreach (var kv in set.ItemsWithCount) {
 				Add(kv.Key, kv.Value);

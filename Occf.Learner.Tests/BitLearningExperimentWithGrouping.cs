@@ -39,43 +39,75 @@ namespace Occf.Learner.Core.Tests {
 				double threshold) {
 			_learnedDiffs = new HashSet<BigInteger>();
 
-			var seedAccepted = new HashSet<XElement>();
-			var seedRejected = new HashSet<XElement>();
+			var seedAcceptedElements = new HashSet<XElement>();
+			var seedRejectedElements = new HashSet<XElement>();
 			foreach (var path in seedPaths) {
 				var codeFile = new FileInfo(path);
 				var ast = Processor.GenerateXml(codeFile);
-				seedRejected.UnionWith(GetAllElements(ast).ToHashSet());
-				seedAccepted.UnionWith(GetAcceptedElements(ast));
+				seedRejectedElements.UnionWith(GetAllElements(ast));
+				seedAcceptedElements.UnionWith(GetAcceptedElements(ast));
 			}
-			seedRejected.ExceptWith(seedAccepted);
-			_masterPredicates = seedAccepted.GetUnionKeys(_predicateDepth).ToList();
+			seedRejectedElements.ExceptWith(seedAcceptedElements);
+			_masterPredicates = seedAcceptedElements.GetUnionKeys(_predicateDepth).ToList();
 			_featureCount = _masterPredicates.Count;
-			_seedAccepted = seedAccepted.Select(e => GetBits(e, _masterPredicates))
+
+			_seedAccepted = seedAcceptedElements
+					.Select(e => GetBits(e, _masterPredicates))
 					.ToHashSet();
-			_rejected = seedRejected.Select(e => GetBits(e, _masterPredicates))
+			_rejected = seedRejectedElements
+					.Select(e => GetBits(e, _masterPredicates))
 					.ToHashSet();
 			_accepted = new List<BigInteger>();
 
-			_acceptedFeatures = new HashSet<BigInteger>();
-			_rejectedFeatures = new HashSet<BigInteger>();
+			var acceptedFeaturesCounter = new CountingSet<BigInteger>();
+			var allFeaturesCounter = new CountingSet<BigInteger>();
 			foreach (var path in allPaths) {
 				var codeFile = new FileInfo(path);
 				var ast = Processor.GenerateXml(codeFile);
-				var rejectedElements = GetAllElements(ast).ToHashSet();
-				var acceptedElements = GetAcceptedElements(ast).ToHashSet();
-				rejectedElements.ExceptWith(acceptedElements);
-				_acceptedFeatures.UnionWith(acceptedElements
+				allFeaturesCounter.UnionWith(GetAllElements(ast)
 						.Select(e => GetBits(e, _masterPredicates)));
-				_rejectedFeatures.UnionWith(rejectedElements
+				acceptedFeaturesCounter.UnionWith(GetAcceptedElements(ast)
 						.Select(e => GetBits(e, _masterPredicates)));
 			}
-			_rejectedFeatures.UnionWith(_rejected);
+			const int initialFeatureCount = 5;
+			var initialMaxFeatures = allFeaturesCounter
+					.ItemsWithCount.OrderByDescending(kv => kv.Value)
+					.Select(kv => kv.Key)
+					.Where(f => !_seedAccepted.Contains(f) && !_rejected.Contains(f))
+					.Take(initialFeatureCount)
+					.ToList();
+			var initialMinFeatures = allFeaturesCounter
+					.ItemsWithCount.OrderBy(kv => kv.Value)
+					.Select(kv => kv.Key)
+					.Where(f => !_seedAccepted.Contains(f) && !_rejected.Contains(f))
+					.Take(initialFeatureCount)
+					.ToList();
 
+			allFeaturesCounter.ExceptWith(acceptedFeaturesCounter);
+			_acceptedFeatures = acceptedFeaturesCounter.ToHashSet();
+			_rejectedFeatures = allFeaturesCounter.ToHashSet();
+			Console.WriteLine("Max A: " + acceptedFeaturesCounter.ItemsWithCount.Max(kv => kv.Value) +
+			                  ", Min A: " + acceptedFeaturesCounter.ItemsWithCount.Min(kv => kv.Value) +
+			                  ", Max R: " + allFeaturesCounter.ItemsWithCount.Max(kv => kv.Value) +
+			                  ", Min R: " + allFeaturesCounter.ItemsWithCount.Min(kv => kv.Value));
+
+			foreach (var feature in initialMaxFeatures.Concat(initialMinFeatures)) {
+				if (_rejectedFeatures.Contains(feature)) {
+					_rejected.Add(feature);
+				} else {
+					_accepted.Add(feature);
+				}
+			}
+
+			_rejectedFeatures.UnionWith(_rejected);
 			var count = 2;
 			while (true) {
 				var time = Environment.TickCount;
-				if (LearnAndApply() && --count == 0) {
-					break;
+				if (LearnAndApply()) {
+					if (--count == 0) {
+						break;
+					}
+					LearnPredicates();
 				}
 				Console.WriteLine("Time: " + (Environment.TickCount - time));
 			}
@@ -124,7 +156,97 @@ namespace Occf.Learner.Core.Tests {
 			}
 		}
 
-		private List<BigInteger> LearnCommonKeys() {
+		private List<BigInteger> LearnPredicatesFromMinAccepted() {
+			var learningSet = _seedAccepted
+					.Select(s => new Stack<BigInteger>(Enumerable.Repeat(s, 1)))
+					.ToList();
+			var acceptedSet = _accepted.ToHashSet();
+			while (acceptedSet.Count > 0) {
+				var selectedTuple = acceptedSet
+						.Select(a => {
+							var maxCount = -1;
+							var maxIndex = -1;
+							for (int i = 0; i < learningSet.Count; i++) {
+								learningSet[i].Push(a);
+								var predicates = learningSet.Select(GetPredicate).ToList();
+								if (CanReject(predicates, _rejected)) {
+									var count = CountRejected(predicates);
+									if (maxCount < count) {
+										maxCount = count;
+										maxIndex = i;
+									}
+								}
+								learningSet[i].Pop();
+							}
+							return Tuple.Create(a, maxCount, maxIndex);
+						})
+						.Where(t => t.Item3 >= 0)
+						.MinElementOrDefault(t => t.Item2);
+				if (selectedTuple == null) {
+					throw new Exception("Fail to learn rules");
+				}
+				learningSet[selectedTuple.Item3].Push(selectedTuple.Item1);
+				acceptedSet.Remove(selectedTuple.Item1);
+			}
+			return learningSet.Select(GetPredicate).ToList();
+		}
+
+		private List<BigInteger> LearnPredicatesFromMaxAccepted() {
+			var learningSet = _seedAccepted
+					.Select(s => new Stack<BigInteger>(Enumerable.Repeat(s, 1)))
+					.ToList();
+			var acceptedSet = _accepted.ToHashSet();
+			while (acceptedSet.Count > 0) {
+				var selectedTuple = acceptedSet
+						.Select(a => {
+							var maxCount = -1;
+							var maxIndex = -1;
+							for (int i = 0; i < learningSet.Count; i++) {
+								learningSet[i].Push(a);
+								var predicates = learningSet.Select(GetPredicate).ToList();
+								if (CanReject(predicates, _rejected)) {
+									var count = CountRejected(predicates);
+									if (maxCount < count) {
+										maxCount = count;
+										maxIndex = i;
+									}
+								}
+								learningSet[i].Pop();
+							}
+							return Tuple.Create(a, maxCount, maxIndex);
+						})
+						.Where(t => t.Item3 >= 0)
+						.MaxElementOrDefault(t => t.Item2);
+				if (selectedTuple == null) {
+					throw new Exception("Fail to learn rules");
+				}
+				learningSet[selectedTuple.Item3].Push(selectedTuple.Item1);
+				acceptedSet.Remove(selectedTuple.Item1);
+			}
+			return learningSet.Select(GetPredicate).ToList();
+		}
+
+		private List<BigInteger> LearnPredicates() {
+			while (true) {
+				var preds1 = LearnPredicatesFromMaxAccepted();
+				var preds2 = LearnPredicatesFromMinAccepted();
+				var newAccepted = _acceptedFeatures
+						.Where(f => IsRejected(preds1, f) != IsRejected(preds2, f))
+						.ToList();
+				var newRejected = _rejectedFeatures
+						.Where(f => IsRejected(preds1, f) != IsRejected(preds2, f))
+						.ToList();
+				_accepted.AddRange(newAccepted);
+				_rejected.UnionWith(newRejected);
+				Console.WriteLine("A: " + newAccepted.Count + ", R: " + newRejected.Count);
+				if (newAccepted.Count + newRejected.Count == 0) {
+					break;
+				}
+			}
+			return LearnPredicatesFromMaxAccepted();
+		}
+
+		private List<BigInteger> OriginalLearnPredicates() {
 			var candidatePredicates = EnumeratePredicates()
 					.Where(predicates => CanReject(predicates, _rejected));
 			return candidatePredicates
@@ -133,11 +255,15 @@ namespace Occf.Learner.Core.Tests {
 
 		private int CountRejected(IEnumerable<BigInteger> predicates) {
 			return _acceptedFeatures.Concat(_rejectedFeatures)
-					.Count(feature => predicates.All(p => (feature & p) != p));
+					.Count(feature => IsRejected(predicates, feature));
+		}
+
+		private static bool IsRejected(IEnumerable<BigInteger> predicates, BigInteger feature) {
+			return predicates.All(p => (feature & p) != p);
 		}
 
 		private bool LearnAndApply() {
-			var predicates = LearnCommonKeys();
+			var predicates = LearnPredicatesFromMaxAccepted();
 			BigInteger diffPattern;
 			int minIndex;
 
@@ -213,18 +339,18 @@ namespace Occf.Learner.Core.Tests {
 
 		private void UpdateNextElements(
 				List<NextTarget> nextTargets, BigInteger feature, int differential, BigInteger diffPattern) {
-				if (!_learnedDiffs.Contains(diffPattern)) {
-					_learnedDiffs.Add(diffPattern);
-					nextTargets.Add(new NextTarget {
-						Differential = differential,
-						DiffPattern = diffPattern,
-						Feature = feature,
-					});
-					nextTargets.Sort((t1, t2) => t1.Differential.CompareTo(t2.Differential));
-					if (nextTargets.Count > LearningCount) {
-						nextTargets.RemoveAt(LearningCount);
-					}
+			if (!_learnedDiffs.Contains(diffPattern)) {
+				_learnedDiffs.Add(diffPattern);
+				nextTargets.Add(new NextTarget {
+					Differential = differential,
+					DiffPattern = diffPattern,
+					Feature = feature,
+				});
+				nextTargets.Sort((t1, t2) => t1.Differential.CompareTo(t2.Differential));
+				if (nextTargets.Count > LearningCount) {
+					nextTargets.RemoveAt(LearningCount);
 				}
+			}
 		}
 
 		private int GetClassifierInput(
