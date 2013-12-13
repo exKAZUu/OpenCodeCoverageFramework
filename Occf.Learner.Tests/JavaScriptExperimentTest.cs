@@ -17,14 +17,14 @@ namespace Occf.Learner.Core.Tests {
 			get {
 				var exps = new BitLearningExperimentWithGrouping[] {
 					new JavaScriptBranchExperiment(),
-					//new JavaScriptIfExperiment(),
-					//new JavaScriptWhileExperiment(),
-					//new JavaScriptDoWhileExperiment(),
-					//new JavaScriptForExperiment(),
-					//new JavaScriptConsoleLogExperiment(),
-					//new JavaScriptBlockExperiment(),
-					//new JavaScriptLabeledStatementExperiment(), 
-					//new JavaScriptEmptyStatementExperiment(),
+					new JavaScriptIfExperiment(),
+					new JavaScriptWhileExperiment(),
+					new JavaScriptDoWhileExperiment(),
+					new JavaScriptForExperiment(),
+					new JavaScriptConsoleLogExperiment(),
+					new JavaScriptBlockExperiment(),
+					new JavaScriptLabeledStatementExperiment(), 
+					new JavaScriptEmptyStatementExperiment(),
 				};
 				var algorithms = new LearningAlgorithm[] {
 					new SvmLearner(new Linear()),
@@ -72,15 +72,15 @@ namespace Occf.Learner.Core.Tests {
 					.Select(e => Tuple.Create(e, 0));
 			var whileConds = ast.Descendants("whileStatement")
 					.Select(e => e.Element("expression"))
-					.Select(e => Tuple.Create(e, 0));
+					.Select(e => Tuple.Create(e, 1));
 			var doWhileConds = ast.Descendants("doWhileStatement")
 					.Select(e => e.Element("expression"))
-					.Select(e => Tuple.Create(e, 0));
+					.Select(e => Tuple.Create(e, 2));
 			var forConds = ast.Descendants("forStatement")
 					.Select(e => e.Elements().First(e2 => e2.TokenText() == ";"))
 					.Where(e => e.NextElement().Name() == "expression")
 					.Select(e => e.NextElement())
-					.Select(e => Tuple.Create(e, 0));
+					.Select(e => Tuple.Create(e, 3));
 			return ifConds.Concat(whileConds).Concat(doWhileConds).Concat(forConds);
 		}
 	}
