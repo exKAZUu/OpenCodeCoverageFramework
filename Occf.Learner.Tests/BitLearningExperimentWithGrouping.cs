@@ -24,7 +24,6 @@ namespace Occf.Learner.Core.Tests {
 		private List<BigInteger> _accepted;
 		private HashSet<BigInteger> _rejected;
 		private HashSet<BigInteger> _seedAccepted;
-		private HashSet<BigInteger> _learnedDiffs;
 		private int _predicateDepth = 10;
 		private List<string> _masterPredicates;
 		private int _featureCount;
@@ -37,8 +36,6 @@ namespace Occf.Learner.Core.Tests {
 		public void LearnUntilBeStable(
 				ICollection<string> allPaths, ICollection<string> seedPaths, LearningAlgorithm learner,
 				double threshold) {
-			_learnedDiffs = new HashSet<BigInteger>();
-
 			var seedAcceptedElements = new HashSet<XElement>();
 			var seedRejectedElements = new HashSet<XElement>();
 			foreach (var path in seedPaths) {
@@ -156,6 +153,82 @@ namespace Occf.Learner.Core.Tests {
 			}
 		}
 
+		private static double Dispersion(IEnumerable<int> values) {
+			var list = values as IList<int> ?? values.ToList();
+			var average = list.Average();
+			return list.Select(v => (average - v) * (average - v)).Average();
+		}
+
+		private List<BigInteger> LearnPredicatesFromMinDispersionAccepted() {
+			var learningSet = _seedAccepted
+					.Select(s => new Stack<BigInteger>(Enumerable.Repeat(s, 1)))
+					.ToList();
+			var acceptedSet = _accepted.ToHashSet();
+			while (acceptedSet.Count > 0) {
+				var selectedTuple = acceptedSet
+						.Select(a => {
+							var minSum = double.MaxValue;
+							var index = -1;
+							for (int i = 0; i < learningSet.Count; i++) {
+								learningSet[i].Push(a);
+								var predicates = learningSet.Select(GetPredicate).ToList();
+								if (CanReject(predicates, _rejected)) {
+									var count = predicates.Select(CountBits).Sum();
+									if (minSum > count) {
+										minSum = count;
+										index = i;
+									}
+								}
+								learningSet[i].Pop();
+							}
+							return Tuple.Create(a, minSum, index);
+						})
+						.Where(t => t.Item3 >= 0)
+						.MinElementOrDefault(t => t.Item2);
+				if (selectedTuple == null) {
+					throw new Exception("Fail to learn rules");
+				}
+				learningSet[selectedTuple.Item3].Push(selectedTuple.Item1);
+				acceptedSet.Remove(selectedTuple.Item1);
+			}
+			return learningSet.Select(GetPredicate).ToList();
+		}
+
+		private List<BigInteger> LearnPredicatesFromMinMinAccepted() {
+			var learningSet = _seedAccepted
+					.Select(s => new Stack<BigInteger>(Enumerable.Repeat(s, 1)))
+					.ToList();
+			var acceptedSet = _accepted.ToHashSet();
+			while (acceptedSet.Count > 0) {
+				var selectedTuple = acceptedSet
+						.Select(a => {
+							var minCount = int.MaxValue;
+							var minIndex = -1;
+							for (int i = 0; i < learningSet.Count; i++) {
+								learningSet[i].Push(a);
+								var predicates = learningSet.Select(GetPredicate).ToList();
+								if (CanReject(predicates, _rejected)) {
+									var count = CountRejected(predicates);
+									if (minCount > count) {
+										minCount = count;
+										minIndex = i;
+									}
+								}
+								learningSet[i].Pop();
+							}
+							return Tuple.Create(a, minCount, minIndex);
+						})
+						.Where(t => t.Item3 >= 0)
+						.MinElementOrDefault(t => t.Item2);
+				if (selectedTuple == null) {
+					throw new Exception("Fail to learn rules");
+				}
+				learningSet[selectedTuple.Item3].Push(selectedTuple.Item1);
+				acceptedSet.Remove(selectedTuple.Item1);
+			}
+			return learningSet.Select(GetPredicate).ToList();
+		}
+
 		private List<BigInteger> LearnPredicatesFromMinAccepted() {
 			var learningSet = _seedAccepted
 					.Select(s => new Stack<BigInteger>(Enumerable.Repeat(s, 1)))
@@ -263,7 +336,7 @@ namespace Occf.Learner.Core.Tests {
 		}
 
 		private bool LearnAndApply() {
-			var predicates = LearnPredicatesFromMaxAccepted();
+			var predicates = LearnPredicatesFromMinMinAccepted();
 			BigInteger diffPattern;
 			int minIndex;
 
@@ -339,8 +412,6 @@ namespace Occf.Learner.Core.Tests {
 
 		private void UpdateNextElements(
 				List<NextTarget> nextTargets, BigInteger feature, int differential, BigInteger diffPattern) {
-			if (!_learnedDiffs.Contains(diffPattern)) {
-				_learnedDiffs.Add(diffPattern);
 				nextTargets.Add(new NextTarget {
 					Differential = differential,
 					DiffPattern = diffPattern,
@@ -350,7 +421,6 @@ namespace Occf.Learner.Core.Tests {
 				if (nextTargets.Count > LearningCount) {
 					nextTargets.RemoveAt(LearningCount);
 				}
-			}
 		}
 
 		private int GetClassifierInput(

@@ -15,17 +15,17 @@ namespace Occf.Learner.Core.Tests {
 	public class JavaExperimentTest {
 		private static IEnumerable<TestCaseData> TestCases {
 			get {
-				var exps = new BitLearningExperiment[] {
-					//new JavaBranchExperiment(),
+				var exps = new BitLearningExperimentWithGrouping[] {
+					new JavaBranchExperiment(),
 					//new JavaStatementExperiment(), 
-					new JavaIfExperiment(),
-					new JavaWhileExperiment(),
-					new JavaDoWhileExperiment(),
-					new JavaForExperiment(),
-					new JavaPreconditionsExperiment(),
-					new JavaBlockExperiment(),
-					new JavaLabeledStatementExperiment(), 
-					new JavaEmptyStatementExperiment(),
+					//new JavaIfExperiment(),
+					//new JavaWhileExperiment(),
+					//new JavaDoWhileExperiment(),
+					//new JavaForExperiment(),
+					//new JavaPreconditionsExperiment(),
+					//new JavaBlockExperiment(),
+					//new JavaLabeledStatementExperiment(), 
+					//new JavaEmptyStatementExperiment(),
 				};
 				var algorithms = new LearningAlgorithm[] {
 					new SvmLearner(new Linear()),
@@ -53,7 +53,7 @@ namespace Occf.Learner.Core.Tests {
 
 		[Test, TestCaseSource("TestCases")]
 		public void Test(
-				BitLearningExperiment exp, LearningAlgorithm algorithm, string projectPath, IList<string> seedPaths) {
+				BitLearningExperimentWithGrouping exp, LearningAlgorithm algorithm, string projectPath, IList<string> seedPaths) {
 			var allPaths = Directory.GetFiles(projectPath, "*.java", SearchOption.AllDirectories)
 					.ToList();
 			exp.LearnUntilBeStable(allPaths, seedPaths, algorithm, 0.5);
@@ -61,7 +61,7 @@ namespace Occf.Learner.Core.Tests {
 		}
 	}
 
-	public class JavaBranchExperiment : BitLearningExperiment {
+	public class JavaBranchExperiment : BitLearningExperimentWithGrouping {
 		protected override Processor Processor {
 			get { return ProcessorLoader.JavaUsingAntlr3; }
 		}
@@ -86,7 +86,7 @@ namespace Occf.Learner.Core.Tests {
 		}
 	}
 
-	public class JavaIfExperiment : BitLearningExperiment {
+	public class JavaIfExperiment : BitLearningExperimentWithGrouping {
 		protected override Processor Processor {
 			get { return ProcessorLoader.JavaUsingAntlr3; }
 		}
@@ -101,7 +101,7 @@ namespace Occf.Learner.Core.Tests {
 		}
 	}
 
-	public class JavaWhileExperiment : BitLearningExperiment {
+	public class JavaWhileExperiment : BitLearningExperimentWithGrouping {
 		protected override Processor Processor {
 			get { return ProcessorLoader.JavaUsingAntlr3; }
 		}
@@ -116,7 +116,7 @@ namespace Occf.Learner.Core.Tests {
 		}
 	}
 
-	public class JavaDoWhileExperiment : BitLearningExperiment {
+	public class JavaDoWhileExperiment : BitLearningExperimentWithGrouping {
 		protected override Processor Processor {
 			get { return ProcessorLoader.JavaUsingAntlr3; }
 		}
@@ -131,7 +131,7 @@ namespace Occf.Learner.Core.Tests {
 		}
 	}
 
-	public class JavaForExperiment : BitLearningExperiment {
+	public class JavaForExperiment : BitLearningExperimentWithGrouping {
 		protected override Processor Processor {
 			get { return ProcessorLoader.JavaUsingAntlr3; }
 		}
@@ -146,7 +146,7 @@ namespace Occf.Learner.Core.Tests {
 		}
 	}
 
-	public class JavaPreconditionsExperiment : BitLearningExperiment {
+	public class JavaPreconditionsExperiment : BitLearningExperimentWithGrouping {
 		protected override Processor Processor {
 			get { return ProcessorLoader.JavaUsingAntlr3; }
 		}
@@ -176,7 +176,7 @@ namespace Occf.Learner.Core.Tests {
 		}
 	}
 
-	public class JavaStatementExperiment : BitLearningExperiment {
+	public class JavaStatementExperiment : BitLearningExperimentWithGrouping {
 		protected override Processor Processor {
 			get { return ProcessorLoader.JavaUsingAntlr3; }
 		}
@@ -204,7 +204,7 @@ namespace Occf.Learner.Core.Tests {
 		}
 	}
 
-	public class JavaBlockExperiment : BitLearningExperiment {
+	public class JavaBlockExperiment : BitLearningExperimentWithGrouping {
 		protected override Processor Processor {
 			get { return ProcessorLoader.JavaUsingAntlr3; }
 		}
@@ -217,7 +217,7 @@ namespace Occf.Learner.Core.Tests {
 		}
 	}
 
-	public class JavaLabeledStatementExperiment : BitLearningExperiment {
+	public class JavaLabeledStatementExperiment : BitLearningExperimentWithGrouping {
 		protected override Processor Processor {
 			get { return ProcessorLoader.JavaUsingAntlr3; }
 		}
@@ -238,7 +238,7 @@ namespace Occf.Learner.Core.Tests {
 		}
 	}
 
-	public class JavaEmptyStatementExperiment : BitLearningExperiment {
+	public class JavaEmptyStatementExperiment : BitLearningExperimentWithGrouping {
 		protected override Processor Processor {
 			get { return ProcessorLoader.JavaUsingAntlr3; }
 		}
