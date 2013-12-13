@@ -24,7 +24,7 @@ namespace Occf.Learner.Core.Tests {
 		private List<BigInteger> _accepted;
 		private HashSet<BigInteger> _rejected;
 		private HashSet<BigInteger> _seedAccepted;
-		private int _predicateDepth = 10;
+		private int _predicateDepth = 30;
 		private List<string> _masterPredicates;
 		private int _featureCount;
 		private const int LearningCount = 5;
@@ -36,20 +36,30 @@ namespace Occf.Learner.Core.Tests {
 		public void LearnUntilBeStable(
 				ICollection<string> allPaths, ICollection<string> seedPaths, LearningAlgorithm learner,
 				double threshold) {
-			var seedAcceptedElements = new HashSet<XElement>();
+			var seedAcceptedElements = new List<Tuple<XElement, int>>();
 			var seedRejectedElements = new HashSet<XElement>();
 			foreach (var path in seedPaths) {
 				var codeFile = new FileInfo(path);
 				var ast = Processor.GenerateXml(codeFile);
 				seedRejectedElements.UnionWith(GetAllElements(ast));
-				seedAcceptedElements.UnionWith(GetAcceptedElements(ast));
+				seedAcceptedElements.AddRange(GetAcceptedElements(ast));
 			}
-			seedRejectedElements.ExceptWith(seedAcceptedElements);
-			_masterPredicates = seedAcceptedElements.GetUnionKeys(_predicateDepth).ToList();
+			seedRejectedElements.ExceptWith(seedAcceptedElements.Select(t => t.Item1));
+			var groupedSeedAcceptedElements = seedAcceptedElements
+					.GroupBy(t => t.Item2, t => t.Item1)
+					.ToList();
+
+			_masterPredicates = groupedSeedAcceptedElements
+					.Select(g => g.GetCommonKeys(_predicateDepth))
+					.Aggregate((ks1, ks2) => {
+						ks1.UnionWith(ks2);
+						return ks1;
+					}).ToList();
 			_featureCount = _masterPredicates.Count;
 
-			_seedAccepted = seedAcceptedElements
-					.Select(e => GetBits(e, _masterPredicates))
+			_seedAccepted = groupedSeedAcceptedElements
+					.Select(g => g.Select(e => GetBits(e, _masterPredicates))
+							.Aggregate((f1, f2) => f1 & f2))
 					.ToHashSet();
 			_rejected = seedRejectedElements
 					.Select(e => GetBits(e, _masterPredicates))
@@ -64,7 +74,7 @@ namespace Occf.Learner.Core.Tests {
 				allFeaturesCounter.UnionWith(GetAllElements(ast)
 						.Select(e => GetBits(e, _masterPredicates)));
 				acceptedFeaturesCounter.UnionWith(GetAcceptedElements(ast)
-						.Select(e => GetBits(e, _masterPredicates)));
+						.Select(t => GetBits(t.Item1, _masterPredicates)));
 			}
 			const int initialFeatureCount = 5;
 			var initialMaxFeatures = allFeaturesCounter
@@ -90,9 +100,9 @@ namespace Occf.Learner.Core.Tests {
 
 			foreach (var feature in initialMaxFeatures.Concat(initialMinFeatures)) {
 				if (_rejectedFeatures.Contains(feature)) {
-					_rejected.Add(feature);
+					//_rejected.Add(feature);
 				} else {
-					_accepted.Add(feature);
+					//_accepted.Add(feature);
 				}
 			}
 
@@ -104,7 +114,7 @@ namespace Occf.Learner.Core.Tests {
 					if (--count == 0) {
 						break;
 					}
-					LearnPredicates();
+					//LearnPredicates();
 				}
 				Console.WriteLine("Time: " + (Environment.TickCount - time));
 			}
@@ -229,7 +239,11 @@ namespace Occf.Learner.Core.Tests {
 			return learningSet.Select(GetPredicate).ToList();
 		}
 
-		private List<BigInteger> LearnPredicatesFromMinAccepted() {
+		/// <summary>
+		/// Rejectç≈ëÂâªÅiè¨Ç≥Ç¢ï˚Ç©ÇÁÅj
+		/// </summary>
+		/// <returns></returns>
+		private List<BigInteger> LearnPredicatesFromMinMaxAccepted() {
 			var learningSet = _seedAccepted
 					.Select(s => new Stack<BigInteger>(Enumerable.Repeat(s, 1)))
 					.ToList();
@@ -264,7 +278,11 @@ namespace Occf.Learner.Core.Tests {
 			return learningSet.Select(GetPredicate).ToList();
 		}
 
-		private List<BigInteger> LearnPredicatesFromMaxAccepted() {
+		/// <summary>
+		/// Rejectç≈ëÂâª
+		/// </summary>
+		/// <returns></returns>
+		private List<BigInteger> LearnPredicatesFromMaxMaxAccepted() {
 			var learningSet = _seedAccepted
 					.Select(s => new Stack<BigInteger>(Enumerable.Repeat(s, 1)))
 					.ToList();
@@ -301,8 +319,8 @@ namespace Occf.Learner.Core.Tests {
 
 		private List<BigInteger> LearnPredicates() {
 			while (true) {
-				var preds1 = LearnPredicatesFromMaxAccepted();
-				var preds2 = LearnPredicatesFromMinAccepted();
+				var preds1 = LearnPredicatesFromMaxMaxAccepted();
+				var preds2 = LearnPredicatesFromMinMaxAccepted();
 				var newAccepted = _acceptedFeatures
 						.Where(f => IsRejected(preds1, f) != IsRejected(preds2, f))
 						.ToList();
@@ -316,7 +334,7 @@ namespace Occf.Learner.Core.Tests {
 					break;
 				}
 			}
-			return LearnPredicatesFromMaxAccepted();
+			return LearnPredicatesFromMaxMaxAccepted();
 		}
 
 		private List<BigInteger> OriginalLearnPredicates() {
@@ -336,7 +354,7 @@ namespace Occf.Learner.Core.Tests {
 		}
 
 		private bool LearnAndApply() {
-			var predicates = LearnPredicatesFromMinMinAccepted();
+			var predicates = LearnPredicatesFromMinMaxAccepted();
 			BigInteger diffPattern;
 			int minIndex;
 
@@ -407,20 +425,20 @@ namespace Occf.Learner.Core.Tests {
 					_rejected.Add(nextTarget.Feature);
 				}
 			}
-			return nextAcceptedCount + nextRejectedCount == 0;
+			return nextAcceptedCount == 0;
 		}
 
 		private void UpdateNextElements(
 				List<NextTarget> nextTargets, BigInteger feature, int differential, BigInteger diffPattern) {
-				nextTargets.Add(new NextTarget {
-					Differential = differential,
-					DiffPattern = diffPattern,
-					Feature = feature,
-				});
-				nextTargets.Sort((t1, t2) => t1.Differential.CompareTo(t2.Differential));
-				if (nextTargets.Count > LearningCount) {
-					nextTargets.RemoveAt(LearningCount);
-				}
+			nextTargets.Add(new NextTarget {
+				Differential = differential,
+				DiffPattern = diffPattern,
+				Feature = feature,
+			});
+			nextTargets.Sort((t1, t2) => t1.Differential.CompareTo(t2.Differential));
+			if (nextTargets.Count > LearningCount) {
+				nextTargets.RemoveAt(LearningCount);
+			}
 		}
 
 		private int GetClassifierInput(
@@ -468,6 +486,6 @@ namespace Occf.Learner.Core.Tests {
 			return ast.DescendantsAndSelf().Where(e => _elementNames.Contains(e.Name()));
 		}
 
-		protected abstract IEnumerable<XElement> GetAcceptedElements(XElement ast);
+		protected abstract IEnumerable<Tuple<XElement, int>> GetAcceptedElements(XElement ast);
 	}
 }

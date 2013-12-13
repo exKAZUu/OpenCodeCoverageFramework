@@ -18,14 +18,14 @@ namespace Occf.Learner.Core.Tests {
 				var exps = new BitLearningExperimentWithGrouping[] {
 					new JavaBranchExperiment(),
 					//new JavaStatementExperiment(), 
-					//new JavaIfExperiment(),
-					//new JavaWhileExperiment(),
-					//new JavaDoWhileExperiment(),
-					//new JavaForExperiment(),
-					//new JavaPreconditionsExperiment(),
-					//new JavaBlockExperiment(),
-					//new JavaLabeledStatementExperiment(), 
-					//new JavaEmptyStatementExperiment(),
+					new JavaIfExperiment(),
+					new JavaWhileExperiment(),
+					new JavaDoWhileExperiment(),
+					new JavaForExperiment(),
+					new JavaPreconditionsExperiment(),
+					new JavaBlockExperiment(),
+					new JavaLabeledStatementExperiment(), 
+					new JavaEmptyStatementExperiment(),
 				};
 				var algorithms = new LearningAlgorithm[] {
 					new SvmLearner(new Linear()),
@@ -53,7 +53,8 @@ namespace Occf.Learner.Core.Tests {
 
 		[Test, TestCaseSource("TestCases")]
 		public void Test(
-				BitLearningExperimentWithGrouping exp, LearningAlgorithm algorithm, string projectPath, IList<string> seedPaths) {
+				BitLearningExperimentWithGrouping exp, LearningAlgorithm algorithm, string projectPath,
+				IList<string> seedPaths) {
 			var allPaths = Directory.GetFiles(projectPath, "*.java", SearchOption.AllDirectories)
 					.ToList();
 			exp.LearnUntilBeStable(allPaths, seedPaths, algorithm, 0.5);
@@ -68,20 +69,24 @@ namespace Occf.Learner.Core.Tests {
 
 		public JavaBranchExperiment() : base("expression") {}
 
-		protected override IEnumerable<XElement> GetAcceptedElements(XElement ast) {
+		protected override IEnumerable<Tuple<XElement, int>> GetAcceptedElements(XElement ast) {
 			// ifトークンが存在するかどうか
 			var ifConds = ast.Descendants("statement")
 					.Where(e => e.FirstElementOrDefault().SafeValue() == "if")
-					.Select(e => e.Element("parExpression").NthElement(1));
+					.Select(e => e.Element("parExpression").NthElement(1))
+					.Select(e => Tuple.Create(e, 0));
 			var whileConds = ast.Descendants("statement")
 					.Where(e => e.FirstElementOrDefault().SafeValue() == "while")
-					.Select(e => e.Element("parExpression").NthElement(1));
-			var doConds =  ast.Descendants("statement")
+					.Select(e => e.Element("parExpression").NthElement(1))
+					.Select(e => Tuple.Create(e, 1));
+			var doConds = ast.Descendants("statement")
 					.Where(e => e.FirstElementOrDefault().SafeValue() == "do")
-					.Select(e => e.Element("parExpression").NthElement(1));
+					.Select(e => e.Element("parExpression").NthElement(1))
+					.Select(e => Tuple.Create(e, 2));
 			var forConds = ast.Descendants("forstatement")
 					.Where(e => e.Elements().Count(e2 => e2.TokenText() == ";") >= 2)
-					.Select(e => e.Element("expression"));
+					.Select(e => e.Element("expression"))
+					.Select(e => Tuple.Create(e, 3));
 			return ifConds.Concat(whileConds).Concat(doConds).Concat(forConds);
 		}
 	}
@@ -93,11 +98,12 @@ namespace Occf.Learner.Core.Tests {
 
 		public JavaIfExperiment() : base("expression") {}
 
-		protected override IEnumerable<XElement> GetAcceptedElements(XElement ast) {
+		protected override IEnumerable<Tuple<XElement, int>> GetAcceptedElements(XElement ast) {
 			// ifトークンが存在するかどうか
 			return ast.Descendants("statement")
 					.Where(e => e.FirstElementOrDefault().SafeValue() == "if")
-					.Select(e => e.Element("parExpression").NthElement(1));
+					.Select(e => e.Element("parExpression").NthElement(1))
+					.Select(e => Tuple.Create(e, 0));
 		}
 	}
 
@@ -108,11 +114,12 @@ namespace Occf.Learner.Core.Tests {
 
 		public JavaWhileExperiment() : base("expression") {}
 
-		protected override IEnumerable<XElement> GetAcceptedElements(XElement ast) {
+		protected override IEnumerable<Tuple<XElement, int>> GetAcceptedElements(XElement ast) {
 			// whileトークンが存在するかどうか
 			return ast.Descendants("statement")
 					.Where(e => e.FirstElementOrDefault().SafeValue() == "while")
-					.Select(e => e.Element("parExpression").NthElement(1));
+					.Select(e => e.Element("parExpression").NthElement(1))
+					.Select(e => Tuple.Create(e, 0));
 		}
 	}
 
@@ -123,11 +130,12 @@ namespace Occf.Learner.Core.Tests {
 
 		public JavaDoWhileExperiment() : base("expression") {}
 
-		protected override IEnumerable<XElement> GetAcceptedElements(XElement ast) {
+		protected override IEnumerable<Tuple<XElement, int>> GetAcceptedElements(XElement ast) {
 			// doトークンが存在するかどうか
 			return ast.Descendants("statement")
 					.Where(e => e.FirstElementOrDefault().SafeValue() == "do")
-					.Select(e => e.Element("parExpression").NthElement(1));
+					.Select(e => e.Element("parExpression").NthElement(1))
+					.Select(e => Tuple.Create(e, 0));
 		}
 	}
 
@@ -138,11 +146,12 @@ namespace Occf.Learner.Core.Tests {
 
 		public JavaForExperiment() : base("expression") {}
 
-		protected override IEnumerable<XElement> GetAcceptedElements(XElement ast) {
+		protected override IEnumerable<Tuple<XElement, int>> GetAcceptedElements(XElement ast) {
 			// expressionの位置
 			return ast.Descendants("forstatement")
 					.Where(e => e.Elements().Count(e2 => e2.TokenText() == ";") >= 2)
-					.Select(e => e.Element("expression"));
+					.Select(e => e.Element("expression"))
+					.Select(e => Tuple.Create(e, 0));
 		}
 	}
 
@@ -153,7 +162,7 @@ namespace Occf.Learner.Core.Tests {
 
 		public JavaPreconditionsExperiment() : base("expression") {}
 
-		protected override IEnumerable<XElement> GetAcceptedElements(XElement ast) {
+		protected override IEnumerable<Tuple<XElement, int>> GetAcceptedElements(XElement ast) {
 			// ある深さから見てトークンが存在するか？
 			return ast.Descendants("expression")
 					.Where(
@@ -172,7 +181,8 @@ namespace Occf.Learner.Core.Tests {
 									return false;
 								}
 								return true;
-							});
+							})
+					.Select(e => Tuple.Create(e, 0));
 		}
 	}
 
@@ -183,7 +193,7 @@ namespace Occf.Learner.Core.Tests {
 
 		public JavaStatementExperiment() : base("statement") {}
 
-		protected override IEnumerable<XElement> GetAcceptedElements(XElement ast) {
+		protected override IEnumerable<Tuple<XElement, int>> GetAcceptedElements(XElement ast) {
 			return ast.Descendants("statement")
 					.Where(e => {
 						// ブロック自身は意味を持たないステートメントで、中身だけが必要なので除外
@@ -200,7 +210,8 @@ namespace Occf.Learner.Core.Tests {
 							return false;
 						}
 						return true;
-					});
+					})
+					.Select(e => Tuple.Create(e, 0));
 		}
 	}
 
@@ -211,9 +222,10 @@ namespace Occf.Learner.Core.Tests {
 
 		public JavaBlockExperiment() : base("statement") {}
 
-		protected override IEnumerable<XElement> GetAcceptedElements(XElement ast) {
+		protected override IEnumerable<Tuple<XElement, int>> GetAcceptedElements(XElement ast) {
 			return ast.Descendants("statement")
-					.Where(e => e.FirstElement().Name() == "block");
+					.Where(e => e.FirstElement().Name() == "block")
+					.Select(e => Tuple.Create(e, 0));
 		}
 	}
 
@@ -224,7 +236,7 @@ namespace Occf.Learner.Core.Tests {
 
 		public JavaLabeledStatementExperiment() : base("statement") {}
 
-		protected override IEnumerable<XElement> GetAcceptedElements(XElement ast) {
+		protected override IEnumerable<Tuple<XElement, int>> GetAcceptedElements(XElement ast) {
 			return ast.Descendants("statement")
 					.Where(e => {
 						// ラベルはループ文に付くため，ラベルの中身は除外
@@ -234,7 +246,8 @@ namespace Occf.Learner.Core.Tests {
 							return true;
 						}
 						return false;
-					});
+					})
+					.Select(e => Tuple.Create(e, 0));
 		}
 	}
 
@@ -245,9 +258,10 @@ namespace Occf.Learner.Core.Tests {
 
 		public JavaEmptyStatementExperiment() : base("statement") {}
 
-		protected override IEnumerable<XElement> GetAcceptedElements(XElement ast) {
+		protected override IEnumerable<Tuple<XElement, int>> GetAcceptedElements(XElement ast) {
 			return ast.Descendants("statement")
-					.Where(e => e.FirstElement().Value == ";");
+					.Where(e => e.FirstElement().Value == ";")
+					.Select(e => Tuple.Create(e, 0));
 		}
 	}
 }

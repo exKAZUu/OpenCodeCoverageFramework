@@ -66,17 +66,21 @@ namespace Occf.Learner.Core.Tests {
 			get { return ProcessorLoader.JavaScriptUsingAntlr3; }
 		}
 
-		protected override IEnumerable<XElement> GetAcceptedElements(XElement ast) {
+		protected override IEnumerable<Tuple<XElement, int>> GetAcceptedElements(XElement ast) {
 			var ifConds = ast.Descendants("ifStatement")
-					.Select(e => e.Element("expression"));
+					.Select(e => e.Element("expression"))
+					.Select(e => Tuple.Create(e, 0));
 			var whileConds = ast.Descendants("whileStatement")
-					.Select(e => e.Element("expression"));
+					.Select(e => e.Element("expression"))
+					.Select(e => Tuple.Create(e, 0));
 			var doWhileConds = ast.Descendants("doWhileStatement")
-					.Select(e => e.Element("expression"));
+					.Select(e => e.Element("expression"))
+					.Select(e => Tuple.Create(e, 0));
 			var forConds = ast.Descendants("forStatement")
 					.Select(e => e.Elements().First(e2 => e2.TokenText() == ";"))
 					.Where(e => e.NextElement().Name() == "expression")
-					.Select(e => e.NextElement());
+					.Select(e => e.NextElement())
+					.Select(e => Tuple.Create(e, 0));
 			return ifConds.Concat(whileConds).Concat(doWhileConds).Concat(forConds);
 		}
 	}
@@ -88,9 +92,10 @@ namespace Occf.Learner.Core.Tests {
 			get { return ProcessorLoader.JavaScriptUsingAntlr3; }
 		}
 
-		protected override IEnumerable<XElement> GetAcceptedElements(XElement ast) {
+		protected override IEnumerable<Tuple<XElement, int>> GetAcceptedElements(XElement ast) {
 			return ast.Descendants("ifStatement")
-					.Select(e => e.Element("expression"));
+					.Select(e => e.Element("expression"))
+					.Select(e => Tuple.Create(e, 0));
 		}
 	}
 
@@ -101,9 +106,10 @@ namespace Occf.Learner.Core.Tests {
 			get { return ProcessorLoader.JavaScriptUsingAntlr3; }
 		}
 
-		protected override IEnumerable<XElement> GetAcceptedElements(XElement ast) {
+		protected override IEnumerable<Tuple<XElement, int>> GetAcceptedElements(XElement ast) {
 			return ast.Descendants("whileStatement")
-					.Select(e => e.Element("expression"));
+					.Select(e => e.Element("expression"))
+					.Select(e => Tuple.Create(e, 0));
 		}
 	}
 
@@ -114,9 +120,10 @@ namespace Occf.Learner.Core.Tests {
 			get { return ProcessorLoader.JavaScriptUsingAntlr3; }
 		}
 
-		protected override IEnumerable<XElement> GetAcceptedElements(XElement ast) {
+		protected override IEnumerable<Tuple<XElement, int>> GetAcceptedElements(XElement ast) {
 			return ast.Descendants("doWhileStatement")
-					.Select(e => e.Element("expression"));
+					.Select(e => e.Element("expression"))
+					.Select(e => Tuple.Create(e, 0));
 		}
 	}
 
@@ -127,11 +134,12 @@ namespace Occf.Learner.Core.Tests {
 			get { return ProcessorLoader.JavaScriptUsingAntlr3; }
 		}
 
-		protected override IEnumerable<XElement> GetAcceptedElements(XElement ast) {
+		protected override IEnumerable<Tuple<XElement, int>> GetAcceptedElements(XElement ast) {
 			return ast.Descendants("forStatement")
 					.Select(e => e.Elements().First(e2 => e2.TokenText() == ";"))
 					.Where(e => e.NextElement().Name() == "expression")
-					.Select(e => e.NextElement());
+					.Select(e => e.NextElement())
+					.Select(e => Tuple.Create(e, 0));
 		}
 	}
 
@@ -142,11 +150,12 @@ namespace Occf.Learner.Core.Tests {
 			get { return ProcessorLoader.JavaScriptUsingAntlr3; }
 		}
 
-		protected override IEnumerable<XElement> GetAcceptedElements(XElement ast) {
+		protected override IEnumerable<Tuple<XElement, int>> GetAcceptedElements(XElement ast) {
 			var preConds = ast.Descendants("callExpression")
 					.Where(e => e.FirstElement().Value == "console.log")
 					.Select(e => e.Element("arguments").Element("assignmentExpression"))
-					.Where(e => e != null);
+					.Where(e => e != null)
+					.Select(e => Tuple.Create(e, 0));
 			return preConds;
 		}
 	}
@@ -158,9 +167,10 @@ namespace Occf.Learner.Core.Tests {
 
 		public JavaScriptBlockExperiment() : base("statement") {}
 
-		protected override IEnumerable<XElement> GetAcceptedElements(XElement ast) {
+		protected override IEnumerable<Tuple<XElement, int>> GetAcceptedElements(XElement ast) {
 			return ast.Descendants("statement")
-					.Where(e => e.FirstElement().Name() == "statementBlock");
+					.Where(e => e.FirstElement().Name() == "statementBlock")
+					.Select(e => Tuple.Create(e, 0));
 		}
 	}
 
@@ -171,9 +181,10 @@ namespace Occf.Learner.Core.Tests {
 
 		public JavaScriptLabeledStatementExperiment() : base("statement") {}
 
-		protected override IEnumerable<XElement> GetAcceptedElements(XElement ast) {
+		protected override IEnumerable<Tuple<XElement, int>> GetAcceptedElements(XElement ast) {
 			return ast.Descendants("statement")
-					.Where(e => e.FirstElement().Name() == "labelledStatement");
+					.Where(e => e.FirstElement().Name() == "labelledStatement")
+					.Select(e => Tuple.Create(e, 0));
 		}
 	}
 
@@ -184,9 +195,10 @@ namespace Occf.Learner.Core.Tests {
 
 		public JavaScriptEmptyStatementExperiment() : base("statement") {}
 
-		protected override IEnumerable<XElement> GetAcceptedElements(XElement ast) {
+		protected override IEnumerable<Tuple<XElement, int>> GetAcceptedElements(XElement ast) {
 			return ast.Descendants("statement")
-					.Where(e => e.FirstElement().Name() == "emptyStatement");
+					.Where(e => e.FirstElement().Name() == "emptyStatement")
+					.Select(e => Tuple.Create(e, 0));
 		}
 	}
 }
