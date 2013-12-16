@@ -101,7 +101,7 @@ namespace Occf.Learner.Core.Tests {
 
 		public int ClearItemsIf(Func<T, bool> predicate) {
 			var count = 0;
-			foreach (var key in _dict.Keys) {
+			foreach (var key in _dict.Keys.ToList()) {
 				if (predicate(key)) {
 					_dict.Remove(key);
 					count++;

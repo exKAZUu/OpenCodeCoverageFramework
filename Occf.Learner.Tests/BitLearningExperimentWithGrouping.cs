@@ -27,7 +27,9 @@ namespace Occf.Learner.Core.Tests {
 		private int _predicateDepth = 30;
 		private List<string> _masterPredicates;
 		private int _featureCount;
+		private List<bool> _previousActuals;
 		private const int LearningCount = 5;
+		private bool _isFirstTime;
 
 		protected BitLearningExperimentWithGrouping(params string[] elementNames) {
 			_elementNames = elementNames.ToHashSet();
@@ -36,6 +38,9 @@ namespace Occf.Learner.Core.Tests {
 		public void LearnUntilBeStable(
 				ICollection<string> allPaths, ICollection<string> seedPaths, LearningAlgorithm learner,
 				double threshold) {
+			_previousActuals = new List<bool>();
+			_isFirstTime = true;
+
 			var seedAcceptedElements = new List<Tuple<XElement, int>>();
 			var seedRejectedElements = new HashSet<XElement>();
 			foreach (var path in seedPaths) {
@@ -76,19 +81,16 @@ namespace Occf.Learner.Core.Tests {
 				acceptedFeaturesCounter.UnionWith(GetAcceptedElements(ast)
 						.Select(t => GetBits(t.Item1, _masterPredicates)));
 			}
-			const int initialFeatureCount = 5;
-			var initialMaxFeatures = allFeaturesCounter
-					.ItemsWithCount.OrderByDescending(kv => kv.Value)
-					.Select(kv => kv.Key)
-					.Where(f => !_seedAccepted.Contains(f) && !_rejected.Contains(f))
-					.Take(initialFeatureCount)
-					.ToList();
-			var initialMinFeatures = allFeaturesCounter
-					.ItemsWithCount.OrderBy(kv => kv.Value)
-					.Select(kv => kv.Key)
-					.Where(f => !_seedAccepted.Contains(f) && !_rejected.Contains(f))
-					.Take(initialFeatureCount)
-					.ToList();
+
+			var acceptedFeaturesCount = acceptedFeaturesCounter.Count;
+			var allFeaturesCount = allFeaturesCounter.Count;
+			acceptedFeaturesCounter.ClearItemsIf(f => !IsRejected(_seedAccepted, f));
+			allFeaturesCounter.ClearItemsIf(f => !IsRejected(_seedAccepted, f));
+			var alreadyAcceptedCount = acceptedFeaturesCount - acceptedFeaturesCounter.Count;
+			if (alreadyAcceptedCount != allFeaturesCount - allFeaturesCounter.Count) {
+				throw new Exception("Some excluded elements wrongly are accepted.");
+			}
+			Console.WriteLine("Already accepted: " + alreadyAcceptedCount);
 
 			allFeaturesCounter.ExceptWith(acceptedFeaturesCounter);
 			_acceptedFeatures = acceptedFeaturesCounter.ToHashSet();
@@ -98,6 +100,9 @@ namespace Occf.Learner.Core.Tests {
 			                  ", Max R: " + allFeaturesCounter.ItemsWithCount.Max(kv => kv.Value) +
 			                  ", Min R: " + allFeaturesCounter.ItemsWithCount.Min(kv => kv.Value));
 
+			const int initialFeatureCount = 5;
+			var initialMaxFeatures = GetInitialFeatures(allFeaturesCounter, initialFeatureCount, 1);
+			var initialMinFeatures = GetInitialFeatures(allFeaturesCounter, initialFeatureCount, -1);
 			foreach (var feature in initialMaxFeatures.Concat(initialMinFeatures)) {
 				if (_rejectedFeatures.Contains(feature)) {
 					//_rejected.Add(feature);
@@ -117,8 +122,20 @@ namespace Occf.Learner.Core.Tests {
 					//LearnPredicates();
 				}
 				Console.WriteLine("Time: " + (Environment.TickCount - time));
+			_isFirstTime = false;
 			}
 			Console.WriteLine("Required elements: " + (_accepted.Count + _rejected.Count));
+		}
+
+		private List<BigInteger> GetInitialFeatures(
+				CountingSet<BigInteger> allFeaturesCounter, int initialFeatureCount, int sign) {
+			var initialMaxFeatures = allFeaturesCounter
+					.ItemsWithCount.OrderByDescending(kv => kv.Value * sign)
+					.Select(kv => kv.Key)
+					.Where(f => !_seedAccepted.Contains(f) && !_rejected.Contains(f))
+					.Take(initialFeatureCount)
+					.ToList();
+			return initialMaxFeatures;
 		}
 
 		private bool CanReject(IEnumerable<BigInteger> predicates, ICollection<BigInteger> rejected) {
@@ -370,10 +387,25 @@ namespace Occf.Learner.Core.Tests {
 			for (int i = 0; i < _seedAccepted.Count; i++) {
 				nextRejectedList.Add(new List<NextTarget>());
 			}
+			var difAccepted = new List<NextTarget>();
+			var difRejected = new List<NextTarget>();
+
+			var index = 0;
 
 			foreach (var feature in _acceptedFeatures) {
 				var differential = GetClassifierInput(feature, predicates, out minIndex, out diffPattern);
 				var actual = differential == 0;
+				if (_isFirstTime) {
+					_previousActuals.Add(actual);
+				} else if (_previousActuals[index] != actual) {
+					_previousActuals[index] = actual;
+					difAccepted.Add(new NextTarget {
+						DiffPattern = diffPattern,
+						Differential = differential,
+						Feature = feature
+					});
+				}
+				index++;
 				if (actual) {
 					correctlyAccepted++;
 				} else {
@@ -390,6 +422,17 @@ namespace Occf.Learner.Core.Tests {
 			foreach (var feature in _rejectedFeatures) {
 				var differential = GetClassifierInput(feature, predicates, out minIndex, out diffPattern);
 				var actual = differential == 0;
+				if (_isFirstTime) {
+					_previousActuals.Add(actual);
+				} else if (_previousActuals[index] != actual) {
+					_previousActuals[index] = actual;
+					difRejected.Add(new NextTarget {
+						DiffPattern = diffPattern,
+						Differential = differential,
+						Feature = feature
+					});
+				}
+				index++;
 				if (actual) {
 					if (wronglyAccepted == 0) {
 						//Console.WriteLine("WA (" + prob + "): " + e.SafeParent().SafeParent().SafeParent());
@@ -406,6 +449,7 @@ namespace Occf.Learner.Core.Tests {
 			var nextRejectedCount = nextRejectedList.Select(l => l.Count).Sum();
 
 			Console.WriteLine("done");
+			Console.WriteLine("DA: " + difAccepted.Count + ", DR: " + difRejected.Count);
 			Console.WriteLine("WA: " + wronglyAccepted + ", WR: " + wronglyRejected + ", CA: "
 			                  + correctlyAccepted + ", CR: " + correctlyRejected + ", L: "
 			                  + (_accepted.Count + _rejected.Count) + ", P: "
