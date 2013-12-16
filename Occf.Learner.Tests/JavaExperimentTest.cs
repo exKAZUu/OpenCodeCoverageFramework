@@ -16,16 +16,16 @@ namespace Occf.Learner.Core.Tests {
 		private static IEnumerable<TestCaseData> TestCases {
 			get {
 				var exps = new BitLearningExperimentWithGrouping[] {
-					new JavaBranchExperiment(),
+					//new JavaBranchExperiment(),
 					//new JavaStatementExperiment(), 
-					new JavaIfExperiment(),
-					new JavaWhileExperiment(),
-					new JavaDoWhileExperiment(),
-					new JavaForExperiment(),
+					//new JavaIfExperiment(),
+					//new JavaWhileExperiment(),
+					//new JavaDoWhileExperiment(),
+					//new JavaForExperiment(),
 					new JavaPreconditionsExperiment(),
-					new JavaBlockExperiment(),
-					new JavaLabeledStatementExperiment(), 
-					new JavaEmptyStatementExperiment(),
+					//new JavaBlockExperiment(),
+					//new JavaLabeledStatementExperiment(), 
+					//new JavaEmptyStatementExperiment(),
 				};
 				var algorithms = new LearningAlgorithm[] {
 					new SvmLearner(new Linear()),
