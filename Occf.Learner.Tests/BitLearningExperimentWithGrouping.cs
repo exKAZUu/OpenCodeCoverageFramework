@@ -36,8 +36,7 @@ namespace Occf.Learner.Core.Tests {
 		}
 
 		public void LearnUntilBeStable(
-				ICollection<string> allPaths, ICollection<string> seedPaths, LearningAlgorithm learner,
-				double threshold) {
+				ICollection<string> allPaths, ICollection<string> seedPaths, double threshold) {
 			_previousActuals = new List<bool>();
 			_isFirstTime = true;
 

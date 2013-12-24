@@ -80,12 +80,14 @@
     <Compile Include="ClassificationTest.cs" />
     <Compile Include="BitLearningExperiment.cs" />
     <Compile Include="BitLearningExperimentWithGrouping.cs" />
-    <Compile Include="JavaScriptExperimentTest.cs" />
+    <Compile Include="Experiments\CSharpExperiment.cs" />
+    <Compile Include="Experiments\JavaScriptExperiment.cs" />
+    <Compile Include="Experiments\LuaExperiment.cs" />
     <Compile Include="NewLearningExperiment.cs" />
     <Compile Include="OriginalLearningExperiment.cs" />
     <Compile Include="CountingSet.cs" />
     <Compile Include="LearningAlgorithms\C45Learner.cs" />
-    <Compile Include="JavaExperimentTest.cs" />
+    <Compile Include="Experiments\JavaExperiment.cs" />
     <Compile Include="FindLearnerTest.cs" />
     <Compile Include="LearningAlgorithms\NaiveBayesLearner.cs" />
     <Compile Include="LearningAlgorithms\Id3Learner.cs" />

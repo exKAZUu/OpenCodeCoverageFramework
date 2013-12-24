@@ -3,16 +3,14 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
-using Accord.Statistics.Kernels;
 using Code2Xml.Core;
 using NUnit.Framework;
-using Occf.Learner.Core.Tests.LearningAlgorithms;
 using Paraiba.Xml.Linq;
 using ParserTests;
 
-namespace Occf.Learner.Core.Tests {
+namespace Occf.Learner.Core.Tests.Experiments {
 	[TestFixture]
-	public class JavaScriptExperimentTest {
+	public class JavaScriptExperiment {
 		private static IEnumerable<TestCaseData> TestCases {
 			get {
 				var exps = new BitLearningExperimentWithGrouping[] {
@@ -23,13 +21,8 @@ namespace Occf.Learner.Core.Tests {
 					new JavaScriptForExperiment(),
 					new JavaScriptConsoleLogExperiment(),
 					new JavaScriptBlockExperiment(),
-					new JavaScriptLabeledStatementExperiment(), 
+					new JavaScriptLabeledStatementExperiment(),
 					new JavaScriptEmptyStatementExperiment(),
-				};
-				var algorithms = new LearningAlgorithm[] {
-					new SvmLearner(new Linear()),
-					//new NaiveBayesLearner(), 
-					//new C45Learner(new SvmLearner(new Linear())),
 				};
 				const string langName = "JavaScript";
 				var learningSets = new[] {
@@ -41,10 +34,8 @@ namespace Occf.Learner.Core.Tests {
 					//		new List<string> { Fixture.GetInputCodePath(langName, "seed.js"), }),
 				};
 				foreach (var exp in exps) {
-					foreach (var algorithm in algorithms) {
-						foreach (var learningSet in learningSets) {
-							yield return new TestCaseData(exp, algorithm, learningSet.Item1, learningSet.Item2);
-						}
+					foreach (var learningSet in learningSets) {
+						yield return new TestCaseData(exp, learningSet.Item1, learningSet.Item2);
 					}
 				}
 			}
@@ -52,13 +43,14 @@ namespace Occf.Learner.Core.Tests {
 
 		[Test, TestCaseSource("TestCases")]
 		public void Test(
-				BitLearningExperimentWithGrouping exp, LearningAlgorithm algorithm, string projectPath, IList<string> seedPaths) {
+				BitLearningExperimentWithGrouping exp, string projectPath, IList<string> seedPaths) {
 			var allPaths = Directory.GetFiles(projectPath, "*.js", SearchOption.AllDirectories)
 					.ToList();
-			exp.LearnUntilBeStable(allPaths, seedPaths, algorithm, 0.5);
+			exp.LearnUntilBeStable(allPaths, seedPaths, 0.5);
 			Assert.That(exp.WrongCount, Is.EqualTo(0));
 		}
 	}
+
 	public class JavaScriptBranchExperiment : BitLearningExperimentWithGrouping {
 		public JavaScriptBranchExperiment() : base("expression") {}
 
