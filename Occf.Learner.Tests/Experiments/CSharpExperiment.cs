@@ -3,10 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
-using Accord.Statistics.Kernels;
 using Code2Xml.Core;
 using NUnit.Framework;
-using Occf.Learner.Core.Tests.LearningAlgorithms;
 using Paraiba.Xml.Linq;
 using ParserTests;
 
@@ -26,19 +24,10 @@ namespace Occf.Learner.Core.Tests.Experiments {
 					new CSharpBlockExperiment(),
 					new CSharpLabeledStatementExperiment(),
 				};
-				var algorithms = new LearningAlgorithm[] {
-					new SvmLearner(new Linear()),
-					//new NaiveBayesLearner(), 
-					//new C45Learner(new SvmLearner(new Linear())),
-				};
 				const string langName = "CSharp";
 				var learningSets = new[] {
-					Tuple.Create(Fixture.GetInputProjectPath(langName, "pageobjectgenerator"),
-							new List<string> { Fixture.GetInputCodePath(langName, "Seed.CSharp"), }),
-					Tuple.Create(Fixture.GetInputProjectPath(langName, "presto"),
-							new List<string> { Fixture.GetInputCodePath(langName, "Seed.CSharp"), }),
-					Tuple.Create(Fixture.GetInputProjectPath(langName, "storm"),
-							new List<string> { Fixture.GetInputCodePath(langName, "Seed.CSharp"), }),
+					Tuple.Create(Fixture.GetInputProjectPath(langName, "SignalR"),
+							new List<string> { Fixture.GetInputCodePath(langName, "Seed.cs"), }),
 				};
 				foreach (var exp in exps) {
 					foreach (var learningSet in learningSets) {
@@ -51,7 +40,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 		[Test, TestCaseSource("TestCases")]
 		public void Test(
 				BitLearningExperimentWithGrouping exp, string projectPath, IList<string> seedPaths) {
-			var allPaths = Directory.GetFiles(projectPath, "*.CSharp", SearchOption.AllDirectories)
+			var allPaths = Directory.GetFiles(projectPath, "*.cs", SearchOption.AllDirectories)
 					.ToList();
 			exp.LearnUntilBeStable(allPaths, seedPaths, 0.5);
 			Assert.That(exp.WrongCount, Is.EqualTo(0));

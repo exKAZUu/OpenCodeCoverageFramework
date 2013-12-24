@@ -43,8 +43,9 @@ namespace Occf.Learner.Core.Tests {
 			var seedAcceptedElements = new List<Tuple<XElement, int>>();
 			var seedRejectedElements = new HashSet<XElement>();
 			foreach (var path in seedPaths) {
+				Console.WriteLine(path);
 				var codeFile = new FileInfo(path);
-				var ast = Processor.GenerateXml(codeFile);
+				var ast = Processor.GenerateXml(codeFile, null, true);
 				seedRejectedElements.UnionWith(GetAllElements(ast));
 				seedAcceptedElements.AddRange(GetAcceptedElements(ast));
 			}
@@ -73,6 +74,7 @@ namespace Occf.Learner.Core.Tests {
 			var acceptedFeaturesCounter = new CountingSet<BigInteger>();
 			var allFeaturesCounter = new CountingSet<BigInteger>();
 			foreach (var path in allPaths) {
+				Console.WriteLine(path);
 				var codeFile = new FileInfo(path);
 				var ast = Processor.GenerateXml(codeFile);
 				allFeaturesCounter.UnionWith(GetAllElements(ast)
