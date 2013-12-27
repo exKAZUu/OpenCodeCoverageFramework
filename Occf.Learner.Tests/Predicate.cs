@@ -570,14 +570,22 @@ namespace Occf.Learner.Core.Tests {
 					foreach (var e in t.Item1.Elements()) {
 						var key = t.Item2 + ">" + e.NameOrTokenWithId();
 						newChildElements.Add(Tuple.Create(e, key));
+						// トークンが存在するかチェックする弱い条件
+						ret.Add(t.Item2 + ">'" + e.TokenText() + "'");
+					}
+					foreach (var e in t.Item1.Descendants().Where(e => e.IsTokenSet())) {
+						ret.Add(t.Item2 + ">>'" + e.TokenText() + "'");
 					}
 				}
 				foreach (var e in parentElement.Item1.Siblings(10)) {
 					var key = parentElement.Item2 + "-" + e.NameOrTokenWithId();
 					newChildElements.Add(Tuple.Create(e, key));
-					var iLastName = parentElement.Item2.LastIndexOf("<");
-					var weakKey = "<<" + parentElement.Item2.Substring(iLastName + 1) + "-" + e.NameOrTokenWithId();
-					newChildElements.Add(Tuple.Create(e, weakKey));
+					// トークンが存在するかチェックする弱い条件
+					ret.Add(parentElement.Item2 + "-'" + e.TokenText() + "'");
+					// 先祖に存在するかチェックする弱い条件
+					//var iLastName = parentElement.Item2.LastIndexOf("<");
+					//var weakKey = "<<" + parentElement.Item2.Substring(iLastName + 1) + "-" + e.NameOrTokenWithId();
+					//newChildElements.Add(Tuple.Create(e, weakKey));
 				}
 				ret.UnionWith(newChildElements.Select(t => t.Item2));
 				childElements = newChildElements;

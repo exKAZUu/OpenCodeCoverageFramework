@@ -14,15 +14,15 @@ namespace Occf.Learner.Core.Tests.Experiments {
 		private static IEnumerable<TestCaseData> TestCases {
 			get {
 				var exps = new BitLearningExperimentWithGrouping[] {
-					new JavaScriptBranchExperiment(),
-					new JavaScriptIfExperiment(),
-					new JavaScriptWhileExperiment(),
-					new JavaScriptDoWhileExperiment(),
-					new JavaScriptForExperiment(),
+					//new JavaScriptBranchExperiment(),
+					//new JavaScriptIfExperiment(),
+					//new JavaScriptWhileExperiment(),
+					//new JavaScriptDoWhileExperiment(),
+					//new JavaScriptForExperiment(),
 					new JavaScriptConsoleLogExperiment(),
-					new JavaScriptBlockExperiment(),
-					new JavaScriptLabeledStatementExperiment(),
-					new JavaScriptEmptyStatementExperiment(),
+					//new JavaScriptBlockExperiment(),
+					//new JavaScriptLabeledStatementExperiment(),
+					//new JavaScriptEmptyStatementExperiment(),
 				};
 				const string langName = "JavaScript";
 				var learningSets = new[] {

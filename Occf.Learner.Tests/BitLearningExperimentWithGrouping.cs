@@ -35,6 +35,45 @@ namespace Occf.Learner.Core.Tests {
 			_elementNames = elementNames.ToHashSet();
 		}
 
+		public void CheckLearnable(ICollection<string> allPaths, ICollection<string> seedPaths) {
+			var acceptedElements = new List<Tuple<XElement, int>>();
+			var rejectedElements = new HashSet<XElement>();
+
+			foreach (var path in seedPaths.Concat(allPaths)) {
+				var codeFile = new FileInfo(path);
+				var ast = Processor.GenerateXml(codeFile, null, true);
+				rejectedElements.UnionWith(GetAllElements(ast));
+				acceptedElements.AddRange(GetAcceptedElements(ast));
+			}
+			rejectedElements.ExceptWith(acceptedElements.Select(t => t.Item1));
+			var groupedAcceptedElements = acceptedElements
+					.GroupBy(t => t.Item2, t => t.Item1)
+					.ToList();
+
+			var masterPredicates = groupedAcceptedElements
+					.Select(g => g.GetCommonKeys(_predicateDepth))
+					.Aggregate((ks1, ks2) => {
+						ks1.UnionWith(ks2);
+						return ks1;
+					}).ToList();
+			
+			var acceptedFeatures = groupedAcceptedElements
+					.Select(g => g.Select(e => GetBits(e, masterPredicates))
+							.Aggregate((f1, f2) => f1 & f2))
+					.ToHashSet();
+			var rejectedFeatures = rejectedElements
+					.Select(e => GetBits(e, masterPredicates))
+					.ToHashSet();
+
+			var idealPredicates = acceptedFeatures
+					.Select(s => new Stack<BigInteger>(Enumerable.Repeat(s, 1)))
+					.Select(GetPredicate)
+					.ToList();
+			if (!CanReject(idealPredicates, rejectedFeatures)) {
+				throw new Exception("Ideal predicates can't reject elements.");
+			}
+		}
+
 		public void LearnUntilBeStable(
 				ICollection<string> allPaths, ICollection<string> seedPaths, double threshold) {
 			_previousActuals = new List<bool>();
@@ -96,10 +135,14 @@ namespace Occf.Learner.Core.Tests {
 			allFeaturesCounter.ExceptWith(acceptedFeaturesCounter);
 			_acceptedFeatures = acceptedFeaturesCounter.ToHashSet();
 			_rejectedFeatures = allFeaturesCounter.ToHashSet();
-			Console.WriteLine("Max A: " + acceptedFeaturesCounter.ItemsWithCount.Max(kv => kv.Value) +
-			                  ", Min A: " + acceptedFeaturesCounter.ItemsWithCount.Min(kv => kv.Value) +
-			                  ", Max R: " + allFeaturesCounter.ItemsWithCount.Max(kv => kv.Value) +
-			                  ", Min R: " + allFeaturesCounter.ItemsWithCount.Min(kv => kv.Value));
+			if (acceptedFeaturesCounter.Count > 0) {
+				Console.WriteLine("Accepted Max A: " + acceptedFeaturesCounter.ItemsWithCount.Max(kv => kv.Value) +
+				                  ", Min A: " + acceptedFeaturesCounter.ItemsWithCount.Min(kv => kv.Value));
+			}
+			if (allFeaturesCounter.Count > 0) {
+				Console.WriteLine("Rejected Max R: " + allFeaturesCounter.ItemsWithCount.Max(kv => kv.Value) +
+				                  ", Min R: " + allFeaturesCounter.ItemsWithCount.Min(kv => kv.Value));
+			}
 
 			const int initialFeatureCount = 5;
 			var initialMaxFeatures = GetInitialFeatures(allFeaturesCounter, initialFeatureCount, 1);
@@ -113,6 +156,14 @@ namespace Occf.Learner.Core.Tests {
 			}
 
 			_rejectedFeatures.UnionWith(_rejected);
+			var initialPredicates = _seedAccepted
+					.Select(s => new Stack<BigInteger>(Enumerable.Repeat(s, 1)))
+					.Select(GetPredicate)
+					.ToList();
+			if (!CanReject(initialPredicates, _rejectedFeatures)) {
+				throw new Exception("Initial predicates can't reject elements.");
+			}
+
 			var count = 2;
 			while (true) {
 				var time = Environment.TickCount;

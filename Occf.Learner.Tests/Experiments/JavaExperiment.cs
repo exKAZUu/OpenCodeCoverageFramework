@@ -15,15 +15,15 @@ namespace Occf.Learner.Core.Tests.Experiments {
 			get {
 				var exps = new BitLearningExperimentWithGrouping[] {
 					//new JavaStatementExperiment(), 
-					new JavaBranchExperiment(),
-					new JavaIfExperiment(),
-					new JavaWhileExperiment(),
-					new JavaDoWhileExperiment(),
-					new JavaForExperiment(),
+					//new JavaBranchExperiment(),
+					//new JavaIfExperiment(),
+					//new JavaWhileExperiment(),
+					//new JavaDoWhileExperiment(),
+					//new JavaForExperiment(),
 					new JavaPreconditionsExperiment(),
-					new JavaBlockExperiment(),
-					new JavaLabeledStatementExperiment(),
-					new JavaEmptyStatementExperiment(),
+					//new JavaBlockExperiment(),
+					//new JavaLabeledStatementExperiment(),
+					//new JavaEmptyStatementExperiment(),
 				};
 				const string langName = "Java";
 				var learningSets = new[] {
@@ -49,6 +49,14 @@ namespace Occf.Learner.Core.Tests.Experiments {
 					.ToList();
 			exp.LearnUntilBeStable(allPaths, seedPaths, 0.5);
 			Assert.That(exp.WrongCount, Is.EqualTo(0));
+		}
+
+		[Test, TestCaseSource("TestCases")]
+		public void CheckLearnable(
+				BitLearningExperimentWithGrouping exp, string projectPath, IList<string> seedPaths) {
+			var allPaths = Directory.GetFiles(projectPath, "*.java", SearchOption.AllDirectories)
+					.ToList();
+			exp.CheckLearnable(allPaths, seedPaths);
 		}
 	}
 
@@ -161,12 +169,18 @@ namespace Occf.Learner.Core.Tests.Experiments {
 								if (primary.SafeName() != "primary") {
 									return false;
 								}
-								if (primary.NthElementOrDefault(0).SafeValue() != "Preconditions") {
+								//if (primary.Elements().All(e2 => e2.TokenText() != "Preconditions")) {
+								//	return false;
+								//}
+								if (primary.Elements().All(e2 => e2.TokenText() != "checkArgument")) {
 									return false;
 								}
-								if (primary.NthElementOrDefault(2).SafeValue() != "checkArgument") {
-									return false;
-								}
+								//if (primary.NthElementOrDefault(0).SafeValue() != "Preconditions") {
+								//	return false;
+								//}
+								//if (primary.NthElementOrDefault(2).SafeValue() != "checkArgument") {
+								//	return false;
+								//}
 								if (e.ElementsBeforeSelf().Any()) {
 									return false;
 								}

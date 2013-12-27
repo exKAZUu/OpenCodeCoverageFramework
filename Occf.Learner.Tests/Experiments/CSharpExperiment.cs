@@ -4,6 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 using Code2Xml.Core;
+using Code2Xml.Languages.ANTLRv3.Processors.CSharp;
+using Code2Xml.Languages.ANTLRv3.Processors.Test;
 using NUnit.Framework;
 using Paraiba.Xml.Linq;
 using ParserTests;
@@ -40,6 +42,23 @@ namespace Occf.Learner.Core.Tests.Experiments {
 		[Test, TestCaseSource("TestCases")]
 		public void Test(
 				BitLearningExperimentWithGrouping exp, string projectPath, IList<string> seedPaths) {
+			/*
+			 return from method in manager.GetHubMethods(descriptor.Name)
+                   group method by method.Name into overloads
+                   let oload = (from overload in overloads
+                                orderby overload.Parameters.Count
+                                select overload).FirstOrDefault()
+                   orderby oload.Name
+                   select oload;
+			 */
+			//var processor = new TestProcessorUsingAntlr3();
+			//var xml1 = processor.GenerateXml("class A { void main() { new A() { }; } }");
+
+			Console.WriteLine("-----------------");
+
+			var processor2 = new CSharpProcessorUsingAntlr3();
+			var xml2 = processor2.GenerateXml("class A { void main() { new A() { b = 0 }; } }");
+
 			var allPaths = Directory.GetFiles(projectPath, "*.cs", SearchOption.AllDirectories)
 					.ToList();
 			exp.LearnUntilBeStable(allPaths, seedPaths, 0.5);
