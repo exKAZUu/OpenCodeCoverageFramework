@@ -127,6 +127,7 @@ namespace Occf.Learner.Core.Tests {
 
 			var acceptedFeaturesCount = acceptedFeaturesCounter.Count;
 			var allFeaturesCount = allFeaturesCounter.Count;
+			// ‰Šú‚ÌiÅ‚àŒµ‚µ‚¢jPredicate‚ÅœŠO‚Å‚«‚é‚à‚Ì‚Í–³Ž‹
 			acceptedFeaturesCounter.ClearItemsIf(f => !IsRejected(_seedAccepted, f));
 			allFeaturesCounter.ClearItemsIf(f => !IsRejected(_seedAccepted, f));
 			var alreadyAcceptedCount = acceptedFeaturesCount - acceptedFeaturesCounter.Count;

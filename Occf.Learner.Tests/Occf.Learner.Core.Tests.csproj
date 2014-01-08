@@ -84,6 +84,7 @@
     <Compile Include="ClassificationTest.cs" />
     <Compile Include="BitLearningExperiment.cs" />
     <Compile Include="BitLearningExperimentWithGrouping.cs" />
+    <Compile Include="BitLearningExperimentGroupingWithId.cs" />
     <Compile Include="Experiments\CSharpExperiment.cs" />
     <Compile Include="Experiments\JavaScriptExperiment.cs" />
     <Compile Include="Experiments\LuaExperiment.cs" />

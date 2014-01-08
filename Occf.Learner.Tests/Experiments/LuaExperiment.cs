@@ -14,9 +14,9 @@ namespace Occf.Learner.Core.Tests.Experiments {
 	public class LuaExperiment {
 		private static IEnumerable<TestCaseData> TestCases {
 			get {
-				var exps = new BitLearningExperimentWithGrouping[] {
-					//new LuaComplexStatementExperiment(),
-					//new LuaComplexBranchExperiment(),
+				var exps = new BitLearningExperimentGroupingWithId[] {
+					new LuaComplexStatementExperiment(),
+					new LuaComplexBranchExperiment(),
 					new LuaStatementExperiment(),
 					new LuaIfExperiment(),
 					new LuaWhileExperiment(),
@@ -57,7 +57,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 		[Test, TestCaseSource("TestCases")]
 		public void Test(
-				BitLearningExperimentWithGrouping exp, string projectPath, IList<string> seedPaths) {
+				BitLearningExperimentGroupingWithId exp, string projectPath, IList<string> seedPaths) {
 			var allPaths = Directory.GetFiles(projectPath, "*.lua", SearchOption.AllDirectories)
 					.ToList();
 			exp.LearnUntilBeStable(allPaths, seedPaths);
@@ -66,147 +66,144 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 		[Test, TestCaseSource("TestCases")]
 		public void CheckLearnable(
-				BitLearningExperimentWithGrouping exp, string projectPath, IList<string> seedPaths) {
+				BitLearningExperimentGroupingWithId exp, string projectPath, IList<string> seedPaths) {
 			var allPaths = Directory.GetFiles(projectPath, "*.lua", SearchOption.AllDirectories)
 					.ToList();
-			exp.CheckLearnable(allPaths, seedPaths);
+			//exp.CheckLearnable(allPaths, seedPaths);
 		}
 	}
 
-	public class LuaComplexBranchExperiment : BitLearningExperimentWithGrouping {
+	public class LuaComplexBranchExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
 			get { return new LuaProcessor(); }
 		}
 
 		public LuaComplexBranchExperiment() : base("exp") {}
 
-		protected override IEnumerable<Tuple<XElement, int>> GetAcceptedElements(XElement ast) {
-			// ifトークンが存在するかどうか
-			var ifConds = ast.Descendants("stat")
-					.Where(e => e.FirstElementOrDefault().SafeValue() == "if")
-					.SelectMany(e => e.Elements("exp"))
-					.Select(e => Tuple.Create(e, 0));
-			var whileConds = ast.Descendants("stat")
-					.Where(e => e.FirstElementOrDefault().SafeValue() == "while")
-					.Select(e => e.Element("exp"))
-					.Select(e => Tuple.Create(e, 1));
-			var doConds = ast.Descendants("stat")
-					.Where(e => e.FirstElementOrDefault().SafeValue() == "repeat")
-					.Select(e => e.Element("exp"))
-					.Select(e => Tuple.Create(e, 2));
-			return ifConds.Concat(whileConds).Concat(doConds);
+		protected override bool IsAccepted(XElement e) {
+			var siblings = e.Siblings().ToList();
+			var parent = e.Parent;
+			if (parent.SafeName() == "stat" && siblings[0].Value == "if") {
+				return true;
+			}
+			if (parent.SafeName() == "stat" && siblings[0].Value == "while") {
+				return true;
+			}
+			if (parent.SafeName() == "stat" && siblings[0].Value == "repeat") {
+				return true;
+			}
+			return false;
 		}
 	}
 
-	public class LuaIfExperiment : BitLearningExperimentWithGrouping {
+	public class LuaIfExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
 			get { return new LuaProcessor(); }
 		}
 
 		public LuaIfExperiment() : base("exp") {}
 
-		protected override IEnumerable<Tuple<XElement, int>> GetAcceptedElements(XElement ast) {
-			// ifトークンが存在するかどうか
-			return ast.Descendants("stat")
-					.Where(e => e.FirstElementOrDefault().SafeValue() == "if")
-					.SelectMany(e => e.Elements("exp"))
-					.Select(e => Tuple.Create(e, 0));
+		protected override bool IsAccepted(XElement e) {
+			var siblings = e.Siblings().ToList();
+			var parent = e.Parent;
+			if (parent.SafeName() == "stat" && siblings[0].Value == "if") {
+				return true;
+			}
+			return false;
 		}
 	}
 
-	public class LuaWhileExperiment : BitLearningExperimentWithGrouping {
+	public class LuaWhileExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
 			get { return new LuaProcessor(); }
 		}
 
 		public LuaWhileExperiment() : base("exp") {}
 
-		protected override IEnumerable<Tuple<XElement, int>> GetAcceptedElements(XElement ast) {
-			// whileトークンが存在するかどうか
-			return ast.Descendants("stat")
-					.Where(e => e.FirstElementOrDefault().SafeValue() == "while")
-					.Select(e => e.Element("exp"))
-					.Select(e => Tuple.Create(e, 0));
+		protected override bool IsAccepted(XElement e) {
+			var siblings = e.Siblings().ToList();
+			var parent = e.Parent;
+			if (parent.SafeName() == "stat" && siblings[0].Value == "while") {
+				return true;
+			}
+			return false;
 		}
 	}
 
-	public class LuaDoWhileExperiment : BitLearningExperimentWithGrouping {
+	public class LuaDoWhileExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
 			get { return new LuaProcessor(); }
 		}
 
 		public LuaDoWhileExperiment() : base("exp") {}
 
-		protected override IEnumerable<Tuple<XElement, int>> GetAcceptedElements(XElement ast) {
-			// doトークンが存在するかどうか
-			return ast.Descendants("stat")
-					.Where(e => e.FirstElementOrDefault().SafeValue() == "repeat")
-					.Select(e => e.Element("exp"))
-					.Select(e => Tuple.Create(e, 0));
+		protected override bool IsAccepted(XElement e) {
+			var siblings = e.Siblings().ToList();
+			var parent = e.Parent;
+			if (parent.SafeName() == "stat" && siblings[0].Value == "repeat") {
+				return true;
+			}
+			return false;
 		}
 	}
 
-	public class LuaComplexStatementExperiment : BitLearningExperimentWithGrouping {
+	public class LuaComplexStatementExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
 			get { return new LuaProcessor(); }
 		}
 
 		public LuaComplexStatementExperiment() : base("stat") {}
 
-		protected override IEnumerable<Tuple<XElement, int>> GetAcceptedElements(XElement ast) {
-			return ast.Descendants("stat")
-					.Where(e => {
-						// ラベルはループ文に付くため，ラベルの中身は除外
-						if (e.FirstElement().Name() == "label") {
-							return false;
-						}
-						if (e.FirstElement().Value == ";") {
-							return false;
-						}
-						return true;
-					})
-					.Select(e => Tuple.Create(e, 0));
+		protected override bool IsAccepted(XElement e) {
+			if (e.FirstElement().Name() == "label") {
+				return false;
+			}
+			if (e.FirstElement().Value == ";") {
+				return false;
+			}
+			return true;
 		}
 	}
 
-	public class LuaStatementExperiment : BitLearningExperimentWithGrouping {
+	public class LuaStatementExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
 			get { return new LuaProcessor(); }
 		}
 
 		public LuaStatementExperiment() : base("stat") {}
 
-		protected override IEnumerable<Tuple<XElement, int>> GetAcceptedElements(XElement ast) {
-			return ast.Descendants("stat")
-					.Select(e => Tuple.Create(e, 0));
+		protected override bool IsAccepted(XElement e) {
+			return true;
 		}
 	}
 
-	public class LuaLabeledStatementExperiment : BitLearningExperimentWithGrouping {
+	public class LuaLabeledStatementExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
 			get { return new LuaProcessor(); }
 		}
 
 		public LuaLabeledStatementExperiment() : base("stat") {}
 
-		protected override IEnumerable<Tuple<XElement, int>> GetAcceptedElements(XElement ast) {
-			return ast.Descendants("stat")
-					.Where(e => e.FirstElement().Name() == "label")
-					.Select(e => Tuple.Create(e, 0));
+		protected override bool IsAccepted(XElement e) {
+			if (e.FirstElement().Name() == "label") {
+				return true;
+			}
+			return false;
 		}
 	}
 
-	public class LuaEmptyStatementExperiment : BitLearningExperimentWithGrouping {
+	public class LuaEmptyStatementExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
 			get { return new LuaProcessor(); }
 		}
 
 		public LuaEmptyStatementExperiment() : base("stat") {}
 
-		protected override IEnumerable<Tuple<XElement, int>> GetAcceptedElements(XElement ast) {
-			return ast.Descendants("stat")
-					.Where(e => e.FirstElement().Value == ";")
-					.Select(e => Tuple.Create(e, 0));
+		protected override bool IsAccepted(XElement e) {
+			if (e.FirstElement().Value == ";") {
+				return true;
+			}
+			return false;
 		}
 	}
 }
