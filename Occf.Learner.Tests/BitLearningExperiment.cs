@@ -5,7 +5,6 @@ using System.Linq;
 using System.Numerics;
 using System.Xml.Linq;
 using Code2Xml.Core;
-using Occf.Learner.Core.Tests.LearningAlgorithms;
 using Paraiba.Linq;
 
 namespace Occf.Learner.Core.Tests {
@@ -28,8 +27,7 @@ namespace Occf.Learner.Core.Tests {
 		}
 
 		public void LearnUntilBeStable(
-				ICollection<string> allPaths, ICollection<string> seedPaths, LearningAlgorithm learner,
-				double threshold) {
+				ICollection<string> allPaths, ICollection<string> seedPaths) {
 			_learnedDiffs = new HashSet<BigInteger>();
 
 			var seedAccepted = new HashSet<XElement>();
@@ -38,7 +36,7 @@ namespace Occf.Learner.Core.Tests {
 				var codeFile = new FileInfo(path);
 				var ast = Processor.GenerateXml(codeFile);
 				seedRejected.UnionWith(GetAllElements(ast).ToHashSet());
-				seedAccepted.UnionWith(GetAcceptedElements(ast));
+				seedAccepted.UnionWith(GetAcceptedElements(ast).Select(t => t.Item1));
 			}
 			seedRejected.ExceptWith(seedAccepted);
 			_masterPredicates = seedAccepted.GetUnionKeys(_predicateDepth).ToList();
@@ -52,7 +50,7 @@ namespace Occf.Learner.Core.Tests {
 				var codeFile = new FileInfo(path);
 				var ast = Processor.GenerateXml(codeFile);
 				var rejectedElements = GetAllElements(ast).ToHashSet();
-				var acceptedElements = GetAcceptedElements(ast).ToHashSet();
+				var acceptedElements = GetAcceptedElements(ast).Select(t => t.Item1).ToHashSet();
 				rejectedElements.ExceptWith(acceptedElements);
 				_acceptedFeatureDict.Add(path, acceptedElements
 						.Select(e => GetBits(e, _masterPredicates))
@@ -202,6 +200,6 @@ namespace Occf.Learner.Core.Tests {
 			return ast.DescendantsAndSelf().Where(e => _elementNames.Contains(e.Name()));
 		}
 
-		protected abstract IEnumerable<XElement> GetAcceptedElements(XElement ast);
+		protected abstract IEnumerable<Tuple<XElement, int>> GetAcceptedElements(XElement ast);
 	}
 }

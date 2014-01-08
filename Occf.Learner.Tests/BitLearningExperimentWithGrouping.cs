@@ -5,7 +5,6 @@ using System.Linq;
 using System.Numerics;
 using System.Xml.Linq;
 using Code2Xml.Core;
-using Occf.Learner.Core.Tests.LearningAlgorithms;
 using Paraiba.Linq;
 
 namespace Occf.Learner.Core.Tests {
@@ -24,7 +23,7 @@ namespace Occf.Learner.Core.Tests {
 		private List<BigInteger> _accepted;
 		private HashSet<BigInteger> _rejected;
 		private HashSet<BigInteger> _seedAccepted;
-		private int _predicateDepth = 30;
+		private int _predicateDepth = 10;
 		private List<string> _masterPredicates;
 		private int _featureCount;
 		private List<bool> _previousActuals;
@@ -41,9 +40,14 @@ namespace Occf.Learner.Core.Tests {
 
 			foreach (var path in seedPaths.Concat(allPaths)) {
 				var codeFile = new FileInfo(path);
-				var ast = Processor.GenerateXml(codeFile, null, true);
-				rejectedElements.UnionWith(GetAllElements(ast));
-				acceptedElements.AddRange(GetAcceptedElements(ast));
+				try {
+					var ast = Processor.GenerateXml(codeFile, null, true);
+					rejectedElements.UnionWith(GetAllElements(ast));
+					acceptedElements.AddRange(GetAcceptedElements(ast));
+				} catch (Exception e) {
+					Console.WriteLine(e.Message);
+					Console.WriteLine(path);
+				}
 			}
 			rejectedElements.ExceptWith(acceptedElements.Select(t => t.Item1));
 			var groupedAcceptedElements = acceptedElements
@@ -56,7 +60,7 @@ namespace Occf.Learner.Core.Tests {
 						ks1.UnionWith(ks2);
 						return ks1;
 					}).ToList();
-			
+
 			var acceptedFeatures = groupedAcceptedElements
 					.Select(g => g.Select(e => GetBits(e, masterPredicates))
 							.Aggregate((f1, f2) => f1 & f2))
@@ -74,8 +78,7 @@ namespace Occf.Learner.Core.Tests {
 			}
 		}
 
-		public void LearnUntilBeStable(
-				ICollection<string> allPaths, ICollection<string> seedPaths, double threshold) {
+		public void LearnUntilBeStable(ICollection<string> allPaths, ICollection<string> seedPaths) {
 			_previousActuals = new List<bool>();
 			_isFirstTime = true;
 
@@ -136,7 +139,8 @@ namespace Occf.Learner.Core.Tests {
 			_acceptedFeatures = acceptedFeaturesCounter.ToHashSet();
 			_rejectedFeatures = allFeaturesCounter.ToHashSet();
 			if (acceptedFeaturesCounter.Count > 0) {
-				Console.WriteLine("Accepted Max A: " + acceptedFeaturesCounter.ItemsWithCount.Max(kv => kv.Value) +
+				Console.WriteLine("Accepted Max A: "
+				                  + acceptedFeaturesCounter.ItemsWithCount.Max(kv => kv.Value) +
 				                  ", Min A: " + acceptedFeaturesCounter.ItemsWithCount.Min(kv => kv.Value));
 			}
 			if (allFeaturesCounter.Count > 0) {
@@ -174,7 +178,7 @@ namespace Occf.Learner.Core.Tests {
 					//LearnPredicates();
 				}
 				Console.WriteLine("Time: " + (Environment.TickCount - time));
-			_isFirstTime = false;
+				_isFirstTime = false;
 			}
 			Console.WriteLine("Required elements: " + (_accepted.Count + _rejected.Count));
 		}

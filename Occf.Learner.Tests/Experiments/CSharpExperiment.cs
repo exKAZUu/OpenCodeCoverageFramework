@@ -5,7 +5,6 @@ using System.Linq;
 using System.Xml.Linq;
 using Code2Xml.Core;
 using Code2Xml.Languages.ANTLRv3.Processors.CSharp;
-using Code2Xml.Languages.ANTLRv3.Processors.Test;
 using NUnit.Framework;
 using Paraiba.Xml.Linq;
 using ParserTests;
@@ -42,27 +41,32 @@ namespace Occf.Learner.Core.Tests.Experiments {
 		[Test, TestCaseSource("TestCases")]
 		public void Test(
 				BitLearningExperimentWithGrouping exp, string projectPath, IList<string> seedPaths) {
-			/*
-			 return from method in manager.GetHubMethods(descriptor.Name)
-                   group method by method.Name into overloads
-                   let oload = (from overload in overloads
-                                orderby overload.Parameters.Count
-                                select overload).FirstOrDefault()
-                   orderby oload.Name
-                   select oload;
-			 */
+			var code = @"
+			var a = from method in new[] { 123.ToString() }
+				group method by method.Length
+				into overloads
+				select oload;
+			 ";
 			//var processor = new TestProcessorUsingAntlr3();
 			//var xml1 = processor.GenerateXml("class A { void main() { new A() { }; } }");
 
 			Console.WriteLine("-----------------");
 
 			var processor2 = new CSharpProcessorUsingAntlr3();
-			var xml2 = processor2.GenerateXml("class A { void main() { new A() { b = 0 }; } }");
+			var xml2 = processor2.GenerateXml("class A { void main() { " + code + "} }", true);
 
 			var allPaths = Directory.GetFiles(projectPath, "*.cs", SearchOption.AllDirectories)
 					.ToList();
-			exp.LearnUntilBeStable(allPaths, seedPaths, 0.5);
+			exp.LearnUntilBeStable(allPaths, seedPaths);
 			Assert.That(exp.WrongCount, Is.EqualTo(0));
+		}
+
+		[Test, TestCaseSource("TestCases")]
+		public void CheckLearnable(
+				BitLearningExperimentWithGrouping exp, string projectPath, IList<string> seedPaths) {
+			var allPaths = Directory.GetFiles(projectPath, "*.cs", SearchOption.AllDirectories)
+					.ToList();
+			exp.CheckLearnable(allPaths, seedPaths);
 		}
 	}
 
@@ -241,8 +245,18 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 		protected override IEnumerable<Tuple<XElement, int>> GetAcceptedElements(XElement ast) {
 			return ast.Descendants("statement")
-					.Where(e => e.Element("labeled_statement") == null)
+					.Where(e => e.Element("labeled_statement") != null)
 					.Select(e => Tuple.Create(e, 0));
+		}
+	}
+	class A {
+		void main() {
+			var a = from method in new[] { 123.ToString() }
+				let oload = (from overload in new[] { 123.ToString() }
+					orderby overload.Length
+					select overload).FirstOrDefault()
+				orderby oload.Length
+				select oload;
 		}
 	}
 }

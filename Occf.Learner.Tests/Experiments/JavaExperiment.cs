@@ -47,7 +47,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 				BitLearningExperimentWithGrouping exp, string projectPath, IList<string> seedPaths) {
 			var allPaths = Directory.GetFiles(projectPath, "*.java", SearchOption.AllDirectories)
 					.ToList();
-			exp.LearnUntilBeStable(allPaths, seedPaths, 0.5);
+			exp.LearnUntilBeStable(allPaths, seedPaths);
 			Assert.That(exp.WrongCount, Is.EqualTo(0));
 		}
 

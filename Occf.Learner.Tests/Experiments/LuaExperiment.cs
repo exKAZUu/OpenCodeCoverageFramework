@@ -15,8 +15,9 @@ namespace Occf.Learner.Core.Tests.Experiments {
 		private static IEnumerable<TestCaseData> TestCases {
 			get {
 				var exps = new BitLearningExperimentWithGrouping[] {
+					//new LuaComplexStatementExperiment(),
+					//new LuaComplexBranchExperiment(),
 					new LuaStatementExperiment(),
-					new LuaBranchExperiment(),
 					new LuaIfExperiment(),
 					new LuaWhileExperiment(),
 					new LuaDoWhileExperiment(),
@@ -25,11 +26,25 @@ namespace Occf.Learner.Core.Tests.Experiments {
 				};
 				const string langName = "Lua";
 				var learningSets = new[] {
-					Tuple.Create(Fixture.GetInputProjectPath(langName, "pageobjectgenerator"),
+					Tuple.Create(Fixture.GetInputProjectPath(langName, "koreader"),
 							new List<string> { Fixture.GetInputCodePath(langName, "Seed.Lua"), }),
-					Tuple.Create(Fixture.GetInputProjectPath(langName, "presto"),
+					Tuple.Create(Fixture.GetInputProjectPath(langName, "lapis"),
 							new List<string> { Fixture.GetInputCodePath(langName, "Seed.Lua"), }),
-					Tuple.Create(Fixture.GetInputProjectPath(langName, "storm"),
+					Tuple.Create(Fixture.GetInputProjectPath(langName, "lsyncd"),
+							new List<string> { Fixture.GetInputCodePath(langName, "Seed.Lua"), }),
+					Tuple.Create(Fixture.GetInputProjectPath(langName, "luafun"),
+							new List<string> { Fixture.GetInputCodePath(langName, "Seed.Lua"), }),
+					Tuple.Create(Fixture.GetInputProjectPath(langName, "luakit"),
+							new List<string> { Fixture.GetInputCodePath(langName, "Seed.Lua"), }),
+					Tuple.Create(Fixture.GetInputProjectPath(langName, "middleclass"),
+							new List<string> { Fixture.GetInputCodePath(langName, "Seed.Lua"), }),
+					Tuple.Create(Fixture.GetInputProjectPath(langName, "pacpac"),
+							new List<string> { Fixture.GetInputCodePath(langName, "Seed.Lua"), }),
+					Tuple.Create(Fixture.GetInputProjectPath(langName, "Penlight"),
+							new List<string> { Fixture.GetInputCodePath(langName, "Seed.Lua"), }),
+					Tuple.Create(Fixture.GetInputProjectPath(langName, "Tir"),
+							new List<string> { Fixture.GetInputCodePath(langName, "Seed.Lua"), }),
+					Tuple.Create(Fixture.GetInputProjectPath(langName, "vlsub"),
 							new List<string> { Fixture.GetInputCodePath(langName, "Seed.Lua"), }),
 				};
 				foreach (var exp in exps) {
@@ -43,19 +58,27 @@ namespace Occf.Learner.Core.Tests.Experiments {
 		[Test, TestCaseSource("TestCases")]
 		public void Test(
 				BitLearningExperimentWithGrouping exp, string projectPath, IList<string> seedPaths) {
-			var allPaths = Directory.GetFiles(projectPath, "*.Lua", SearchOption.AllDirectories)
+			var allPaths = Directory.GetFiles(projectPath, "*.lua", SearchOption.AllDirectories)
 					.ToList();
-			exp.LearnUntilBeStable(allPaths, seedPaths, 0.5);
+			exp.LearnUntilBeStable(allPaths, seedPaths);
 			Assert.That(exp.WrongCount, Is.EqualTo(0));
+		}
+
+		[Test, TestCaseSource("TestCases")]
+		public void CheckLearnable(
+				BitLearningExperimentWithGrouping exp, string projectPath, IList<string> seedPaths) {
+			var allPaths = Directory.GetFiles(projectPath, "*.lua", SearchOption.AllDirectories)
+					.ToList();
+			exp.CheckLearnable(allPaths, seedPaths);
 		}
 	}
 
-	public class LuaBranchExperiment : BitLearningExperimentWithGrouping {
+	public class LuaComplexBranchExperiment : BitLearningExperimentWithGrouping {
 		protected override Processor Processor {
 			get { return new LuaProcessor(); }
 		}
 
-		public LuaBranchExperiment() : base("exp") {}
+		public LuaComplexBranchExperiment() : base("exp") {}
 
 		protected override IEnumerable<Tuple<XElement, int>> GetAcceptedElements(XElement ast) {
 			// ifÉgÅ[ÉNÉìÇ™ë∂ç›Ç∑ÇÈÇ©Ç«Ç§Ç©
@@ -123,12 +146,12 @@ namespace Occf.Learner.Core.Tests.Experiments {
 		}
 	}
 
-	public class LuaStatementExperiment : BitLearningExperimentWithGrouping {
+	public class LuaComplexStatementExperiment : BitLearningExperimentWithGrouping {
 		protected override Processor Processor {
 			get { return new LuaProcessor(); }
 		}
 
-		public LuaStatementExperiment() : base("stat") {}
+		public LuaComplexStatementExperiment() : base("stat") {}
 
 		protected override IEnumerable<Tuple<XElement, int>> GetAcceptedElements(XElement ast) {
 			return ast.Descendants("stat")
@@ -142,6 +165,19 @@ namespace Occf.Learner.Core.Tests.Experiments {
 						}
 						return true;
 					})
+					.Select(e => Tuple.Create(e, 0));
+		}
+	}
+
+	public class LuaStatementExperiment : BitLearningExperimentWithGrouping {
+		protected override Processor Processor {
+			get { return new LuaProcessor(); }
+		}
+
+		public LuaStatementExperiment() : base("stat") {}
+
+		protected override IEnumerable<Tuple<XElement, int>> GetAcceptedElements(XElement ast) {
+			return ast.Descendants("stat")
 					.Select(e => Tuple.Create(e, 0));
 		}
 	}
