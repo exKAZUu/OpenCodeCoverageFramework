@@ -13,17 +13,18 @@ namespace Occf.Learner.Core.Tests.Experiments {
 	public class JavaExperiment {
 		private static IEnumerable<TestCaseData> TestCases {
 			get {
-				var exps = new BitLearningExperimentWithGrouping[] {
-					//new JavaStatementExperiment(), 
-					//new JavaBranchExperiment(),
-					//new JavaIfExperiment(),
-					//new JavaWhileExperiment(),
-					//new JavaDoWhileExperiment(),
-					//new JavaForExperiment(),
+				var exps = new BitLearningExperimentGroupingWithId[] {
+					new JavaComplexStatementExperiment(),
+					new JavaComplexBranchExperiment(),
+					new JavaIfExperiment(),
+					new JavaWhileExperiment(),
+					new JavaDoWhileExperiment(),
+					new JavaForExperiment(),
 					new JavaPreconditionsExperiment(),
-					//new JavaBlockExperiment(),
-					//new JavaLabeledStatementExperiment(),
-					//new JavaEmptyStatementExperiment(),
+					new JavaStatementExperiment(),
+					new JavaBlockExperiment(),
+					new JavaLabeledStatementExperiment(),
+					new JavaEmptyStatementExperiment(),
 				};
 				const string langName = "Java";
 				var learningSets = new[] {
@@ -44,228 +45,253 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 		[Test, TestCaseSource("TestCases")]
 		public void Test(
-				BitLearningExperimentWithGrouping exp, string projectPath, IList<string> seedPaths) {
+				BitLearningExperimentGroupingWithId exp, string projectPath, IList<string> seedPaths) {
 			var allPaths = Directory.GetFiles(projectPath, "*.java", SearchOption.AllDirectories)
 					.ToList();
 			exp.LearnUntilBeStable(allPaths, seedPaths);
+			if (exp.WrongCount > 0) {
+				Console.WriteLine("--------------- WronglyAcceptedElements ---------------");
+				foreach (var we in exp.WronglyAcceptedElements) {
+					var e = we.AncestorsAndSelf().ElementAtOrDefault(5) ?? we;
+					Console.WriteLine(we.Text());
+					Console.WriteLine(e.Text());
+					Console.WriteLine("---------------------------------------------");
+				}
+				Console.WriteLine("---- WronglyRejectedElements ----");
+				foreach (var we in exp.WronglyRejectedElements) {
+					var e = we.AncestorsAndSelf().ElementAtOrDefault(5) ?? we;
+					Console.WriteLine(we.Text());
+					Console.WriteLine(e.Text());
+					Console.WriteLine("---------------------------------------------");
+				}
+			}
 			Assert.That(exp.WrongCount, Is.EqualTo(0));
 		}
 
 		[Test, TestCaseSource("TestCases")]
 		public void CheckLearnable(
-				BitLearningExperimentWithGrouping exp, string projectPath, IList<string> seedPaths) {
+				BitLearningExperimentGroupingWithId exp, string projectPath, IList<string> seedPaths) {
 			var allPaths = Directory.GetFiles(projectPath, "*.java", SearchOption.AllDirectories)
 					.ToList();
-			exp.CheckLearnable(allPaths, seedPaths);
+			//exp.CheckLearnable(allPaths, seedPaths);
 		}
 	}
 
-	public class JavaBranchExperiment : BitLearningExperimentWithGrouping {
+	public class JavaComplexBranchExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
 			get { return ProcessorLoader.JavaUsingAntlr3; }
 		}
 
-		public JavaBranchExperiment() : base("expression") {}
+		public JavaComplexBranchExperiment() : base("expression") {}
 
-		protected override IEnumerable<Tuple<XElement, int>> GetAcceptedElements(XElement ast) {
-			// ifトークンが存在するかどうか
-			var ifConds = ast.Descendants("statement")
-					.Where(e => e.FirstElementOrDefault().SafeValue() == "if")
-					.Select(e => e.Element("parExpression").NthElement(1))
-					.Select(e => Tuple.Create(e, 0));
-			var whileConds = ast.Descendants("statement")
-					.Where(e => e.FirstElementOrDefault().SafeValue() == "while")
-					.Select(e => e.Element("parExpression").NthElement(1))
-					.Select(e => Tuple.Create(e, 1));
-			var doConds = ast.Descendants("statement")
-					.Where(e => e.FirstElementOrDefault().SafeValue() == "do")
-					.Select(e => e.Element("parExpression").NthElement(1))
-					.Select(e => Tuple.Create(e, 2));
-			var forConds = ast.Descendants("forstatement")
-					.Where(e => e.Elements().Count(e2 => e2.TokenText() == ";") >= 2)
-					.Select(e => e.Element("expression"))
-					.Select(e => Tuple.Create(e, 3));
-			return ifConds.Concat(whileConds).Concat(doConds).Concat(forConds);
+		protected override bool IsAccepted(XElement e) {
+			var p = e.Parent;
+			var pp = p.Parent;
+			var isPar = p.SafeName() == "parExpression";
+			var isStmt = pp.SafeName() == "statement";
+			if (isStmt && isPar && pp.FirstElementOrDefault().SafeValue() == "if") {
+				return true;
+			}
+			if (isStmt && isPar && pp.FirstElementOrDefault().SafeValue() == "while") {
+				return true;
+			}
+			if (isStmt && isPar && pp.FirstElementOrDefault().SafeValue() == "do") {
+				return true;
+			}
+			if (p.SafeName() == "forstatement" && p.Elements().Count(e2 => e2.TokenText() == ";") >= 2) {
+				return true;
+			}
+			return false;
 		}
 	}
 
-	public class JavaIfExperiment : BitLearningExperimentWithGrouping {
+	public class JavaIfExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
 			get { return ProcessorLoader.JavaUsingAntlr3; }
 		}
 
 		public JavaIfExperiment() : base("expression") {}
 
-		protected override IEnumerable<Tuple<XElement, int>> GetAcceptedElements(XElement ast) {
-			// ifトークンが存在するかどうか
-			return ast.Descendants("statement")
-					.Where(e => e.FirstElementOrDefault().SafeValue() == "if")
-					.Select(e => e.Element("parExpression").NthElement(1))
-					.Select(e => Tuple.Create(e, 0));
+		protected override bool IsAccepted(XElement e) {
+			var p = e.Parent;
+			var pp = p.Parent;
+			var isPar = p.SafeName() == "parExpression";
+			var isStmt = pp.SafeName() == "statement";
+			if (isStmt && isPar && pp.FirstElementOrDefault().SafeValue() == "if") {
+				return true;
+			}
+			return false;
 		}
 	}
 
-	public class JavaWhileExperiment : BitLearningExperimentWithGrouping {
+	public class JavaWhileExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
 			get { return ProcessorLoader.JavaUsingAntlr3; }
 		}
 
 		public JavaWhileExperiment() : base("expression") {}
 
-		protected override IEnumerable<Tuple<XElement, int>> GetAcceptedElements(XElement ast) {
-			// whileトークンが存在するかどうか
-			return ast.Descendants("statement")
-					.Where(e => e.FirstElementOrDefault().SafeValue() == "while")
-					.Select(e => e.Element("parExpression").NthElement(1))
-					.Select(e => Tuple.Create(e, 0));
+		protected override bool IsAccepted(XElement e) {
+			var p = e.Parent;
+			var pp = p.Parent;
+			var isPar = p.SafeName() == "parExpression";
+			var isStmt = pp.SafeName() == "statement";
+			if (isStmt && isPar && pp.FirstElementOrDefault().SafeValue() == "while") {
+				return true;
+			}
+			return false;
 		}
 	}
 
-	public class JavaDoWhileExperiment : BitLearningExperimentWithGrouping {
+	public class JavaDoWhileExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
 			get { return ProcessorLoader.JavaUsingAntlr3; }
 		}
 
 		public JavaDoWhileExperiment() : base("expression") {}
 
-		protected override IEnumerable<Tuple<XElement, int>> GetAcceptedElements(XElement ast) {
-			// doトークンが存在するかどうか
-			return ast.Descendants("statement")
-					.Where(e => e.FirstElementOrDefault().SafeValue() == "do")
-					.Select(e => e.Element("parExpression").NthElement(1))
-					.Select(e => Tuple.Create(e, 0));
+		protected override bool IsAccepted(XElement e) {
+			var p = e.Parent;
+			var pp = p.Parent;
+			var isPar = p.SafeName() == "parExpression";
+			var isStmt = pp.SafeName() == "statement";
+			if (isStmt && isPar && pp.FirstElementOrDefault().SafeValue() == "do") {
+				return true;
+			}
+			return false;
 		}
 	}
 
-	public class JavaForExperiment : BitLearningExperimentWithGrouping {
+	public class JavaForExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
 			get { return ProcessorLoader.JavaUsingAntlr3; }
 		}
 
 		public JavaForExperiment() : base("expression") {}
 
-		protected override IEnumerable<Tuple<XElement, int>> GetAcceptedElements(XElement ast) {
-			// expressionの位置
-			return ast.Descendants("forstatement")
-					.Where(e => e.Elements().Count(e2 => e2.TokenText() == ";") >= 2)
-					.Select(e => e.Element("expression"))
-					.Select(e => Tuple.Create(e, 0));
+		protected override bool IsAccepted(XElement e) {
+			var p = e.Parent;
+			if (p.SafeName() == "forstatement" && p.Elements().Count(e2 => e2.TokenText() == ";") >= 2) {
+				return true;
+			}
+			return false;
 		}
 	}
 
-	public class JavaPreconditionsExperiment : BitLearningExperimentWithGrouping {
+	public class JavaPreconditionsExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
 			get { return ProcessorLoader.JavaUsingAntlr3; }
 		}
 
 		public JavaPreconditionsExperiment() : base("expression") {}
 
-		protected override IEnumerable<Tuple<XElement, int>> GetAcceptedElements(XElement ast) {
-			// ある深さから見てトークンが存在するか？
-			return ast.Descendants("expression")
-					.Where(
-							e => {
-								var primary = e.SafeParent().SafeParent().SafeParent().SafeParent();
-								if (primary.SafeName() != "primary") {
-									return false;
-								}
-								//if (primary.Elements().All(e2 => e2.TokenText() != "Preconditions")) {
-								//	return false;
-								//}
-								if (primary.Elements().All(e2 => e2.TokenText() != "checkArgument")) {
-									return false;
-								}
-								//if (primary.NthElementOrDefault(0).SafeValue() != "Preconditions") {
-								//	return false;
-								//}
-								//if (primary.NthElementOrDefault(2).SafeValue() != "checkArgument") {
-								//	return false;
-								//}
-								if (e.ElementsBeforeSelf().Any()) {
-									return false;
-								}
-								return true;
-							})
-					.Select(e => Tuple.Create(e, 0));
+		protected override bool IsAccepted(XElement e) {
+			var primary = e.SafeParent().SafeParent().SafeParent().SafeParent();
+			if (primary.SafeName() != "primary") {
+				return false;
+			}
+			//if (primary.Elements().All(e2 => e2.TokenText() != "Preconditions")) {
+			//	return false;
+			//}
+			if (primary.Elements().All(e2 => e2.TokenText() != "checkArgument")) {
+				return false;
+			}
+			//if (primary.NthElementOrDefault(0).SafeValue() != "Preconditions") {
+			//	return false;
+			//}
+			//if (primary.NthElementOrDefault(2).SafeValue() != "checkArgument") {
+			//	return false;
+			//}
+			if (e.ElementsBeforeSelf().Any()) {
+				return false;
+			}
+			return true;
 		}
 	}
 
-	public class JavaStatementExperiment : BitLearningExperimentWithGrouping {
+	public class JavaComplexStatementExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
 			get { return ProcessorLoader.JavaUsingAntlr3; }
 		}
 
-		public JavaStatementExperiment() : base("statement") {}
+		public JavaComplexStatementExperiment() : base("statement") {}
 
-		protected override IEnumerable<Tuple<XElement, int>> GetAcceptedElements(XElement ast) {
-			return ast.Descendants("statement")
-					.Where(e => {
-						// ブロック自身は意味を持たないステートメントで、中身だけが必要なので除外
-						if (e.FirstElement().Name() == "block") {
-							return false;
-						}
-						// ラベルはループ文に付くため，ラベルの中身は除外
-						var second = e.Parent.NthElementOrDefault(1);
-						if (second != null && second.Value == ":"
-						    && e.Parent.Name() == "statement") {
-							return false;
-						}
-						if (e.FirstElement().Value == ";") {
-							return false;
-						}
-						return true;
-					})
-					.Select(e => Tuple.Create(e, 0));
+		protected override bool IsAccepted(XElement e) {
+			// ブロック自身は意味を持たないステートメントで、中身だけが必要なので除外
+			if (e.FirstElement().Name() == "block") {
+				return false;
+			}
+			// ラベルはループ文に付くため，ラベルの中身は除外
+			var second = e.Parent.NthElementOrDefault(1);
+			if (second != null && second.Value == ":"
+			    && e.Parent.Name() == "statement") {
+				return false;
+			}
+			if (e.FirstElement().Value == ";") {
+				return false;
+			}
+			return true;
 		}
 	}
 
-	public class JavaBlockExperiment : BitLearningExperimentWithGrouping {
+	public class JavaBlockExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
 			get { return ProcessorLoader.JavaUsingAntlr3; }
 		}
 
 		public JavaBlockExperiment() : base("statement") {}
 
-		protected override IEnumerable<Tuple<XElement, int>> GetAcceptedElements(XElement ast) {
-			return ast.Descendants("statement")
-					.Where(e => e.FirstElement().Name() == "block")
-					.Select(e => Tuple.Create(e, 0));
+		protected override bool IsAccepted(XElement e) {
+			// ブロック自身は意味を持たないステートメントで、中身だけが必要なので除外
+			if (e.FirstElement().Name() == "block") {
+				return true;
+			}
+			return false;
 		}
 	}
 
-	public class JavaLabeledStatementExperiment : BitLearningExperimentWithGrouping {
+	public class JavaStatementExperiment : BitLearningExperimentGroupingWithId {
+		protected override Processor Processor {
+			get { return ProcessorLoader.JavaUsingAntlr3; }
+		}
+
+		public JavaStatementExperiment() : base("statement") {}
+
+		protected override bool IsAccepted(XElement e) {
+			return true;
+		}
+	}
+
+	public class JavaLabeledStatementExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
 			get { return ProcessorLoader.JavaUsingAntlr3; }
 		}
 
 		public JavaLabeledStatementExperiment() : base("statement") {}
 
-		protected override IEnumerable<Tuple<XElement, int>> GetAcceptedElements(XElement ast) {
-			return ast.Descendants("statement")
-					.Where(e => {
-						// ラベルはループ文に付くため，ラベルの中身は除外
-						var second = e.Parent.NthElementOrDefault(1);
-						if (second != null && second.Value == ":"
-						    && e.Parent.Name() == "statement") {
-							return true;
-						}
-						return false;
-					})
-					.Select(e => Tuple.Create(e, 0));
+		protected override bool IsAccepted(XElement e) {
+			// ラベルはループ文に付くため，ラベルの中身は除外
+			var second = e.Parent.NthElementOrDefault(1);
+			if (second != null && second.Value == ":"
+			    && e.Parent.Name() == "statement") {
+				return true;
+			}
+			return false;
 		}
 	}
 
-	public class JavaEmptyStatementExperiment : BitLearningExperimentWithGrouping {
+	public class JavaEmptyStatementExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
 			get { return ProcessorLoader.JavaUsingAntlr3; }
 		}
 
 		public JavaEmptyStatementExperiment() : base("statement") {}
 
-		protected override IEnumerable<Tuple<XElement, int>> GetAcceptedElements(XElement ast) {
-			return ast.Descendants("statement")
-					.Where(e => e.FirstElement().Value == ";")
-					.Select(e => Tuple.Create(e, 0));
+		protected override bool IsAccepted(XElement e) {
+			if (e.FirstElement().Value == ";") {
+				return true;
+			}
+			return false;
 		}
 	}
 }

@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 using Code2Xml.Core;
-using Code2Xml.Languages.ANTLRv4.Processors.Lua;
+using Code2Xml.Languages.ANTLRv3.Processors.Lua;
 using NUnit.Framework;
 using Paraiba.Xml.Linq;
 using ParserTests;
@@ -15,14 +15,14 @@ namespace Occf.Learner.Core.Tests.Experiments {
 		private static IEnumerable<TestCaseData> TestCases {
 			get {
 				var exps = new BitLearningExperimentGroupingWithId[] {
-					new LuaComplexStatementExperiment(),
+					//new LuaComplexStatementExperiment(),
 					new LuaComplexBranchExperiment(),
 					new LuaStatementExperiment(),
 					new LuaIfExperiment(),
 					new LuaWhileExperiment(),
 					new LuaDoWhileExperiment(),
-					new LuaLabeledStatementExperiment(),
-					new LuaEmptyStatementExperiment(),
+					//new LuaLabeledStatementExperiment(),
+					//new LuaEmptyStatementExperiment(),
 				};
 				const string langName = "Lua";
 				var learningSets = new[] {
@@ -61,6 +61,22 @@ namespace Occf.Learner.Core.Tests.Experiments {
 			var allPaths = Directory.GetFiles(projectPath, "*.lua", SearchOption.AllDirectories)
 					.ToList();
 			exp.LearnUntilBeStable(allPaths, seedPaths);
+			if (exp.WrongCount > 0) {
+				Console.WriteLine("--------------- WronglyAcceptedElements ---------------");
+				foreach (var we in exp.WronglyAcceptedElements) {
+					var e = we.AncestorsAndSelf().ElementAtOrDefault(5) ?? we;
+					Console.WriteLine(we.Text());
+					Console.WriteLine(e.Text());
+					Console.WriteLine("---------------------------------------------");
+				}
+				Console.WriteLine("---- WronglyRejectedElements ----");
+				foreach (var we in exp.WronglyRejectedElements) {
+					var e = we.AncestorsAndSelf().ElementAtOrDefault(5) ?? we;
+					Console.WriteLine(we.Text());
+					Console.WriteLine(e.Text());
+					Console.WriteLine("---------------------------------------------");
+				}
+			}
 			Assert.That(exp.WrongCount, Is.EqualTo(0));
 		}
 
@@ -75,7 +91,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 	public class LuaComplexBranchExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
-			get { return new LuaProcessor(); }
+			get { return new LuaProcessorUsingAntlr3(); }
 		}
 
 		public LuaComplexBranchExperiment() : base("exp") {}
@@ -98,7 +114,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 	public class LuaIfExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
-			get { return new LuaProcessor(); }
+			get { return new LuaProcessorUsingAntlr3(); }
 		}
 
 		public LuaIfExperiment() : base("exp") {}
@@ -115,7 +131,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 	public class LuaWhileExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
-			get { return new LuaProcessor(); }
+			get { return new LuaProcessorUsingAntlr3(); }
 		}
 
 		public LuaWhileExperiment() : base("exp") {}
@@ -132,7 +148,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 	public class LuaDoWhileExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
-			get { return new LuaProcessor(); }
+			get { return new LuaProcessorUsingAntlr3(); }
 		}
 
 		public LuaDoWhileExperiment() : base("exp") {}
@@ -149,7 +165,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 	public class LuaComplexStatementExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
-			get { return new LuaProcessor(); }
+			get { return new LuaProcessorUsingAntlr3(); }
 		}
 
 		public LuaComplexStatementExperiment() : base("stat") {}
@@ -167,7 +183,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 	public class LuaStatementExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
-			get { return new LuaProcessor(); }
+			get { return new LuaProcessorUsingAntlr3(); }
 		}
 
 		public LuaStatementExperiment() : base("stat") {}
@@ -179,7 +195,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 	public class LuaLabeledStatementExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
-			get { return new LuaProcessor(); }
+			get { return new LuaProcessorUsingAntlr3(); }
 		}
 
 		public LuaLabeledStatementExperiment() : base("stat") {}
@@ -194,7 +210,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 	public class LuaEmptyStatementExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
-			get { return new LuaProcessor(); }
+			get { return new LuaProcessorUsingAntlr3(); }
 		}
 
 		public LuaEmptyStatementExperiment() : base("stat") {}
