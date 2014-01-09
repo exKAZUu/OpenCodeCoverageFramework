@@ -324,8 +324,8 @@ namespace Occf.Learner.Core.Tests {
 					if (!_accepted.ContainsKey(feature) && !_rejected.ContainsKey(feature)) {
 						// Rejected‚Æ‹¤’Ê€‚ª­‚È‚¢‚à‚Ì‚ğ‘_‚¤
 						suspiciousRejectedListByRejecting[iClassifier].Add(new SuspiciousTarget {
-							BitsCount =
-								CountRejectingBits(feature & rejectingPredicates[iClassifier]) - (accepted ? 10000 : 0),
+							BitsCount = CountRejectingBits(feature & rejectingPredicates[iClassifier])
+							            - (accepted ? 100000 : 0),
 							FeatureAndClassifier = featureAndClassifier,
 						});
 					}
@@ -363,8 +363,8 @@ namespace Occf.Learner.Core.Tests {
 					if (!_accepted.ContainsKey(feature) && !_rejected.ContainsKey(feature)) {
 						// Rejected‚Æ‹¤’Ê€‚ª­‚È‚¢‚à‚Ì‚ğ‘_‚¤
 						suspiciousRejectedListByRejecting[iClassifier].Add(new SuspiciousTarget {
-							BitsCount =
-								CountRejectingBits(feature & rejectingPredicates[iClassifier]) - (accepted ? 10000 : 0),
+							BitsCount = CountRejectingBits(feature & rejectingPredicates[iClassifier])
+							            - (accepted ? 100000 : 0),
 							FeatureAndClassifier = featureAndClassifier,
 						});
 					}
