@@ -15,7 +15,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 		private static IEnumerable<TestCaseData> TestCases {
 			get {
 				var exps = new BitLearningExperimentGroupingWithId[] {
-					//new LuaComplexStatementExperiment(),
+					new LuaComplexStatementExperiment(),
 					new LuaComplexBranchExperiment(),
 					new LuaStatementExperiment(),
 					new LuaIfExperiment(),
@@ -61,22 +61,22 @@ namespace Occf.Learner.Core.Tests.Experiments {
 			var allPaths = Directory.GetFiles(projectPath, "*.lua", SearchOption.AllDirectories)
 					.ToList();
 			exp.LearnUntilBeStable(allPaths, seedPaths);
-			if (exp.WrongCount > 0) {
-				Console.WriteLine("--------------- WronglyAcceptedElements ---------------");
-				foreach (var we in exp.WronglyAcceptedElements) {
-					var e = we.AncestorsAndSelf().ElementAtOrDefault(5) ?? we;
-					Console.WriteLine(we.Text());
-					Console.WriteLine(e.Text());
-					Console.WriteLine("---------------------------------------------");
-				}
-				Console.WriteLine("---- WronglyRejectedElements ----");
-				foreach (var we in exp.WronglyRejectedElements) {
-					var e = we.AncestorsAndSelf().ElementAtOrDefault(5) ?? we;
-					Console.WriteLine(we.Text());
-					Console.WriteLine(e.Text());
-					Console.WriteLine("---------------------------------------------");
-				}
-			}
+			//if (exp.WrongCount > 0) {
+			//	Console.WriteLine("--------------- WronglyAcceptedElements ---------------");
+			//	foreach (var we in exp.WronglyAcceptedElements) {
+			//		var e = we.AncestorsAndSelf().ElementAtOrDefault(5) ?? we;
+			//		Console.WriteLine(we.Text());
+			//		Console.WriteLine(e.Text());
+			//		Console.WriteLine("---------------------------------------------");
+			//	}
+			//	Console.WriteLine("---- WronglyRejectedElements ----");
+			//	foreach (var we in exp.WronglyRejectedElements) {
+			//		var e = we.AncestorsAndSelf().ElementAtOrDefault(5) ?? we;
+			//		Console.WriteLine(we.Text());
+			//		Console.WriteLine(e.Text());
+			//		Console.WriteLine("---------------------------------------------");
+			//	}
+			//}
 			Assert.That(exp.WrongCount, Is.EqualTo(0));
 		}
 
