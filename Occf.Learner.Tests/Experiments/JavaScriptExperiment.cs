@@ -33,8 +33,10 @@ namespace Occf.Learner.Core.Tests.Experiments {
 							new List<string> { Fixture.GetInputCodePath(langName, "seed.js"), }),
 					Tuple.Create(Fixture.GetInputProjectPath(langName, "ionic"),
 							new List<string> { Fixture.GetInputCodePath(langName, "seed.js"), }),
-					//Tuple.Create(Fixture.GetInputProjectPath(langName, "reportr"),
-					//		new List<string> { Fixture.GetInputCodePath(langName, "seed.js"), }),
+					Tuple.Create(Fixture.GetInputProjectPath(langName, "clmtrackr"),
+							new List<string> { Fixture.GetInputCodePath(langName, "seed.js"), }),
+					Tuple.Create(Fixture.GetInputProjectPath(langName, "gulp"),
+							new List<string> { Fixture.GetInputCodePath(langName, "seed.js"), }),
 				};
 				foreach (var exp in exps) {
 					foreach (var learningSet in learningSets) {
