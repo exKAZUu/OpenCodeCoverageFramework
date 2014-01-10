@@ -13,16 +13,19 @@ namespace Occf.Learner.Core.Tests.Experiments {
 	public class JavaScriptExperiment {
 		private static IEnumerable<TestCaseData> TestCases {
 			get {
-				var exps = new BitLearningExperimentWithGrouping[] {
-					//new JavaScriptBranchExperiment(),
-					//new JavaScriptIfExperiment(),
-					//new JavaScriptWhileExperiment(),
-					//new JavaScriptDoWhileExperiment(),
-					//new JavaScriptForExperiment(),
+				var exps = new BitLearningExperimentGroupingWithId[] {
+					new JavaScriptComplexStatementExperiment(),
+					new JavaScriptSuperComplexBranchExperiment(), 
+					new JavaScriptComplexBranchExperiment(),
+					new JavaScriptIfExperiment(),
+					new JavaScriptWhileExperiment(),
+					new JavaScriptDoWhileExperiment(),
+					new JavaScriptForExperiment(),
 					new JavaScriptConsoleLogExperiment(),
-					//new JavaScriptBlockExperiment(),
-					//new JavaScriptLabeledStatementExperiment(),
-					//new JavaScriptEmptyStatementExperiment(),
+					new JavaScriptStatementExperiment(),
+					new JavaScriptBlockExperiment(),
+					new JavaScriptLabeledStatementExperiment(),
+					new JavaScriptEmptyStatementExperiment(),
 				};
 				const string langName = "JavaScript";
 				var learningSets = new[] {
@@ -43,7 +46,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 		[Test, TestCaseSource("TestCases")]
 		public void Test(
-				BitLearningExperimentWithGrouping exp, string projectPath, IList<string> seedPaths) {
+				BitLearningExperimentGroupingWithId exp, string projectPath, IList<string> seedPaths) {
 			var allPaths = Directory.GetFiles(projectPath, "*.js", SearchOption.AllDirectories)
 					.ToList();
 			exp.LearnUntilBeStable(allPaths, seedPaths);
@@ -51,146 +54,218 @@ namespace Occf.Learner.Core.Tests.Experiments {
 		}
 	}
 
-	public class JavaScriptBranchExperiment : BitLearningExperimentWithGrouping {
-		public JavaScriptBranchExperiment() : base("expression") {}
+	public class JavaScriptSuperComplexBranchExperiment : BitLearningExperimentGroupingWithId {
+		public JavaScriptSuperComplexBranchExperiment() : base("expression") {}
 
 		protected override Processor Processor {
 			get { return ProcessorLoader.JavaScriptUsingAntlr3; }
 		}
 
-		protected override IEnumerable<Tuple<XElement, int>> GetAcceptedElements(XElement ast) {
-			var ifConds = ast.Descendants("ifStatement")
-					.Select(e => e.Element("expression"))
-					.Select(e => Tuple.Create(e, 0));
-			var whileConds = ast.Descendants("whileStatement")
-					.Select(e => e.Element("expression"))
-					.Select(e => Tuple.Create(e, 1));
-			var doWhileConds = ast.Descendants("doWhileStatement")
-					.Select(e => e.Element("expression"))
-					.Select(e => Tuple.Create(e, 2));
-			var forConds = ast.Descendants("forStatement")
-					.Select(e => e.Elements().First(e2 => e2.TokenText() == ";"))
-					.Where(e => e.NextElement().Name() == "expression")
-					.Select(e => e.NextElement())
-					.Select(e => Tuple.Create(e, 3));
-			return ifConds.Concat(whileConds).Concat(doWhileConds).Concat(forConds);
+		protected override bool IsAccepted(XElement e) {
+			var parentName = e.Parent.SafeName();
+			if (parentName == "ifStatement") {
+				return true;
+			}
+			if (parentName == "whileStatement") {
+				return true;
+			}
+			if (parentName == "doWhileStatement") {
+				return true;
+			}
+			if (parentName == "forStatement" && e.PreviousElement() == e.Parent.Elements().First(e2 => e2.TokenText() == ";")) {
+				return true;
+			}
+			var p = e.SafeParent().SafeParent();
+			if (p.SafeName() == "callExpression" && p.FirstElement().Value == "console.log" &&
+			    p.Element("arguments").Element("assignmentExpression") == e) {
+				return true;
+			}
+			return false;
 		}
 	}
 
-	public class JavaScriptIfExperiment : BitLearningExperimentWithGrouping {
+	public class JavaScriptComplexBranchExperiment : BitLearningExperimentGroupingWithId {
+		public JavaScriptComplexBranchExperiment() : base("expression") {}
+
+		protected override Processor Processor {
+			get { return ProcessorLoader.JavaScriptUsingAntlr3; }
+		}
+
+		protected override bool IsAccepted(XElement e) {
+			var parentName = e.Parent.SafeName();
+			if (parentName == "ifStatement") {
+				return true;
+			}
+			if (parentName == "whileStatement") {
+				return true;
+			}
+			if (parentName == "doWhileStatement") {
+				return true;
+			}
+			if (parentName == "forStatement" && e.PreviousElement() == e.Parent.Elements().First(e2 => e2.TokenText() == ";")) {
+				return true;
+			}
+			return false;
+		}
+	}
+
+	public class JavaScriptIfExperiment : BitLearningExperimentGroupingWithId {
 		public JavaScriptIfExperiment() : base("expression") {}
 
 		protected override Processor Processor {
 			get { return ProcessorLoader.JavaScriptUsingAntlr3; }
 		}
 
-		protected override IEnumerable<Tuple<XElement, int>> GetAcceptedElements(XElement ast) {
-			return ast.Descendants("ifStatement")
-					.Select(e => e.Element("expression"))
-					.Select(e => Tuple.Create(e, 0));
+		protected override bool IsAccepted(XElement e) {
+			var parentName = e.Parent.SafeName();
+			if (parentName == "ifStatement") {
+				return true;
+			}
+			return false;
 		}
 	}
 
-	public class JavaScriptWhileExperiment : BitLearningExperimentWithGrouping {
+	public class JavaScriptWhileExperiment : BitLearningExperimentGroupingWithId {
 		public JavaScriptWhileExperiment() : base("expression") {}
 
 		protected override Processor Processor {
 			get { return ProcessorLoader.JavaScriptUsingAntlr3; }
 		}
 
-		protected override IEnumerable<Tuple<XElement, int>> GetAcceptedElements(XElement ast) {
-			return ast.Descendants("whileStatement")
-					.Select(e => e.Element("expression"))
-					.Select(e => Tuple.Create(e, 0));
+		protected override bool IsAccepted(XElement e) {
+			var parentName = e.Parent.SafeName();
+			if (parentName == "whileStatement") {
+				return true;
+			}
+			return false;
 		}
 	}
 
-	public class JavaScriptDoWhileExperiment : BitLearningExperimentWithGrouping {
+	public class JavaScriptDoWhileExperiment : BitLearningExperimentGroupingWithId {
 		public JavaScriptDoWhileExperiment() : base("expression") {}
 
 		protected override Processor Processor {
 			get { return ProcessorLoader.JavaScriptUsingAntlr3; }
 		}
 
-		protected override IEnumerable<Tuple<XElement, int>> GetAcceptedElements(XElement ast) {
-			return ast.Descendants("doWhileStatement")
-					.Select(e => e.Element("expression"))
-					.Select(e => Tuple.Create(e, 0));
+		protected override bool IsAccepted(XElement e) {
+			var parentName = e.Parent.SafeName();
+			if (parentName == "doWhileStatement") {
+				return true;
+			}
+			return false;
 		}
 	}
 
-	public class JavaScriptForExperiment : BitLearningExperimentWithGrouping {
+	public class JavaScriptForExperiment : BitLearningExperimentGroupingWithId {
 		public JavaScriptForExperiment() : base("expression") {}
 
 		protected override Processor Processor {
 			get { return ProcessorLoader.JavaScriptUsingAntlr3; }
 		}
 
-		protected override IEnumerable<Tuple<XElement, int>> GetAcceptedElements(XElement ast) {
-			return ast.Descendants("forStatement")
-					.Select(e => e.Elements().First(e2 => e2.TokenText() == ";"))
-					.Where(e => e.NextElement().Name() == "expression")
-					.Select(e => e.NextElement())
-					.Select(e => Tuple.Create(e, 0));
+
+		protected override bool IsAccepted(XElement e) {
+			var parentName = e.Parent.SafeName();
+			if (parentName == "forStatement" && e.PreviousElement() == e.Parent.Elements().First(e2 => e2.TokenText() == ";")) {
+				return true;
+			}
+			return false;
 		}
 	}
 
-	public class JavaScriptConsoleLogExperiment : BitLearningExperimentWithGrouping {
+	public class JavaScriptConsoleLogExperiment : BitLearningExperimentGroupingWithId {
 		public JavaScriptConsoleLogExperiment() : base("assignmentExpression") {}
 
 		protected override Processor Processor {
 			get { return ProcessorLoader.JavaScriptUsingAntlr3; }
 		}
 
-		protected override IEnumerable<Tuple<XElement, int>> GetAcceptedElements(XElement ast) {
-			var preConds = ast.Descendants("callExpression")
-					.Where(e => e.FirstElement().Value == "console.log")
-					.Select(e => e.Element("arguments").Element("assignmentExpression"))
-					.Where(e => e != null)
-					.Select(e => Tuple.Create(e, 0));
-			return preConds;
+		protected override bool IsAccepted(XElement e) {
+			var p = e.SafeParent().SafeParent();
+			if (p.SafeName() == "callExpression" && p.FirstElement().Value == "console.log" &&
+			    p.Element("arguments").Element("assignmentExpression") == e) {
+				return true;
+			}
+			return false;
 		}
 	}
 
-	public class JavaScriptBlockExperiment : BitLearningExperimentWithGrouping {
+	public class JavaScriptStatementExperiment : BitLearningExperimentGroupingWithId {
+		protected override Processor Processor {
+			get { return ProcessorLoader.JavaScriptUsingAntlr3; }
+		}
+
+		public JavaScriptStatementExperiment() : base("statement") {}
+
+		protected override bool IsAccepted(XElement e) {
+			return true;
+		}
+	}
+
+	public class JavaScriptComplexStatementExperiment : BitLearningExperimentGroupingWithId {
+		protected override Processor Processor {
+			get { return ProcessorLoader.JavaScriptUsingAntlr3; }
+		}
+
+		public JavaScriptComplexStatementExperiment() : base("statement") {}
+
+		protected override bool IsAccepted(XElement e) {
+			if (e.FirstElement().Name() == "statementBlock") {
+				return false;
+			}
+			if (e.FirstElement().Name() == "labelledStatement") {
+				return false;
+			}
+			if (e.FirstElement().Name() == "emptyStatement") {
+				return false;
+			}
+			return true;
+		}
+	}
+
+	public class JavaScriptBlockExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
 			get { return ProcessorLoader.JavaScriptUsingAntlr3; }
 		}
 
 		public JavaScriptBlockExperiment() : base("statement") {}
 
-		protected override IEnumerable<Tuple<XElement, int>> GetAcceptedElements(XElement ast) {
-			return ast.Descendants("statement")
-					.Where(e => e.FirstElement().Name() == "statementBlock")
-					.Select(e => Tuple.Create(e, 0));
+		protected override bool IsAccepted(XElement e) {
+			if (e.FirstElement().Name() == "statementBlock") {
+				return true;
+			}
+			return false;
 		}
 	}
 
-	public class JavaScriptLabeledStatementExperiment : BitLearningExperimentWithGrouping {
+	public class JavaScriptLabeledStatementExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
 			get { return ProcessorLoader.JavaScriptUsingAntlr3; }
 		}
 
 		public JavaScriptLabeledStatementExperiment() : base("statement") {}
 
-		protected override IEnumerable<Tuple<XElement, int>> GetAcceptedElements(XElement ast) {
-			return ast.Descendants("statement")
-					.Where(e => e.FirstElement().Name() == "labelledStatement")
-					.Select(e => Tuple.Create(e, 0));
+		protected override bool IsAccepted(XElement e) {
+			if (e.FirstElement().Name() == "labelledStatement") {
+				return true;
+			}
+			return false;
 		}
 	}
 
-	public class JavaScriptEmptyStatementExperiment : BitLearningExperimentWithGrouping {
+	public class JavaScriptEmptyStatementExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
 			get { return ProcessorLoader.JavaScriptUsingAntlr3; }
 		}
 
 		public JavaScriptEmptyStatementExperiment() : base("statement") {}
 
-		protected override IEnumerable<Tuple<XElement, int>> GetAcceptedElements(XElement ast) {
-			return ast.Descendants("statement")
-					.Where(e => e.FirstElement().Name() == "emptyStatement")
-					.Select(e => Tuple.Create(e, 0));
+		protected override bool IsAccepted(XElement e) {
+			if (e.FirstElement().Name() == "emptyStatement") {
+				return true;
+			}
+			return false;
 		}
 	}
 }
