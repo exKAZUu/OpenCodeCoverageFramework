@@ -192,7 +192,7 @@ namespace Occf.Learner.Core.Tests {
 			writer.WriteLine(_accepted.Count + _rejected.Count);
 			writer.Flush();
 
-			//ShowBitsInfo();
+			ShowBitsInfo();
 		}
 
 		private void ShowBitsInfo() {
@@ -386,17 +386,17 @@ namespace Occf.Learner.Core.Tests {
 			var correctlyRejected = 0;
 			var wronglyAccepted = 0;
 			var wronglyRejected = 0;
-			var suspiciousRejectedListByRejecting = new List<List<SuspiciousTarget>>();
+			var rejectedInRejecting = new List<List<SuspiciousTarget>>();
 			for (int i = 0; i < _classifiers.Count; i++) {
-				suspiciousRejectedListByRejecting.Add(new List<SuspiciousTarget>());
+				rejectedInRejecting.Add(new List<SuspiciousTarget>());
 			}
-			var suspiciousRejectedListByAccepting = new List<List<SuspiciousTarget>>();
+			var rejectedInAccepting = new List<List<SuspiciousTarget>>();
 			for (int i = 0; i < _classifiers.Count; i++) {
-				suspiciousRejectedListByAccepting.Add(new List<SuspiciousTarget>());
+				rejectedInAccepting.Add(new List<SuspiciousTarget>());
 			}
-			var suspiciousAcceptedListByAccepting = new List<List<SuspiciousTarget>>();
+			var acceptedInAccepting = new List<List<SuspiciousTarget>>();
 			for (int i = 0; i < _classifiers.Count; i++) {
-				suspiciousAcceptedListByAccepting.Add(new List<SuspiciousTarget>());
+				acceptedInAccepting.Add(new List<SuspiciousTarget>());
 			}
 			_wronglyAcceptedFeatures.Clear();
 			_wronglyRejectedFeatures.Clear();
@@ -415,7 +415,7 @@ namespace Occf.Learner.Core.Tests {
 					_wronglyRejectedFeatures.Add(featureAndClassifier);
 					if (!_accepted.ContainsKey(feature) && !_rejected.ContainsKey(feature)) {
 						// RejectedÇ∆ã§í çÄÇ™è≠Ç»Ç¢Ç‡ÇÃÇë_Ç§
-						suspiciousRejectedListByRejecting[iClassifier].Add(new SuspiciousTarget {
+						rejectedInRejecting[iClassifier].Add(new SuspiciousTarget {
 							BitsCount = CountRejectingBits(feature)
 							            - (accepted ? 100000 : 0),
 							FeatureAndClassifier = featureAndClassifier,
@@ -425,7 +425,7 @@ namespace Occf.Learner.Core.Tests {
 					correctlyAccepted++;
 					if (!_accepted.ContainsKey(feature) && !_rejected.ContainsKey(feature)) {
 						// AcceptedÇ∆ã§í çÄÇ™è≠Ç»Ç¢Ç‡ÇÃÇë_Ç§
-						suspiciousAcceptedListByAccepting[iClassifier].Add(new SuspiciousTarget {
+						acceptedInAccepting[iClassifier].Add(new SuspiciousTarget {
 							BitsCount = CountAcceptingBits(feature),
 							FeatureAndClassifier = featureAndClassifier,
 						});
@@ -435,7 +435,7 @@ namespace Occf.Learner.Core.Tests {
 					_wronglyRejectedFeatures.Add(featureAndClassifier);
 					if (!_accepted.ContainsKey(feature) && !_rejected.ContainsKey(feature)) {
 						// AcceptedÇ∆ã§í çÄÇ™ëΩÇ¢Ç‡ÇÃÇë_Ç§
-						suspiciousRejectedListByAccepting[iClassifier].Add(new SuspiciousTarget {
+						rejectedInAccepting[iClassifier].Add(new SuspiciousTarget {
 							BitsCount = -CountAcceptingBits(feature),
 							FeatureAndClassifier = featureAndClassifier,
 						});
@@ -454,7 +454,7 @@ namespace Occf.Learner.Core.Tests {
 					correctlyRejected++;
 					if (!_accepted.ContainsKey(feature) && !_rejected.ContainsKey(feature)) {
 						// RejectedÇ∆ã§í çÄÇ™è≠Ç»Ç¢Ç‡ÇÃÇë_Ç§
-						suspiciousRejectedListByRejecting[iClassifier].Add(new SuspiciousTarget {
+						rejectedInRejecting[iClassifier].Add(new SuspiciousTarget {
 							BitsCount = CountRejectingBits(feature)
 							            - (accepted ? 100000 : 0),
 							FeatureAndClassifier = featureAndClassifier,
@@ -465,7 +465,7 @@ namespace Occf.Learner.Core.Tests {
 					_wronglyAcceptedFeatures.Add(featureAndClassifier);
 					if (!_accepted.ContainsKey(feature) && !_rejected.ContainsKey(feature)) {
 						// AcceptedÇ∆ã§í çÄÇ™è≠Ç»Ç¢Ç‡ÇÃÇë_Ç§
-						suspiciousAcceptedListByAccepting[iClassifier].Add(new SuspiciousTarget {
+						acceptedInAccepting[iClassifier].Add(new SuspiciousTarget {
 							BitsCount = CountAcceptingBits(feature),
 							FeatureAndClassifier = featureAndClassifier,
 						});
@@ -474,7 +474,7 @@ namespace Occf.Learner.Core.Tests {
 					correctlyRejected++;
 					if (!_accepted.ContainsKey(feature) && !_rejected.ContainsKey(feature)) {
 						// AcceptedÇ∆ã§í çÄÇ™ëΩÇ¢Ç‡ÇÃÇë_Ç§
-						suspiciousRejectedListByAccepting[iClassifier].Add(new SuspiciousTarget {
+						rejectedInAccepting[iClassifier].Add(new SuspiciousTarget {
 							BitsCount = -CountAcceptingBits(feature),
 							FeatureAndClassifier = featureAndClassifier,
 						});
@@ -482,9 +482,9 @@ namespace Occf.Learner.Core.Tests {
 				}
 			}
 
-			var suspiciousAcceptedByAccepting = new List<SuspiciousTarget>();
-			var suspiciousRejectedByAccepting = new List<SuspiciousTarget>();
-			var suspiciousRejectedByRejecting = new List<SuspiciousTarget>();
+			var suspiciousAcceptedInAccepting = new List<SuspiciousTarget>();
+			var suspiciousRejectedInAccepting = new List<SuspiciousTarget>();
+			var suspiciousRejectedInRejecting = new List<SuspiciousTarget>();
 			switch (count) {
 			case 0:
 				//suspiciousAcceptedByAccepting = SelectSuspiciousElements(
@@ -494,15 +494,17 @@ namespace Occf.Learner.Core.Tests {
 				//		suspiciousRejectedListByAccepting, acceptingPredicates, BigInteger.Zero, BigInteger.Zero);
 				//suspiciousRejectedByRejecting = SelectSuspiciousElements(
 				//		suspiciousRejectedListByRejecting, rejectingPredicates, _rejectingMask, _rejectingMask);
-				suspiciousAcceptedByAccepting = FlattenSuspiciousTargetsList(suspiciousAcceptedListByAccepting);
-				suspiciousRejectedByAccepting = FlattenSuspiciousTargetsList(suspiciousRejectedListByAccepting);
-				suspiciousRejectedByRejecting = FlattenSuspiciousTargetsList(suspiciousRejectedListByRejecting);
+				suspiciousAcceptedInAccepting = FlattenSuspiciousTargetsList(acceptedInAccepting);
+				suspiciousRejectedInAccepting = FlattenSuspiciousTargetsList(rejectedInAccepting);
+				suspiciousRejectedInRejecting = FlattenSuspiciousTargetsList(rejectedInRejecting);
 				break;
 			case 1:
-				suspiciousRejectedByAccepting = SelectSuspiciousElementsWithMask(
-						suspiciousRejectedListByAccepting, BigInteger.Zero, _acceptingMask);
-				suspiciousRejectedByRejecting = SelectSuspiciousElementsWithMask(
-						suspiciousRejectedListByRejecting, _rejectingMask, _rejectingMask);
+				suspiciousAcceptedInAccepting = SelectSuspiciousElementsWithMask(
+						acceptedInAccepting, BigInteger.Zero, _acceptingMask);
+				suspiciousRejectedInAccepting = SelectSuspiciousElementsWithMask(
+						rejectedInAccepting, BigInteger.Zero, _acceptingMask);
+				suspiciousRejectedInRejecting = SelectSuspiciousElementsWithMask(
+						rejectedInRejecting, _rejectingMask, _rejectingMask);
 				//suspiciousAcceptedByAccepting = SelectSuspiciousElements(
 				//		suspiciousAcceptedListByAccepting, acceptingPredicates, _acceptingMask, BigInteger.Zero);
 				//suspiciousRejectedByAccepting = SelectSuspiciousElements(
@@ -511,28 +513,33 @@ namespace Occf.Learner.Core.Tests {
 				//		suspiciousRejectedListByRejecting, rejectingPredicates, _rejectingMask, _rejectingMask);
 				break;
 			case 2:
-				suspiciousAcceptedByAccepting = SelectSuspiciousElementsWithMask(
-						suspiciousAcceptedListByAccepting, BigInteger.Zero, _acceptingMask);
-				suspiciousRejectedByRejecting = SelectSuspiciousElementsWithMask(
-						suspiciousRejectedListByRejecting, _rejectingMask, _rejectingMask);
+				suspiciousAcceptedInAccepting = SelectSuspiciousElementsWithMask(
+						acceptedInAccepting, BigInteger.Zero, _acceptingMask);
+				suspiciousRejectedInAccepting = SelectSuspiciousElementsWithMask(
+						rejectedInAccepting, BigInteger.Zero, _acceptingMask);
+				suspiciousRejectedInRejecting = SelectSuspiciousElementsWithMask(
+						rejectedInRejecting, _rejectingMask, _rejectingMask);
 				break;
-			case 3:
+			default:
 				return false;
 			}
+			Console.WriteLine("SA(A): " + suspiciousAcceptedInAccepting.Count 
+				+ ", SR(A): " + suspiciousRejectedInAccepting.Count
+				+ ", SR(R): " + suspiciousRejectedInRejecting.Count);
 
 			var additionalAccepted =
-					suspiciousAcceptedByAccepting.Concat(suspiciousRejectedByAccepting)
-							.Concat(suspiciousRejectedByRejecting)
+					suspiciousAcceptedInAccepting.Concat(suspiciousRejectedInAccepting)
+							.Concat(suspiciousRejectedInRejecting)
 							.Where(t => _idealAccepted.ContainsKey(t.FeatureAndClassifier.Key))
 							.ToList();
 			var additionalRejected =
-					suspiciousAcceptedByAccepting.Concat(suspiciousRejectedByAccepting)
-							.Concat(suspiciousRejectedByRejecting)
+					suspiciousAcceptedInAccepting.Concat(suspiciousRejectedInAccepting)
+							.Concat(suspiciousRejectedInRejecting)
 							.Where(t => _idealRejected.ContainsKey(t.FeatureAndClassifier.Key))
 							.ToList();
-			var foundWronglyRejected = suspiciousRejectedByAccepting.Concat(suspiciousRejectedByRejecting)
+			var foundWronglyRejected = suspiciousRejectedInAccepting.Concat(suspiciousRejectedInRejecting)
 					.Count(t => _idealAccepted.ContainsKey(t.FeatureAndClassifier.Key));
-			var foundWronglyAccepted = suspiciousAcceptedByAccepting
+			var foundWronglyAccepted = suspiciousAcceptedInAccepting
 					.Count(t => _idealRejected.ContainsKey(t.FeatureAndClassifier.Key));
 
 			var additionalAcceptedCount = additionalAccepted.Count;

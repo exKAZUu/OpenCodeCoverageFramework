@@ -11,6 +11,7 @@ using ParserTests;
 namespace Occf.Learner.Core.Tests.Experiments {
 	[TestFixture]
 	public class JavaScriptExperiment {
+		private readonly StreamWriter _writer = File.CreateText(@"C:\Users\exKAZUu\Desktop\javascript.txt");
 		private static IEnumerable<TestCaseData> TestCases {
 			get {
 				var exps = new BitLearningExperimentGroupingWithId[] {
@@ -49,7 +50,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 				BitLearningExperimentGroupingWithId exp, string projectPath, IList<string> seedPaths) {
 			var allPaths = Directory.GetFiles(projectPath, "*.js", SearchOption.AllDirectories)
 					.ToList();
-			exp.LearnUntilBeStable(allPaths, seedPaths);
+			exp.LearnUntilBeStable(allPaths, seedPaths, _writer);
 			Assert.That(exp.WrongCount, Is.EqualTo(0));
 		}
 	}

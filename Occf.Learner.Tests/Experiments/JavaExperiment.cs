@@ -79,6 +79,54 @@ namespace Occf.Learner.Core.Tests.Experiments {
 		}
 	}
 
+	public class JavaSuperComplexBranchExperiment : BitLearningExperimentGroupingWithId {
+		protected override Processor Processor {
+			get { return ProcessorLoader.JavaUsingAntlr3; }
+		}
+
+		public JavaSuperComplexBranchExperiment() : base("expression") {}
+
+		protected override bool IsAccepted(XElement e) {
+			var p = e.Parent;
+			var pp = p.Parent;
+			var isPar = p.SafeName() == "parExpression";
+			var isStmt = pp.SafeName() == "statement";
+			if (isStmt && isPar && pp.FirstElementOrDefault().SafeValue() == "if") {
+				return true;
+			}
+			if (isStmt && isPar && pp.FirstElementOrDefault().SafeValue() == "while") {
+				return true;
+			}
+			if (isStmt && isPar && pp.FirstElementOrDefault().SafeValue() == "do") {
+				return true;
+			}
+			if (p.SafeName() == "forstatement" && p.Elements().Count(e2 => e2.TokenText() == ";") >= 2) {
+				return true;
+			}
+			{
+				var primary = e.SafeParent().SafeParent().SafeParent().SafeParent();
+				if (primary.SafeName() != "primary") {
+					return false;
+				}
+				//if (primary.Elements().All(e2 => e2.TokenText() != "Preconditions")) {
+				//	return false;
+				//}
+				if (primary.Elements().All(e2 => e2.TokenText() != "checkArgument")) {
+					return false;
+				}
+				//if (primary.NthElementOrDefault(0).SafeValue() != "Preconditions") {
+				//	return false;
+				//}
+				//if (primary.NthElementOrDefault(2).SafeValue() != "checkArgument") {
+				//	return false;
+				//}
+				if (e.ElementsBeforeSelf().Any()) {
+					return false;
+				}
+				return true;
+			}
+		}
+	}
 	public class JavaComplexBranchExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
 			get { return ProcessorLoader.JavaUsingAntlr3; }
