@@ -206,7 +206,8 @@ namespace Occf.Learner.Core.Tests {
 				}
 				Console.WriteLine("Time: " + (Environment.TickCount - time));
 			}
-			Console.WriteLine("Required elements: " + (_accepted.Count + _rejected.Count));
+			Console.WriteLine("Required elements: " + (_accepted.Count + _rejected.Count) + " / "
+			                  + (_idealAccepted.Count + _idealRejected.Count));
 			writer.WriteLine(_accepted.Count + _rejected.Count);
 			writer.Flush();
 
