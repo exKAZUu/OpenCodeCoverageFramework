@@ -192,7 +192,7 @@ namespace Occf.Learner.Core.Tests {
 			writer.WriteLine(_accepted.Count + _rejected.Count);
 			writer.Flush();
 
-			ShowBitsInfo();
+			//ShowBitsInfo();
 		}
 
 		private void ShowBitsInfo() {
@@ -562,7 +562,7 @@ namespace Occf.Learner.Core.Tests {
 			                  + " / " + _idealAccepted.Count);
 			Console.WriteLine("Rejected: " + _rejected.Count + " + " + additionalRejectedCount
 			                  + " / " + _idealRejected.Count);
-			WrongCount = wronglyAccepted + wronglyRejected;
+			WrongCount = wronglyAccepted + wronglyRejected + wronglyRejectedInRejecting;
 			foreach (var suspiciousTarget in additionalAccepted) {
 				_accepted.Add(suspiciousTarget.FeatureAndClassifier.Key,
 						suspiciousTarget.FeatureAndClassifier.Value);
