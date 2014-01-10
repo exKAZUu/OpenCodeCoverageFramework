@@ -64,6 +64,10 @@ namespace Occf.Learner.Core.Tests.Experiments {
 			get { return ProcessorLoader.JavaScriptUsingAntlr3; }
 		}
 
+		protected override bool IsStatement {
+			get { return false; }
+		}
+
 		protected override bool IsAccepted(XElement e) {
 			var parentName = e.Parent.SafeName();
 			if (parentName == "ifStatement") {
@@ -94,6 +98,10 @@ namespace Occf.Learner.Core.Tests.Experiments {
 			get { return ProcessorLoader.JavaScriptUsingAntlr3; }
 		}
 
+		protected override bool IsStatement {
+			get { return false; }
+		}
+
 		protected override bool IsAccepted(XElement e) {
 			var parentName = e.Parent.SafeName();
 			if (parentName == "ifStatement") {
@@ -119,6 +127,10 @@ namespace Occf.Learner.Core.Tests.Experiments {
 			get { return ProcessorLoader.JavaScriptUsingAntlr3; }
 		}
 
+		protected override bool IsStatement {
+			get { return false; }
+		}
+
 		protected override bool IsAccepted(XElement e) {
 			var parentName = e.Parent.SafeName();
 			if (parentName == "ifStatement") {
@@ -133,6 +145,10 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 		protected override Processor Processor {
 			get { return ProcessorLoader.JavaScriptUsingAntlr3; }
+		}
+
+		protected override bool IsStatement {
+			get { return false; }
 		}
 
 		protected override bool IsAccepted(XElement e) {
@@ -151,6 +167,10 @@ namespace Occf.Learner.Core.Tests.Experiments {
 			get { return ProcessorLoader.JavaScriptUsingAntlr3; }
 		}
 
+		protected override bool IsStatement {
+			get { return false; }
+		}
+
 		protected override bool IsAccepted(XElement e) {
 			var parentName = e.Parent.SafeName();
 			if (parentName == "doWhileStatement") {
@@ -167,6 +187,9 @@ namespace Occf.Learner.Core.Tests.Experiments {
 			get { return ProcessorLoader.JavaScriptUsingAntlr3; }
 		}
 
+		protected override bool IsStatement {
+			get { return false; }
+		}
 
 		protected override bool IsAccepted(XElement e) {
 			var parentName = e.Parent.SafeName();
@@ -184,6 +207,10 @@ namespace Occf.Learner.Core.Tests.Experiments {
 			get { return ProcessorLoader.JavaScriptUsingAntlr3; }
 		}
 
+		protected override bool IsStatement {
+			get { return false; }
+		}
+
 		protected override bool IsAccepted(XElement e) {
 			var p = e.SafeParent().SafeParent();
 			if (p.SafeName() == "callExpression" && p.FirstElement().Value == "console.log" &&
@@ -199,6 +226,10 @@ namespace Occf.Learner.Core.Tests.Experiments {
 			get { return ProcessorLoader.JavaScriptUsingAntlr3; }
 		}
 
+		protected override bool IsStatement {
+			get { return true; }
+		}
+
 		public JavaScriptStatementExperiment() : base("statement") {}
 
 		protected override bool IsAccepted(XElement e) {
@@ -209,6 +240,10 @@ namespace Occf.Learner.Core.Tests.Experiments {
 	public class JavaScriptComplexStatementExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
 			get { return ProcessorLoader.JavaScriptUsingAntlr3; }
+		}
+
+		protected override bool IsStatement {
+			get { return true; }
 		}
 
 		public JavaScriptComplexStatementExperiment() : base("statement") {}
@@ -232,6 +267,10 @@ namespace Occf.Learner.Core.Tests.Experiments {
 			get { return ProcessorLoader.JavaScriptUsingAntlr3; }
 		}
 
+		protected override bool IsStatement {
+			get { return true; }
+		}
+
 		public JavaScriptBlockExperiment() : base("statement") {}
 
 		protected override bool IsAccepted(XElement e) {
@@ -247,6 +286,10 @@ namespace Occf.Learner.Core.Tests.Experiments {
 			get { return ProcessorLoader.JavaScriptUsingAntlr3; }
 		}
 
+		protected override bool IsStatement {
+			get { return true; }
+		}
+
 		public JavaScriptLabeledStatementExperiment() : base("statement") {}
 
 		protected override bool IsAccepted(XElement e) {
@@ -260,6 +303,10 @@ namespace Occf.Learner.Core.Tests.Experiments {
 	public class JavaScriptEmptyStatementExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
 			get { return ProcessorLoader.JavaScriptUsingAntlr3; }
+		}
+
+		protected override bool IsStatement {
+			get { return true; }
 		}
 
 		public JavaScriptEmptyStatementExperiment() : base("statement") {}

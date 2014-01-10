@@ -84,6 +84,10 @@ namespace Occf.Learner.Core.Tests.Experiments {
 			get { return ProcessorLoader.JavaUsingAntlr3; }
 		}
 
+		protected override bool IsStatement {
+			get { return false; }
+		}
+
 		public JavaSuperComplexBranchExperiment() : base("expression") {}
 
 		protected override bool IsAccepted(XElement e) {
@@ -132,6 +136,10 @@ namespace Occf.Learner.Core.Tests.Experiments {
 			get { return ProcessorLoader.JavaUsingAntlr3; }
 		}
 
+		protected override bool IsStatement {
+			get { return false; }
+		}
+
 		public JavaComplexBranchExperiment() : base("expression") {}
 
 		protected override bool IsAccepted(XElement e) {
@@ -160,6 +168,10 @@ namespace Occf.Learner.Core.Tests.Experiments {
 			get { return ProcessorLoader.JavaUsingAntlr3; }
 		}
 
+		protected override bool IsStatement {
+			get { return false; }
+		}
+
 		public JavaIfExperiment() : base("expression") {}
 
 		protected override bool IsAccepted(XElement e) {
@@ -177,6 +189,10 @@ namespace Occf.Learner.Core.Tests.Experiments {
 	public class JavaWhileExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
 			get { return ProcessorLoader.JavaUsingAntlr3; }
+		}
+
+		protected override bool IsStatement {
+			get { return false; }
 		}
 
 		public JavaWhileExperiment() : base("expression") {}
@@ -198,6 +214,10 @@ namespace Occf.Learner.Core.Tests.Experiments {
 			get { return ProcessorLoader.JavaUsingAntlr3; }
 		}
 
+		protected override bool IsStatement {
+			get { return false; }
+		}
+
 		public JavaDoWhileExperiment() : base("expression") {}
 
 		protected override bool IsAccepted(XElement e) {
@@ -217,6 +237,10 @@ namespace Occf.Learner.Core.Tests.Experiments {
 			get { return ProcessorLoader.JavaUsingAntlr3; }
 		}
 
+		protected override bool IsStatement {
+			get { return false; }
+		}
+
 		public JavaForExperiment() : base("expression") {}
 
 		protected override bool IsAccepted(XElement e) {
@@ -231,6 +255,10 @@ namespace Occf.Learner.Core.Tests.Experiments {
 	public class JavaPreconditionsExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
 			get { return ProcessorLoader.JavaUsingAntlr3; }
+		}
+
+		protected override bool IsStatement {
+			get { return false; }
 		}
 
 		public JavaPreconditionsExperiment() : base("expression") {}
@@ -264,6 +292,10 @@ namespace Occf.Learner.Core.Tests.Experiments {
 			get { return ProcessorLoader.JavaUsingAntlr3; }
 		}
 
+		protected override bool IsStatement {
+			get { return true; }
+		}
+
 		public JavaComplexStatementExperiment() : base("statement") {}
 
 		protected override bool IsAccepted(XElement e) {
@@ -289,6 +321,10 @@ namespace Occf.Learner.Core.Tests.Experiments {
 			get { return ProcessorLoader.JavaUsingAntlr3; }
 		}
 
+		protected override bool IsStatement {
+			get { return true; }
+		}
+
 		public JavaBlockExperiment() : base("statement") {}
 
 		protected override bool IsAccepted(XElement e) {
@@ -305,6 +341,10 @@ namespace Occf.Learner.Core.Tests.Experiments {
 			get { return ProcessorLoader.JavaUsingAntlr3; }
 		}
 
+		protected override bool IsStatement {
+			get { return true; }
+		}
+
 		public JavaStatementExperiment() : base("statement") {}
 
 		protected override bool IsAccepted(XElement e) {
@@ -315,6 +355,10 @@ namespace Occf.Learner.Core.Tests.Experiments {
 	public class JavaLabeledStatementExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
 			get { return ProcessorLoader.JavaUsingAntlr3; }
+		}
+
+		protected override bool IsStatement {
+			get { return true; }
 		}
 
 		public JavaLabeledStatementExperiment() : base("statement") {}
@@ -333,6 +377,10 @@ namespace Occf.Learner.Core.Tests.Experiments {
 	public class JavaEmptyStatementExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
 			get { return ProcessorLoader.JavaUsingAntlr3; }
+		}
+
+		protected override bool IsStatement {
+			get { return true; }
 		}
 
 		public JavaEmptyStatementExperiment() : base("statement") {}

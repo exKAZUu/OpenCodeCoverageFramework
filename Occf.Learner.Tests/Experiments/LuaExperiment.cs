@@ -95,6 +95,10 @@ namespace Occf.Learner.Core.Tests.Experiments {
 			get { return new LuaProcessorUsingAntlr3(); }
 		}
 
+		protected override bool IsStatement {
+			get { return false; }
+		}
+
 		public LuaComplexBranchExperiment() : base("exp") {}
 
 		protected override bool IsAccepted(XElement e) {
@@ -118,6 +122,10 @@ namespace Occf.Learner.Core.Tests.Experiments {
 			get { return new LuaProcessorUsingAntlr3(); }
 		}
 
+		protected override bool IsStatement {
+			get { return false; }
+		}
+
 		public LuaIfExperiment() : base("exp") {}
 
 		protected override bool IsAccepted(XElement e) {
@@ -133,6 +141,10 @@ namespace Occf.Learner.Core.Tests.Experiments {
 	public class LuaWhileExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
 			get { return new LuaProcessorUsingAntlr3(); }
+		}
+
+		protected override bool IsStatement {
+			get { return false; }
 		}
 
 		public LuaWhileExperiment() : base("exp") {}
@@ -152,6 +164,10 @@ namespace Occf.Learner.Core.Tests.Experiments {
 			get { return new LuaProcessorUsingAntlr3(); }
 		}
 
+		protected override bool IsStatement {
+			get { return false; }
+		}
+
 		public LuaDoWhileExperiment() : base("exp") {}
 
 		protected override bool IsAccepted(XElement e) {
@@ -167,6 +183,10 @@ namespace Occf.Learner.Core.Tests.Experiments {
 	public class LuaComplexStatementExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
 			get { return new LuaProcessorUsingAntlr3(); }
+		}
+
+		protected override bool IsStatement {
+			get { return true; }
 		}
 
 		public LuaComplexStatementExperiment() : base("stat") {}
@@ -187,6 +207,10 @@ namespace Occf.Learner.Core.Tests.Experiments {
 			get { return new LuaProcessorUsingAntlr3(); }
 		}
 
+		protected override bool IsStatement {
+			get { return true; }
+		}
+
 		public LuaStatementExperiment() : base("stat") {}
 
 		protected override bool IsAccepted(XElement e) {
@@ -197,6 +221,10 @@ namespace Occf.Learner.Core.Tests.Experiments {
 	public class LuaLabeledStatementExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
 			get { return new LuaProcessorUsingAntlr3(); }
+		}
+
+		protected override bool IsStatement {
+			get { return true; }
 		}
 
 		public LuaLabeledStatementExperiment() : base("stat") {}
@@ -212,6 +240,10 @@ namespace Occf.Learner.Core.Tests.Experiments {
 	public class LuaEmptyStatementExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
 			get { return new LuaProcessorUsingAntlr3(); }
+		}
+
+		protected override bool IsStatement {
+			get { return true; }
 		}
 
 		public LuaEmptyStatementExperiment() : base("stat") {}
