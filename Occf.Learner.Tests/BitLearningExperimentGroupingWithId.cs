@@ -413,19 +413,19 @@ namespace Occf.Learner.Core.Tests {
 				var rejected = IsRejected(feature, rejectingPredicates[iClassifier]);
 				var accepted = IsAccepted(feature, acceptingPredicates[iClassifier]);
 				index++;
-				if (rejected) {
-					wronglyRejectedInRejecting++;
+				if (!accepted) {
+					wronglyRejected++;
 					_wronglyRejectedFeatures.Add(featureAndClassifier);
 					if (!_accepted.ContainsKey(feature) && !_rejected.ContainsKey(feature)) {
-						// Rejected‚Æ‹¤’Ê€‚ª­‚È‚¢‚à‚Ì‚ğ‘_‚¤
-						rejectedInRejecting[iClassifier].Add(new SuspiciousTarget {
-							BitsCount = CountRejectingBits(feature)
-							            - (accepted ? 100000 : 0),
+						// Accepted‚Æ‹¤’Ê€‚ª‘½‚¢‚à‚Ì‚ğ‘_‚¤
+						rejectedInAccepting[iClassifier].Add(new SuspiciousTarget {
+							BitsCount = -CountAcceptingBits(feature),
 							Feature = feature,
 							Classifier = classifier,
 						});
 					}
-				} else if (accepted) {
+				}
+				 else if (!rejected) {
 					correctlyAccepted++;
 					if (!_accepted.ContainsKey(feature) && !_rejected.ContainsKey(feature)) {
 						// Accepted‚Æ‹¤’Ê€‚ª­‚È‚¢‚à‚Ì‚ğ‘_‚¤
@@ -436,12 +436,12 @@ namespace Occf.Learner.Core.Tests {
 						});
 					}
 				} else {
-					wronglyRejected++;
+					wronglyRejectedInRejecting++;
 					_wronglyRejectedFeatures.Add(featureAndClassifier);
 					if (!_accepted.ContainsKey(feature) && !_rejected.ContainsKey(feature)) {
-						// Accepted‚Æ‹¤’Ê€‚ª‘½‚¢‚à‚Ì‚ğ‘_‚¤
-						rejectedInAccepting[iClassifier].Add(new SuspiciousTarget {
-							BitsCount = -CountAcceptingBits(feature),
+						// Rejected‚Æ‹¤’Ê€‚ª­‚È‚¢‚à‚Ì‚ğ‘_‚¤
+						rejectedInRejecting[iClassifier].Add(new SuspiciousTarget {
+							BitsCount = CountRejectingBits(feature & rejectingPredicates[iClassifier]),
 							Feature = feature,
 							Classifier = classifier,
 						});
@@ -456,18 +456,17 @@ namespace Occf.Learner.Core.Tests {
 				var rejected = IsRejected(feature, rejectingPredicates[iClassifier]);
 				var accepted = IsAccepted(feature, acceptingPredicates[iClassifier]);
 				index++;
-				if (rejected) {
-					correctlyRejectedInRejecting++;
+				if (!accepted) {
+					correctlyRejected++;
 					if (!_accepted.ContainsKey(feature) && !_rejected.ContainsKey(feature)) {
-						// Rejected‚Æ‹¤’Ê€‚ª­‚È‚¢‚à‚Ì‚ğ‘_‚¤
-						rejectedInRejecting[iClassifier].Add(new SuspiciousTarget {
-							BitsCount = CountRejectingBits(feature)
-							            - (accepted ? 100000 : 0),
+						// Accepted‚Æ‹¤’Ê€‚ª‘½‚¢‚à‚Ì‚ğ‘_‚¤
+						rejectedInAccepting[iClassifier].Add(new SuspiciousTarget {
+							BitsCount = -CountAcceptingBits(feature),
 							Feature = feature,
 							Classifier = classifier,
 						});
 					}
-				} else if (accepted) {
+				} else if (!rejected) {
 					wronglyAccepted++;
 					_wronglyAcceptedFeatures.Add(featureAndClassifier);
 					if (!_accepted.ContainsKey(feature) && !_rejected.ContainsKey(feature)) {
@@ -479,11 +478,11 @@ namespace Occf.Learner.Core.Tests {
 						});
 					}
 				} else {
-					correctlyRejected++;
+					correctlyRejectedInRejecting++;
 					if (!_accepted.ContainsKey(feature) && !_rejected.ContainsKey(feature)) {
-						// Accepted‚Æ‹¤’Ê€‚ª‘½‚¢‚à‚Ì‚ğ‘_‚¤
-						rejectedInAccepting[iClassifier].Add(new SuspiciousTarget {
-							BitsCount = -CountAcceptingBits(feature),
+						// Rejected‚Æ‹¤’Ê€‚ª­‚È‚¢‚à‚Ì‚ğ‘_‚¤
+						rejectedInRejecting[iClassifier].Add(new SuspiciousTarget {
+							BitsCount = CountRejectingBits(feature & rejectingPredicates[iClassifier]),
 							Feature = feature,
 							Classifier = classifier,
 						});
@@ -505,10 +504,10 @@ namespace Occf.Learner.Core.Tests {
 				//		suspiciousRejectedListByRejecting, rejectingPredicates, _rejectingMask, _rejectingMask);
 				//suspiciousAcceptedInAccepting = FlattenSuspiciousTargetsList(acceptedInAccepting);
 				//suspiciousRejectedInAccepting = FlattenSuspiciousTargetsList(rejectedInAccepting);
-				//suspiciousRejectedInRejecting = FlattenSuspiciousTargetsList(rejectedInRejecting);
+				suspiciousRejectedInRejecting = FlattenSuspiciousTargetsList(rejectedInRejecting);
 				suspiciousAcceptedInAccepting = SelectVariousElements(acceptedInAccepting, _acceptingMask);
 				suspiciousRejectedInAccepting = SelectVariousElements(rejectedInAccepting, _acceptingMask);
-				suspiciousRejectedInRejecting = SelectVariousElements(rejectedInRejecting, _rejectingMask);
+				//suspiciousRejectedInRejecting = SelectVariousElements(rejectedInRejecting, _rejectingMask);
 				break;
 			case 1:
 				suspiciousAcceptedInAccepting = SelectSuspiciousElementsWithMask(
@@ -577,7 +576,11 @@ namespace Occf.Learner.Core.Tests {
 				_rejected.Add(suspiciousTarget.Feature, suspiciousTarget.Classifier);
 			}
 
-			var ret = foundWronglyRejected + foundWronglyAccepted == 0;
+			var predicates2 = LearnPredicates();
+			var ret = foundWronglyRejected + foundWronglyAccepted == 0
+			          && predicates2.Item1.SequenceEqual(acceptingPredicates)
+			          && predicates2.Item2.SequenceEqual(rejectingPredicates);
+
 			if (ret) {
 				if (count == 0) {
 					return LearnAndApply(1);
