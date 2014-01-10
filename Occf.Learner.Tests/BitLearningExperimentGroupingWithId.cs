@@ -93,7 +93,8 @@ namespace Occf.Learner.Core.Tests {
 			}
 		}
 
-		public void LearnUntilBeStable(ICollection<string> allPaths, ICollection<string> seedPaths) {
+		public void LearnUntilBeStable(
+				ICollection<string> allPaths, ICollection<string> seedPaths, StreamWriter writer) {
 			_idealAccepted = new Dictionary<BigInteger, string>();
 			_idealRejected = new Dictionary<BigInteger, string>();
 			_accepted = new Dictionary<BigInteger, string>();
@@ -147,8 +148,16 @@ namespace Occf.Learner.Core.Tests {
 				foreach (var e in GetAllElements(ast)) {
 					var bits = GetBits(e, _masterPredicates);
 					if (IsAccepted(e)) {
+						//if (_idealRejected.ContainsKey(bits)) {
+						//	Console.WriteLine(e.Text());
+						//	Console.WriteLine(_feature2Element[bits].Text());
+						//}
 						UpdateDict(_idealAccepted, bits, e);
 					} else {
+						//if (_idealAccepted.ContainsKey(bits)) {
+						//	Console.WriteLine(e.Text());
+						//	Console.WriteLine(_feature2Element[bits].Text());
+						//}
 						UpdateDict(_idealRejected, bits, e);
 					}
 					_feature2Element[bits] = e;
@@ -171,7 +180,7 @@ namespace Occf.Learner.Core.Tests {
 			var count = 1;
 			while (true) {
 				var time = Environment.TickCount;
-				if (LearnAndApply(false)) {
+				if (LearnAndApply(0)) {
 					if (--count == 0) {
 						break;
 					}
@@ -180,8 +189,10 @@ namespace Occf.Learner.Core.Tests {
 				Console.WriteLine("Time: " + (Environment.TickCount - time));
 			}
 			Console.WriteLine("Required elements: " + (_accepted.Count + _rejected.Count));
+			writer.WriteLine(_accepted.Count + _rejected.Count);
+			writer.Flush();
 
-			ShowBitsInfo();
+			//ShowBitsInfo();
 		}
 
 		private void ShowBitsInfo() {
@@ -366,7 +377,7 @@ namespace Occf.Learner.Core.Tests {
 			}
 		}
 
-		private bool LearnAndApply(bool strongLearning) {
+		private bool LearnAndApply(int count) {
 			var predicates = LearnPredicates();
 			var acceptingPredicates = predicates.Item1;
 			var rejectingPredicates = predicates.Item2;
@@ -471,24 +482,42 @@ namespace Occf.Learner.Core.Tests {
 				}
 			}
 
-			List<SuspiciousTarget> suspiciousAcceptedByAccepting;
-			List<SuspiciousTarget> suspiciousRejectedByAccepting;
-			List<SuspiciousTarget> suspiciousRejectedByRejecting;
-			if (strongLearning) {
-				suspiciousAcceptedByAccepting = SelectSuspiciousElementsWithMask(
-						suspiciousAcceptedListByAccepting, BigInteger.Zero, _acceptingMask);
+			var suspiciousAcceptedByAccepting = new List<SuspiciousTarget>();
+			var suspiciousRejectedByAccepting = new List<SuspiciousTarget>();
+			var suspiciousRejectedByRejecting = new List<SuspiciousTarget>();
+			switch (count) {
+			case 0:
+				//suspiciousAcceptedByAccepting = SelectSuspiciousElements(
+				//		suspiciousAcceptedListByAccepting, acceptingPredicates, BigInteger.Zero, BigInteger.Zero);
+				//		//suspiciousAcceptedListByAccepting, acceptingPredicates, BigInteger.Zero, BigInteger.Zero);
+				//suspiciousRejectedByAccepting = SelectSuspiciousElements(
+				//		suspiciousRejectedListByAccepting, acceptingPredicates, BigInteger.Zero, BigInteger.Zero);
+				//suspiciousRejectedByRejecting = SelectSuspiciousElements(
+				//		suspiciousRejectedListByRejecting, rejectingPredicates, _rejectingMask, _rejectingMask);
+				suspiciousAcceptedByAccepting = FlattenSuspiciousTargetsList(suspiciousAcceptedListByAccepting);
+				suspiciousRejectedByAccepting = FlattenSuspiciousTargetsList(suspiciousRejectedListByAccepting);
+				suspiciousRejectedByRejecting = FlattenSuspiciousTargetsList(suspiciousRejectedListByRejecting);
+				break;
+			case 1:
 				suspiciousRejectedByAccepting = SelectSuspiciousElementsWithMask(
 						suspiciousRejectedListByAccepting, BigInteger.Zero, _acceptingMask);
 				suspiciousRejectedByRejecting = SelectSuspiciousElementsWithMask(
 						suspiciousRejectedListByRejecting, _rejectingMask, _rejectingMask);
-			} else {
-				suspiciousAcceptedByAccepting = SelectSuspiciousElements(
-						suspiciousAcceptedListByAccepting, acceptingPredicates, BigInteger.Zero, BigInteger.Zero);
-						//suspiciousAcceptedListByAccepting, acceptingPredicates, BigInteger.Zero, BigInteger.Zero);
-				suspiciousRejectedByAccepting = SelectSuspiciousElements(
-						suspiciousRejectedListByAccepting, acceptingPredicates, BigInteger.Zero, BigInteger.Zero);
-				suspiciousRejectedByRejecting = SelectSuspiciousElements(
-						suspiciousRejectedListByRejecting, rejectingPredicates, _rejectingMask, _rejectingMask);
+				//suspiciousAcceptedByAccepting = SelectSuspiciousElements(
+				//		suspiciousAcceptedListByAccepting, acceptingPredicates, _acceptingMask, BigInteger.Zero);
+				//suspiciousRejectedByAccepting = SelectSuspiciousElements(
+				//		suspiciousRejectedListByAccepting, acceptingPredicates, BigInteger.Zero, BigInteger.Zero);
+				//suspiciousRejectedByRejecting = SelectSuspiciousElements(
+				//		suspiciousRejectedListByRejecting, rejectingPredicates, _rejectingMask, _rejectingMask);
+				break;
+			case 2:
+				suspiciousAcceptedByAccepting = SelectSuspiciousElementsWithMask(
+						suspiciousAcceptedListByAccepting, BigInteger.Zero, _acceptingMask);
+				suspiciousRejectedByRejecting = SelectSuspiciousElementsWithMask(
+						suspiciousRejectedListByRejecting, _rejectingMask, _rejectingMask);
+				break;
+			case 3:
+				return false;
 			}
 
 			var additionalAccepted =
@@ -530,10 +559,16 @@ namespace Occf.Learner.Core.Tests {
 			}
 
 			var ret = foundWronglyRejected + foundWronglyAccepted == 0;
-			if (ret && !strongLearning) {
-				return LearnAndApply(true);
+			if (ret) {
+				if (count == 0) {
+					return LearnAndApply(1);
+				}
+				return true;
 			}
-			return ret;
+			if (count == 0) {
+				return false;
+			}
+			return LearnAndApply(count + 1);
 		}
 
 		private List<SuspiciousTarget> SelectSuspiciousElements(
@@ -574,12 +609,24 @@ namespace Occf.Learner.Core.Tests {
 			return suspiciousElements;
 		}
 
-		private List<SuspiciousTarget> FlattenSuspiciousTargetsList(List<List<SuspiciousTarget>> targetsList) {
+		private List<SuspiciousTarget> FlattenSuspiciousTargetsList(
+				List<List<SuspiciousTarget>> targetsList) {
 			var ret = new List<SuspiciousTarget>();
 			var indices = Enumerable.Repeat(0, targetsList.Count).ToList();
+			foreach (List<SuspiciousTarget> list in targetsList) {
+				list.Sort((t1, t2) => t1.BitsCount.CompareTo(t2.BitsCount));
+			}
 			while (ret.Count < LearningCount) {
+				var added = false;
 				for (int i = 0; i < targetsList.Count; i++) {
-					ret.Add(targetsList[i][indices[i]++]);
+					var list = targetsList[i];
+					if (indices[i] < list.Count) {
+						ret.Add(list[indices[i]++]);
+						added = true;
+					}
+				}
+				if (!added) {
+					break;
 				}
 			}
 			return ret;

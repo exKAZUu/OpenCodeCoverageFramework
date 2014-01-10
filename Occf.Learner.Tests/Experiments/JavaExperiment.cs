@@ -11,6 +11,8 @@ using ParserTests;
 namespace Occf.Learner.Core.Tests.Experiments {
 	[TestFixture]
 	public class JavaExperiment {
+		private readonly StreamWriter _writer = File.CreateText(@"C:\Users\exKAZUu\Desktop\java.txt");
+
 		private static IEnumerable<TestCaseData> TestCases {
 			get {
 				var exps = new BitLearningExperimentGroupingWithId[] {
@@ -48,7 +50,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 				BitLearningExperimentGroupingWithId exp, string projectPath, IList<string> seedPaths) {
 			var allPaths = Directory.GetFiles(projectPath, "*.java", SearchOption.AllDirectories)
 					.ToList();
-			exp.LearnUntilBeStable(allPaths, seedPaths);
+			exp.LearnUntilBeStable(allPaths, seedPaths, _writer);
 			if (exp.WrongCount > 0) {
 				Console.WriteLine("--------------- WronglyAcceptedElements ---------------");
 				foreach (var we in exp.WronglyAcceptedElements) {
