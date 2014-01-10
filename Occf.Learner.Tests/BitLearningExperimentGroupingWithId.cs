@@ -655,15 +655,15 @@ namespace Occf.Learner.Core.Tests {
 		}
 
 		private SuspiciousTarget SelectMostDifferentElement(
-				IList<SuspiciousTarget> existings, IEnumerable<SuspiciousTarget> targets) {
+				IList<SuspiciousTarget> existings, IEnumerable<SuspiciousTarget> targets, BigInteger mask) {
 			if (existings.Count == 0) {
 				return targets.FirstOrDefault();
 			}
 			var maxDiff = 0;
 			SuspiciousTarget ret = null;
 			foreach (var t in targets) {
-				var feature = t.Feature;
-				var diff = existings.Min(e => CountBits(e.Feature ^ feature));
+				var feature = t.Feature & mask;
+				var diff = existings.Min(e => CountBits((e.Feature & mask) ^ feature));
 				if (maxDiff < diff) {
 					maxDiff = diff;
 					ret = t;
@@ -676,14 +676,11 @@ namespace Occf.Learner.Core.Tests {
 			var ret = new List<SuspiciousTarget>();
 			foreach (List<SuspiciousTarget> list in targetsList) {
 				list.Sort((t1, t2) => t1.BitsCount.CompareTo(t2.BitsCount));
-				for (int i = 0; i < list.Count; i++) {
-					list[i].Feature &= mask;
-				}
 			}
 			while (ret.Count < LearningCount) {
 				var added = false;
 				foreach (var list in targetsList) {
-					var e = SelectMostDifferentElement(ret, list);
+					var e = SelectMostDifferentElement(ret, list, mask);
 					if (e != null) {
 						ret.Add(e);
 						added = true;
