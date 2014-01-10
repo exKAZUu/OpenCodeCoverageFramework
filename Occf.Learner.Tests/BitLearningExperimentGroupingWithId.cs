@@ -12,7 +12,8 @@ namespace Occf.Learner.Core.Tests {
 	public abstract class BitLearningExperimentGroupingWithId {
 		internal class SuspiciousTarget {
 			public int BitsCount { get; set; }
-			public KeyValuePair<BigInteger, string> FeatureAndClassifier { get; set; }
+			public BigInteger Feature { get; set; }
+			public string Classifier { get; set; }
 		}
 
 		public int WrongCount { get; set; }
@@ -420,7 +421,8 @@ namespace Occf.Learner.Core.Tests {
 						rejectedInRejecting[iClassifier].Add(new SuspiciousTarget {
 							BitsCount = CountRejectingBits(feature)
 							            - (accepted ? 100000 : 0),
-							FeatureAndClassifier = featureAndClassifier,
+							Feature = feature,
+							Classifier = classifier,
 						});
 					}
 				} else if (accepted) {
@@ -429,7 +431,8 @@ namespace Occf.Learner.Core.Tests {
 						// Accepted‚Æ‹¤’Ê€‚ª­‚È‚¢‚à‚Ì‚ð‘_‚¤
 						acceptedInAccepting[iClassifier].Add(new SuspiciousTarget {
 							BitsCount = CountAcceptingBits(feature),
-							FeatureAndClassifier = featureAndClassifier,
+							Feature = feature,
+							Classifier = classifier,
 						});
 					}
 				} else {
@@ -439,7 +442,8 @@ namespace Occf.Learner.Core.Tests {
 						// Accepted‚Æ‹¤’Ê€‚ª‘½‚¢‚à‚Ì‚ð‘_‚¤
 						rejectedInAccepting[iClassifier].Add(new SuspiciousTarget {
 							BitsCount = -CountAcceptingBits(feature),
-							FeatureAndClassifier = featureAndClassifier,
+							Feature = feature,
+							Classifier = classifier,
 						});
 					}
 				}
@@ -459,7 +463,8 @@ namespace Occf.Learner.Core.Tests {
 						rejectedInRejecting[iClassifier].Add(new SuspiciousTarget {
 							BitsCount = CountRejectingBits(feature)
 							            - (accepted ? 100000 : 0),
-							FeatureAndClassifier = featureAndClassifier,
+							Feature = feature,
+							Classifier = classifier,
 						});
 					}
 				} else if (accepted) {
@@ -469,7 +474,8 @@ namespace Occf.Learner.Core.Tests {
 						// Accepted‚Æ‹¤’Ê€‚ª­‚È‚¢‚à‚Ì‚ð‘_‚¤
 						acceptedInAccepting[iClassifier].Add(new SuspiciousTarget {
 							BitsCount = CountAcceptingBits(feature),
-							FeatureAndClassifier = featureAndClassifier,
+							Feature = feature,
+							Classifier = classifier,
 						});
 					}
 				} else {
@@ -478,7 +484,8 @@ namespace Occf.Learner.Core.Tests {
 						// Accepted‚Æ‹¤’Ê€‚ª‘½‚¢‚à‚Ì‚ð‘_‚¤
 						rejectedInAccepting[iClassifier].Add(new SuspiciousTarget {
 							BitsCount = -CountAcceptingBits(feature),
-							FeatureAndClassifier = featureAndClassifier,
+							Feature = feature,
+							Classifier = classifier,
 						});
 					}
 				}
@@ -499,9 +506,9 @@ namespace Occf.Learner.Core.Tests {
 				//suspiciousAcceptedInAccepting = FlattenSuspiciousTargetsList(acceptedInAccepting);
 				//suspiciousRejectedInAccepting = FlattenSuspiciousTargetsList(rejectedInAccepting);
 				//suspiciousRejectedInRejecting = FlattenSuspiciousTargetsList(rejectedInRejecting);
-				suspiciousAcceptedInAccepting = SelectVariousElements(acceptedInAccepting);
-				suspiciousRejectedInAccepting = SelectVariousElements(rejectedInAccepting);
-				suspiciousRejectedInRejecting = SelectVariousElements(rejectedInRejecting);
+				suspiciousAcceptedInAccepting = SelectVariousElements(acceptedInAccepting, _acceptingMask);
+				suspiciousRejectedInAccepting = SelectVariousElements(rejectedInAccepting, _acceptingMask);
+				suspiciousRejectedInRejecting = SelectVariousElements(rejectedInRejecting, _rejectingMask);
 				break;
 			case 1:
 				suspiciousAcceptedInAccepting = SelectSuspiciousElementsWithMask(
@@ -535,17 +542,17 @@ namespace Occf.Learner.Core.Tests {
 			var additionalAccepted =
 					suspiciousAcceptedInAccepting.Concat(suspiciousRejectedInAccepting)
 							.Concat(suspiciousRejectedInRejecting)
-							.Where(t => _idealAccepted.ContainsKey(t.FeatureAndClassifier.Key))
+							.Where(t => _idealAccepted.ContainsKey(t.Feature))
 							.ToList();
 			var additionalRejected =
 					suspiciousAcceptedInAccepting.Concat(suspiciousRejectedInAccepting)
 							.Concat(suspiciousRejectedInRejecting)
-							.Where(t => _idealRejected.ContainsKey(t.FeatureAndClassifier.Key))
+							.Where(t => _idealRejected.ContainsKey(t.Feature))
 							.ToList();
 			var foundWronglyRejected = suspiciousRejectedInAccepting.Concat(suspiciousRejectedInRejecting)
-					.Count(t => _idealAccepted.ContainsKey(t.FeatureAndClassifier.Key));
+					.Count(t => _idealAccepted.ContainsKey(t.Feature));
 			var foundWronglyAccepted = suspiciousAcceptedInAccepting
-					.Count(t => _idealRejected.ContainsKey(t.FeatureAndClassifier.Key));
+					.Count(t => _idealRejected.ContainsKey(t.Feature));
 
 			var additionalAcceptedCount = additionalAccepted.Count;
 			var additionalRejectedCount = additionalRejected.Count;
@@ -564,12 +571,10 @@ namespace Occf.Learner.Core.Tests {
 			                  + " / " + _idealRejected.Count);
 			WrongCount = wronglyAccepted + wronglyRejected + wronglyRejectedInRejecting;
 			foreach (var suspiciousTarget in additionalAccepted) {
-				_accepted.Add(suspiciousTarget.FeatureAndClassifier.Key,
-						suspiciousTarget.FeatureAndClassifier.Value);
+				_accepted.Add(suspiciousTarget.Feature, suspiciousTarget.Classifier);
 			}
 			foreach (var suspiciousTarget in additionalRejected) {
-				_rejected.Add(suspiciousTarget.FeatureAndClassifier.Key,
-						suspiciousTarget.FeatureAndClassifier.Value);
+				_rejected.Add(suspiciousTarget.Feature, suspiciousTarget.Classifier);
 			}
 
 			var ret = foundWronglyRejected + foundWronglyAccepted == 0;
@@ -595,7 +600,7 @@ namespace Occf.Learner.Core.Tests {
 				var pred = predicates[i] ^ predXor;
 				list.Sort((t1, t2) => t1.BitsCount.CompareTo(t2.BitsCount));
 				foreach (var t in list) {
-					var newFeature = (feature | (t.FeatureAndClassifier.Key ^ featureXor)) & pred;
+					var newFeature = (feature | (t.Feature ^ featureXor)) & pred;
 					if (newFeature != feature) {
 						feature = newFeature;
 						suspiciousElements.Add(t);
@@ -613,7 +618,7 @@ namespace Occf.Learner.Core.Tests {
 				var list = suspiciousElementsList[i];
 				list.Sort((t1, t2) => t1.BitsCount.CompareTo(t2.BitsCount));
 				foreach (var t in list) {
-					var newFeature = (feature | (t.FeatureAndClassifier.Key ^ xor)) & mask;
+					var newFeature = (feature | (t.Feature ^ xor)) & mask;
 					if (newFeature != feature) {
 						feature = newFeature;
 						suspiciousElements.Add(t);
@@ -654,8 +659,8 @@ namespace Occf.Learner.Core.Tests {
 			var maxDiff = 0;
 			SuspiciousTarget ret = null;
 			foreach (var t in targets) {
-				var feature = t.FeatureAndClassifier.Key;
-				var diff = existings.Min(e => CountBits(e.FeatureAndClassifier.Key ^ feature));
+				var feature = t.Feature;
+				var diff = existings.Min(e => CountBits(e.Feature ^ feature));
 				if (maxDiff < diff) {
 					maxDiff = diff;
 					ret = t;
@@ -664,10 +669,13 @@ namespace Occf.Learner.Core.Tests {
 			return ret;
 		}
 
-		private List<SuspiciousTarget> SelectVariousElements(List<List<SuspiciousTarget>> targetsList) {
+		private List<SuspiciousTarget> SelectVariousElements(List<List<SuspiciousTarget>> targetsList, BigInteger mask) {
 			var ret = new List<SuspiciousTarget>();
 			foreach (List<SuspiciousTarget> list in targetsList) {
 				list.Sort((t1, t2) => t1.BitsCount.CompareTo(t2.BitsCount));
+				for (int i = 0; i < list.Count; i++) {
+					list[i].Feature &= mask;
+				}
 			}
 			while (ret.Count < LearningCount) {
 				var added = false;
@@ -683,19 +691,6 @@ namespace Occf.Learner.Core.Tests {
 				}
 			}
 			return ret;
-		}
-
-		private void UpdateSuspiciousTargets(
-				List<SuspiciousTarget> targets, KeyValuePair<BigInteger, string> featureAndClassifier,
-				int differential) {
-			targets.Add(new SuspiciousTarget {
-				BitsCount = differential,
-				FeatureAndClassifier = featureAndClassifier,
-			});
-			//targets.Sort((t1, t2) => t1.BitsCount.CompareTo(t2.BitsCount));
-			//if (targets.Count > LearningCount) {
-			//	targets.RemoveAt(LearningCount);
-			//}
 		}
 
 		private string CanReject(
