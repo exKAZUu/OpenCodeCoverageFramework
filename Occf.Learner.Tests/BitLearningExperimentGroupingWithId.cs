@@ -119,9 +119,9 @@ namespace Occf.Learner.Core.Tests {
 			_masterPredicates.Sort((s1, s2) => s1.Length.CompareTo(s2.Length));
 
 			var acceptingPredicateSet = _masterPredicates.ToHashSet();
-			var rejectingPredicates = seedRejectedElements.GetUnionKeys(_predicateDepth)
-					.Where(p => !acceptingPredicateSet.Contains(p))
-					.ToList();
+			var rejectingPredicateSet = seedRejectedElements.GetUnionKeys(_predicateDepth);
+			rejectingPredicateSet.ExceptWith(acceptingPredicateSet);
+			var rejectingPredicates = rejectingPredicateSet.ToList();
 			rejectingPredicates.Sort((s1, s2) => s1.Length.CompareTo(s2.Length));
 			_acceptingPredicatesCount = _masterPredicates.Count;
 			_masterPredicates.AddRange(rejectingPredicates);
