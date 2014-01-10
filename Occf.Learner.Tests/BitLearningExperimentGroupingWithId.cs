@@ -52,7 +52,7 @@ namespace Occf.Learner.Core.Tests {
 				new List<KeyValuePair<BigInteger, string>>();
 
 		private HashSet<BigInteger> _seedAccepted;
-		private int _predicateDepth = 10;
+		private int _predicateDepth = 7;
 		private List<string> _masterPredicates;
 		private const int LearningCount = 5;
 		private const int AncestorCount = 5;
@@ -386,6 +386,8 @@ namespace Occf.Learner.Core.Tests {
 			var correctlyRejected = 0;
 			var wronglyAccepted = 0;
 			var wronglyRejected = 0;
+			var correctlyRejectedInRejecting = 0;
+			var wronglyRejectedInRejecting = 0;
 			var rejectedInRejecting = new List<List<SuspiciousTarget>>();
 			for (int i = 0; i < _classifiers.Count; i++) {
 				rejectedInRejecting.Add(new List<SuspiciousTarget>());
@@ -411,7 +413,7 @@ namespace Occf.Learner.Core.Tests {
 				var accepted = IsAccepted(feature, acceptingPredicates[iClassifier]);
 				index++;
 				if (rejected) {
-					wronglyRejected++;
+					wronglyRejectedInRejecting++;
 					_wronglyRejectedFeatures.Add(featureAndClassifier);
 					if (!_accepted.ContainsKey(feature) && !_rejected.ContainsKey(feature)) {
 						// RejectedÇ∆ã§í çÄÇ™è≠Ç»Ç¢Ç‡ÇÃÇë_Ç§
@@ -451,7 +453,7 @@ namespace Occf.Learner.Core.Tests {
 				var accepted = IsAccepted(feature, acceptingPredicates[iClassifier]);
 				index++;
 				if (rejected) {
-					correctlyRejected++;
+					correctlyRejectedInRejecting++;
 					if (!_accepted.ContainsKey(feature) && !_rejected.ContainsKey(feature)) {
 						// RejectedÇ∆ã§í çÄÇ™è≠Ç»Ç¢Ç‡ÇÃÇë_Ç§
 						rejectedInRejecting[iClassifier].Add(new SuspiciousTarget {
@@ -494,9 +496,12 @@ namespace Occf.Learner.Core.Tests {
 				//		suspiciousRejectedListByAccepting, acceptingPredicates, BigInteger.Zero, BigInteger.Zero);
 				//suspiciousRejectedByRejecting = SelectSuspiciousElements(
 				//		suspiciousRejectedListByRejecting, rejectingPredicates, _rejectingMask, _rejectingMask);
-				suspiciousAcceptedInAccepting = FlattenSuspiciousTargetsList(acceptedInAccepting);
-				suspiciousRejectedInAccepting = FlattenSuspiciousTargetsList(rejectedInAccepting);
-				suspiciousRejectedInRejecting = FlattenSuspiciousTargetsList(rejectedInRejecting);
+				//suspiciousAcceptedInAccepting = FlattenSuspiciousTargetsList(acceptedInAccepting);
+				//suspiciousRejectedInAccepting = FlattenSuspiciousTargetsList(rejectedInAccepting);
+				//suspiciousRejectedInRejecting = FlattenSuspiciousTargetsList(rejectedInRejecting);
+				suspiciousAcceptedInAccepting = SelectVariousElements(acceptedInAccepting);
+				suspiciousRejectedInAccepting = SelectVariousElements(rejectedInAccepting);
+				suspiciousRejectedInRejecting = SelectVariousElements(rejectedInRejecting);
 				break;
 			case 1:
 				suspiciousAcceptedInAccepting = SelectSuspiciousElementsWithMask(
@@ -523,9 +528,9 @@ namespace Occf.Learner.Core.Tests {
 			default:
 				return false;
 			}
-			Console.WriteLine("SA(A): " + suspiciousAcceptedInAccepting.Count 
-				+ ", SR(A): " + suspiciousRejectedInAccepting.Count
-				+ ", SR(R): " + suspiciousRejectedInRejecting.Count);
+			Console.WriteLine("SA(A): " + suspiciousAcceptedInAccepting.Count
+			                  + ", SR(A): " + suspiciousRejectedInAccepting.Count
+			                  + ", SR(R): " + suspiciousRejectedInRejecting.Count);
 
 			var additionalAccepted =
 					suspiciousAcceptedInAccepting.Concat(suspiciousRejectedInAccepting)
@@ -546,8 +551,10 @@ namespace Occf.Learner.Core.Tests {
 			var additionalRejectedCount = additionalRejected.Count;
 
 			Console.WriteLine("done");
-			Console.WriteLine("WA: " + wronglyAccepted + ", WR: " + wronglyRejected + ", CA: "
-			                  + correctlyAccepted + ", CR: " + correctlyRejected);
+			Console.WriteLine("WA: " + wronglyAccepted + ", WR: " + wronglyRejected + "/"
+			                  + wronglyRejectedInRejecting + ", CA: "
+			                  + correctlyAccepted + ", CR: " + correctlyRejected + "/"
+			                  + correctlyRejectedInRejecting);
 			Console.WriteLine("L: " + (_accepted.Count + _rejected.Count) + ", AP: "
 			                  + string.Join(", ", acceptingPredicates.Select(CountBits)) + ", RP: "
 			                  + string.Join(", ", rejectingPredicates.Select(CountRejectingBits)));
@@ -629,6 +636,45 @@ namespace Occf.Learner.Core.Tests {
 					var list = targetsList[i];
 					if (indices[i] < list.Count) {
 						ret.Add(list[indices[i]++]);
+						added = true;
+					}
+				}
+				if (!added) {
+					break;
+				}
+			}
+			return ret;
+		}
+
+		private SuspiciousTarget SelectMostDifferentElement(
+				IList<SuspiciousTarget> existings, IEnumerable<SuspiciousTarget> targets) {
+			if (existings.Count == 0) {
+				return targets.FirstOrDefault();
+			}
+			var maxDiff = 0;
+			SuspiciousTarget ret = null;
+			foreach (var t in targets) {
+				var feature = t.FeatureAndClassifier.Key;
+				var diff = existings.Min(e => CountBits(e.FeatureAndClassifier.Key ^ feature));
+				if (maxDiff < diff) {
+					maxDiff = diff;
+					ret = t;
+				}
+			}
+			return ret;
+		}
+
+		private List<SuspiciousTarget> SelectVariousElements(List<List<SuspiciousTarget>> targetsList) {
+			var ret = new List<SuspiciousTarget>();
+			foreach (List<SuspiciousTarget> list in targetsList) {
+				list.Sort((t1, t2) => t1.BitsCount.CompareTo(t2.BitsCount));
+			}
+			while (ret.Count < LearningCount) {
+				var added = false;
+				foreach (var list in targetsList) {
+					var e = SelectMostDifferentElement(ret, list);
+					if (e != null) {
+						ret.Add(e);
 						added = true;
 					}
 				}
