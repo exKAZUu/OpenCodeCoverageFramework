@@ -31,7 +31,27 @@ namespace Occf.Learner.Core.Tests.Experiments {
 				};
 				const string langName = "CSharp";
 				var learningSets = new[] {
+					Tuple.Create(Fixture.GetInputProjectPath(langName, "MechJeb2"),
+							new List<string> { Fixture.GetInputCodePath(langName, "Seed.cs"), }),
+					Tuple.Create(Fixture.GetInputProjectPath(langName, "MediaPortal-1"),
+							new List<string> { Fixture.GetInputCodePath(langName, "Seed.cs"), }),
+					Tuple.Create(Fixture.GetInputProjectPath(langName, "MonoTouch.Dialog"),
+							new List<string> { Fixture.GetInputCodePath(langName, "Seed.cs"), }),
+					Tuple.Create(Fixture.GetInputProjectPath(langName, "moq4"),
+							new List<string> { Fixture.GetInputCodePath(langName, "Seed.cs"), }),
+					Tuple.Create(Fixture.GetInputProjectPath(langName, "Nancy"),
+							new List<string> { Fixture.GetInputCodePath(langName, "Seed.cs"), }),
+					Tuple.Create(Fixture.GetInputProjectPath(langName, "Newtonsoft.Json"),
+							new List<string> { Fixture.GetInputCodePath(langName, "Seed.cs"), }),
+					Tuple.Create(Fixture.GetInputProjectPath(langName, "NuGetGallery"),
+							new List<string> { Fixture.GetInputCodePath(langName, "Seed.cs"), }),
+					Tuple.Create(Fixture.GetInputProjectPath(langName, "ravendb"),
+							new List<string> { Fixture.GetInputCodePath(langName, "Seed.cs"), }),
+					Tuple.Create(Fixture.GetInputProjectPath(langName, "ServiceStack"),
+							new List<string> { Fixture.GetInputCodePath(langName, "Seed.cs"), }),
 					Tuple.Create(Fixture.GetInputProjectPath(langName, "SignalR"),
+							new List<string> { Fixture.GetInputCodePath(langName, "Seed.cs"), }),
+					Tuple.Create(Fixture.GetInputProjectPath(langName, "StarryboundServer"),
 							new List<string> { Fixture.GetInputCodePath(langName, "Seed.cs"), }),
 				};
 				foreach (var exp in exps) {
@@ -62,7 +82,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 	public class CSharpBranchExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
-			get { return ProcessorLoader.CSharpUsingAntlr3; }
+			get { return CSharpExperiment.Processor; }
 		}
 
 		protected override bool IsInner {
@@ -91,7 +111,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 	public class CSharpIfExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
-			get { return ProcessorLoader.CSharpUsingAntlr3; }
+			get { return CSharpExperiment.Processor; }
 		}
 
 		protected override bool IsInner {
@@ -111,7 +131,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 	public class CSharpWhileExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
-			get { return ProcessorLoader.CSharpUsingAntlr3; }
+			get { return CSharpExperiment.Processor; }
 		}
 
 		protected override bool IsInner {
@@ -131,7 +151,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 	public class CSharpDoWhileExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
-			get { return ProcessorLoader.CSharpUsingAntlr3; }
+			get { return CSharpExperiment.Processor; }
 		}
 
 		protected override bool IsInner {
@@ -151,7 +171,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 	public class CSharpForExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
-			get { return ProcessorLoader.CSharpUsingAntlr3; }
+			get { return CSharpExperiment.Processor; }
 		}
 
 		protected override bool IsInner {
@@ -171,7 +191,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 	public class CSharpPreconditionsExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
-			get { return ProcessorLoader.CSharpUsingAntlr3; }
+			get { return CSharpExperiment.Processor; }
 		}
 
 		protected override bool IsInner {
@@ -192,7 +212,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 	public class CSharpStatementExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
-			get { return ProcessorLoader.CSharpUsingAntlr3; }
+			get { return CSharpExperiment.Processor; }
 		}
 
 		protected override bool IsInner {
@@ -218,7 +238,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 	public class CSharpBlockExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
-			get { return ProcessorLoader.CSharpUsingAntlr3; }
+			get { return CSharpExperiment.Processor; }
 		}
 
 		protected override bool IsInner {
@@ -239,7 +259,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 	public class CSharpLabeledStatementExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
-			get { return ProcessorLoader.CSharpUsingAntlr3; }
+			get { return CSharpExperiment.Processor; }
 		}
 
 		protected override bool IsInner {

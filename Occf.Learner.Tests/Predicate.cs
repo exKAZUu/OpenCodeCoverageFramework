@@ -573,7 +573,7 @@ namespace Occf.Learner.Core.Tests {
 			if (outer) {
 				var parentElement = Tuple.Create(element, element.Name());
 				// 自分自身の位置による区別も考慮する
-				//ret.Add(element.NameOrTokenWithId());
+				ret.Add(element.NameOrTokenWithId());
 				for (; i <= length; i++) {
 					var newChildElements = new List<Tuple<XElement, string>>();
 					foreach (var t in childElements.Where(t2 => !t2.Item1.IsTokenSet())) {
