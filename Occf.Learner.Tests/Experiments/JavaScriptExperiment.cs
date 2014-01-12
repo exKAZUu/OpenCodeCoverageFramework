@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 using Code2Xml.Core;
+using Code2Xml.Core.Processors;
 using NUnit.Framework;
 using Paraiba.Xml.Linq;
 using ParserTests;
@@ -12,11 +13,15 @@ namespace Occf.Learner.Core.Tests.Experiments {
 	[TestFixture]
 	public class JavaScriptExperiment {
 		private readonly StreamWriter _writer = File.CreateText(@"C:\Users\exKAZUu\Desktop\javascript.txt");
+
+		public static Processor Processor =
+				new MemoryCachchProcessor(new FileCacheProcessor(ProcessorLoader.JavaScriptUsingAntlr3));
+
 		private static IEnumerable<TestCaseData> TestCases {
 			get {
 				var exps = new BitLearningExperimentGroupingWithId[] {
 					new JavaScriptComplexStatementExperiment(),
-					new JavaScriptSuperComplexBranchExperiment(), 
+					new JavaScriptSuperComplexBranchExperiment(),
 					new JavaScriptComplexBranchExperiment(),
 					new JavaScriptIfExperiment(),
 					new JavaScriptWhileExperiment(),
@@ -61,10 +66,10 @@ namespace Occf.Learner.Core.Tests.Experiments {
 		public JavaScriptSuperComplexBranchExperiment() : base("expression") {}
 
 		protected override Processor Processor {
-			get { return ProcessorLoader.JavaScriptUsingAntlr3; }
+			get { return JavaScriptExperiment.Processor; }
 		}
 
-		protected override bool IsStatement {
+		protected override bool IsInner {
 			get { return false; }
 		}
 
@@ -79,7 +84,8 @@ namespace Occf.Learner.Core.Tests.Experiments {
 			if (parentName == "doWhileStatement") {
 				return true;
 			}
-			if (parentName == "forStatement" && e.PreviousElement() == e.Parent.Elements().First(e2 => e2.TokenText() == ";")) {
+			if (parentName == "forStatement"
+			    && e.PreviousElement() == e.Parent.Elements().First(e2 => e2.TokenText() == ";")) {
 				return true;
 			}
 			var p = e.SafeParent().SafeParent();
@@ -95,10 +101,10 @@ namespace Occf.Learner.Core.Tests.Experiments {
 		public JavaScriptComplexBranchExperiment() : base("expression") {}
 
 		protected override Processor Processor {
-			get { return ProcessorLoader.JavaScriptUsingAntlr3; }
+			get { return JavaScriptExperiment.Processor; }
 		}
 
-		protected override bool IsStatement {
+		protected override bool IsInner {
 			get { return false; }
 		}
 
@@ -113,7 +119,8 @@ namespace Occf.Learner.Core.Tests.Experiments {
 			if (parentName == "doWhileStatement") {
 				return true;
 			}
-			if (parentName == "forStatement" && e.PreviousElement() == e.Parent.Elements().First(e2 => e2.TokenText() == ";")) {
+			if (parentName == "forStatement"
+			    && e.PreviousElement() == e.Parent.Elements().First(e2 => e2.TokenText() == ";")) {
 				return true;
 			}
 			return false;
@@ -124,10 +131,10 @@ namespace Occf.Learner.Core.Tests.Experiments {
 		public JavaScriptIfExperiment() : base("expression") {}
 
 		protected override Processor Processor {
-			get { return ProcessorLoader.JavaScriptUsingAntlr3; }
+			get { return JavaScriptExperiment.Processor; }
 		}
 
-		protected override bool IsStatement {
+		protected override bool IsInner {
 			get { return false; }
 		}
 
@@ -144,10 +151,10 @@ namespace Occf.Learner.Core.Tests.Experiments {
 		public JavaScriptWhileExperiment() : base("expression") {}
 
 		protected override Processor Processor {
-			get { return ProcessorLoader.JavaScriptUsingAntlr3; }
+			get { return JavaScriptExperiment.Processor; }
 		}
 
-		protected override bool IsStatement {
+		protected override bool IsInner {
 			get { return false; }
 		}
 
@@ -164,10 +171,10 @@ namespace Occf.Learner.Core.Tests.Experiments {
 		public JavaScriptDoWhileExperiment() : base("expression") {}
 
 		protected override Processor Processor {
-			get { return ProcessorLoader.JavaScriptUsingAntlr3; }
+			get { return JavaScriptExperiment.Processor; }
 		}
 
-		protected override bool IsStatement {
+		protected override bool IsInner {
 			get { return false; }
 		}
 
@@ -184,16 +191,17 @@ namespace Occf.Learner.Core.Tests.Experiments {
 		public JavaScriptForExperiment() : base("expression") {}
 
 		protected override Processor Processor {
-			get { return ProcessorLoader.JavaScriptUsingAntlr3; }
+			get { return JavaScriptExperiment.Processor; }
 		}
 
-		protected override bool IsStatement {
+		protected override bool IsInner {
 			get { return false; }
 		}
 
 		protected override bool IsAccepted(XElement e) {
 			var parentName = e.Parent.SafeName();
-			if (parentName == "forStatement" && e.PreviousElement() == e.Parent.Elements().First(e2 => e2.TokenText() == ";")) {
+			if (parentName == "forStatement"
+			    && e.PreviousElement() == e.Parent.Elements().First(e2 => e2.TokenText() == ";")) {
 				return true;
 			}
 			return false;
@@ -204,10 +212,10 @@ namespace Occf.Learner.Core.Tests.Experiments {
 		public JavaScriptConsoleLogExperiment() : base("assignmentExpression") {}
 
 		protected override Processor Processor {
-			get { return ProcessorLoader.JavaScriptUsingAntlr3; }
+			get { return JavaScriptExperiment.Processor; }
 		}
 
-		protected override bool IsStatement {
+		protected override bool IsInner {
 			get { return false; }
 		}
 
@@ -223,10 +231,10 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 	public class JavaScriptStatementExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
-			get { return ProcessorLoader.JavaScriptUsingAntlr3; }
+			get { return JavaScriptExperiment.Processor; }
 		}
 
-		protected override bool IsStatement {
+		protected override bool IsInner {
 			get { return true; }
 		}
 
@@ -239,10 +247,10 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 	public class JavaScriptComplexStatementExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
-			get { return ProcessorLoader.JavaScriptUsingAntlr3; }
+			get { return JavaScriptExperiment.Processor; }
 		}
 
-		protected override bool IsStatement {
+		protected override bool IsInner {
 			get { return true; }
 		}
 
@@ -264,10 +272,10 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 	public class JavaScriptBlockExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
-			get { return ProcessorLoader.JavaScriptUsingAntlr3; }
+			get { return JavaScriptExperiment.Processor; }
 		}
 
-		protected override bool IsStatement {
+		protected override bool IsInner {
 			get { return true; }
 		}
 
@@ -283,10 +291,10 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 	public class JavaScriptLabeledStatementExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
-			get { return ProcessorLoader.JavaScriptUsingAntlr3; }
+			get { return JavaScriptExperiment.Processor; }
 		}
 
-		protected override bool IsStatement {
+		protected override bool IsInner {
 			get { return true; }
 		}
 
@@ -302,10 +310,10 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 	public class JavaScriptEmptyStatementExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
-			get { return ProcessorLoader.JavaScriptUsingAntlr3; }
+			get { return JavaScriptExperiment.Processor; }
 		}
 
-		protected override bool IsStatement {
+		protected override bool IsInner {
 			get { return true; }
 		}
 

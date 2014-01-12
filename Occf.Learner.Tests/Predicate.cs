@@ -538,19 +538,21 @@ namespace Occf.Learner.Core.Tests {
 					: element.Name() + element.Attribute("id").Value;
 		}
 
-		public static HashSet<string> GetInnerUnionKeys(this IEnumerable<XElement> targets, int length) {
+		public static HashSet<string> GetUnionKeys(
+				this IEnumerable<XElement> targets, int length, bool inner = true, bool outer = true) {
 			var commonKeys = new HashSet<string>();
 			foreach (var target in targets) {
-				var keys = target.GetInnerKeys(length);
+				var keys = target.GetSurroundingKeys(length, inner, outer);
 				commonKeys.UnionWith(keys);
 			}
 			return commonKeys;
 		}
 
-		public static HashSet<string> GetInnerCommonKeys(this IEnumerable<XElement> targets, int length) {
+		public static HashSet<string> GetCommonKeys(
+				this IEnumerable<XElement> targets, int length, bool inner = true, bool outer = true) {
 			HashSet<string> commonKeys = null;
 			foreach (var target in targets) {
-				var keys = target.GetInnerKeys(length);
+				var keys = target.GetSurroundingKeys(length, inner, outer);
 				if (commonKeys == null) {
 					commonKeys = keys;
 				} else {
@@ -560,172 +562,55 @@ namespace Occf.Learner.Core.Tests {
 			return commonKeys;
 		}
 
-		public static HashSet<string> GetOuterUnionKeys(this IEnumerable<XElement> targets, int length) {
-			var commonKeys = new HashSet<string>();
-			foreach (var target in targets) {
-				var keys = target.GetOuterKeys(length);
-				commonKeys.UnionWith(keys);
-			}
-			return commonKeys;
-		}
-
-		public static HashSet<string> GetOuterCommonKeys(this IEnumerable<XElement> targets, int length) {
-			HashSet<string> commonKeys = null;
-			foreach (var target in targets) {
-				var keys = target.GetOuterKeys(length);
-				if (commonKeys == null) {
-					commonKeys = keys;
-				} else {
-					commonKeys.IntersectWith(keys);
-				}
-			}
-			return commonKeys;
-		}
-
-		public static HashSet<string> GetUnionKeys(this IEnumerable<XElement> targets, int length) {
-			var commonKeys = new HashSet<string>();
-			foreach (var target in targets) {
-				var keys = target.GetSurroundingKeys(length);
-				commonKeys.UnionWith(keys);
-			}
-			return commonKeys;
-		}
-
-		public static HashSet<string> GetCommonKeys(this IEnumerable<XElement> targets, int length) {
-			HashSet<string> commonKeys = null;
-			foreach (var target in targets) {
-				var keys = target.GetSurroundingKeys(length);
-				if (commonKeys == null) {
-					commonKeys = keys;
-				} else {
-					commonKeys.IntersectWith(keys);
-				}
-			}
-			return commonKeys;
-		}
-
-		public static HashSet<string> GetSurroundingKeys(this XElement element, int length) {
-			var ret = new HashSet<string>();
-			var childElements = new List<Tuple<XElement, string>> { Tuple.Create(element, element.Name()) };
-			var parentElement = Tuple.Create(element, element.Name());
-			var i = 1;
-			for (; i <= length; i++) {
-				var newChildElements = new List<Tuple<XElement, string>>();
-				foreach (var t in childElements.Where(t2 => !t2.Item1.IsTokenSet())) {
-					foreach (var e in t.Item1.Elements()) {
-						var key = t.Item2 + ">" + e.NameOrTokenWithId();
-						newChildElements.Add(Tuple.Create(e, key));
-						// トークンが存在するかチェックする弱い条件
-						// for Preconditions.checkArguments()
-						ret.Add(t.Item2 + ">'" + e.TokenText() + "'");
-					}
-					foreach (var e in t.Item1.Descendants().Where(e => e.IsTokenSet())) {
-						// トークンが存在するかチェックする弱い条件
-						//ret.Add(t.Item2 + ">>'" + e.TokenText() + "'");
-					}
-				}
-				foreach (var e in parentElement.Item1.Siblings(10)) {
-					var key = parentElement.Item2 + "-" + e.NameOrTokenWithId();
-					newChildElements.Add(Tuple.Create(e, key));
-					// トークンが存在するかチェックする弱い条件
-					// for Preconditions.checkArguments()
-					ret.Add(parentElement.Item2 + "-'" + e.TokenText() + "'");
-					//// 先祖に存在するかチェックする弱い条件
-					//var iLastName = parentElement.Item2.LastIndexOf("<");
-					//var weakKey = "<<" + parentElement.Item2.Substring(iLastName + 1) + "-" + e.NameOrTokenWithId();
-					//newChildElements.Add(Tuple.Create(e, weakKey));
-				}
-				ret.UnionWith(newChildElements.Select(t => t.Item2));
-				childElements = newChildElements;
-				parentElement = Tuple.Create(parentElement.Item1.Parent,
-						parentElement.Item2 + "<" + parentElement.Item1.NameOrTokenWithId());
-				if (parentElement.Item1 == null) {
-					break;
-				}
-				ret.Add(parentElement.Item2);
-			}
-			for (; i <= length; i++) {
-				var newChildElements = new List<Tuple<XElement, string>>();
-				foreach (var t in childElements.Where(t2 => !t2.Item1.IsTokenSet())) {
-					foreach (var e in t.Item1.Elements()) {
-						var key = t.Item2 + ">" + e.NameOrTokenWithId();
-						newChildElements.Add(Tuple.Create(e, key));
-						// トークンが存在するかチェックする弱い条件
-						// for Preconditions.checkArguments()
-						ret.Add(t.Item2 + ">'" + e.TokenText() + "'");
-					}
-				}
-				ret.UnionWith(newChildElements.Select(t => t.Item2));
-				childElements = newChildElements;
-			}
-			// 自分自身の位置による区別も考慮する
-			ret.Add(element.NameOrTokenWithId());
-			return ret;
-		}
-
-		public static HashSet<string> GetInnerKeys(this XElement element, int length) {
-			var ret = new HashSet<string>();
-			var childElements = new List<Tuple<XElement, string>> { Tuple.Create(element, element.Name()) };
-			for (int i = 0; i < length; i++) {
-				var newChildElements = new List<Tuple<XElement, string>>();
-				foreach (var t in childElements.Where(t2 => !t2.Item1.IsTokenSet())) {
-					foreach (var e in t.Item1.Elements()) {
-						var key = t.Item2 + ">" + e.NameOrTokenWithId();
-						newChildElements.Add(Tuple.Create(e, key));
-						// トークンが存在するかチェックする弱い条件
-						// for Preconditions.checkArguments()
-						ret.Add(t.Item2 + ">'" + e.TokenText() + "'");
-					}
-					foreach (var e in t.Item1.Descendants().Where(e => e.IsTokenSet())) {
-						// トークンが存在するかチェックする弱い条件
-						//ret.Add(t.Item2 + ">>'" + e.TokenText() + "'");
-					}
-				}
-				ret.UnionWith(newChildElements.Select(t => t.Item2));
-				childElements = newChildElements;
-			}
-			return ret;
-		}
-
-		public static HashSet<string> GetOuterKeys(this XElement element, int length) {
+		public static HashSet<string> GetSurroundingKeys(
+				this XElement element, int length, bool inner = true, bool outer = true) {
 			var ret = new HashSet<string>();
 			var childElements = new List<Tuple<XElement, string>>();
-			var parentElement = Tuple.Create(element, element.Name());
+			if (inner) {
+				childElements.Add(Tuple.Create(element, element.Name()));
+			}
 			var i = 1;
-			for (; i <= length; i++) {
-				var newChildElements = new List<Tuple<XElement, string>>();
-				foreach (var t in childElements.Where(t2 => !t2.Item1.IsTokenSet())) {
-					foreach (var e in t.Item1.Elements()) {
-						var key = t.Item2 + ">" + e.NameOrTokenWithId();
+			if (outer) {
+				var parentElement = Tuple.Create(element, element.Name());
+				// 自分自身の位置による区別も考慮する
+				//ret.Add(element.NameOrTokenWithId());
+				for (; i <= length; i++) {
+					var newChildElements = new List<Tuple<XElement, string>>();
+					foreach (var t in childElements.Where(t2 => !t2.Item1.IsTokenSet())) {
+						foreach (var e in t.Item1.Elements()) {
+							var key = t.Item2 + ">" + e.NameOrTokenWithId();
+							newChildElements.Add(Tuple.Create(e, key));
+							// トークンが存在するかチェックする弱い条件
+							// for Preconditions.checkArguments()
+							ret.Add(t.Item2 + ">'" + e.TokenText() + "'");
+						}
+						foreach (var e in t.Item1.Descendants().Where(e => e.IsTokenSet())) {
+							// トークンが存在するかチェックする弱い条件
+							//ret.Add(t.Item2 + ">>'" + e.TokenText() + "'");
+						}
+					}
+					foreach (var e in parentElement.Item1.Siblings(10)) {
+						var key = parentElement.Item2 + "-" + e.NameOrTokenWithId();
 						newChildElements.Add(Tuple.Create(e, key));
 						// トークンが存在するかチェックする弱い条件
 						// for Preconditions.checkArguments()
-						ret.Add(t.Item2 + ">'" + e.TokenText() + "'");
+						ret.Add(parentElement.Item2 + "-'" + e.TokenText() + "'");
+						//// 先祖に存在するかチェックする弱い条件
+						//var iLastName = parentElement.Item2.LastIndexOf("<");
+						//var weakKey = "<<" + parentElement.Item2.Substring(iLastName + 1) + "-" + e.NameOrTokenWithId();
+						//newChildElements.Add(Tuple.Create(e, weakKey));
 					}
-					foreach (var e in t.Item1.Descendants().Where(e => e.IsTokenSet())) {
-						// トークンが存在するかチェックする弱い条件
-						//ret.Add(t.Item2 + ">>'" + e.TokenText() + "'");
+					ret.UnionWith(newChildElements.Select(t => t.Item2));
+					childElements = newChildElements;
+
+					var newParentElement = parentElement.Item1.Parent;
+					if (newParentElement == null) {
+						break;
 					}
+					parentElement = Tuple.Create(newParentElement,
+							parentElement.Item2 + "<" + newParentElement.NameOrTokenWithId());
+					ret.Add(parentElement.Item2);
 				}
-				foreach (var e in parentElement.Item1.Siblings(10)) {
-					var key = parentElement.Item2 + "-" + e.NameOrTokenWithId();
-					newChildElements.Add(Tuple.Create(e, key));
-					// トークンが存在するかチェックする弱い条件
-					// for Preconditions.checkArguments()
-					ret.Add(parentElement.Item2 + "-'" + e.TokenText() + "'");
-					//// 先祖に存在するかチェックする弱い条件
-					//var iLastName = parentElement.Item2.LastIndexOf("<");
-					//var weakKey = "<<" + parentElement.Item2.Substring(iLastName + 1) + "-" + e.NameOrTokenWithId();
-					//newChildElements.Add(Tuple.Create(e, weakKey));
-				}
-				ret.UnionWith(newChildElements.Select(t => t.Item2));
-				childElements = newChildElements;
-				parentElement = Tuple.Create(parentElement.Item1.Parent,
-						parentElement.Item2 + "<" + parentElement.Item1.NameOrTokenWithId());
-				if (parentElement.Item1 == null) {
-					break;
-				}
-				ret.Add(parentElement.Item2);
 			}
 			for (; i <= length; i++) {
 				var newChildElements = new List<Tuple<XElement, string>>();
@@ -741,9 +626,117 @@ namespace Occf.Learner.Core.Tests {
 				ret.UnionWith(newChildElements.Select(t => t.Item2));
 				childElements = newChildElements;
 			}
-			// 自分自身の位置による区別も考慮する
-			ret.Add(element.NameOrTokenWithId());
 			return ret;
+		}
+
+		public static BigInteger GetSurroundingBits(
+				this XElement element, int length, IDictionary<string, BigInteger> key2Bit, bool inner = true,
+				bool outer = true) {
+			var ret = BigInteger.Zero;
+			BigInteger bit;
+			var childElements = new List<Tuple<XElement, string>>();
+			if (inner) {
+				childElements.Add(Tuple.Create(element, element.Name()));
+			}
+			var i = 1;
+			if (outer) {
+				var parentElement = Tuple.Create(element, element.Name());
+				// 自分自身の位置による区別も考慮する
+				if (key2Bit.TryGetValue(element.NameOrTokenWithId(), out bit)) {
+					ret |= bit;
+				}
+				for (; i <= length; i++) {
+					var newChildElements = new List<Tuple<XElement, string>>();
+					foreach (var t in childElements.Where(t2 => !t2.Item1.IsTokenSet())) {
+						foreach (var e in t.Item1.Elements()) {
+							var key = t.Item2 + ">" + e.NameOrTokenWithId();
+							if (key2Bit.TryGetValue(key, out bit)) {
+								newChildElements.Add(Tuple.Create(e, key));
+								ret |= bit;
+							}
+							// トークンが存在するかチェックする弱い条件
+							// for Preconditions.checkArguments()
+							if (key2Bit.TryGetValue(t.Item2 + ">'" + e.TokenText() + "'", out bit)) {
+								ret |= bit;
+							}
+						}
+						foreach (var e in t.Item1.Descendants().Where(e => e.IsTokenSet())) {
+							// トークンが存在するかチェックする弱い条件
+							//ret.Add(t.Item2 + ">>'" + e.TokenText() + "'");
+						}
+					}
+					foreach (var e in parentElement.Item1.Siblings(10)) {
+						var key = parentElement.Item2 + "-" + e.NameOrTokenWithId();
+						if (key2Bit.TryGetValue(key, out bit)) {
+							newChildElements.Add(Tuple.Create(e, key));
+							ret |= bit;
+						}
+						// トークンが存在するかチェックする弱い条件
+						// for Preconditions.checkArguments()
+						if (key2Bit.TryGetValue(parentElement.Item2 + "-'" + e.TokenText() + "'", out bit)) {
+							ret |= bit;
+						}
+						//// 先祖に存在するかチェックする弱い条件
+						//var iLastName = parentElement.Item2.LastIndexOf("<");
+						//var weakKey = "<<" + parentElement.Item2.Substring(iLastName + 1) + "-" + e.NameOrTokenWithId();
+						//newChildElements.Add(Tuple.Create(e, weakKey));
+					}
+					childElements = newChildElements;
+
+					var newParentElement = parentElement.Item1.Parent;
+					if (newParentElement == null) {
+						break;
+					}
+					parentElement = Tuple.Create(newParentElement,
+							parentElement.Item2 + "<" + newParentElement.NameOrTokenWithId());
+					if (key2Bit.TryGetValue(parentElement.Item2, out bit)) {
+						ret |= bit;
+					} else {
+						break;
+					}
+				}
+			}
+			for (; i <= length; i++) {
+				var newChildElements = new List<Tuple<XElement, string>>();
+				foreach (var t in childElements.Where(t2 => !t2.Item1.IsTokenSet())) {
+					foreach (var e in t.Item1.Elements()) {
+						var key = t.Item2 + ">" + e.NameOrTokenWithId();
+						if (key2Bit.TryGetValue(key, out bit)) {
+							newChildElements.Add(Tuple.Create(e, key));
+							ret |= bit;
+						}
+						// トークンが存在するかチェックする弱い条件
+						// for Preconditions.checkArguments()
+						if (key2Bit.TryGetValue(t.Item2 + ">'" + e.TokenText() + "'", out bit)) {
+							ret |= bit;
+						}
+					}
+				}
+				childElements = newChildElements;
+			}
+			return ret;
+		}
+
+		public static IEnumerable<string> test(
+				this XElement element, int length, IList<string> predicateKeys,
+				List<List<Tuple<XElement, string>>> descendants) {
+			var maxLevel = descendants.Count - 1;
+			for (int i = 1; i < maxLevel; i++) {
+				var tuples = descendants[i];
+				foreach (var t in tuples) {
+					yield return t.Item2;
+				}
+			}
+			for (int i = maxLevel; i < length; i++) {
+				var tuples = descendants[i];
+				foreach (var t in tuples) {
+					foreach (var e in t.Item1.Elements()) {
+						var key = t.Item2 + ">" + e.NameOrTokenWithId();
+						descendants[i + 1].Add(Tuple.Create(e, key));
+						yield return key;
+					}
+				}
+			}
 		}
 
 		public static Dictionary<string, List<XElement>> SurroundingElementsWithSelf(

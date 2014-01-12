@@ -18,7 +18,7 @@ namespace Occf.Learner.Core.Tests {
 
 		public int WrongCount { get; set; }
 		protected abstract Processor Processor { get; }
-		protected abstract bool IsStatement { get; }
+		protected abstract bool IsInner { get; }
 
 		public IList<XElement> WronglyAcceptedElements {
 			get {
@@ -55,7 +55,7 @@ namespace Occf.Learner.Core.Tests {
 
 		private HashSet<BigInteger> _seedAccepted;
 		private int _predicateDepth = 7;
-		private List<string> _masterPredicates;
+		private IDictionary<string, BigInteger> _masterPredicates;
 		private const int LearningCount = 5;
 		private const int AncestorCount = 5;
 		private List<string> _classifiers;
@@ -86,7 +86,7 @@ namespace Occf.Learner.Core.Tests {
 		private void UpdateDict(Dictionary<BigInteger, string> dict, BigInteger bits, XElement element) {
 			var existingAncestorsStr = dict.GetValueOrDefault(bits);
 			IEnumerable<string> ancestors;
-			if (IsStatement) {
+			if (IsInner) {
 				var descendants = element.FirstDescendants().TakeWhile(e => !e.Parent.IsTerminal())
 						.Take(AncestorCount)
 						.ToList();
@@ -109,6 +109,8 @@ namespace Occf.Learner.Core.Tests {
 
 		public void LearnUntilBeStable(
 				ICollection<string> allPaths, ICollection<string> seedPaths, StreamWriter writer) {
+			var totalTime = Environment.TickCount;
+
 			_idealAccepted = new Dictionary<BigInteger, string>();
 			_idealRejected = new Dictionary<BigInteger, string>();
 			_accepted = new Dictionary<BigInteger, string>();
@@ -116,6 +118,7 @@ namespace Occf.Learner.Core.Tests {
 			_feature2Element = new Dictionary<BigInteger, XElement>();
 			_seedAccepted = new HashSet<BigInteger>();
 			_classifiers = new List<string> { ">" };
+			_masterPredicates = new Dictionary<string, BigInteger>();
 
 			var seedAcceptedElements = new List<XElement>();
 			var seedRejectedElements = new List<XElement>();
@@ -127,34 +130,43 @@ namespace Occf.Learner.Core.Tests {
 					(IsAccepted(e) ? seedAcceptedElements : seedRejectedElements).Add(e);
 				}
 			}
-			_masterPredicates = (IsStatement
-					? seedAcceptedElements.GetInnerUnionKeys(_predicateDepth)
-					: seedAcceptedElements.GetOuterUnionKeys(_predicateDepth))
+			var acceptingPredicates = seedAcceptedElements
+					.GetUnionKeys(_predicateDepth, IsInner, !IsInner)
+					.ToHashSet()
 					.ToList();
-			_masterPredicates.Sort((s1, s2) => s1.Length.CompareTo(s2.Length));
+			acceptingPredicates.Sort((s1, s2) => s1.Length.CompareTo(s2.Length));
 
-			var acceptingPredicateSet = _masterPredicates.ToHashSet();
-			var rejectingPredicateSet = (IsStatement
-					? seedRejectedElements.GetInnerUnionKeys(_predicateDepth)
-					: seedRejectedElements.GetOuterUnionKeys(_predicateDepth));
-			rejectingPredicateSet.ExceptWith(acceptingPredicateSet);
+			var masterBit = BigInteger.One;
+			foreach (var predicate in acceptingPredicates) {
+				_masterPredicates.Add(predicate, masterBit);
+				masterBit <<= 1;
+			}
+			_acceptingPredicatesCount = _masterPredicates.Count;
+
+			var rejectingPredicateSet = seedRejectedElements
+					.GetUnionKeys(_predicateDepth, IsInner, !IsInner)
+					.ToHashSet();
+			rejectingPredicateSet.ExceptWith(acceptingPredicates);
 			var rejectingPredicates = rejectingPredicateSet.ToList();
 			rejectingPredicates.Sort((s1, s2) => s1.Length.CompareTo(s2.Length));
-			_acceptingPredicatesCount = _masterPredicates.Count;
-			_masterPredicates.AddRange(rejectingPredicates);
+
+			foreach (var predicate in rejectingPredicates) {
+				_masterPredicates.Add(predicate, masterBit);
+				masterBit <<= 1;
+			}
 
 			_mask = (BigInteger.One << _masterPredicates.Count) - BigInteger.One;
 			_acceptingMask = (BigInteger.One << _acceptingPredicatesCount) - BigInteger.One;
 			_rejectingMask = _mask ^ _acceptingMask;
 
 			foreach (var e in seedAcceptedElements) {
-				var bits = GetBits(e, _masterPredicates);
+				var bits = e.GetSurroundingBits(_predicateDepth, _masterPredicates, IsInner, !IsInner);
 				UpdateDict(_idealAccepted, bits, e);
 				_seedAccepted.Add(bits);
 				_feature2Element[bits] = e;
 			}
 			foreach (var e in seedRejectedElements) {
-				var bits = GetBits(e, _masterPredicates);
+				var bits = e.GetSurroundingBits(_predicateDepth, _masterPredicates, IsInner, !IsInner);
 				UpdateDict(_idealRejected, bits, e);
 				_feature2Element[bits] = e;
 			}
@@ -164,7 +176,7 @@ namespace Occf.Learner.Core.Tests {
 				var codeFile = new FileInfo(path);
 				var ast = Processor.GenerateXml(codeFile);
 				foreach (var e in GetAllElements(ast)) {
-					var bits = GetBits(e, _masterPredicates);
+					var bits = e.GetSurroundingBits(_predicateDepth, _masterPredicates, IsInner, !IsInner);
 					if (IsAccepted(e)) {
 						//if (_idealRejected.ContainsKey(bits)) {
 						//	Console.WriteLine(e.Text());
@@ -183,11 +195,11 @@ namespace Occf.Learner.Core.Tests {
 			}
 
 			foreach (var e in seedAcceptedElements) {
-				var bits = GetBits(e, _masterPredicates);
+				var bits = e.GetSurroundingBits(_predicateDepth, _masterPredicates, IsInner, !IsInner);
 				_accepted[bits] = _idealAccepted[bits];
 			}
 			foreach (var e in seedRejectedElements) {
-				var bits = GetBits(e, _masterPredicates);
+				var bits = e.GetSurroundingBits(_predicateDepth, _masterPredicates, IsInner, !IsInner);
 				_rejected[bits] = _idealRejected[bits];
 			}
 
@@ -196,6 +208,7 @@ namespace Occf.Learner.Core.Tests {
 			}
 
 			var count = 1;
+			var sumTime = Environment.TickCount;
 			while (true) {
 				var time = Environment.TickCount;
 				if (LearnAndApply(0)) {
@@ -206,6 +219,9 @@ namespace Occf.Learner.Core.Tests {
 				}
 				Console.WriteLine("Time: " + (Environment.TickCount - time));
 			}
+			Console.WriteLine();
+			Console.WriteLine("Sum time: " + (Environment.TickCount - sumTime));
+			Console.WriteLine("Total time: " + (Environment.TickCount - totalTime));
 			Console.WriteLine("Required elements: " + (_accepted.Count + _rejected.Count) + " / "
 			                  + (_idealAccepted.Count + _idealRejected.Count));
 			writer.WriteLine(_accepted.Count + _rejected.Count);
@@ -737,12 +753,6 @@ namespace Occf.Learner.Core.Tests {
 			return (feature & rejectingPredicate) != BigInteger.Zero;
 		}
 
-		private int GetClassifierInput(BigInteger feature, BigInteger predicate) {
-			var diffs = (feature & predicate) ^ predicate;
-			var count = CountBits(diffs);
-			return count;
-		}
-
 		private static int CountBits(BigInteger bits) {
 			var count = 0;
 			while (bits != BigInteger.Zero) {
@@ -758,18 +768,6 @@ namespace Occf.Learner.Core.Tests {
 
 		private int CountRejectingBits(BigInteger bits) {
 			return CountBits(bits >> _acceptingPredicatesCount);
-		}
-
-		private BigInteger GetBits(XElement e, IList<string> predicateKeys) {
-			var keys = IsStatement ? e.GetInnerKeys(_predicateDepth) : e.GetOuterKeys(_predicateDepth);
-			var ret = BigInteger.Zero;
-			for (int i = predicateKeys.Count - 1; i >= 0; i--) {
-				ret <<= 1;
-				if (keys.Contains(predicateKeys[i])) {
-					ret++;
-				}
-			}
-			return ret;
 		}
 
 		protected IEnumerable<XElement> GetAllElements(XElement ast) {

@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 using Code2Xml.Core;
+using Code2Xml.Core.Processors;
 using NUnit.Framework;
 using Paraiba.Xml.Linq;
 using ParserTests;
@@ -12,6 +13,9 @@ namespace Occf.Learner.Core.Tests.Experiments {
 	[TestFixture]
 	public class JavaExperiment {
 		private readonly StreamWriter _writer = File.CreateText(@"C:\Users\exKAZUu\Desktop\java.txt");
+
+		public static Processor Processor =
+				new MemoryCachchProcessor(new FileCacheProcessor(ProcessorLoader.JavaUsingAntlr3));
 
 		private static IEnumerable<TestCaseData> TestCases {
 			get {
@@ -81,10 +85,10 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 	public class JavaSuperComplexBranchExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
-			get { return ProcessorLoader.JavaUsingAntlr3; }
+			get { return JavaExperiment.Processor; }
 		}
 
-		protected override bool IsStatement {
+		protected override bool IsInner {
 			get { return false; }
 		}
 
@@ -131,12 +135,13 @@ namespace Occf.Learner.Core.Tests.Experiments {
 			}
 		}
 	}
+
 	public class JavaComplexBranchExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
-			get { return ProcessorLoader.JavaUsingAntlr3; }
+			get { return JavaExperiment.Processor; }
 		}
 
-		protected override bool IsStatement {
+		protected override bool IsInner {
 			get { return false; }
 		}
 
@@ -165,10 +170,10 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 	public class JavaIfExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
-			get { return ProcessorLoader.JavaUsingAntlr3; }
+			get { return JavaExperiment.Processor; }
 		}
 
-		protected override bool IsStatement {
+		protected override bool IsInner {
 			get { return false; }
 		}
 
@@ -188,10 +193,10 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 	public class JavaWhileExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
-			get { return ProcessorLoader.JavaUsingAntlr3; }
+			get { return JavaExperiment.Processor; }
 		}
 
-		protected override bool IsStatement {
+		protected override bool IsInner {
 			get { return false; }
 		}
 
@@ -211,10 +216,10 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 	public class JavaDoWhileExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
-			get { return ProcessorLoader.JavaUsingAntlr3; }
+			get { return JavaExperiment.Processor; }
 		}
 
-		protected override bool IsStatement {
+		protected override bool IsInner {
 			get { return false; }
 		}
 
@@ -234,10 +239,10 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 	public class JavaForExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
-			get { return ProcessorLoader.JavaUsingAntlr3; }
+			get { return JavaExperiment.Processor; }
 		}
 
-		protected override bool IsStatement {
+		protected override bool IsInner {
 			get { return false; }
 		}
 
@@ -254,10 +259,10 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 	public class JavaPreconditionsExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
-			get { return ProcessorLoader.JavaUsingAntlr3; }
+			get { return JavaExperiment.Processor; }
 		}
 
-		protected override bool IsStatement {
+		protected override bool IsInner {
 			get { return false; }
 		}
 
@@ -289,10 +294,10 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 	public class JavaComplexStatementExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
-			get { return ProcessorLoader.JavaUsingAntlr3; }
+			get { return JavaExperiment.Processor; }
 		}
 
-		protected override bool IsStatement {
+		protected override bool IsInner {
 			get { return true; }
 		}
 
@@ -318,10 +323,10 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 	public class JavaBlockExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
-			get { return ProcessorLoader.JavaUsingAntlr3; }
+			get { return JavaExperiment.Processor; }
 		}
 
-		protected override bool IsStatement {
+		protected override bool IsInner {
 			get { return true; }
 		}
 
@@ -338,10 +343,10 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 	public class JavaStatementExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
-			get { return ProcessorLoader.JavaUsingAntlr3; }
+			get { return JavaExperiment.Processor; }
 		}
 
-		protected override bool IsStatement {
+		protected override bool IsInner {
 			get { return true; }
 		}
 
@@ -354,10 +359,10 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 	public class JavaLabeledStatementExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
-			get { return ProcessorLoader.JavaUsingAntlr3; }
+			get { return JavaExperiment.Processor; }
 		}
 
-		protected override bool IsStatement {
+		protected override bool IsInner {
 			get { return true; }
 		}
 
@@ -376,10 +381,10 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 	public class JavaEmptyStatementExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
-			get { return ProcessorLoader.JavaUsingAntlr3; }
+			get { return JavaExperiment.Processor; }
 		}
 
-		protected override bool IsStatement {
+		protected override bool IsInner {
 			get { return true; }
 		}
 

@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 using Code2Xml.Core;
-using Code2Xml.Languages.ANTLRv3.Processors.Lua;
+using Code2Xml.Core.Processors;
 using NUnit.Framework;
 using Paraiba.Xml.Linq;
 using ParserTests;
@@ -13,6 +13,10 @@ namespace Occf.Learner.Core.Tests.Experiments {
 	[TestFixture]
 	public class LuaExperiment {
 		private readonly StreamWriter _writer = File.CreateText(@"C:\Users\exKAZUu\Desktop\lua.txt");
+
+		public static Processor Processor =
+				new MemoryCachchProcessor(new FileCacheProcessor(ProcessorLoader.LuaUsingAntlr3));
+
 		private static IEnumerable<TestCaseData> TestCases {
 			get {
 				var exps = new BitLearningExperimentGroupingWithId[] {
@@ -92,10 +96,10 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 	public class LuaComplexBranchExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
-			get { return new LuaProcessorUsingAntlr3(); }
+			get { return LuaExperiment.Processor; }
 		}
 
-		protected override bool IsStatement {
+		protected override bool IsInner {
 			get { return false; }
 		}
 
@@ -119,10 +123,10 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 	public class LuaIfExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
-			get { return new LuaProcessorUsingAntlr3(); }
+			get { return LuaExperiment.Processor; }
 		}
 
-		protected override bool IsStatement {
+		protected override bool IsInner {
 			get { return false; }
 		}
 
@@ -140,10 +144,10 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 	public class LuaWhileExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
-			get { return new LuaProcessorUsingAntlr3(); }
+			get { return LuaExperiment.Processor; }
 		}
 
-		protected override bool IsStatement {
+		protected override bool IsInner {
 			get { return false; }
 		}
 
@@ -161,10 +165,10 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 	public class LuaDoWhileExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
-			get { return new LuaProcessorUsingAntlr3(); }
+			get { return LuaExperiment.Processor; }
 		}
 
-		protected override bool IsStatement {
+		protected override bool IsInner {
 			get { return false; }
 		}
 
@@ -182,10 +186,10 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 	public class LuaComplexStatementExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
-			get { return new LuaProcessorUsingAntlr3(); }
+			get { return LuaExperiment.Processor; }
 		}
 
-		protected override bool IsStatement {
+		protected override bool IsInner {
 			get { return true; }
 		}
 
@@ -204,10 +208,10 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 	public class LuaStatementExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
-			get { return new LuaProcessorUsingAntlr3(); }
+			get { return LuaExperiment.Processor; }
 		}
 
-		protected override bool IsStatement {
+		protected override bool IsInner {
 			get { return true; }
 		}
 
@@ -220,10 +224,10 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 	public class LuaLabeledStatementExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
-			get { return new LuaProcessorUsingAntlr3(); }
+			get { return LuaExperiment.Processor; }
 		}
 
-		protected override bool IsStatement {
+		protected override bool IsInner {
 			get { return true; }
 		}
 
@@ -239,10 +243,10 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 	public class LuaEmptyStatementExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
-			get { return new LuaProcessorUsingAntlr3(); }
+			get { return LuaExperiment.Processor; }
 		}
 
-		protected override bool IsStatement {
+		protected override bool IsInner {
 			get { return true; }
 		}
 
