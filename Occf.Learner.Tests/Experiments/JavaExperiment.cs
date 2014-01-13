@@ -54,7 +54,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 				BitLearningExperimentGroupingWithId exp, string projectPath, IList<string> seedPaths) {
 			var allPaths = Directory.GetFiles(projectPath, "*.java", SearchOption.AllDirectories)
 					.ToList();
-			exp.LearnUntilBeStable(allPaths, seedPaths, _writer);
+			exp.AutomaticallyLearnUntilBeStable(allPaths, seedPaths, _writer);
 			if (exp.WrongCount > 0) {
 				Console.WriteLine("--------------- WronglyAcceptedElements ---------------");
 				foreach (var we in exp.WronglyAcceptedElements) {
@@ -94,7 +94,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 		public JavaSuperComplexBranchExperiment() : base("expression") {}
 
-		protected override bool IsAccepted(XElement e) {
+		public override bool IsAccepted(XElement e) {
 			var p = e.Parent;
 			var pp = p.Parent;
 			var isPar = p.SafeName() == "parExpression";
@@ -147,7 +147,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 		public JavaComplexBranchExperiment() : base("expression") {}
 
-		protected override bool IsAccepted(XElement e) {
+		public override bool IsAccepted(XElement e) {
 			var p = e.Parent;
 			var pp = p.Parent;
 			var isPar = p.SafeName() == "parExpression";
@@ -179,7 +179,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 		public JavaIfExperiment() : base("expression") {}
 
-		protected override bool IsAccepted(XElement e) {
+		public override bool IsAccepted(XElement e) {
 			var p = e.Parent;
 			var pp = p.Parent;
 			var isPar = p.SafeName() == "parExpression";
@@ -202,7 +202,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 		public JavaWhileExperiment() : base("expression") {}
 
-		protected override bool IsAccepted(XElement e) {
+		public override bool IsAccepted(XElement e) {
 			var p = e.Parent;
 			var pp = p.Parent;
 			var isPar = p.SafeName() == "parExpression";
@@ -225,7 +225,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 		public JavaDoWhileExperiment() : base("expression") {}
 
-		protected override bool IsAccepted(XElement e) {
+		public override bool IsAccepted(XElement e) {
 			var p = e.Parent;
 			var pp = p.Parent;
 			var isPar = p.SafeName() == "parExpression";
@@ -248,7 +248,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 		public JavaForExperiment() : base("expression") {}
 
-		protected override bool IsAccepted(XElement e) {
+		public override bool IsAccepted(XElement e) {
 			var p = e.Parent;
 			if (p.SafeName() == "forstatement" && p.Elements().Count(e2 => e2.TokenText() == ";") >= 2) {
 				return true;
@@ -268,7 +268,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 		public JavaPreconditionsExperiment() : base("expression") {}
 
-		protected override bool IsAccepted(XElement e) {
+		public override bool IsAccepted(XElement e) {
 			var primary = e.SafeParent().SafeParent().SafeParent().SafeParent();
 			if (primary.SafeName() != "primary") {
 				return false;
@@ -303,7 +303,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 		public JavaComplexStatementExperiment() : base("statement") {}
 
-		protected override bool IsAccepted(XElement e) {
+		public override bool IsAccepted(XElement e) {
 			// ブロック自身は意味を持たないステートメントで、中身だけが必要なので除外
 			if (e.FirstElement().Name() == "block") {
 				return false;
@@ -332,7 +332,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 		public JavaBlockExperiment() : base("statement") {}
 
-		protected override bool IsAccepted(XElement e) {
+		public override bool IsAccepted(XElement e) {
 			// ブロック自身は意味を持たないステートメントで、中身だけが必要なので除外
 			if (e.FirstElement().Name() == "block") {
 				return true;
@@ -352,7 +352,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 		public JavaStatementExperiment() : base("statement") {}
 
-		protected override bool IsAccepted(XElement e) {
+		public override bool IsAccepted(XElement e) {
 			return true;
 		}
 	}
@@ -368,7 +368,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 		public JavaLabeledStatementExperiment() : base("statement") {}
 
-		protected override bool IsAccepted(XElement e) {
+		public override bool IsAccepted(XElement e) {
 			// ラベルはループ文に付くため，ラベルの中身は除外
 			var second = e.Parent.NthElementOrDefault(1);
 			if (second != null && second.Value == ":"
@@ -390,7 +390,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 		public JavaEmptyStatementExperiment() : base("statement") {}
 
-		protected override bool IsAccepted(XElement e) {
+		public override bool IsAccepted(XElement e) {
 			if (e.FirstElement().Value == ";") {
 				return true;
 			}

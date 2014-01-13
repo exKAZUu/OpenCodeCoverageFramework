@@ -67,7 +67,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 				BitLearningExperimentGroupingWithId exp, string projectPath, IList<string> seedPaths) {
 			var allPaths = Directory.GetFiles(projectPath, "*.cs", SearchOption.AllDirectories)
 					.ToList();
-			exp.LearnUntilBeStable(allPaths, seedPaths, _writer);
+			exp.AutomaticallyLearnUntilBeStable(allPaths, seedPaths, _writer);
 			Assert.That(exp.WrongCount, Is.EqualTo(0));
 		}
 
@@ -91,7 +91,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 		public CSharpBranchExperiment() : base("boolean_expression") {}
 
-		protected override bool IsAccepted(XElement e) {
+		public override bool IsAccepted(XElement e) {
 			var pName = e.Parent.Name();
 			if (pName == "if_statement") {
 				return true;
@@ -118,7 +118,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 			get { return false; }
 		}
 
-		protected override bool IsAccepted(XElement e) {
+		public override bool IsAccepted(XElement e) {
 			var pName = e.Parent.Name();
 			if (pName == "if_statement") {
 				return true;
@@ -138,7 +138,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 			get { return false; }
 		}
 
-		protected override bool IsAccepted(XElement e) {
+		public override bool IsAccepted(XElement e) {
 			var pName = e.Parent.Name();
 			if (pName == "while_statement") {
 				return true;
@@ -158,7 +158,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 			get { return false; }
 		}
 
-		protected override bool IsAccepted(XElement e) {
+		public override bool IsAccepted(XElement e) {
 			var pName = e.Parent.Name();
 			if (pName == "do_statement") {
 				return true;
@@ -178,7 +178,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 			get { return false; }
 		}
 
-		protected override bool IsAccepted(XElement e) {
+		public override bool IsAccepted(XElement e) {
 			var pName = e.Parent.Name();
 			if (pName == "for_condition") {
 				return true;
@@ -198,7 +198,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 			get { return false; }
 		}
 
-		protected override bool IsAccepted(XElement e) {
+		public override bool IsAccepted(XElement e) {
 			// TODO:
 			var pName = e.Parent.Name();
 			if (pName == "for_condition") {
@@ -219,7 +219,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 			get { return true; }
 		}
 
-		protected override bool IsAccepted(XElement e) {
+		public override bool IsAccepted(XElement e) {
 			// ラベルはループ文に付くため，ラベルの中身は除外
 			if (e.Element("labeled_statement") != null) {
 				return false;
@@ -245,7 +245,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 			get { return true; }
 		}
 
-		protected override bool IsAccepted(XElement e) {
+		public override bool IsAccepted(XElement e) {
 			// ブロック自身は意味を持たないステートメントで、中身だけが必要なので除外
 			var e2 = e.Element("embedded_statement");
 			if (e2 != null && e2.Element("block") != null) {
@@ -266,7 +266,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 			get { return true; }
 		}
 
-		protected override bool IsAccepted(XElement e) {
+		public override bool IsAccepted(XElement e) {
 			// ラベルはループ文に付くため，ラベルの中身は除外
 			if (e.Element("labeled_statement") != null) {
 				return true;

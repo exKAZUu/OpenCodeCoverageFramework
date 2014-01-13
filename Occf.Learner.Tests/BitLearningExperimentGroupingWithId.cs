@@ -1,3 +1,21 @@
+#region License
+
+// Copyright (C) 2011-2014 Kazunori Sakamoto
+// 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#endregion
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -10,7 +28,7 @@ using Paraiba.Linq;
 
 namespace Occf.Learner.Core.Tests {
 	public abstract class BitLearningExperimentGroupingWithId {
-		internal class SuspiciousTarget {
+		public class SuspiciousTarget {
 			public int BitsCount { get; set; }
 			public BigInteger Feature { get; set; }
 			public string Classifier { get; set; }
@@ -19,6 +37,10 @@ namespace Occf.Learner.Core.Tests {
 		public int WrongCount { get; set; }
 		protected abstract Processor Processor { get; }
 		protected abstract bool IsInner { get; }
+
+		public Dictionary<BigInteger, XElement> Feature2Element {
+			get { return _feature2Element; }
+		}
 
 		public IList<XElement> WronglyAcceptedElements {
 			get {
@@ -40,7 +62,7 @@ namespace Occf.Learner.Core.Tests {
 			get { return _idealRejected.Keys.Select(f => _feature2Element[f]).ToList(); }
 		}
 
-		private readonly ISet<string> _elementNames;
+		private ISet<string> _elementNames;
 		private Dictionary<BigInteger, string> _idealAccepted;
 		private Dictionary<BigInteger, string> _idealRejected;
 		private Dictionary<BigInteger, string> _accepted;
@@ -63,6 +85,11 @@ namespace Occf.Learner.Core.Tests {
 		private BigInteger _acceptingMask;
 		private BigInteger _rejectingMask;
 		private BigInteger _mask;
+		public List<SuspiciousTarget> SuspiciousAcceptedInAccepting { get; private set; }
+		public List<SuspiciousTarget> SuspiciousRejectedInAccepting { get; private set; }
+		public List<SuspiciousTarget> SuspiciousRejectedInRejecting  { get; private set; }
+		private List<BigInteger> _acceptingPredicates;
+		private List<BigInteger> _rejectingPredicates;
 
 		protected BitLearningExperimentGroupingWithId(params string[] elementNames) {
 			_elementNames = elementNames.ToHashSet();
@@ -84,33 +111,79 @@ namespace Occf.Learner.Core.Tests {
 		}
 
 		private void UpdateDict(Dictionary<BigInteger, string> dict, BigInteger bits, XElement element) {
-			var existingAncestorsStr = dict.GetValueOrDefault(bits);
-			IEnumerable<string> ancestors;
+			var existingClassifiersStr = dict.GetValueOrDefault(bits);
+			IEnumerable<string> classifiers;
 			if (IsInner) {
 				var descendants = element.FirstDescendants().TakeWhile(e => !e.Parent.IsTerminal())
 						.Take(AncestorCount)
 						.ToList();
-				ancestors = descendants.Select(e => e.NameWithId());
+				classifiers = descendants.Select(e => e.NameWithId());
 				if (descendants[descendants.Count - 1].IsTerminal()) {
-					ancestors = ancestors.Concat(descendants[descendants.Count - 1].TokenText());
+					classifiers = classifiers.Concat(descendants[descendants.Count - 1].TokenText());
 				}
 			} else {
-				ancestors = element.AncestorsAndSelf()
+				classifiers = element.AncestorsAndSelf()
 						.Take(AncestorCount)
 						.Select(e => e.NameWithId());
 			}
-			var ancestorsStr = ">" + string.Join(">", ancestors) + ">";
-			if (existingAncestorsStr == null) {
-				dict.Add(bits, ancestorsStr);
+			var classifiersStre = ">" + element.Name() + ">" + string.Join(">", classifiers) + ">";
+			if (existingClassifiersStr == null) {
+				dict.Add(bits, classifiersStre);
 			} else {
-				dict[bits] = CommonSuffix(existingAncestorsStr, ancestorsStr);
+				dict[bits] = CommonSuffix(existingClassifiersStr, classifiersStre);
 			}
 		}
 
-		public void LearnUntilBeStable(
+		public void AutomaticallyLearnUntilBeStable(
 				ICollection<string> allPaths, ICollection<string> seedPaths, StreamWriter writer) {
-			var totalTime = Environment.TickCount;
+			var allAsts = allPaths.Select(path => Processor.GenerateXml(new FileInfo(path), null, true))
+					.ToList();
+			var seedAsts = seedPaths.Select(path => Processor.GenerateXml(new FileInfo(path), null, true))
+					.ToList();
+			var seedAcceptedElements = seedAsts.SelectMany(GetAllElements).Where(IsAccepted);
+			LearnUntilBeStable(allAsts, seedAsts, seedAcceptedElements, _elementNames, writer);
 
+			var count = 0;
+			var sumTime = Environment.TickCount;
+			while (true) {
+				var time = Environment.TickCount;
+				count = LearnAndApply(count);
+				var ret = AddNewElements(_idealAccepted.Keys);
+				if (!ret) {
+					count = 0;
+				}
+				else if (count < 0) {
+					break;
+				}
+
+				Console.WriteLine("Time: " + (Environment.TickCount - time));
+			}
+			Console.WriteLine();
+			Console.WriteLine("Sum time: " + (Environment.TickCount - sumTime));
+			Console.WriteLine(
+					"Required elements: " + (_accepted.Count + _rejected.Count) + " / "
+					+ (_idealAccepted.Count + _idealRejected.Count));
+			if (writer != null) {
+				writer.WriteLine(_accepted.Count + _rejected.Count);
+				writer.Flush();
+			}
+
+			//ShowBitsInfo();
+		}
+
+		public void ManuallyLearnUntilBeStable(
+				IEnumerable<XElement> allAsts, IEnumerable<XElement> seedAsts, IEnumerable<XElement> seedElements) {
+			var elementNames = seedElements.Select(e => e.Name());
+			LearnUntilBeStable(allAsts, seedAsts, seedElements, elementNames, null);
+		}
+
+		public void LearnUntilBeStable(
+				IEnumerable<XElement> allAsts, IEnumerable<XElement> seedAsts,
+				IEnumerable<XElement> seedElements, IEnumerable<string> elementNames,
+				StreamWriter writer) {
+			var preparingTime = Environment.TickCount;
+
+			_elementNames = elementNames.ToHashSet();
 			_idealAccepted = new Dictionary<BigInteger, string>();
 			_idealRejected = new Dictionary<BigInteger, string>();
 			_accepted = new Dictionary<BigInteger, string>();
@@ -120,14 +193,15 @@ namespace Occf.Learner.Core.Tests {
 			_classifiers = new List<string> { ">" };
 			_masterPredicates = new Dictionary<string, BigInteger>();
 
-			var seedAcceptedElements = new List<XElement>();
+			var seedAcceptedElements = seedElements.ToHashSet();
 			var seedRejectedElements = new List<XElement>();
-			foreach (var path in seedPaths) {
+			foreach (var ast in seedAsts) {
 				Console.Write(".");
-				var codeFile = new FileInfo(path);
-				var ast = Processor.GenerateXml(codeFile, null, true);
 				foreach (var e in GetAllElements(ast)) {
-					(IsAccepted(e) ? seedAcceptedElements : seedRejectedElements).Add(e);
+					if (!seedAcceptedElements.Contains(e)) {
+						seedRejectedElements.Add(e);
+					}
+					//(IsAccepted(e) ? seedAcceptedElements : seedRejectedElements).Add(e);
 				}
 			}
 			var acceptingPredicates = seedAcceptedElements
@@ -171,10 +245,8 @@ namespace Occf.Learner.Core.Tests {
 				_feature2Element[bits] = e;
 			}
 
-			foreach (var path in allPaths) {
+			foreach (var ast in allAsts) {
 				Console.Write(".");
-				var codeFile = new FileInfo(path);
-				var ast = Processor.GenerateXml(codeFile);
 				foreach (var e in GetAllElements(ast)) {
 					var bits = e.GetSurroundingBits(_predicateDepth, _masterPredicates, IsInner, !IsInner);
 					if (IsAccepted(e)) {
@@ -207,145 +279,9 @@ namespace Occf.Learner.Core.Tests {
 				throw new Exception("Master predicates can't classify elements!");
 			}
 
-			var count = 1;
-			var sumTime = Environment.TickCount;
-			while (true) {
-				var time = Environment.TickCount;
-				if (LearnAndApply(0)) {
-					if (--count == 0) {
-						break;
-					}
-					//LearnPredicates();
-				}
-				Console.WriteLine("Time: " + (Environment.TickCount - time));
-			}
-			Console.WriteLine();
-			Console.WriteLine("Sum time: " + (Environment.TickCount - sumTime));
-			Console.WriteLine("Total time: " + (Environment.TickCount - totalTime));
-			Console.WriteLine("Required elements: " + (_accepted.Count + _rejected.Count) + " / "
-			                  + (_idealAccepted.Count + _idealRejected.Count));
-			writer.WriteLine(_accepted.Count + _rejected.Count);
-			writer.Flush();
+			LearnPredicates();	// for the first time
 
-			//ShowBitsInfo();
-		}
-
-		private void ShowBitsInfo() {
-			var predicates = LearnPredicates();
-			var acceptingPredicates = predicates.Item1;
-			var rejectingPredicates = predicates.Item2;
-
-			Console.WriteLine("---------------------------------------------------");
-			Console.Write("A(A): ");
-			foreach (var f in _idealAccepted.Keys) {
-				Console.Write(CountAcceptingBits(f) + ", ");
-			}
-			Console.WriteLine();
-			Console.Write("R(A): ");
-			foreach (var f in _idealRejected.Keys) {
-				Console.Write(CountAcceptingBits(f) + ", ");
-			}
-			Console.WriteLine();
-			Console.Write("WA(A): ");
-			foreach (var f in _wronglyAcceptedFeatures.Select(kv => kv.Key)) {
-				Console.Write(CountAcceptingBits(f) + ", ");
-			}
-			Console.WriteLine();
-			Console.Write("WR(A): ");
-			foreach (var f in _wronglyRejectedFeatures.Select(kv => kv.Key)) {
-				Console.Write(CountAcceptingBits(f) + ", ");
-			}
-			Console.WriteLine();
-
-			Console.WriteLine("---------------------------------------------------");
-			Console.Write("A(R): ");
-			foreach (var f in _idealAccepted.Keys) {
-				Console.Write(CountRejectingBits(f) + ", ");
-			}
-			Console.WriteLine();
-			Console.Write("R(R): ");
-			foreach (var f in _idealRejected.Keys) {
-				Console.Write(CountRejectingBits(f) + ", ");
-			}
-			Console.WriteLine();
-			Console.Write("WA(R): ");
-			foreach (var f in _wronglyAcceptedFeatures.Select(kv => kv.Key)) {
-				Console.Write(CountRejectingBits(f) + ", ");
-			}
-			Console.WriteLine();
-			Console.Write("WR(R): ");
-			foreach (var f in _wronglyRejectedFeatures.Select(kv => kv.Key)) {
-				Console.Write(CountRejectingBits(f) + ", ");
-			}
-			Console.WriteLine();
-
-			Console.WriteLine("---------------------------------------------------");
-			Console.Write("A(A): ");
-			foreach (var featureAndClassifier in _idealAccepted) {
-				var feature = featureAndClassifier.Key;
-				var classifier = featureAndClassifier.Value;
-				var iClassifier = DetermineClassifierIndex(classifier);
-				Console.Write(CountAcceptingBits(feature & acceptingPredicates[iClassifier]) + ", ");
-			}
-			Console.WriteLine();
-			Console.Write("R(A): ");
-			foreach (var featureAndClassifier in _idealRejected) {
-				var feature = featureAndClassifier.Key;
-				var classifier = featureAndClassifier.Value;
-				var iClassifier = DetermineClassifierIndex(classifier);
-				Console.Write(CountAcceptingBits(feature & acceptingPredicates[iClassifier]) + ", ");
-			}
-			Console.WriteLine();
-			Console.Write("WA(A): ");
-			foreach (var featureAndClassifier in _wronglyAcceptedFeatures) {
-				var feature = featureAndClassifier.Key;
-				var classifier = featureAndClassifier.Value;
-				var iClassifier = DetermineClassifierIndex(classifier);
-				Console.Write(CountAcceptingBits(feature & acceptingPredicates[iClassifier]) + ", ");
-			}
-			Console.WriteLine();
-			Console.Write("WR(A): ");
-			foreach (var featureAndClassifier in _wronglyRejectedFeatures) {
-				var feature = featureAndClassifier.Key;
-				var classifier = featureAndClassifier.Value;
-				var iClassifier = DetermineClassifierIndex(classifier);
-				Console.Write(CountAcceptingBits(feature & acceptingPredicates[iClassifier]) + ", ");
-			}
-			Console.WriteLine();
-
-			Console.WriteLine("---------------------------------------------------");
-			Console.Write("A(R): ");
-			foreach (var featureAndClassifier in _idealAccepted) {
-				var feature = featureAndClassifier.Key;
-				var classifier = featureAndClassifier.Value;
-				var iClassifier = DetermineClassifierIndex(classifier);
-				Console.Write(CountRejectingBits(feature & rejectingPredicates[iClassifier]) + ", ");
-			}
-			Console.WriteLine();
-			Console.Write("R(R): ");
-			foreach (var featureAndClassifier in _idealRejected) {
-				var feature = featureAndClassifier.Key;
-				var classifier = featureAndClassifier.Value;
-				var iClassifier = DetermineClassifierIndex(classifier);
-				Console.Write(CountRejectingBits(feature & rejectingPredicates[iClassifier]) + ", ");
-			}
-			Console.WriteLine();
-			Console.Write("WA(R): ");
-			foreach (var featureAndClassifier in _wronglyAcceptedFeatures) {
-				var feature = featureAndClassifier.Key;
-				var classifier = featureAndClassifier.Value;
-				var iClassifier = DetermineClassifierIndex(classifier);
-				Console.Write(CountRejectingBits(feature & rejectingPredicates[iClassifier]) + ", ");
-			}
-			Console.WriteLine();
-			Console.Write("WR(R): ");
-			foreach (var featureAndClassifier in _wronglyRejectedFeatures) {
-				var feature = featureAndClassifier.Key;
-				var classifier = featureAndClassifier.Value;
-				var iClassifier = DetermineClassifierIndex(classifier);
-				Console.Write(CountRejectingBits(feature & rejectingPredicates[iClassifier]) + ", ");
-			}
-			Console.WriteLine();
+			Console.WriteLine("Preparing time: " + (Environment.TickCount - preparingTime));
 		}
 
 		private int DetermineClassifierIndex(string classifier) {
@@ -357,7 +293,7 @@ namespace Occf.Learner.Core.Tests {
 			throw new Exception("Can't find the given classifier: " + classifier);
 		}
 
-		private Tuple<List<BigInteger>, List<BigInteger>> LearnPredicates() {
+		private void LearnPredicates() {
 			while (true) {
 				var acceptingPredicates = Enumerable.Repeat(_mask, _classifiers.Count).ToList();
 				var rejectingPredicates = Enumerable.Repeat(BigInteger.Zero, _classifiers.Count).ToList();
@@ -387,7 +323,9 @@ namespace Occf.Learner.Core.Tests {
 					}
 				}
 				if (failedClassifier == null) {
-					return Tuple.Create(acceptingPredicates, rejectingPredicates);
+					_acceptingPredicates = acceptingPredicates;
+					_rejectingPredicates = rejectingPredicates;
+					return;
 				}
 				var count = _classifiers.Count;
 				if (classifier != _classifiers[iClassifier]) {
@@ -412,11 +350,9 @@ namespace Occf.Learner.Core.Tests {
 			}
 		}
 
-		private bool LearnAndApply(int count) {
-			var predicates = LearnPredicates();
-			var acceptingPredicates = predicates.Item1;
-			var rejectingPredicates = predicates.Item2;
-
+		public int LearnAndApply(int count) {
+			var acceptingPredicates = _acceptingPredicates;
+			var rejectingPredicates = _rejectingPredicates;
 			var correctlyAccepted = 0;
 			var correctlyRejected = 0;
 			var wronglyAccepted = 0;
@@ -452,32 +388,35 @@ namespace Occf.Learner.Core.Tests {
 					_wronglyRejectedFeatures.Add(featureAndClassifier);
 					if (!_accepted.ContainsKey(feature) && !_rejected.ContainsKey(feature)) {
 						// AcceptedÇ∆ã§í çÄÇ™ëΩÇ¢Ç‡ÇÃÇë_Ç§
-						rejectedInAccepting[iClassifier].Add(new SuspiciousTarget {
-							BitsCount = -CountAcceptingBits(feature),
-							Feature = feature,
-							Classifier = classifier,
-						});
+						rejectedInAccepting[iClassifier].Add(
+								new SuspiciousTarget {
+									BitsCount = -CountAcceptingBits(feature),
+									Feature = feature,
+									Classifier = classifier,
+								});
 					}
 				} else if (!rejected) {
 					correctlyAccepted++;
 					if (!_accepted.ContainsKey(feature) && !_rejected.ContainsKey(feature)) {
 						// AcceptedÇ∆ã§í çÄÇ™è≠Ç»Ç¢Ç‡ÇÃÇë_Ç§
-						acceptedInAccepting[iClassifier].Add(new SuspiciousTarget {
-							BitsCount = CountAcceptingBits(feature),
-							Feature = feature,
-							Classifier = classifier,
-						});
+						acceptedInAccepting[iClassifier].Add(
+								new SuspiciousTarget {
+									BitsCount = CountAcceptingBits(feature),
+									Feature = feature,
+									Classifier = classifier,
+								});
 					}
 				} else {
 					wronglyRejectedInRejecting++;
 					_wronglyRejectedFeatures.Add(featureAndClassifier);
 					if (!_accepted.ContainsKey(feature) && !_rejected.ContainsKey(feature)) {
 						// RejectedÇ∆ã§í çÄÇ™è≠Ç»Ç¢Ç‡ÇÃÇë_Ç§
-						rejectedInRejecting[iClassifier].Add(new SuspiciousTarget {
-							BitsCount = CountRejectingBits(feature & rejectingPredicates[iClassifier]),
-							Feature = feature,
-							Classifier = classifier,
-						});
+						rejectedInRejecting[iClassifier].Add(
+								new SuspiciousTarget {
+									BitsCount = CountRejectingBits(feature & rejectingPredicates[iClassifier]),
+									Feature = feature,
+									Classifier = classifier,
+								});
 					}
 				}
 			}
@@ -493,39 +432,42 @@ namespace Occf.Learner.Core.Tests {
 					correctlyRejected++;
 					if (!_accepted.ContainsKey(feature) && !_rejected.ContainsKey(feature)) {
 						// AcceptedÇ∆ã§í çÄÇ™ëΩÇ¢Ç‡ÇÃÇë_Ç§
-						rejectedInAccepting[iClassifier].Add(new SuspiciousTarget {
-							BitsCount = -CountAcceptingBits(feature),
-							Feature = feature,
-							Classifier = classifier,
-						});
+						rejectedInAccepting[iClassifier].Add(
+								new SuspiciousTarget {
+									BitsCount = -CountAcceptingBits(feature),
+									Feature = feature,
+									Classifier = classifier,
+								});
 					}
 				} else if (!rejected) {
 					wronglyAccepted++;
 					_wronglyAcceptedFeatures.Add(featureAndClassifier);
 					if (!_accepted.ContainsKey(feature) && !_rejected.ContainsKey(feature)) {
 						// AcceptedÇ∆ã§í çÄÇ™è≠Ç»Ç¢Ç‡ÇÃÇë_Ç§
-						acceptedInAccepting[iClassifier].Add(new SuspiciousTarget {
-							BitsCount = CountAcceptingBits(feature),
-							Feature = feature,
-							Classifier = classifier,
-						});
+						acceptedInAccepting[iClassifier].Add(
+								new SuspiciousTarget {
+									BitsCount = CountAcceptingBits(feature),
+									Feature = feature,
+									Classifier = classifier,
+								});
 					}
 				} else {
 					correctlyRejectedInRejecting++;
 					if (!_accepted.ContainsKey(feature) && !_rejected.ContainsKey(feature)) {
 						// RejectedÇ∆ã§í çÄÇ™è≠Ç»Ç¢Ç‡ÇÃÇë_Ç§
-						rejectedInRejecting[iClassifier].Add(new SuspiciousTarget {
-							BitsCount = CountRejectingBits(feature & rejectingPredicates[iClassifier]),
-							Feature = feature,
-							Classifier = classifier,
-						});
+						rejectedInRejecting[iClassifier].Add(
+								new SuspiciousTarget {
+									BitsCount = CountRejectingBits(feature & rejectingPredicates[iClassifier]),
+									Feature = feature,
+									Classifier = classifier,
+								});
 					}
 				}
 			}
 
-			var suspiciousAcceptedInAccepting = new List<SuspiciousTarget>();
-			var suspiciousRejectedInAccepting = new List<SuspiciousTarget>();
-			var suspiciousRejectedInRejecting = new List<SuspiciousTarget>();
+			SuspiciousAcceptedInAccepting = new List<SuspiciousTarget>();
+			SuspiciousRejectedInAccepting = new List<SuspiciousTarget>();
+			SuspiciousRejectedInRejecting = new List<SuspiciousTarget>();
 			switch (count) {
 			case 0:
 				//suspiciousAcceptedByAccepting = SelectSuspiciousElements(
@@ -537,17 +479,17 @@ namespace Occf.Learner.Core.Tests {
 				//		suspiciousRejectedListByRejecting, rejectingPredicates, _rejectingMask, _rejectingMask);
 				//suspiciousAcceptedInAccepting = FlattenSuspiciousTargetsList(acceptedInAccepting);
 				//suspiciousRejectedInAccepting = FlattenSuspiciousTargetsList(rejectedInAccepting);
-				suspiciousRejectedInRejecting = FlattenSuspiciousTargetsList(rejectedInRejecting);
-				suspiciousAcceptedInAccepting = SelectVariousElements(acceptedInAccepting, _acceptingMask);
-				suspiciousRejectedInAccepting = SelectVariousElements(rejectedInAccepting, _acceptingMask);
+				SuspiciousRejectedInRejecting = FlattenSuspiciousTargetsList(rejectedInRejecting);
+				SuspiciousAcceptedInAccepting = SelectVariousElements(acceptedInAccepting, _acceptingMask);
+				SuspiciousRejectedInAccepting = SelectVariousElements(rejectedInAccepting, _acceptingMask);
 				//suspiciousRejectedInRejecting = SelectVariousElements(rejectedInRejecting, _rejectingMask);
 				break;
 			case 1:
-				suspiciousAcceptedInAccepting = SelectSuspiciousElementsWithMask(
+				SuspiciousAcceptedInAccepting = SelectSuspiciousElementsWithMask(
 						acceptedInAccepting, BigInteger.Zero, _acceptingMask);
-				suspiciousRejectedInAccepting = SelectSuspiciousElementsWithMask(
+				SuspiciousRejectedInAccepting = SelectSuspiciousElementsWithMask(
 						rejectedInAccepting, BigInteger.Zero, _acceptingMask);
-				suspiciousRejectedInRejecting = SelectSuspiciousElementsWithMask(
+				SuspiciousRejectedInRejecting = SelectSuspiciousElementsWithMask(
 						rejectedInRejecting, _rejectingMask, _rejectingMask);
 				//suspiciousAcceptedByAccepting = SelectSuspiciousElements(
 				//		suspiciousAcceptedListByAccepting, acceptingPredicates, _acceptingMask, BigInteger.Zero);
@@ -557,51 +499,60 @@ namespace Occf.Learner.Core.Tests {
 				//		suspiciousRejectedListByRejecting, rejectingPredicates, _rejectingMask, _rejectingMask);
 				break;
 			case 2:
-				suspiciousAcceptedInAccepting = SelectSuspiciousElementsWithMask(
+				SuspiciousAcceptedInAccepting = SelectSuspiciousElementsWithMask(
 						acceptedInAccepting, BigInteger.Zero, _acceptingMask);
-				suspiciousRejectedInAccepting = SelectSuspiciousElementsWithMask(
+				SuspiciousRejectedInAccepting = SelectSuspiciousElementsWithMask(
 						rejectedInAccepting, BigInteger.Zero, _acceptingMask);
-				suspiciousRejectedInRejecting = SelectSuspiciousElementsWithMask(
+				SuspiciousRejectedInRejecting = SelectSuspiciousElementsWithMask(
 						rejectedInRejecting, _rejectingMask, _rejectingMask);
 				break;
 			default:
-				return false;
+				return -1;
 			}
-			Console.WriteLine("SA(A): " + suspiciousAcceptedInAccepting.Count
-			                  + ", SR(A): " + suspiciousRejectedInAccepting.Count
-			                  + ", SR(R): " + suspiciousRejectedInRejecting.Count);
+			Console.WriteLine(
+					"SA(A): " + SuspiciousAcceptedInAccepting.Count
+					+ ", SR(A): " + SuspiciousRejectedInAccepting.Count
+					+ ", SR(R): " + SuspiciousRejectedInRejecting.Count);
+			Console.WriteLine("done");
+			Console.WriteLine(
+					"WA: " + wronglyAccepted + ", WR: " + wronglyRejected + "/"
+					+ wronglyRejectedInRejecting + ", CA: "
+					+ correctlyAccepted + ", CR: " + correctlyRejected + "/"
+					+ correctlyRejectedInRejecting);
+			WrongCount = wronglyAccepted + wronglyRejected + wronglyRejectedInRejecting;
 
+			return count + 1;
+		}
+
+		public bool AddNewElements(ICollection<BigInteger> actuallyAcceptedElements) {
 			var additionalAccepted =
-					suspiciousAcceptedInAccepting.Concat(suspiciousRejectedInAccepting)
-							.Concat(suspiciousRejectedInRejecting)
-							.Where(t => _idealAccepted.ContainsKey(t.Feature))
+					SuspiciousAcceptedInAccepting.Concat(SuspiciousRejectedInAccepting)
+							.Concat(SuspiciousRejectedInRejecting)
+							.Where(t => actuallyAcceptedElements.Contains(t.Feature))
 							.ToList();
 			var additionalRejected =
-					suspiciousAcceptedInAccepting.Concat(suspiciousRejectedInAccepting)
-							.Concat(suspiciousRejectedInRejecting)
-							.Where(t => _idealRejected.ContainsKey(t.Feature))
+					SuspiciousAcceptedInAccepting.Concat(SuspiciousRejectedInAccepting)
+							.Concat(SuspiciousRejectedInRejecting)
+							.Where(t => !actuallyAcceptedElements.Contains(t.Feature))
 							.ToList();
-			var foundWronglyRejected = suspiciousRejectedInAccepting.Concat(suspiciousRejectedInRejecting)
-					.Count(t => _idealAccepted.ContainsKey(t.Feature));
-			var foundWronglyAccepted = suspiciousAcceptedInAccepting
-					.Count(t => _idealRejected.ContainsKey(t.Feature));
+			var foundWronglyRejected = SuspiciousRejectedInAccepting.Concat(SuspiciousRejectedInRejecting)
+					.Count(t => actuallyAcceptedElements.Contains(t.Feature));
+			var foundWronglyAccepted = SuspiciousAcceptedInAccepting
+					.Count(t => !actuallyAcceptedElements.Contains(t.Feature));
 
 			var additionalAcceptedCount = additionalAccepted.Count;
 			var additionalRejectedCount = additionalRejected.Count;
 
-			Console.WriteLine("done");
-			Console.WriteLine("WA: " + wronglyAccepted + ", WR: " + wronglyRejected + "/"
-			                  + wronglyRejectedInRejecting + ", CA: "
-			                  + correctlyAccepted + ", CR: " + correctlyRejected + "/"
-			                  + correctlyRejectedInRejecting);
-			Console.WriteLine("L: " + (_accepted.Count + _rejected.Count) + ", AP: "
-			                  + string.Join(", ", acceptingPredicates.Select(CountBits)) + ", RP: "
-			                  + string.Join(", ", rejectingPredicates.Select(CountRejectingBits)));
-			Console.WriteLine("Accepted: " + _accepted.Count + " + " + additionalAcceptedCount
-			                  + " / " + _idealAccepted.Count);
-			Console.WriteLine("Rejected: " + _rejected.Count + " + " + additionalRejectedCount
-			                  + " / " + _idealRejected.Count);
-			WrongCount = wronglyAccepted + wronglyRejected + wronglyRejectedInRejecting;
+			Console.WriteLine(
+					"L: " + (_accepted.Count + _rejected.Count) + ", AP: "
+					+ string.Join(", ", _acceptingPredicates.Select(CountBits)) + ", RP: "
+					+ string.Join(", ", _rejectingPredicates.Select(CountRejectingBits)));
+			Console.WriteLine(
+					"Accepted: " + _accepted.Count + " + " + additionalAcceptedCount
+					+ " / " + _idealAccepted.Count);
+			Console.WriteLine(
+					"Rejected: " + _rejected.Count + " + " + additionalRejectedCount
+					+ " / " + _idealRejected.Count);
 			foreach (var suspiciousTarget in additionalAccepted) {
 				_accepted.Add(suspiciousTarget.Feature, suspiciousTarget.Classifier);
 			}
@@ -609,21 +560,13 @@ namespace Occf.Learner.Core.Tests {
 				_rejected.Add(suspiciousTarget.Feature, suspiciousTarget.Classifier);
 			}
 
-			var predicates2 = LearnPredicates();
+			var lastAcceptingPredicates = _acceptingPredicates.ToList();
+			var lastRejectingPredicates = _rejectingPredicates.ToList();
+			LearnPredicates();
 			var ret = foundWronglyRejected + foundWronglyAccepted == 0
-			          && predicates2.Item1.SequenceEqual(acceptingPredicates)
-			          && predicates2.Item2.SequenceEqual(rejectingPredicates);
-
-			if (ret) {
-				if (count == 0) {
-					return LearnAndApply(1);
-				}
-				return true;
-			}
-			if (count == 0) {
-				return false;
-			}
-			return LearnAndApply(count + 1);
+			          && lastAcceptingPredicates.SequenceEqual(_acceptingPredicates)
+			          && lastRejectingPredicates.SequenceEqual(_rejectingPredicates);
+			return ret;
 		}
 
 		private List<SuspiciousTarget> SelectSuspiciousElements(
@@ -770,10 +713,126 @@ namespace Occf.Learner.Core.Tests {
 			return CountBits(bits >> _acceptingPredicatesCount);
 		}
 
+		private void ShowBitsInfo() {
+			LearnPredicates();
+
+			Console.WriteLine("---------------------------------------------------");
+			Console.Write("A(A): ");
+			foreach (var f in _idealAccepted.Keys) {
+				Console.Write(CountAcceptingBits(f) + ", ");
+			}
+			Console.WriteLine();
+			Console.Write("R(A): ");
+			foreach (var f in _idealRejected.Keys) {
+				Console.Write(CountAcceptingBits(f) + ", ");
+			}
+			Console.WriteLine();
+			Console.Write("WA(A): ");
+			foreach (var f in _wronglyAcceptedFeatures.Select(kv => kv.Key)) {
+				Console.Write(CountAcceptingBits(f) + ", ");
+			}
+			Console.WriteLine();
+			Console.Write("WR(A): ");
+			foreach (var f in _wronglyRejectedFeatures.Select(kv => kv.Key)) {
+				Console.Write(CountAcceptingBits(f) + ", ");
+			}
+			Console.WriteLine();
+
+			Console.WriteLine("---------------------------------------------------");
+			Console.Write("A(R): ");
+			foreach (var f in _idealAccepted.Keys) {
+				Console.Write(CountRejectingBits(f) + ", ");
+			}
+			Console.WriteLine();
+			Console.Write("R(R): ");
+			foreach (var f in _idealRejected.Keys) {
+				Console.Write(CountRejectingBits(f) + ", ");
+			}
+			Console.WriteLine();
+			Console.Write("WA(R): ");
+			foreach (var f in _wronglyAcceptedFeatures.Select(kv => kv.Key)) {
+				Console.Write(CountRejectingBits(f) + ", ");
+			}
+			Console.WriteLine();
+			Console.Write("WR(R): ");
+			foreach (var f in _wronglyRejectedFeatures.Select(kv => kv.Key)) {
+				Console.Write(CountRejectingBits(f) + ", ");
+			}
+			Console.WriteLine();
+
+			Console.WriteLine("---------------------------------------------------");
+			Console.Write("A(A): ");
+			foreach (var featureAndClassifier in _idealAccepted) {
+				var feature = featureAndClassifier.Key;
+				var classifier = featureAndClassifier.Value;
+				var iClassifier = DetermineClassifierIndex(classifier);
+				Console.Write(CountAcceptingBits(feature & _acceptingPredicates[iClassifier]) + ", ");
+			}
+			Console.WriteLine();
+			Console.Write("R(A): ");
+			foreach (var featureAndClassifier in _idealRejected) {
+				var feature = featureAndClassifier.Key;
+				var classifier = featureAndClassifier.Value;
+				var iClassifier = DetermineClassifierIndex(classifier);
+				Console.Write(CountAcceptingBits(feature & _acceptingPredicates[iClassifier]) + ", ");
+			}
+			Console.WriteLine();
+			Console.Write("WA(A): ");
+			foreach (var featureAndClassifier in _wronglyAcceptedFeatures) {
+				var feature = featureAndClassifier.Key;
+				var classifier = featureAndClassifier.Value;
+				var iClassifier = DetermineClassifierIndex(classifier);
+				Console.Write(CountAcceptingBits(feature & _acceptingPredicates[iClassifier]) + ", ");
+			}
+			Console.WriteLine();
+			Console.Write("WR(A): ");
+			foreach (var featureAndClassifier in _wronglyRejectedFeatures) {
+				var feature = featureAndClassifier.Key;
+				var classifier = featureAndClassifier.Value;
+				var iClassifier = DetermineClassifierIndex(classifier);
+				Console.Write(CountAcceptingBits(feature & _acceptingPredicates[iClassifier]) + ", ");
+			}
+			Console.WriteLine();
+
+			Console.WriteLine("---------------------------------------------------");
+			Console.Write("A(R): ");
+			foreach (var featureAndClassifier in _idealAccepted) {
+				var feature = featureAndClassifier.Key;
+				var classifier = featureAndClassifier.Value;
+				var iClassifier = DetermineClassifierIndex(classifier);
+				Console.Write(CountRejectingBits(feature & _rejectingPredicates[iClassifier]) + ", ");
+			}
+			Console.WriteLine();
+			Console.Write("R(R): ");
+			foreach (var featureAndClassifier in _idealRejected) {
+				var feature = featureAndClassifier.Key;
+				var classifier = featureAndClassifier.Value;
+				var iClassifier = DetermineClassifierIndex(classifier);
+				Console.Write(CountRejectingBits(feature & _rejectingPredicates[iClassifier]) + ", ");
+			}
+			Console.WriteLine();
+			Console.Write("WA(R): ");
+			foreach (var featureAndClassifier in _wronglyAcceptedFeatures) {
+				var feature = featureAndClassifier.Key;
+				var classifier = featureAndClassifier.Value;
+				var iClassifier = DetermineClassifierIndex(classifier);
+				Console.Write(CountRejectingBits(feature & _rejectingPredicates[iClassifier]) + ", ");
+			}
+			Console.WriteLine();
+			Console.Write("WR(R): ");
+			foreach (var featureAndClassifier in _wronglyRejectedFeatures) {
+				var feature = featureAndClassifier.Key;
+				var classifier = featureAndClassifier.Value;
+				var iClassifier = DetermineClassifierIndex(classifier);
+				Console.Write(CountRejectingBits(feature & _rejectingPredicates[iClassifier]) + ", ");
+			}
+			Console.WriteLine();
+		}
+
 		protected IEnumerable<XElement> GetAllElements(XElement ast) {
 			return ast.DescendantsAndSelf().Where(e => _elementNames.Contains(e.Name()));
 		}
 
-		protected abstract bool IsAccepted(XElement e);
+		public abstract bool IsAccepted(XElement e);
 	}
 }

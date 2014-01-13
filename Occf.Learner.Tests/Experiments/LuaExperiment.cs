@@ -65,7 +65,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 				BitLearningExperimentGroupingWithId exp, string projectPath, IList<string> seedPaths) {
 			var allPaths = Directory.GetFiles(projectPath, "*.lua", SearchOption.AllDirectories)
 					.ToList();
-			exp.LearnUntilBeStable(allPaths, seedPaths, _writer);
+			exp.AutomaticallyLearnUntilBeStable(allPaths, seedPaths, _writer);
 			//if (exp.WrongCount > 0) {
 			//	Console.WriteLine("--------------- WronglyAcceptedElements ---------------");
 			//	foreach (var we in exp.WronglyAcceptedElements) {
@@ -105,7 +105,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 		public LuaComplexBranchExperiment() : base("exp") {}
 
-		protected override bool IsAccepted(XElement e) {
+		public override bool IsAccepted(XElement e) {
 			var siblings = e.Siblings().ToList();
 			var parent = e.Parent;
 			if (parent.SafeName() == "stat" && siblings[0].Value == "if") {
@@ -132,7 +132,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 		public LuaIfExperiment() : base("exp") {}
 
-		protected override bool IsAccepted(XElement e) {
+		public override bool IsAccepted(XElement e) {
 			var siblings = e.Siblings().ToList();
 			var parent = e.Parent;
 			if (parent.SafeName() == "stat" && siblings[0].Value == "if") {
@@ -153,7 +153,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 		public LuaWhileExperiment() : base("exp") {}
 
-		protected override bool IsAccepted(XElement e) {
+		public override bool IsAccepted(XElement e) {
 			var siblings = e.Siblings().ToList();
 			var parent = e.Parent;
 			if (parent.SafeName() == "stat" && siblings[0].Value == "while") {
@@ -174,7 +174,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 		public LuaDoWhileExperiment() : base("exp") {}
 
-		protected override bool IsAccepted(XElement e) {
+		public override bool IsAccepted(XElement e) {
 			var siblings = e.Siblings().ToList();
 			var parent = e.Parent;
 			if (parent.SafeName() == "stat" && siblings[0].Value == "repeat") {
@@ -195,7 +195,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 		public LuaComplexStatementExperiment() : base("stat") {}
 
-		protected override bool IsAccepted(XElement e) {
+		public override bool IsAccepted(XElement e) {
 			if (e.FirstElement().Name() == "label") {
 				return false;
 			}
@@ -217,7 +217,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 		public LuaStatementExperiment() : base("stat") {}
 
-		protected override bool IsAccepted(XElement e) {
+		public override bool IsAccepted(XElement e) {
 			return true;
 		}
 	}
@@ -233,7 +233,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 		public LuaLabeledStatementExperiment() : base("stat") {}
 
-		protected override bool IsAccepted(XElement e) {
+		public override bool IsAccepted(XElement e) {
 			if (e.FirstElement().Name() == "label") {
 				return true;
 			}
@@ -252,7 +252,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 		public LuaEmptyStatementExperiment() : base("stat") {}
 
-		protected override bool IsAccepted(XElement e) {
+		public override bool IsAccepted(XElement e) {
 			if (e.FirstElement().Value == ";") {
 				return true;
 			}
