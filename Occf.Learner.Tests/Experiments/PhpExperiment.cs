@@ -79,7 +79,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 		public PhpComplexBranchExperiment() : base("expression") {}
 
-		public override bool IsAccepted(XElement e) {
+		protected override bool ProtectedIsAcceptedUsingOracle(XElement e) {
 			var pName = e.Parent.FirstElement().Name();
 			if (pName == "If") {
 				return true;
@@ -107,7 +107,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 			get { return false; }
 		}
 
-		public override bool IsAccepted(XElement e) {
+		protected override bool ProtectedIsAcceptedUsingOracle(XElement e) {
 			var pName = e.Parent.FirstElement().Name();
 			if (pName == "If") {
 				return true;
@@ -127,7 +127,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 			get { return false; }
 		}
 
-		public override bool IsAccepted(XElement e) {
+		protected override bool ProtectedIsAcceptedUsingOracle(XElement e) {
 			var pName = e.Parent.Name();
 			if (pName == "While") {
 				return true;
@@ -147,7 +147,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 			get { return false; }
 		}
 
-		public override bool IsAccepted(XElement e) {
+		protected override bool ProtectedIsAcceptedUsingOracle(XElement e) {
 			var pName = e.Parent.Name();
 			if (pName == "Do") {
 				return true;
@@ -167,7 +167,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 			get { return false; }
 		}
 
-		public override bool IsAccepted(XElement e) {
+		protected override bool ProtectedIsAcceptedUsingOracle(XElement e) {
 			var pName = e.Parent.Name();
 			if (e.Parent.Name() == "commaList" && e.Parent.NextElement() == null
 			    && e.Parent.Parent.Name() == "forCondition") {
@@ -188,7 +188,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 			get { return false; }
 		}
 
-		public override bool IsAccepted(XElement e) {
+		protected override bool ProtectedIsAcceptedUsingOracle(XElement e) {
 			// TODO:
 			var pName = e.Parent.Name();
 			if (pName == "for_condition") {
@@ -209,7 +209,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 			get { return true; }
 		}
 
-		public override bool IsAccepted(XElement e) {
+		protected override bool ProtectedIsAcceptedUsingOracle(XElement e) {
 			// ラベルはループ文に付くため，ラベルの中身は除外
 			if (e.FirstElement().Name() != "UnquotedString") {
 				return false;
@@ -237,7 +237,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 			get { return true; }
 		}
 
-		public override bool IsAccepted(XElement e) {
+		protected override bool ProtectedIsAcceptedUsingOracle(XElement e) {
 			// ブロック自身は意味を持たないステートメントで、中身だけが必要なので除外
 			if (e.Element("bracketedBlock") != null) {
 				return true;
@@ -257,7 +257,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 			get { return true; }
 		}
 
-		public override bool IsAccepted(XElement e) {
+		protected override bool ProtectedIsAcceptedUsingOracle(XElement e) {
 			// ラベルはループ文に付くため，ラベルの中身は除外
 			if (e.FirstElement().Name() != "UnquotedString") {
 				return true;
@@ -277,7 +277,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 			get { return true; }
 		}
 
-		public override bool IsAccepted(XElement e) {
+		protected override bool ProtectedIsAcceptedUsingOracle(XElement e) {
 			// 空文
 			if (e.FirstElement().TokenText() == ";") {
 				return true;

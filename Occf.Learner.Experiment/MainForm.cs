@@ -511,7 +511,7 @@ namespace Occf.Learner.Experiment {
 				if (accepted) {
 					acceptedFeature.Add(featureAndElement.Item1);
 				}
-				if (accepted != _activeExperiment.IsAccepted(featureAndElement.Item2)) {
+				if (accepted != _activeExperiment.IsAcceptedUsingOracle(featureAndElement.Item2)) {
 					throw new Exception("選択が間違っています！");
 				}
 			}
@@ -527,7 +527,7 @@ namespace Occf.Learner.Experiment {
 				if (accepted) {
 					acceptedFeature.Add(featureAndElement.Item1);
 				}
-				if (accepted != _activeExperiment.IsAccepted(featureAndElement.Item2)) {
+				if (accepted != _activeExperiment.IsAcceptedUsingOracle(featureAndElement.Item2)) {
 					throw new Exception("選択が間違っています！");
 				}
 			}

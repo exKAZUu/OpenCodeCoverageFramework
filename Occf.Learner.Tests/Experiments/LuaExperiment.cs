@@ -105,7 +105,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 		public LuaComplexBranchExperiment() : base("exp") {}
 
-		public override bool IsAccepted(XElement e) {
+		protected override bool ProtectedIsAcceptedUsingOracle(XElement e) {
 			var siblings = e.Siblings().ToList();
 			var parent = e.Parent;
 			if (parent.SafeName() == "stat" && siblings[0].Value == "if") {
@@ -132,7 +132,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 		public LuaIfExperiment() : base("exp") {}
 
-		public override bool IsAccepted(XElement e) {
+		protected override bool ProtectedIsAcceptedUsingOracle(XElement e) {
 			var siblings = e.Siblings().ToList();
 			var parent = e.Parent;
 			if (parent.SafeName() == "stat" && siblings[0].Value == "if") {
@@ -153,7 +153,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 		public LuaWhileExperiment() : base("exp") {}
 
-		public override bool IsAccepted(XElement e) {
+		protected override bool ProtectedIsAcceptedUsingOracle(XElement e) {
 			var siblings = e.Siblings().ToList();
 			var parent = e.Parent;
 			if (parent.SafeName() == "stat" && siblings[0].Value == "while") {
@@ -174,7 +174,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 		public LuaDoWhileExperiment() : base("exp") {}
 
-		public override bool IsAccepted(XElement e) {
+		protected override bool ProtectedIsAcceptedUsingOracle(XElement e) {
 			var siblings = e.Siblings().ToList();
 			var parent = e.Parent;
 			if (parent.SafeName() == "stat" && siblings[0].Value == "repeat") {
@@ -195,7 +195,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 		public LuaComplexStatementExperiment() : base("stat") {}
 
-		public override bool IsAccepted(XElement e) {
+		protected override bool ProtectedIsAcceptedUsingOracle(XElement e) {
 			if (e.FirstElement().Name() == "label") {
 				return false;
 			}
@@ -217,7 +217,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 		public LuaStatementExperiment() : base("stat") {}
 
-		public override bool IsAccepted(XElement e) {
+		protected override bool ProtectedIsAcceptedUsingOracle(XElement e) {
 			return true;
 		}
 	}
@@ -233,7 +233,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 		public LuaLabeledStatementExperiment() : base("stat") {}
 
-		public override bool IsAccepted(XElement e) {
+		protected override bool ProtectedIsAcceptedUsingOracle(XElement e) {
 			if (e.FirstElement().Name() == "label") {
 				return true;
 			}
@@ -252,7 +252,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 		public LuaEmptyStatementExperiment() : base("stat") {}
 
-		public override bool IsAccepted(XElement e) {
+		protected override bool ProtectedIsAcceptedUsingOracle(XElement e) {
 			if (e.FirstElement().Value == ";") {
 				return true;
 			}

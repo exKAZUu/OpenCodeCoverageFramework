@@ -75,7 +75,6 @@ namespace Occf.Learner.Core.Tests {
 		private readonly List<KeyValuePair<BigInteger, string>> _wronglyRejectedFeatures =
 				new List<KeyValuePair<BigInteger, string>>();
 
-		private HashSet<BigInteger> _seedAccepted;
 		private int _predicateDepth = 7;
 		private IDictionary<string, BigInteger> _masterPredicates;
 		private const int LearningCount = 5;
@@ -87,12 +86,13 @@ namespace Occf.Learner.Core.Tests {
 		private BigInteger _mask;
 		public List<SuspiciousTarget> SuspiciousAcceptedInAccepting { get; private set; }
 		public List<SuspiciousTarget> SuspiciousRejectedInAccepting { get; private set; }
-		public List<SuspiciousTarget> SuspiciousRejectedInRejecting  { get; private set; }
+		public List<SuspiciousTarget> SuspiciousRejectedInRejecting { get; private set; }
 		private List<BigInteger> _acceptingPredicates;
 		private List<BigInteger> _rejectingPredicates;
+		private readonly HashSet<string> _initialElementNames;
 
 		protected BitLearningExperimentGroupingWithId(params string[] elementNames) {
-			_elementNames = elementNames.ToHashSet();
+			_initialElementNames = elementNames.ToHashSet();
 		}
 
 		private string CommonSuffix(string s1, string s2) {
@@ -114,14 +114,21 @@ namespace Occf.Learner.Core.Tests {
 			var existingClassifiersStr = dict.GetValueOrDefault(bits);
 			IEnumerable<string> classifiers;
 			if (IsInner) {
-				var descendants = element.FirstDescendants().TakeWhile(e => !e.Parent.IsTerminal())
+				//element = element.AncestorsOfOnlyChildAndSelf().Last(); // TODO
+				// TODO: descendants may be empty list
+				var descendants = element.FirstDescendants()
+						.TakeWhile(e => !e.Parent.IsTerminal())
 						.Take(AncestorCount)
 						.ToList();
+				if (descendants.Count == 0) {
+					descendants = descendants;
+				}
 				classifiers = descendants.Select(e => e.NameWithId());
 				if (descendants[descendants.Count - 1].IsTerminal()) {
 					classifiers = classifiers.Concat(descendants[descendants.Count - 1].TokenText());
 				}
 			} else {
+				//element = element.DescendantsOfOnlyChildAndSelf().Last(); // TODO
 				classifiers = element.AncestorsAndSelf()
 						.Take(AncestorCount)
 						.Select(e => e.NameWithId());
@@ -134,14 +141,50 @@ namespace Occf.Learner.Core.Tests {
 			}
 		}
 
+		private static IEnumerable<string> SelectElementNames(ICollection<XElement> elements) {
+			var name2Count = new Dictionary<string, int>();
+			var candidateElements = elements
+					.SelectMany(e => e.DescendantsOfOnlyChildAndSelf());
+			foreach (var element in candidateElements) {
+				var count = name2Count.GetValueOrDefault(element.Name.LocalName);
+				name2Count[element.Name.LocalName] = count + 1;
+			}
+			//return name2Count.Keys.ToHashSet();
+			//var average = name2Count.Values.Average();
+			return elements.Select(
+					element => element.DescendantsOfOnlyChildAndSelf()
+							.Select(e => e.Name())
+							.MaxElementOrDefault(name => name2Count[name]))
+					//.Concat(name2Count.Where(kv => kv.Value >= average).Select(kv => kv.Key))
+					.ToHashSet();
+		}
+
+		private static IEnumerable<XElement> GetMostOuterElements(IEnumerable<XElement> elements) {
+			return elements.Select(e => e.AncestorsOfOnlyChildAndSelf().Last());
+		}
+
 		public void AutomaticallyLearnUntilBeStable(
 				ICollection<string> allPaths, ICollection<string> seedPaths, StreamWriter writer) {
-			var allAsts = allPaths.Select(path => Processor.GenerateXml(new FileInfo(path), null, true))
-					.ToList();
+			var allAsts = allPaths.Select(path => Processor.GenerateXml(new FileInfo(path), null, true));
 			var seedAsts = seedPaths.Select(path => Processor.GenerateXml(new FileInfo(path), null, true))
 					.ToList();
-			var seedAcceptedElements = seedAsts.SelectMany(GetAllElements).Where(IsAccepted);
-			LearnUntilBeStable(allAsts, seedAsts, seedAcceptedElements, _elementNames, writer);
+			_elementNames = _initialElementNames.ToHashSet();
+			foreach (var elementName in _elementNames) {
+				Console.WriteLine(elementName);
+			}
+			var seedAcceptedElements = seedAsts
+					.SelectMany(GetAllElements)
+					.Where(ProtectedIsAcceptedUsingOracle)
+					.ToList();
+			Console.WriteLine("Accepted elements: " + seedAcceptedElements.Count);
+			if (seedAcceptedElements.Count() == 0) {
+				var es = seedAsts.SelectMany(GetAllElements).ToList();
+				foreach (var e in es) {
+					var b = ProtectedIsAcceptedUsingOracle(e);
+				}
+				Console.WriteLine("buggy");
+			}
+			LearnUntilBeStable(allAsts, seedAsts, seedAcceptedElements.ToList(), writer);
 
 			var count = 0;
 			var sumTime = Environment.TickCount;
@@ -151,8 +194,7 @@ namespace Occf.Learner.Core.Tests {
 				var ret = AddNewElements(_idealAccepted.Keys);
 				if (!ret) {
 					count = 0;
-				}
-				else if (count < 0) {
+				} else if (count < 0) {
 					break;
 				}
 
@@ -172,58 +214,66 @@ namespace Occf.Learner.Core.Tests {
 		}
 
 		public void ManuallyLearnUntilBeStable(
-				IEnumerable<XElement> allAsts, IEnumerable<XElement> seedAsts, IEnumerable<XElement> seedElements) {
-			var elementNames = seedElements.Select(e => e.Name());
-			LearnUntilBeStable(allAsts, seedAsts, seedElements, elementNames, null);
+				IEnumerable<XElement> allAsts, IEnumerable<XElement> seedAsts,
+				IEnumerable<XElement> seedElements) {
+			LearnUntilBeStable(allAsts, seedAsts, seedElements.ToList(), null);
 		}
 
 		public void LearnUntilBeStable(
 				IEnumerable<XElement> allAsts, IEnumerable<XElement> seedAsts,
-				IEnumerable<XElement> seedElements, IEnumerable<string> elementNames,
-				StreamWriter writer) {
+				IList<XElement> seedElements, StreamWriter writer) {
 			var preparingTime = Environment.TickCount;
 
-			_elementNames = elementNames.ToHashSet();
+			var seedAcceptedElements = GetMostOuterElements(seedElements).ToHashSet();
+			_elementNames = SelectElementNames(seedAcceptedElements).ToHashSet();
+			var extendedSeedAcceptedElements = seedAcceptedElements
+					.SelectMany(
+							e => e.DescendantsOfOnlyChildAndSelf()
+									.Where(e2 => _elementNames.Contains(e2.Name())))
+					.ToHashSet();
+			var extendedSeedRejectedElements = new List<XElement>();
+			foreach (var elementName in _elementNames) {
+				Console.WriteLine(elementName);
+			}
+			if (!extendedSeedAcceptedElements.Any()) {
+				throw new Exception("There are no seed elements!");
+			}
+
 			_idealAccepted = new Dictionary<BigInteger, string>();
 			_idealRejected = new Dictionary<BigInteger, string>();
 			_accepted = new Dictionary<BigInteger, string>();
 			_rejected = new Dictionary<BigInteger, string>();
 			_feature2Element = new Dictionary<BigInteger, XElement>();
-			_seedAccepted = new HashSet<BigInteger>();
 			_classifiers = new List<string> { ">" };
 			_masterPredicates = new Dictionary<string, BigInteger>();
 
-			var seedAcceptedElements = seedElements.ToHashSet();
-			var seedRejectedElements = new List<XElement>();
 			foreach (var ast in seedAsts) {
 				Console.Write(".");
 				foreach (var e in GetAllElements(ast)) {
-					if (!seedAcceptedElements.Contains(e)) {
-						seedRejectedElements.Add(e);
+					if (!extendedSeedAcceptedElements.Contains(e)) {
+						extendedSeedRejectedElements.Add(e);
 					}
-					//(IsAccepted(e) ? seedAcceptedElements : seedRejectedElements).Add(e);
+					//(ProtectedIsAcceptedUsingOracle(e) ? seedAcceptedElements : seedRejectedElements).Add(e);
 				}
 			}
-			var acceptingPredicates = seedAcceptedElements
+			var acceptingPredicates = extendedSeedAcceptedElements
 					.GetUnionKeys(_predicateDepth, IsInner, !IsInner)
 					.ToHashSet()
 					.ToList();
 			acceptingPredicates.Sort((s1, s2) => s1.Length.CompareTo(s2.Length));
-
-			var masterBit = BigInteger.One;
-			foreach (var predicate in acceptingPredicates) {
-				_masterPredicates.Add(predicate, masterBit);
-				masterBit <<= 1;
-			}
-			_acceptingPredicatesCount = _masterPredicates.Count;
-
-			var rejectingPredicateSet = seedRejectedElements
+			_acceptingPredicatesCount = acceptingPredicates.Count;
+			var rejectingPredicateSet = extendedSeedRejectedElements
 					.GetUnionKeys(_predicateDepth, IsInner, !IsInner)
 					.ToHashSet();
 			rejectingPredicateSet.ExceptWith(acceptingPredicates);
 			var rejectingPredicates = rejectingPredicateSet.ToList();
 			rejectingPredicates.Sort((s1, s2) => s1.Length.CompareTo(s2.Length));
 
+			var masterBit = BigInteger.One;
+			foreach (var predicate in acceptingPredicates) {
+				_masterPredicates.Add(predicate, masterBit);
+				masterBit <<= 1;
+			}
 			foreach (var predicate in rejectingPredicates) {
 				_masterPredicates.Add(predicate, masterBit);
 				masterBit <<= 1;
@@ -233,53 +283,55 @@ namespace Occf.Learner.Core.Tests {
 			_acceptingMask = (BigInteger.One << _acceptingPredicatesCount) - BigInteger.One;
 			_rejectingMask = _mask ^ _acceptingMask;
 
-			foreach (var e in seedAcceptedElements) {
+			foreach (var e in extendedSeedAcceptedElements) {
 				var bits = e.GetSurroundingBits(_predicateDepth, _masterPredicates, IsInner, !IsInner);
 				UpdateDict(_idealAccepted, bits, e);
-				_seedAccepted.Add(bits);
+				_accepted[bits] = _idealAccepted[bits];
 				_feature2Element[bits] = e;
 			}
-			foreach (var e in seedRejectedElements) {
+			foreach (var e in extendedSeedRejectedElements) {
 				var bits = e.GetSurroundingBits(_predicateDepth, _masterPredicates, IsInner, !IsInner);
 				UpdateDict(_idealRejected, bits, e);
+				_rejected[bits] = _idealRejected[bits];
 				_feature2Element[bits] = e;
 			}
 
 			foreach (var ast in allAsts) {
 				Console.Write(".");
-				foreach (var e in GetAllElements(ast)) {
+				foreach (var e in GetAllElementsWithoutDuplicates(ast)) {
 					var bits = e.GetSurroundingBits(_predicateDepth, _masterPredicates, IsInner, !IsInner);
-					if (IsAccepted(e)) {
-						//if (_idealRejected.ContainsKey(bits)) {
-						//	Console.WriteLine(e.Text());
-						//	Console.WriteLine(_feature2Element[bits].Text());
-						//}
+					if (IsAcceptedUsingOracle(e)) {
+						// TODO: for debug
+						if (_idealRejected.ContainsKey(bits)) {
+							Console.WriteLine(e.Parent.Name() + ", " + e.Name() + ", " + e.Text());
+							Console.WriteLine(
+									_feature2Element[bits].Parent.Name() + ", " + _feature2Element[bits].Name() + ", "
+									+ _feature2Element[bits].Text());
+							IsAcceptedUsingOracle(e);
+							bits = e.GetSurroundingBits(_predicateDepth, _masterPredicates, IsInner, !IsInner);
+						}
 						UpdateDict(_idealAccepted, bits, e);
 					} else {
-						//if (_idealAccepted.ContainsKey(bits)) {
-						//	Console.WriteLine(e.Text());
-						//	Console.WriteLine(_feature2Element[bits].Text());
-						//}
+						// TODO: for debug
+						if (_idealAccepted.ContainsKey(bits)) {
+							Console.WriteLine(e.Parent.Name() + ", " + e.Name() + ", " + e.Text());
+							Console.WriteLine(
+									_feature2Element[bits].Parent.Name() + ", " + _feature2Element[bits].Name() + ", "
+									+ _feature2Element[bits].Text());
+							IsAcceptedUsingOracle(e);
+							bits = e.GetSurroundingBits(_predicateDepth, _masterPredicates, IsInner, !IsInner);
+						}
 						UpdateDict(_idealRejected, bits, e);
 					}
 					_feature2Element[bits] = e;
 				}
 			}
 
-			foreach (var e in seedAcceptedElements) {
-				var bits = e.GetSurroundingBits(_predicateDepth, _masterPredicates, IsInner, !IsInner);
-				_accepted[bits] = _idealAccepted[bits];
-			}
-			foreach (var e in seedRejectedElements) {
-				var bits = e.GetSurroundingBits(_predicateDepth, _masterPredicates, IsInner, !IsInner);
-				_rejected[bits] = _idealRejected[bits];
-			}
-
 			if (_idealAccepted.Keys.ToHashSet().Overlaps(_idealRejected.Keys.ToHashSet())) {
 				throw new Exception("Master predicates can't classify elements!");
 			}
 
-			LearnPredicates();	// for the first time
+			LearnPredicates(); // for the first time
 
 			Console.WriteLine("Preparing time: " + (Environment.TickCount - preparingTime));
 		}
@@ -830,9 +882,22 @@ namespace Occf.Learner.Core.Tests {
 		}
 
 		protected IEnumerable<XElement> GetAllElements(XElement ast) {
-			return ast.DescendantsAndSelf().Where(e => _elementNames.Contains(e.Name()));
+			return ast.DescendantsAndSelf()
+					.Where(e => _elementNames.Contains(e.Name()));
 		}
 
-		public abstract bool IsAccepted(XElement e);
+		protected IEnumerable<XElement> GetAllElementsWithoutDuplicates(XElement ast) {
+			return ast.DescendantsAndSelf()
+					.Where(e => _elementNames.Contains(e.Name()))
+					.Where(e => e.AncestorsOfOnlyChild().All(a => !_elementNames.Contains(a.Name())));
+		}
+
+		public bool IsAcceptedUsingOracle(XElement e) {
+			return e.DescendantsOfOnlyChildAndSelf()
+					.Where(e2 => _elementNames.Contains(e2.Name()))
+					.Any(ProtectedIsAcceptedUsingOracle);
+		}
+
+		protected abstract bool ProtectedIsAcceptedUsingOracle(XElement e);
 	}
 }

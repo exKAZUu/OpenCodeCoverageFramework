@@ -73,7 +73,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 			get { return false; }
 		}
 
-		public override bool IsAccepted(XElement e) {
+		protected override bool ProtectedIsAcceptedUsingOracle(XElement e) {
 			var parentName = e.Parent.SafeName();
 			if (parentName == "ifStatement") {
 				return true;
@@ -108,7 +108,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 			get { return false; }
 		}
 
-		public override bool IsAccepted(XElement e) {
+		protected override bool ProtectedIsAcceptedUsingOracle(XElement e) {
 			var parentName = e.Parent.SafeName();
 			if (parentName == "ifStatement") {
 				return true;
@@ -138,7 +138,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 			get { return false; }
 		}
 
-		public override bool IsAccepted(XElement e) {
+		protected override bool ProtectedIsAcceptedUsingOracle(XElement e) {
 			var parentName = e.Parent.SafeName();
 			if (parentName == "ifStatement") {
 				return true;
@@ -158,7 +158,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 			get { return false; }
 		}
 
-		public override bool IsAccepted(XElement e) {
+		protected override bool ProtectedIsAcceptedUsingOracle(XElement e) {
 			var parentName = e.Parent.SafeName();
 			if (parentName == "whileStatement") {
 				return true;
@@ -178,7 +178,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 			get { return false; }
 		}
 
-		public override bool IsAccepted(XElement e) {
+		protected override bool ProtectedIsAcceptedUsingOracle(XElement e) {
 			var parentName = e.Parent.SafeName();
 			if (parentName == "doWhileStatement") {
 				return true;
@@ -198,7 +198,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 			get { return false; }
 		}
 
-		public override bool IsAccepted(XElement e) {
+		protected override bool ProtectedIsAcceptedUsingOracle(XElement e) {
 			var parentName = e.Parent.SafeName();
 			if (parentName == "forStatement"
 			    && e.PreviousElement() == e.Parent.Elements().First(e2 => e2.TokenText() == ";")) {
@@ -219,7 +219,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 			get { return false; }
 		}
 
-		public override bool IsAccepted(XElement e) {
+		protected override bool ProtectedIsAcceptedUsingOracle(XElement e) {
 			var p = e.SafeParent().SafeParent();
 			if (p.SafeName() == "callExpression" && p.FirstElement().Value == "console.log" &&
 			    p.Element("arguments").Element("assignmentExpression") == e) {
@@ -240,7 +240,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 		public JavaScriptStatementExperiment() : base("statement") {}
 
-		public override bool IsAccepted(XElement e) {
+		protected override bool ProtectedIsAcceptedUsingOracle(XElement e) {
 			return true;
 		}
 	}
@@ -256,7 +256,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 		public JavaScriptComplexStatementExperiment() : base("statement") {}
 
-		public override bool IsAccepted(XElement e) {
+		protected override bool ProtectedIsAcceptedUsingOracle(XElement e) {
 			if (e.FirstElement().Name() == "statementBlock") {
 				return false;
 			}
@@ -281,7 +281,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 		public JavaScriptBlockExperiment() : base("statement") {}
 
-		public override bool IsAccepted(XElement e) {
+		protected override bool ProtectedIsAcceptedUsingOracle(XElement e) {
 			if (e.FirstElement().Name() == "statementBlock") {
 				return true;
 			}
@@ -300,7 +300,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 		public JavaScriptLabeledStatementExperiment() : base("statement") {}
 
-		public override bool IsAccepted(XElement e) {
+		protected override bool ProtectedIsAcceptedUsingOracle(XElement e) {
 			if (e.FirstElement().Name() == "labelledStatement") {
 				return true;
 			}
@@ -319,7 +319,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 		public JavaScriptEmptyStatementExperiment() : base("statement") {}
 
-		public override bool IsAccepted(XElement e) {
+		protected override bool ProtectedIsAcceptedUsingOracle(XElement e) {
 			if (e.FirstElement().Name() == "emptyStatement") {
 				return true;
 			}

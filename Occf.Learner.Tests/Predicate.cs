@@ -1,4 +1,22 @@
-﻿using System;
+﻿#region License
+
+// Copyright (C) 2011-2014 Kazunori Sakamoto
+// 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#endregion
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
@@ -163,8 +181,10 @@ namespace Occf.Learner.Core.Tests {
 		public static IEnumerable<SurroundingElementsPredicate> Create(
 				XElement target, int length) {
 			return GetSurroundingElements(target, length)
-					.SelectMany(kv => kv.Value.Select(value =>
-							new SurroundingElementsPredicate(kv.Key, value)));
+					.SelectMany(
+							kv => kv.Value.Select(
+									value =>
+											new SurroundingElementsPredicate(kv.Key, value)));
 		}
 
 		public static Dictionary<string, CountingSet<string>> GetSurroundingElements(
@@ -177,8 +197,10 @@ namespace Occf.Learner.Core.Tests {
 			var ret = new Dictionary<string, CountingSet<string>>();
 			foreach (var target in targets) {
 				var dict = target.SurroundingElementsWithSelf(length)
-						.Select(kv => Tuple.Create(kv.Key,
-								kv.Value.Select(e => e.NameOrTokenWithId()).ToHashSet().ToCountingSet()))
+						.Select(
+								kv => Tuple.Create(
+										kv.Key,
+										kv.Value.Select(e => e.NameOrTokenWithId()).ToHashSet().ToCountingSet()))
 						.ToDictionary(kv => kv.Item1, kv => kv.Item2);
 				foreach (var kv in dict) {
 					CountingSet<string> set;
@@ -357,7 +379,8 @@ namespace Occf.Learner.Core.Tests {
 		}
 
 		public static string GetSequence(IList<XElement> elements) {
-			return String.Join("/",
+			return String.Join(
+					"/",
 					elements.Select(
 							e => e.Name() == Code2XmlConstants.TokenSetElementName ? e.TokenText() : e.Name()));
 		}
@@ -403,7 +426,8 @@ namespace Occf.Learner.Core.Tests {
 		}
 
 		public static string GetSequence(XElement element) {
-			return String.Join("/",
+			return String.Join(
+					"/",
 					element.ElementsBeforeSelf().Select(
 							e => e.Name() == Code2XmlConstants.TokenSetElementName ? e.TokenText() : e.Name()));
 		}
@@ -449,7 +473,8 @@ namespace Occf.Learner.Core.Tests {
 		}
 
 		public static string GetSequence(XElement element) {
-			return String.Join("/",
+			return String.Join(
+					"/",
 					element.ElementsAfterSelf().Select(
 							e => e.Name() == Code2XmlConstants.TokenSetElementName ? e.TokenText() : e.Name()));
 		}
@@ -564,14 +589,26 @@ namespace Occf.Learner.Core.Tests {
 
 		public static HashSet<string> GetSurroundingKeys(
 				this XElement element, int length, bool inner = true, bool outer = true) {
+			//inner = outer = true;
+
 			var ret = new HashSet<string>();
 			var childElements = new List<Tuple<XElement, string>>();
 			if (inner) {
 				childElements.Add(Tuple.Create(element, element.Name()));
+				var ancestorStr = "";
+				foreach (var e in element.AncestorsOfOnlyChildAndSelf()) {
+					ancestorStr = ancestorStr + "<" + e.NameWithId();
+					ret.Add(ancestorStr);
+				}
 			}
 			var i = 1;
 			if (outer) {
 				var parentElement = Tuple.Create(element, element.Name());
+				var descendantStr = "";
+				foreach (var e in element.DescendantsOfOnlyChildAndSelf()) {
+					descendantStr = descendantStr + "<" + e.NameWithId();
+					ret.Add(descendantStr);
+				}
 				// 自分自身の位置による区別も考慮する
 				ret.Add(element.NameOrTokenWithId());
 				for (; i <= length; i++) {
@@ -607,7 +644,8 @@ namespace Occf.Learner.Core.Tests {
 					if (newParentElement == null) {
 						break;
 					}
-					parentElement = Tuple.Create(newParentElement,
+					parentElement = Tuple.Create(
+							newParentElement,
 							parentElement.Item2 + "<" + newParentElement.NameOrTokenWithId());
 					ret.Add(parentElement.Item2);
 				}
@@ -632,15 +670,31 @@ namespace Occf.Learner.Core.Tests {
 		public static BigInteger GetSurroundingBits(
 				this XElement element, int length, IDictionary<string, BigInteger> key2Bit, bool inner = true,
 				bool outer = true) {
+			//inner = outer = true;
+
 			var ret = BigInteger.Zero;
 			BigInteger bit;
 			var childElements = new List<Tuple<XElement, string>>();
 			if (inner) {
 				childElements.Add(Tuple.Create(element, element.Name()));
+				var parentStr = "";
+				foreach (var e in element.AncestorsOfOnlyChildAndSelf()) {
+					parentStr = parentStr + "<" + e.NameWithId();
+					if (key2Bit.TryGetValue(parentStr, out bit)) {
+						ret |= bit;
+					}
+				}
 			}
 			var i = 1;
 			if (outer) {
 				var parentElement = Tuple.Create(element, element.Name());
+				var descendantStr = "";
+				foreach (var e in element.DescendantsOfOnlyChildAndSelf()) {
+					descendantStr = descendantStr + "<" + e.NameWithId();
+					if (key2Bit.TryGetValue(descendantStr, out bit)) {
+						ret |= bit;
+					}
+				}
 				// 自分自身の位置による区別も考慮する
 				if (key2Bit.TryGetValue(element.NameOrTokenWithId(), out bit)) {
 					ret |= bit;
@@ -687,7 +741,8 @@ namespace Occf.Learner.Core.Tests {
 					if (newParentElement == null) {
 						break;
 					}
-					parentElement = Tuple.Create(newParentElement,
+					parentElement = Tuple.Create(
+							newParentElement,
 							parentElement.Item2 + "<" + newParentElement.NameOrTokenWithId());
 					if (key2Bit.TryGetValue(parentElement.Item2, out bit)) {
 						ret |= bit;
