@@ -65,8 +65,8 @@ namespace Occf.Learner.Core.Tests {
 		private ISet<string> _elementNames;
 		private Dictionary<BigInteger, string> _idealAccepted;
 		private Dictionary<BigInteger, string> _idealRejected;
-		private Dictionary<BigInteger, string> _accepted;
-		private Dictionary<BigInteger, string> _rejected;
+		private Dictionary<BigInteger, string> _acceptedTrainingSet;
+		private Dictionary<BigInteger, string> _rejectedTrainingNodes;
 		private Dictionary<BigInteger, XElement> _feature2Element;
 
 		private readonly List<KeyValuePair<BigInteger, string>> _wronglyAcceptedFeatures =
@@ -79,7 +79,7 @@ namespace Occf.Learner.Core.Tests {
 		private IDictionary<string, BigInteger> _masterPredicates;
 		private const int LearningCount = 5;
 		private const int AncestorCount = 5;
-		private List<string> _classifiers;
+		private List<string> _groupKeys;
 		private int _acceptingPredicatesCount;
 		private BigInteger _acceptingMask;
 		private BigInteger _rejectingMask;
@@ -87,8 +87,8 @@ namespace Occf.Learner.Core.Tests {
 		public List<SuspiciousTarget> SuspiciousAcceptedInAccepting { get; private set; }
 		public List<SuspiciousTarget> SuspiciousRejectedInAccepting { get; private set; }
 		public List<SuspiciousTarget> SuspiciousRejectedInRejecting { get; private set; }
-		private List<BigInteger> _acceptingPredicates;
-		private List<BigInteger> _rejectingPredicates;
+		private IList<BigInteger> _acceptingPredicates;
+		private IList<BigInteger> _rejectingPredicates;
 		private readonly HashSet<string> _initialElementNames;
 
 		protected BitLearningExperimentGroupingWithId(params string[] elementNames) {
@@ -141,21 +141,18 @@ namespace Occf.Learner.Core.Tests {
 			}
 		}
 
-		private static IEnumerable<string> SelectElementNames(ICollection<XElement> elements) {
+		private static ISet<string> AdoptNodeNames(ICollection<XElement> outermosts) {
 			var name2Count = new Dictionary<string, int>();
-			var candidateElements = elements
-					.SelectMany(e => e.DescendantsOfOnlyChildAndSelf());
-			foreach (var element in candidateElements) {
-				var count = name2Count.GetValueOrDefault(element.Name.LocalName);
-				name2Count[element.Name.LocalName] = count + 1;
+			var candidates = outermosts.SelectMany(
+					e => e.DescendantsOfOnlyChildAndSelf());
+			foreach (var e in candidates) {
+				var count = name2Count.GetValueOrDefault(e.Name());
+				name2Count[e.Name()] = count + 1;
 			}
-			//return name2Count.Keys.ToHashSet();
-			//var average = name2Count.Values.Average();
-			return elements.Select(
-					element => element.DescendantsOfOnlyChildAndSelf()
-							.Select(e => e.Name())
+			return outermosts.Select(
+					e => e.DescendantsOfOnlyChildAndSelf()
+							.Select(e2 => e2.Name())
 							.MaxElementOrDefault(name => name2Count[name]))
-					//.Concat(name2Count.Where(kv => kv.Value >= average).Select(kv => kv.Key))
 					.ToHashSet();
 		}
 
@@ -203,10 +200,10 @@ namespace Occf.Learner.Core.Tests {
 			Console.WriteLine();
 			Console.WriteLine("Sum time: " + (Environment.TickCount - sumTime));
 			Console.WriteLine(
-					"Required elements: " + (_accepted.Count + _rejected.Count) + " / "
+					"Required elements: " + (_acceptedTrainingSet.Count + _rejectedTrainingNodes.Count) + " / "
 					+ (_idealAccepted.Count + _idealRejected.Count));
 			if (writer != null) {
-				writer.WriteLine(_accepted.Count + _rejected.Count);
+				writer.WriteLine(_acceptedTrainingSet.Count + _rejectedTrainingNodes.Count);
 				writer.Flush();
 			}
 
@@ -225,7 +222,7 @@ namespace Occf.Learner.Core.Tests {
 			var preparingTime = Environment.TickCount;
 
 			var seedAcceptedElements = GetMostOuterElements(seedElements).ToHashSet();
-			_elementNames = SelectElementNames(seedAcceptedElements).ToHashSet();
+			_elementNames = AdoptNodeNames(seedAcceptedElements).ToHashSet();
 			var extendedSeedAcceptedElements = seedAcceptedElements
 					.SelectMany(
 							e => e.DescendantsOfOnlyChildAndSelf()
@@ -241,10 +238,10 @@ namespace Occf.Learner.Core.Tests {
 
 			_idealAccepted = new Dictionary<BigInteger, string>();
 			_idealRejected = new Dictionary<BigInteger, string>();
-			_accepted = new Dictionary<BigInteger, string>();
-			_rejected = new Dictionary<BigInteger, string>();
+			_acceptedTrainingSet = new Dictionary<BigInteger, string>();
+			_rejectedTrainingNodes = new Dictionary<BigInteger, string>();
 			_feature2Element = new Dictionary<BigInteger, XElement>();
-			_classifiers = new List<string> { ">" };
+			_groupKeys = new List<string> { ">" };
 			_masterPredicates = new Dictionary<string, BigInteger>();
 
 			foreach (var ast in seedAsts) {
@@ -286,13 +283,13 @@ namespace Occf.Learner.Core.Tests {
 			foreach (var e in extendedSeedAcceptedElements) {
 				var bits = e.GetSurroundingBits(_predicateDepth, _masterPredicates, IsInner, !IsInner);
 				UpdateDict(_idealAccepted, bits, e);
-				_accepted[bits] = _idealAccepted[bits];
+				_acceptedTrainingSet[bits] = _idealAccepted[bits];
 				_feature2Element[bits] = e;
 			}
 			foreach (var e in extendedSeedRejectedElements) {
 				var bits = e.GetSurroundingBits(_predicateDepth, _masterPredicates, IsInner, !IsInner);
 				UpdateDict(_idealRejected, bits, e);
-				_rejected[bits] = _idealRejected[bits];
+				_rejectedTrainingNodes[bits] = _idealRejected[bits];
 				_feature2Element[bits] = e;
 			}
 
@@ -336,70 +333,89 @@ namespace Occf.Learner.Core.Tests {
 			Console.WriteLine("Preparing time: " + (Environment.TickCount - preparingTime));
 		}
 
-		private int DetermineClassifierIndex(string classifier) {
-			for (int i = _classifiers.Count - 1; i >= 0; i--) {
-				if (classifier.StartsWith(_classifiers[i])) {
+		private int GetGroupKeyIndex(string groupKey) {
+			for (int i = _groupKeys.Count - 1; i >= 0; i--) {
+				if (groupKey.StartsWith(_groupKeys[i])) {
 					return i;
 				}
 			}
-			throw new Exception("Can't find the given classifier: " + classifier);
+			throw new Exception("Can't find the given group key: " + groupKey);
 		}
 
 		private void LearnPredicates() {
 			while (true) {
-				var acceptingPredicates = Enumerable.Repeat(_mask, _classifiers.Count).ToList();
-				var rejectingPredicates = Enumerable.Repeat(BigInteger.Zero, _classifiers.Count).ToList();
+				var acceptingFunctions = InitializeAcceptingFunctions();
 				string failedClassifier = null;
-				string classifier = null;
-				int iClassifier = 0;
-				foreach (var featureAndClassifier in _accepted) {
-					var feature = featureAndClassifier.Key;
-					classifier = featureAndClassifier.Value;
-					iClassifier = DetermineClassifierIndex(classifier);
-					rejectingPredicates[iClassifier] |= feature;
-				}
-				for (int i = 0; i < rejectingPredicates.Count; i++) {
-					// ëSÇƒÇÃAcceptedÇ™îıÇ¶ÇƒÇ¢Ç»Ç¢ê´éøÇ1Ç…
-					rejectingPredicates[i] ^= _rejectingMask;
-					rejectingPredicates[i] &= _rejectingMask;
-				}
-
-				foreach (var featureAndClassifier in _accepted) {
-					var feature = featureAndClassifier.Key;
-					classifier = featureAndClassifier.Value;
-					iClassifier = DetermineClassifierIndex(classifier);
-					acceptingPredicates[iClassifier] &= feature;
-					failedClassifier = CanReject(acceptingPredicates, rejectingPredicates, _rejected);
-					if (failedClassifier != null) {
-						break;
-					}
-				}
+				string groupKey = null;
+				int iGroupKey = 0;
+				var rejectingFunctions = LearnRejectingFunction();
+				groupKey = LearnAcceptingFunction(acceptingFunctions, rejectingFunctions, ref iGroupKey, ref failedClassifier);
 				if (failedClassifier == null) {
-					_acceptingPredicates = acceptingPredicates;
-					_rejectingPredicates = rejectingPredicates;
+					_acceptingPredicates = acceptingFunctions;
+					_rejectingPredicates = rejectingFunctions;
 					return;
 				}
-				var count = _classifiers.Count;
-				if (classifier != _classifiers[iClassifier]) {
-					var i = classifier.IndexOf('>', _classifiers[iClassifier].Length + 1);
-					var newClassifier = classifier.Substring(0, i + 1);
-					if (!_classifiers.Contains(newClassifier)) {
-						_classifiers.Add(newClassifier);
+				var count = _groupKeys.Count;
+				if (groupKey != _groupKeys[iGroupKey]) {
+					var i = groupKey.IndexOf('>', _groupKeys[iGroupKey].Length + 1);
+					var newClassifier = groupKey.Substring(0, i + 1);
+					if (!_groupKeys.Contains(newClassifier)) {
+						_groupKeys.Add(newClassifier);
 					}
 				}
-				var failedIndex = DetermineClassifierIndex(failedClassifier);
-				if (failedClassifier != _classifiers[failedIndex]) {
-					var i = failedClassifier.IndexOf('>', _classifiers[failedIndex].Length + 1);
+				var failedIndex = GetGroupKeyIndex(failedClassifier);
+				if (failedClassifier != _groupKeys[failedIndex]) {
+					var i = failedClassifier.IndexOf('>', _groupKeys[failedIndex].Length + 1);
 					var newClassifier = failedClassifier.Substring(0, i + 1);
-					if (!_classifiers.Contains(newClassifier)) {
-						_classifiers.Add(newClassifier);
+					if (!_groupKeys.Contains(newClassifier)) {
+						_groupKeys.Add(newClassifier);
 					}
 				}
-				if (_classifiers.Count == count) {
+				if (_groupKeys.Count == count) {
 					throw new Exception("Fail to learn rules");
 				}
-				Console.WriteLine("Classifiers: " + _classifiers.Count + " (" + count + ")");
+				Console.WriteLine("Classifiers: " + _groupKeys.Count + " (" + count + ")");
 			}
+		}
+
+		private string LearnAcceptingFunction(
+				IList<BigInteger> acceptingFunctions, IList<BigInteger> rejectingFunctions, ref int iGroupKey,
+				ref string failedClassifier) {
+			foreach (var featureAndClassifier in _acceptedTrainingSet) {
+				var feature = featureAndClassifier.Key;
+				var groupKey = featureAndClassifier.Value;
+				iGroupKey = GetGroupKeyIndex(groupKey);
+				acceptingFunctions[iGroupKey] &= feature;
+				failedClassifier = CanReject(acceptingFunctions, rejectingFunctions, _rejectedTrainingNodes);
+				if (failedClassifier != null) {
+					return groupKey;
+				}
+			}
+			return null;
+		}
+
+		private IList<BigInteger> LearnRejectingFunction() {
+			var rejectingFunctions = InitializeRejectingFunctions();
+			foreach (var featureAndGroupKey in _acceptedTrainingSet) {
+				var feature = featureAndGroupKey.Key;
+				var groupKey = featureAndGroupKey.Value;
+				var iGroupKey = GetGroupKeyIndex(groupKey);
+				rejectingFunctions[iGroupKey] |= feature;
+			}
+			for (int i = 0; i < rejectingFunctions.Count; i++) {
+				// ëSÇƒÇÃAcceptedÇ™îıÇ¶ÇƒÇ¢Ç»Ç¢ê´éøÇ1Ç…
+				rejectingFunctions[i] ^= _rejectingMask;
+				rejectingFunctions[i] &= _rejectingMask;
+			}
+			return rejectingFunctions;
+		}
+
+		private List<BigInteger> InitializeRejectingFunctions() {
+			return Enumerable.Repeat(BigInteger.Zero, _groupKeys.Count).ToList();
+		}
+
+		private List<BigInteger> InitializeAcceptingFunctions() {
+			return Enumerable.Repeat(_mask, _groupKeys.Count).ToList();
 		}
 
 		public int LearnAndApply(int count) {
@@ -412,15 +428,15 @@ namespace Occf.Learner.Core.Tests {
 			var correctlyRejectedInRejecting = 0;
 			var wronglyRejectedInRejecting = 0;
 			var rejectedInRejecting = new List<List<SuspiciousTarget>>();
-			for (int i = 0; i < _classifiers.Count; i++) {
+			for (int i = 0; i < _groupKeys.Count; i++) {
 				rejectedInRejecting.Add(new List<SuspiciousTarget>());
 			}
 			var rejectedInAccepting = new List<List<SuspiciousTarget>>();
-			for (int i = 0; i < _classifiers.Count; i++) {
+			for (int i = 0; i < _groupKeys.Count; i++) {
 				rejectedInAccepting.Add(new List<SuspiciousTarget>());
 			}
 			var acceptedInAccepting = new List<List<SuspiciousTarget>>();
-			for (int i = 0; i < _classifiers.Count; i++) {
+			for (int i = 0; i < _groupKeys.Count; i++) {
 				acceptedInAccepting.Add(new List<SuspiciousTarget>());
 			}
 			_wronglyAcceptedFeatures.Clear();
@@ -431,14 +447,14 @@ namespace Occf.Learner.Core.Tests {
 			foreach (var featureAndClassifier in _idealAccepted) {
 				var feature = featureAndClassifier.Key;
 				var classifier = featureAndClassifier.Value;
-				var iClassifier = DetermineClassifierIndex(classifier);
+				var iClassifier = GetGroupKeyIndex(classifier);
 				var rejected = IsRejected(feature, rejectingPredicates[iClassifier]);
 				var accepted = IsAccepted(feature, acceptingPredicates[iClassifier]);
 				index++;
 				if (!accepted) {
 					wronglyRejected++;
 					_wronglyRejectedFeatures.Add(featureAndClassifier);
-					if (!_accepted.ContainsKey(feature) && !_rejected.ContainsKey(feature)) {
+					if (!_acceptedTrainingSet.ContainsKey(feature) && !_rejectedTrainingNodes.ContainsKey(feature)) {
 						// AcceptedÇ∆ã§í çÄÇ™ëΩÇ¢Ç‡ÇÃÇë_Ç§
 						rejectedInAccepting[iClassifier].Add(
 								new SuspiciousTarget {
@@ -449,7 +465,7 @@ namespace Occf.Learner.Core.Tests {
 					}
 				} else if (!rejected) {
 					correctlyAccepted++;
-					if (!_accepted.ContainsKey(feature) && !_rejected.ContainsKey(feature)) {
+					if (!_acceptedTrainingSet.ContainsKey(feature) && !_rejectedTrainingNodes.ContainsKey(feature)) {
 						// AcceptedÇ∆ã§í çÄÇ™è≠Ç»Ç¢Ç‡ÇÃÇë_Ç§
 						acceptedInAccepting[iClassifier].Add(
 								new SuspiciousTarget {
@@ -461,7 +477,7 @@ namespace Occf.Learner.Core.Tests {
 				} else {
 					wronglyRejectedInRejecting++;
 					_wronglyRejectedFeatures.Add(featureAndClassifier);
-					if (!_accepted.ContainsKey(feature) && !_rejected.ContainsKey(feature)) {
+					if (!_acceptedTrainingSet.ContainsKey(feature) && !_rejectedTrainingNodes.ContainsKey(feature)) {
 						// RejectedÇ∆ã§í çÄÇ™è≠Ç»Ç¢Ç‡ÇÃÇë_Ç§
 						rejectedInRejecting[iClassifier].Add(
 								new SuspiciousTarget {
@@ -476,13 +492,13 @@ namespace Occf.Learner.Core.Tests {
 			foreach (var featureAndClassifier in _idealRejected) {
 				var feature = featureAndClassifier.Key;
 				var classifier = featureAndClassifier.Value;
-				var iClassifier = DetermineClassifierIndex(classifier);
+				var iClassifier = GetGroupKeyIndex(classifier);
 				var rejected = IsRejected(feature, rejectingPredicates[iClassifier]);
 				var accepted = IsAccepted(feature, acceptingPredicates[iClassifier]);
 				index++;
 				if (!accepted) {
 					correctlyRejected++;
-					if (!_accepted.ContainsKey(feature) && !_rejected.ContainsKey(feature)) {
+					if (!_acceptedTrainingSet.ContainsKey(feature) && !_rejectedTrainingNodes.ContainsKey(feature)) {
 						// AcceptedÇ∆ã§í çÄÇ™ëΩÇ¢Ç‡ÇÃÇë_Ç§
 						rejectedInAccepting[iClassifier].Add(
 								new SuspiciousTarget {
@@ -494,7 +510,7 @@ namespace Occf.Learner.Core.Tests {
 				} else if (!rejected) {
 					wronglyAccepted++;
 					_wronglyAcceptedFeatures.Add(featureAndClassifier);
-					if (!_accepted.ContainsKey(feature) && !_rejected.ContainsKey(feature)) {
+					if (!_acceptedTrainingSet.ContainsKey(feature) && !_rejectedTrainingNodes.ContainsKey(feature)) {
 						// AcceptedÇ∆ã§í çÄÇ™è≠Ç»Ç¢Ç‡ÇÃÇë_Ç§
 						acceptedInAccepting[iClassifier].Add(
 								new SuspiciousTarget {
@@ -505,7 +521,7 @@ namespace Occf.Learner.Core.Tests {
 					}
 				} else {
 					correctlyRejectedInRejecting++;
-					if (!_accepted.ContainsKey(feature) && !_rejected.ContainsKey(feature)) {
+					if (!_acceptedTrainingSet.ContainsKey(feature) && !_rejectedTrainingNodes.ContainsKey(feature)) {
 						// RejectedÇ∆ã§í çÄÇ™è≠Ç»Ç¢Ç‡ÇÃÇë_Ç§
 						rejectedInRejecting[iClassifier].Add(
 								new SuspiciousTarget {
@@ -596,20 +612,20 @@ namespace Occf.Learner.Core.Tests {
 			var additionalRejectedCount = additionalRejected.Count;
 
 			Console.WriteLine(
-					"L: " + (_accepted.Count + _rejected.Count) + ", AP: "
+					"L: " + (_acceptedTrainingSet.Count + _rejectedTrainingNodes.Count) + ", AP: "
 					+ string.Join(", ", _acceptingPredicates.Select(CountBits)) + ", RP: "
 					+ string.Join(", ", _rejectingPredicates.Select(CountRejectingBits)));
 			Console.WriteLine(
-					"Accepted: " + _accepted.Count + " + " + additionalAcceptedCount
+					"Accepted: " + _acceptedTrainingSet.Count + " + " + additionalAcceptedCount
 					+ " / " + _idealAccepted.Count);
 			Console.WriteLine(
-					"Rejected: " + _rejected.Count + " + " + additionalRejectedCount
+					"Rejected: " + _rejectedTrainingNodes.Count + " + " + additionalRejectedCount
 					+ " / " + _idealRejected.Count);
 			foreach (var suspiciousTarget in additionalAccepted) {
-				_accepted.Add(suspiciousTarget.Feature, suspiciousTarget.Classifier);
+				_acceptedTrainingSet.Add(suspiciousTarget.Feature, suspiciousTarget.Classifier);
 			}
 			foreach (var suspiciousTarget in additionalRejected) {
-				_rejected.Add(suspiciousTarget.Feature, suspiciousTarget.Classifier);
+				_rejectedTrainingNodes.Add(suspiciousTarget.Feature, suspiciousTarget.Classifier);
 			}
 
 			var lastAcceptingPredicates = _acceptingPredicates.ToList();
@@ -723,12 +739,12 @@ namespace Occf.Learner.Core.Tests {
 		}
 
 		private string CanReject(
-				IList<BigInteger> acceptingPredicates, List<BigInteger> rejectingPredicates,
+				IList<BigInteger> acceptingPredicates, IList<BigInteger> rejectingPredicates,
 				Dictionary<BigInteger, string> rejected) {
 			foreach (var featureAndClassifier in rejected) {
 				var feature = featureAndClassifier.Key;
 				var classifier = featureAndClassifier.Value;
-				var iClassifier = DetermineClassifierIndex(classifier);
+				var iClassifier = GetGroupKeyIndex(classifier);
 				if (IsAccepted(feature, acceptingPredicates[iClassifier])
 				    && !IsRejected(feature, rejectingPredicates[iClassifier])) {
 					return classifier;
@@ -817,7 +833,7 @@ namespace Occf.Learner.Core.Tests {
 			foreach (var featureAndClassifier in _idealAccepted) {
 				var feature = featureAndClassifier.Key;
 				var classifier = featureAndClassifier.Value;
-				var iClassifier = DetermineClassifierIndex(classifier);
+				var iClassifier = GetGroupKeyIndex(classifier);
 				Console.Write(CountAcceptingBits(feature & _acceptingPredicates[iClassifier]) + ", ");
 			}
 			Console.WriteLine();
@@ -825,7 +841,7 @@ namespace Occf.Learner.Core.Tests {
 			foreach (var featureAndClassifier in _idealRejected) {
 				var feature = featureAndClassifier.Key;
 				var classifier = featureAndClassifier.Value;
-				var iClassifier = DetermineClassifierIndex(classifier);
+				var iClassifier = GetGroupKeyIndex(classifier);
 				Console.Write(CountAcceptingBits(feature & _acceptingPredicates[iClassifier]) + ", ");
 			}
 			Console.WriteLine();
@@ -833,7 +849,7 @@ namespace Occf.Learner.Core.Tests {
 			foreach (var featureAndClassifier in _wronglyAcceptedFeatures) {
 				var feature = featureAndClassifier.Key;
 				var classifier = featureAndClassifier.Value;
-				var iClassifier = DetermineClassifierIndex(classifier);
+				var iClassifier = GetGroupKeyIndex(classifier);
 				Console.Write(CountAcceptingBits(feature & _acceptingPredicates[iClassifier]) + ", ");
 			}
 			Console.WriteLine();
@@ -841,7 +857,7 @@ namespace Occf.Learner.Core.Tests {
 			foreach (var featureAndClassifier in _wronglyRejectedFeatures) {
 				var feature = featureAndClassifier.Key;
 				var classifier = featureAndClassifier.Value;
-				var iClassifier = DetermineClassifierIndex(classifier);
+				var iClassifier = GetGroupKeyIndex(classifier);
 				Console.Write(CountAcceptingBits(feature & _acceptingPredicates[iClassifier]) + ", ");
 			}
 			Console.WriteLine();
@@ -851,7 +867,7 @@ namespace Occf.Learner.Core.Tests {
 			foreach (var featureAndClassifier in _idealAccepted) {
 				var feature = featureAndClassifier.Key;
 				var classifier = featureAndClassifier.Value;
-				var iClassifier = DetermineClassifierIndex(classifier);
+				var iClassifier = GetGroupKeyIndex(classifier);
 				Console.Write(CountRejectingBits(feature & _rejectingPredicates[iClassifier]) + ", ");
 			}
 			Console.WriteLine();
@@ -859,7 +875,7 @@ namespace Occf.Learner.Core.Tests {
 			foreach (var featureAndClassifier in _idealRejected) {
 				var feature = featureAndClassifier.Key;
 				var classifier = featureAndClassifier.Value;
-				var iClassifier = DetermineClassifierIndex(classifier);
+				var iClassifier = GetGroupKeyIndex(classifier);
 				Console.Write(CountRejectingBits(feature & _rejectingPredicates[iClassifier]) + ", ");
 			}
 			Console.WriteLine();
@@ -867,7 +883,7 @@ namespace Occf.Learner.Core.Tests {
 			foreach (var featureAndClassifier in _wronglyAcceptedFeatures) {
 				var feature = featureAndClassifier.Key;
 				var classifier = featureAndClassifier.Value;
-				var iClassifier = DetermineClassifierIndex(classifier);
+				var iClassifier = GetGroupKeyIndex(classifier);
 				Console.Write(CountRejectingBits(feature & _rejectingPredicates[iClassifier]) + ", ");
 			}
 			Console.WriteLine();
@@ -875,7 +891,7 @@ namespace Occf.Learner.Core.Tests {
 			foreach (var featureAndClassifier in _wronglyRejectedFeatures) {
 				var feature = featureAndClassifier.Key;
 				var classifier = featureAndClassifier.Value;
-				var iClassifier = DetermineClassifierIndex(classifier);
+				var iClassifier = GetGroupKeyIndex(classifier);
 				Console.Write(CountRejectingBits(feature & _rejectingPredicates[iClassifier]) + ", ");
 			}
 			Console.WriteLine();
