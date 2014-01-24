@@ -36,13 +36,25 @@ namespace Occf.Learner.Core.Tests.Experiments {
 				};
 				const string langName = "JavaScript";
 				var learningSets = new[] {
-					Tuple.Create(Fixture.GetInputProjectPath(langName, "cheet.js"),
+					Tuple.Create(Fixture.GetInputProjectPath(langName, "bootstrap"),
 							new List<string> { Fixture.GetInputCodePath(langName, "seed.js"), }),
-					Tuple.Create(Fixture.GetInputProjectPath(langName, "ionic"),
+					Tuple.Create(Fixture.GetInputProjectPath(langName, "browser-sync"),
+							new List<string> { Fixture.GetInputCodePath(langName, "seed.js"), }),
+					Tuple.Create(Fixture.GetInputProjectPath(langName, "cheet.js"),
 							new List<string> { Fixture.GetInputCodePath(langName, "seed.js"), }),
 					Tuple.Create(Fixture.GetInputProjectPath(langName, "clmtrackr"),
 							new List<string> { Fixture.GetInputCodePath(langName, "seed.js"), }),
+					Tuple.Create(Fixture.GetInputProjectPath(langName, "countUp.js"),
+							new List<string> { Fixture.GetInputCodePath(langName, "seed.js"), }),
+					Tuple.Create(Fixture.GetInputProjectPath(langName, "fit.js"),
+							new List<string> { Fixture.GetInputCodePath(langName, "seed.js"), }),
 					Tuple.Create(Fixture.GetInputProjectPath(langName, "gulp"),
+							new List<string> { Fixture.GetInputCodePath(langName, "seed.js"), }),
+					Tuple.Create(Fixture.GetInputProjectPath(langName, "ionic"),
+							new List<string> { Fixture.GetInputCodePath(langName, "seed.js"), }),
+					Tuple.Create(Fixture.GetInputProjectPath(langName, "jQuery-File-Upload"),
+							new List<string> { Fixture.GetInputCodePath(langName, "seed.js"), }),
+					Tuple.Create(Fixture.GetInputProjectPath(langName, "my-mind"),
 							new List<string> { Fixture.GetInputCodePath(langName, "seed.js"), }),
 				};
 				foreach (var exp in exps) {

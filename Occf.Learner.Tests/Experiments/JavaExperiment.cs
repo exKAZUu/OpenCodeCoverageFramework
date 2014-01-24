@@ -55,13 +55,34 @@ namespace Occf.Learner.Core.Tests.Experiments {
 				const string langName = "Java";
 				var learningSets = new[] {
 					Tuple.Create(
+							Fixture.GetInputProjectPath(langName, "android-betterpickers"),
+							new List<string> { Fixture.GetInputCodePath(langName, "Seed.java"), }),
+					Tuple.Create(
+							Fixture.GetInputProjectPath(langName, "android-priority-jobqueue"),
+							new List<string> { Fixture.GetInputCodePath(langName, "Seed.java"), }),
+					Tuple.Create(
+							Fixture.GetInputProjectPath(langName, "elasticsearch"),
+							new List<string> { Fixture.GetInputCodePath(langName, "Seed.java"), }),
+					Tuple.Create(
+							Fixture.GetInputProjectPath(langName, "Hydra"),
+							new List<string> { Fixture.GetInputCodePath(langName, "Seed.java"), }),
+					Tuple.Create(
 							Fixture.GetInputProjectPath(langName, "pageobjectgenerator"),
 							new List<string> { Fixture.GetInputCodePath(langName, "Seed.java"), }),
 					Tuple.Create(
 							Fixture.GetInputProjectPath(langName, "presto"),
 							new List<string> { Fixture.GetInputCodePath(langName, "Seed.java"), }),
 					Tuple.Create(
+							Fixture.GetInputProjectPath(langName, "RxJava"),
+							new List<string> { Fixture.GetInputCodePath(langName, "Seed.java"), }),
+					Tuple.Create(
+							Fixture.GetInputProjectPath(langName, "scalpel"),
+							new List<string> { Fixture.GetInputCodePath(langName, "Seed.java"), }),
+					Tuple.Create(
 							Fixture.GetInputProjectPath(langName, "storm"),
+							new List<string> { Fixture.GetInputCodePath(langName, "Seed.java"), }),
+					Tuple.Create(
+							Fixture.GetInputProjectPath(langName, "u2020"),
 							new List<string> { Fixture.GetInputCodePath(langName, "Seed.java"), }),
 				};
 				foreach (var exp in exps) {

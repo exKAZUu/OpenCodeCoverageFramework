@@ -41,14 +41,14 @@ namespace Occf.Learner.Core.Tests.Experiments {
 			get {
 				var exps = new BitLearningExperimentGroupingWithId[] {
 					new PhpComplexStatementExperiment(),
-					new PhpSuperComplexBranchExperiment(), 
+					new PhpSuperComplexBranchExperiment(),
 					new PhpComplexBranchExperiment(),
 					new PhpIfExperiment(),
 					new PhpWhileExperiment(),
 					new PhpDoWhileExperiment(),
 					new PhpForExperiment(),
-					new PhpPreconditionsExperiment(),
-					new PhpStatementExperiment(), 
+					new PhpEchoExperiment(),
+					new PhpStatementExperiment(),
 					new PhpBlockExperiment(),
 					new PhpLabeledStatementExperiment(),
 					new PhpEmptyStatementExperiment(),
@@ -56,10 +56,28 @@ namespace Occf.Learner.Core.Tests.Experiments {
 				const string langName = "Php";
 				var learningSets = new[] {
 					Tuple.Create(
+							Fixture.GetInputProjectPath(langName, "bedrock"),
+							new List<string> { Fixture.GetInputCodePath(langName, "Seed.php"), }),
+					Tuple.Create(
 							Fixture.GetInputProjectPath(langName, "cockpit"),
 							new List<string> { Fixture.GetInputCodePath(langName, "Seed.php"), }),
 					Tuple.Create(
 							Fixture.GetInputProjectPath(langName, "composer-service"),
+							new List<string> { Fixture.GetInputCodePath(langName, "Seed.php"), }),
+					Tuple.Create(
+							Fixture.GetInputProjectPath(langName, "flight"),
+							new List<string> { Fixture.GetInputCodePath(langName, "Seed.php"), }),
+					Tuple.Create(
+							Fixture.GetInputProjectPath(langName, "flysystem"),
+							new List<string> { Fixture.GetInputCodePath(langName, "Seed.php"), }),
+					Tuple.Create(
+							Fixture.GetInputProjectPath(langName, "gush"),
+							new List<string> { Fixture.GetInputCodePath(langName, "Seed.php"), }),
+					Tuple.Create(
+							Fixture.GetInputProjectPath(langName, "laravel"),
+							new List<string> { Fixture.GetInputCodePath(langName, "Seed.php"), }),
+					Tuple.Create(
+							Fixture.GetInputProjectPath(langName, "phpdotenv"),
 							new List<string> { Fixture.GetInputCodePath(langName, "Seed.php"), }),
 					Tuple.Create(
 							Fixture.GetInputProjectPath(langName, "php-mvc"),
@@ -106,7 +124,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 		public PhpComplexBranchExperiment() : base("expression") {}
 
 		protected override bool ProtectedIsAcceptedUsingOracle(XElement e) {
-			var pName = e.Parent.FirstElement().Name();
+			var pName = e.SafeParent().FirstElement().Name();
 			if (pName == "If") {
 				return true;
 			}
@@ -116,8 +134,8 @@ namespace Occf.Learner.Core.Tests.Experiments {
 			if (pName == "Do") {
 				return true;
 			}
-			if (e.Parent.Name() == "commaList" && e.Parent.NextElement() == null
-			    && e.Parent.Parent.Name() == "forCondition") {
+			if (e.SafeParent().Name() == "commaList" && !e.SafeParent().NextElements().Any()
+			    && e.SafeParent().SafeParent().Name() == "forCondition") {
 				return true;
 			}
 			return false;
@@ -136,7 +154,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 		public PhpSuperComplexBranchExperiment() : base("expression") {}
 
 		protected override bool ProtectedIsAcceptedUsingOracle(XElement e) {
-			var pName = e.Parent.FirstElement().Name();
+			var pName = e.SafeParent().FirstElement().Name();
 			if (pName == "If") {
 				return true;
 			}
@@ -146,12 +164,14 @@ namespace Occf.Learner.Core.Tests.Experiments {
 			if (pName == "Do") {
 				return true;
 			}
-			if (e.Parent.Name() == "commaList" && e.Parent.NextElement() == null
-			    && e.Parent.Parent.Name() == "forCondition") {
+			if (e.SafeParent().Name() == "commaList" && e.SafeParent().SafeParent().Name() == "forCondition"
+			    && !e.NextElements().Any()) {
 				return true;
 			}
-			if (e.Parent.Name() == "commaList" && e.Parent.PreviousElement().Name() == "Echo"
-			    && e.PreviousElement() == null) {
+			if (e.SafeParent().Name() == "commaList"
+			    && e.SafeParent().SafeParent().Name() == "simpleStatement"
+			    && e.SafeParent().SafeParent().FirstElement().Name() == "Echo"
+			    && !e.PreviousElements().Any()) {
 				return true;
 			}
 			return false;
@@ -168,7 +188,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 		}
 
 		protected override bool ProtectedIsAcceptedUsingOracle(XElement e) {
-			var pName = e.Parent.FirstElement().Name();
+			var pName = e.SafeParent().FirstElement().Name();
 			if (pName == "If") {
 				return true;
 			}
@@ -188,7 +208,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 		}
 
 		protected override bool ProtectedIsAcceptedUsingOracle(XElement e) {
-			var pName = e.Parent.Name();
+			var pName = e.SafeParent().FirstElement().Name();
 			if (pName == "While") {
 				return true;
 			}
@@ -208,7 +228,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 		}
 
 		protected override bool ProtectedIsAcceptedUsingOracle(XElement e) {
-			var pName = e.Parent.Name();
+			var pName = e.SafeParent().FirstElement().Name();
 			if (pName == "Do") {
 				return true;
 			}
@@ -228,8 +248,8 @@ namespace Occf.Learner.Core.Tests.Experiments {
 		}
 
 		protected override bool ProtectedIsAcceptedUsingOracle(XElement e) {
-			if (e.Parent.Name() == "commaList" && e.Parent.NextElement() == null
-			    && e.Parent.Parent.Name() == "forCondition") {
+			if (e.SafeParent().Name() == "commaList" && e.SafeParent().SafeParent().Name() == "forCondition"
+			    && !e.NextElements().Any()) {
 				return true;
 			}
 			return false;
@@ -238,7 +258,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 		public PhpForExperiment() : base("expression") {}
 	}
 
-	public class PhpPreconditionsExperiment : BitLearningExperimentGroupingWithId {
+	public class PhpEchoExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
 			get { return PhpExperiment.Processor; }
 		}
@@ -248,14 +268,16 @@ namespace Occf.Learner.Core.Tests.Experiments {
 		}
 
 		protected override bool ProtectedIsAcceptedUsingOracle(XElement e) {
-			if (e.Parent.Name() == "commaList" && e.Parent.PreviousElement().Name() == "Echo"
-			    && e.PreviousElement() == null) {
+			if (e.SafeParent().Name() == "commaList"
+			    && e.SafeParent().SafeParent().Name() == "simpleStatement"
+			    && e.SafeParent().SafeParent().FirstElement().Name() == "Echo"
+			    && !e.PreviousElements().Any()) {
 				return true;
 			}
 			return false;
 		}
 
-		public PhpPreconditionsExperiment() : base("expression") {}
+		public PhpEchoExperiment() : base("expression") {}
 	}
 
 	public class PhpComplexStatementExperiment : BitLearningExperimentGroupingWithId {

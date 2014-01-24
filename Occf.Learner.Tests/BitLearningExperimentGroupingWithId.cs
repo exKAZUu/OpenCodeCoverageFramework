@@ -576,7 +576,6 @@ namespace Occf.Learner.Core.Tests {
 				//		suspiciousRejectedListByAccepting, acceptingPredicates, BigInteger.Zero, BigInteger.Zero);
 				//suspiciousRejectedByRejecting = SelectSuspiciousElements(
 				//		suspiciousRejectedListByRejecting, rejectingPredicates, _rejectingMask, _rejectingMask);
-				return -1;
 				break;
 			case 2:
 				SuspiciousAcceptedInAccepting = SelectSuspiciousElementsWithMask(
