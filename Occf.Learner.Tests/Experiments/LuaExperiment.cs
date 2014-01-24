@@ -47,6 +47,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 					new LuaIfExperiment(),
 					new LuaWhileExperiment(),
 					new LuaDoWhileExperiment(),
+					new LuaPrintExperiment(),
 					new LuaStatementExperiment(),
 					new LuaLabeledStatementExperiment(),
 					new LuaEmptyStatementExperiment(),
