@@ -15,7 +15,8 @@ namespace Occf.Learner.Core.Tests.Experiments {
 		private readonly StreamWriter _writer = File.CreateText(@"C:\Users\exKAZUu\Desktop\javascript.txt");
 
 		public static Processor Processor =
-				new MemoryCachchProcessor(new FileCacheProcessor(ProcessorLoader.JavaScriptUsingAntlr3));
+				new MemoryCacheProcessor(ProcessorLoader.JavaScriptUsingAntlr3);
+				//new MemoryCacheProcessor(new FileCacheProcessor(ProcessorLoader.JavaScriptUsingAntlr3));
 
 		private static IEnumerable<TestCaseData> TestCases {
 			get {

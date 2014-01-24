@@ -532,6 +532,17 @@ namespace Occf.Learner.Core.Tests {
 					}
 				}
 			}
+			Console.WriteLine("done");
+			Console.WriteLine(
+					"WA: " + wronglyAccepted + ", WR: " + wronglyRejected + "/"
+					+ wronglyRejectedInRejecting + ", CA: "
+					+ correctlyAccepted + ", CR: " + correctlyRejected + "/"
+					+ correctlyRejectedInRejecting);
+			Console.WriteLine(
+					"L: " + (_acceptedTrainingSet.Count + _rejectedTrainingNodes.Count) + ", AP: "
+					+ string.Join(", ", _acceptingPredicates.Select(CountBits)) + ", RP: "
+					+ string.Join(", ", _rejectingPredicates.Select(CountRejectingBits)));
+			WrongCount = wronglyAccepted + wronglyRejected + wronglyRejectedInRejecting;
 
 			SuspiciousAcceptedInAccepting = new List<SuspiciousTarget>();
 			SuspiciousRejectedInAccepting = new List<SuspiciousTarget>();
@@ -565,6 +576,7 @@ namespace Occf.Learner.Core.Tests {
 				//		suspiciousRejectedListByAccepting, acceptingPredicates, BigInteger.Zero, BigInteger.Zero);
 				//suspiciousRejectedByRejecting = SelectSuspiciousElements(
 				//		suspiciousRejectedListByRejecting, rejectingPredicates, _rejectingMask, _rejectingMask);
+				return -1;
 				break;
 			case 2:
 				SuspiciousAcceptedInAccepting = SelectSuspiciousElementsWithMask(
@@ -581,13 +593,6 @@ namespace Occf.Learner.Core.Tests {
 					"SA(A): " + SuspiciousAcceptedInAccepting.Count
 					+ ", SR(A): " + SuspiciousRejectedInAccepting.Count
 					+ ", SR(R): " + SuspiciousRejectedInRejecting.Count);
-			Console.WriteLine("done");
-			Console.WriteLine(
-					"WA: " + wronglyAccepted + ", WR: " + wronglyRejected + "/"
-					+ wronglyRejectedInRejecting + ", CA: "
-					+ correctlyAccepted + ", CR: " + correctlyRejected + "/"
-					+ correctlyRejectedInRejecting);
-			WrongCount = wronglyAccepted + wronglyRejected + wronglyRejectedInRejecting;
 
 			return count + 1;
 		}
@@ -611,10 +616,6 @@ namespace Occf.Learner.Core.Tests {
 			var additionalAcceptedCount = additionalAccepted.Count;
 			var additionalRejectedCount = additionalRejected.Count;
 
-			Console.WriteLine(
-					"L: " + (_acceptedTrainingSet.Count + _rejectedTrainingNodes.Count) + ", AP: "
-					+ string.Join(", ", _acceptingPredicates.Select(CountBits)) + ", RP: "
-					+ string.Join(", ", _rejectingPredicates.Select(CountRejectingBits)));
 			Console.WriteLine(
 					"Accepted: " + _acceptedTrainingSet.Count + " + " + additionalAcceptedCount
 					+ " / " + _idealAccepted.Count);

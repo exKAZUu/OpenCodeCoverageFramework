@@ -32,20 +32,25 @@ namespace Occf.Learner.Core.Tests.Experiments {
 		private readonly StreamWriter _writer = File.CreateText(@"C:\Users\exKAZUu\Desktop\cs.txt");
 
 		public static Processor Processor =
-				new MemoryCachchProcessor(new FileCacheProcessor(ProcessorLoader.CSharpUsingAntlr3));
+				new MemoryCacheProcessor(ProcessorLoader.CSharpUsingAntlr3);
+
+		//new MemoryCacheProcessor(new FileCacheProcessor(ProcessorLoader.CSharpUsingAntlr3));
 
 		private static IEnumerable<TestCaseData> TestCases {
 			get {
 				var exps = new BitLearningExperimentGroupingWithId[] {
-					new CSharpStatementExperiment(),
-					new CSharpBranchExperiment(),
+					new CSharpComplexStatementExperiment(),
+					new CSharpSuperComplexBranchExperiment(),
+					new CSharpComplexBranchExperiment(),
 					new CSharpIfExperiment(),
 					new CSharpWhileExperiment(),
 					new CSharpDoWhileExperiment(),
 					new CSharpForExperiment(),
 					new CSharpPreconditionsExperiment(),
+					new CSharpStatementExperiment(), 
 					new CSharpBlockExperiment(),
 					new CSharpLabeledStatementExperiment(),
+					new CSharpEmptyStatementExperiment(),
 				};
 				const string langName = "CSharp";
 				var learningSets = new[] {
@@ -106,7 +111,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 		}
 	}
 
-	public class CSharpBranchExperiment : BitLearningExperimentGroupingWithId {
+	public class CSharpSuperComplexBranchExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
 			get { return CSharpExperiment.Processor; }
 		}
@@ -115,7 +120,49 @@ namespace Occf.Learner.Core.Tests.Experiments {
 			get { return false; }
 		}
 
-		public CSharpBranchExperiment() : base("boolean_expression") {}
+		public CSharpSuperComplexBranchExperiment() : base("boolean_expression") {}
+
+		protected override bool ProtectedIsAcceptedUsingOracle(XElement e) {
+			var pName = e.Parent.Name();
+			if (pName == "if_statement") {
+				return true;
+			}
+			if (pName == "while_statement") {
+				return true;
+			}
+			if (pName == "do_statement") {
+				return true;
+			}
+			if (pName == "for_condition") {
+				return true;
+			}
+			if (e.ElementsBeforeSelf().Any()) {
+				return false;
+			}
+			var p = e.Parent.Parent.Parent.Parent.Parent;
+			var parts = p.Elements("primary_expression_start")
+					.Concat(p.Elements("primary_expression_part"))
+					.ToList();
+			if (parts.All(e2 => e2.Descendants("identifier").FirstOrDefault().TokenText() != "Contract")) {
+				return false;
+			}
+			if (parts.All(e2 => e2.Descendants("identifier").FirstOrDefault().TokenText() != "Requires")) {
+				return false;
+			}
+			return true;
+		}
+	}
+
+	public class CSharpComplexBranchExperiment : BitLearningExperimentGroupingWithId {
+		protected override Processor Processor {
+			get { return CSharpExperiment.Processor; }
+		}
+
+		protected override bool IsInner {
+			get { return false; }
+		}
+
+		public CSharpComplexBranchExperiment() : base("boolean_expression") {}
 
 		protected override bool ProtectedIsAcceptedUsingOracle(XElement e) {
 			var pName = e.Parent.Name();
@@ -240,7 +287,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 		public CSharpPreconditionsExperiment() : base("argument") {}
 	}
 
-	public class CSharpStatementExperiment : BitLearningExperimentGroupingWithId {
+	public class CSharpComplexStatementExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
 			get { return CSharpExperiment.Processor; }
 		}
@@ -260,6 +307,27 @@ namespace Occf.Learner.Core.Tests.Experiments {
 			if (e2 != null && e2.Element("block") != null) {
 				return false;
 			}
+
+			// 空文を除外
+			if (e2 != null && e2.Element("empty_statement") != null) {
+				return false;
+			}
+			return true;
+		}
+
+		public CSharpComplexStatementExperiment() : base("statement") {}
+	}
+
+	public class CSharpStatementExperiment : BitLearningExperimentGroupingWithId {
+		protected override Processor Processor {
+			get { return CSharpExperiment.Processor; }
+		}
+
+		protected override bool IsInner {
+			get { return true; }
+		}
+
+		protected override bool ProtectedIsAcceptedUsingOracle(XElement e) {
 			return true;
 		}
 
@@ -305,5 +373,26 @@ namespace Occf.Learner.Core.Tests.Experiments {
 		}
 
 		public CSharpLabeledStatementExperiment() : base("statement") {}
+	}
+
+	public class CSharpEmptyStatementExperiment : BitLearningExperimentGroupingWithId {
+		protected override Processor Processor {
+			get { return CSharpExperiment.Processor; }
+		}
+
+		protected override bool IsInner {
+			get { return true; }
+		}
+
+		protected override bool ProtectedIsAcceptedUsingOracle(XElement e) {
+			// 空文を除外
+			var e2 = e.Element("embedded_statement");
+			if (e2 != null && e2.Element("empty_statement") != null) {
+				return true;
+			}
+			return false;
+		}
+
+		public CSharpEmptyStatementExperiment() : base("statement") {}
 	}
 }

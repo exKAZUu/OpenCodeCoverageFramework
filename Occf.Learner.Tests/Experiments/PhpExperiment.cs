@@ -1,4 +1,22 @@
-﻿using System;
+﻿#region License
+
+// Copyright (C) 2011-2014 Kazunori Sakamoto
+// 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#endregion
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -15,31 +33,39 @@ namespace Occf.Learner.Core.Tests.Experiments {
 		private readonly StreamWriter _writer = File.CreateText(@"C:\Users\exKAZUu\Desktop\php.txt");
 
 		public static Processor Processor =
-				new MemoryCachchProcessor(new FileCacheProcessor(ProcessorLoader.PhpUsingAntlr3));
+				new MemoryCacheProcessor(ProcessorLoader.PhpUsingAntlr3);
+
+		//new MemoryCacheProcessor(new FileCacheProcessor(ProcessorLoader.PhpUsingAntlr3));
 
 		private static IEnumerable<TestCaseData> TestCases {
 			get {
 				var exps = new BitLearningExperimentGroupingWithId[] {
 					new PhpComplexStatementExperiment(),
+					new PhpSuperComplexBranchExperiment(), 
 					new PhpComplexBranchExperiment(),
 					new PhpIfExperiment(),
 					new PhpWhileExperiment(),
 					new PhpDoWhileExperiment(),
 					new PhpForExperiment(),
 					new PhpPreconditionsExperiment(),
+					new PhpStatementExperiment(), 
 					new PhpBlockExperiment(),
 					new PhpLabeledStatementExperiment(),
 					new PhpEmptyStatementExperiment(),
 				};
 				const string langName = "Php";
 				var learningSets = new[] {
-					Tuple.Create(Fixture.GetInputProjectPath(langName, "cockpit"),
+					Tuple.Create(
+							Fixture.GetInputProjectPath(langName, "cockpit"),
 							new List<string> { Fixture.GetInputCodePath(langName, "Seed.php"), }),
-					Tuple.Create(Fixture.GetInputProjectPath(langName, "composer-service"),
+					Tuple.Create(
+							Fixture.GetInputProjectPath(langName, "composer-service"),
 							new List<string> { Fixture.GetInputCodePath(langName, "Seed.php"), }),
-					Tuple.Create(Fixture.GetInputProjectPath(langName, "php-mvc"),
+					Tuple.Create(
+							Fixture.GetInputProjectPath(langName, "php-mvc"),
 							new List<string> { Fixture.GetInputCodePath(langName, "Seed.php"), }),
-					Tuple.Create(Fixture.GetInputProjectPath(langName, "sovereign"),
+					Tuple.Create(
+							Fixture.GetInputProjectPath(langName, "sovereign"),
 							new List<string> { Fixture.GetInputCodePath(langName, "Seed.php"), }),
 				};
 				foreach (var exp in exps) {
@@ -92,6 +118,40 @@ namespace Occf.Learner.Core.Tests.Experiments {
 			}
 			if (e.Parent.Name() == "commaList" && e.Parent.NextElement() == null
 			    && e.Parent.Parent.Name() == "forCondition") {
+				return true;
+			}
+			return false;
+		}
+	}
+
+	public class PhpSuperComplexBranchExperiment : BitLearningExperimentGroupingWithId {
+		protected override Processor Processor {
+			get { return PhpExperiment.Processor; }
+		}
+
+		protected override bool IsInner {
+			get { return false; }
+		}
+
+		public PhpSuperComplexBranchExperiment() : base("expression") {}
+
+		protected override bool ProtectedIsAcceptedUsingOracle(XElement e) {
+			var pName = e.Parent.FirstElement().Name();
+			if (pName == "If") {
+				return true;
+			}
+			if (pName == "While") {
+				return true;
+			}
+			if (pName == "Do") {
+				return true;
+			}
+			if (e.Parent.Name() == "commaList" && e.Parent.NextElement() == null
+			    && e.Parent.Parent.Name() == "forCondition") {
+				return true;
+			}
+			if (e.Parent.Name() == "commaList" && e.Parent.PreviousElement().Name() == "Echo"
+			    && e.PreviousElement() == null) {
 				return true;
 			}
 			return false;
@@ -168,7 +228,6 @@ namespace Occf.Learner.Core.Tests.Experiments {
 		}
 
 		protected override bool ProtectedIsAcceptedUsingOracle(XElement e) {
-			var pName = e.Parent.Name();
 			if (e.Parent.Name() == "commaList" && e.Parent.NextElement() == null
 			    && e.Parent.Parent.Name() == "forCondition") {
 				return true;
@@ -189,9 +248,8 @@ namespace Occf.Learner.Core.Tests.Experiments {
 		}
 
 		protected override bool ProtectedIsAcceptedUsingOracle(XElement e) {
-			// TODO:
-			var pName = e.Parent.Name();
-			if (pName == "for_condition") {
+			if (e.Parent.Name() == "commaList" && e.Parent.PreviousElement().Name() == "Echo"
+			    && e.PreviousElement() == null) {
 				return true;
 			}
 			return false;
@@ -226,6 +284,22 @@ namespace Occf.Learner.Core.Tests.Experiments {
 		}
 
 		public PhpComplexStatementExperiment() : base("statement") {}
+	}
+
+	public class PhpStatementExperiment : BitLearningExperimentGroupingWithId {
+		protected override Processor Processor {
+			get { return PhpExperiment.Processor; }
+		}
+
+		protected override bool IsInner {
+			get { return true; }
+		}
+
+		protected override bool ProtectedIsAcceptedUsingOracle(XElement e) {
+			return true;
+		}
+
+		public PhpStatementExperiment() : base("statement") {}
 	}
 
 	public class PhpBlockExperiment : BitLearningExperimentGroupingWithId {

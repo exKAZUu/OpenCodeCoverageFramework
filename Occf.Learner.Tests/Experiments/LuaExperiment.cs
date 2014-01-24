@@ -1,3 +1,21 @@
+#region License
+
+// Copyright (C) 2011-2014 Kazunori Sakamoto
+// 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#endregion
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -15,41 +33,55 @@ namespace Occf.Learner.Core.Tests.Experiments {
 		private readonly StreamWriter _writer = File.CreateText(@"C:\Users\exKAZUu\Desktop\lua.txt");
 
 		public static Processor Processor =
-				new MemoryCachchProcessor(new FileCacheProcessor(ProcessorLoader.LuaUsingAntlr3));
+				new MemoryCacheProcessor(ProcessorLoader.LuaUsingAntlr3);
+
+		//new MemoryCacheProcessor(new FileCacheProcessor(ProcessorLoader.LuaUsingAntlr3));
 
 		private static IEnumerable<TestCaseData> TestCases {
 			get {
 				var exps = new BitLearningExperimentGroupingWithId[] {
 					new LuaComplexStatementExperiment(),
+					new LuaSuperComplexBranchExperiment(),
 					new LuaComplexBranchExperiment(),
 					new LuaStatementExperiment(),
 					new LuaIfExperiment(),
 					new LuaWhileExperiment(),
 					new LuaDoWhileExperiment(),
-					//new LuaLabeledStatementExperiment(),
-					//new LuaEmptyStatementExperiment(),
+					new LuaStatementExperiment(),
+					new LuaLabeledStatementExperiment(),
+					new LuaEmptyStatementExperiment(),
 				};
 				const string langName = "Lua";
 				var learningSets = new[] {
-					Tuple.Create(Fixture.GetInputProjectPath(langName, "koreader"),
+					Tuple.Create(
+							Fixture.GetInputProjectPath(langName, "koreader"),
 							new List<string> { Fixture.GetInputCodePath(langName, "Seed.Lua"), }),
-					Tuple.Create(Fixture.GetInputProjectPath(langName, "lapis"),
+					Tuple.Create(
+							Fixture.GetInputProjectPath(langName, "lapis"),
 							new List<string> { Fixture.GetInputCodePath(langName, "Seed.Lua"), }),
-					Tuple.Create(Fixture.GetInputProjectPath(langName, "lsyncd"),
+					Tuple.Create(
+							Fixture.GetInputProjectPath(langName, "lsyncd"),
 							new List<string> { Fixture.GetInputCodePath(langName, "Seed.Lua"), }),
-					Tuple.Create(Fixture.GetInputProjectPath(langName, "luafun"),
+					Tuple.Create(
+							Fixture.GetInputProjectPath(langName, "luafun"),
 							new List<string> { Fixture.GetInputCodePath(langName, "Seed.Lua"), }),
-					Tuple.Create(Fixture.GetInputProjectPath(langName, "luakit"),
+					Tuple.Create(
+							Fixture.GetInputProjectPath(langName, "luakit"),
 							new List<string> { Fixture.GetInputCodePath(langName, "Seed.Lua"), }),
-					Tuple.Create(Fixture.GetInputProjectPath(langName, "middleclass"),
+					Tuple.Create(
+							Fixture.GetInputProjectPath(langName, "middleclass"),
 							new List<string> { Fixture.GetInputCodePath(langName, "Seed.Lua"), }),
-					Tuple.Create(Fixture.GetInputProjectPath(langName, "pacpac"),
+					Tuple.Create(
+							Fixture.GetInputProjectPath(langName, "pacpac"),
 							new List<string> { Fixture.GetInputCodePath(langName, "Seed.Lua"), }),
-					Tuple.Create(Fixture.GetInputProjectPath(langName, "Penlight"),
+					Tuple.Create(
+							Fixture.GetInputProjectPath(langName, "Penlight"),
 							new List<string> { Fixture.GetInputCodePath(langName, "Seed.Lua"), }),
-					Tuple.Create(Fixture.GetInputProjectPath(langName, "Tir"),
+					Tuple.Create(
+							Fixture.GetInputProjectPath(langName, "Tir"),
 							new List<string> { Fixture.GetInputCodePath(langName, "Seed.Lua"), }),
-					Tuple.Create(Fixture.GetInputProjectPath(langName, "vlsub"),
+					Tuple.Create(
+							Fixture.GetInputProjectPath(langName, "vlsub"),
 							new List<string> { Fixture.GetInputCodePath(langName, "Seed.Lua"), }),
 				};
 				foreach (var exp in exps) {
@@ -121,6 +153,37 @@ namespace Occf.Learner.Core.Tests.Experiments {
 		}
 	}
 
+	public class LuaSuperComplexBranchExperiment : BitLearningExperimentGroupingWithId {
+		protected override Processor Processor {
+			get { return LuaExperiment.Processor; }
+		}
+
+		protected override bool IsInner {
+			get { return false; }
+		}
+
+		public LuaSuperComplexBranchExperiment() : base("exp") {}
+
+		protected override bool ProtectedIsAcceptedUsingOracle(XElement e) {
+			var siblings = e.Siblings().ToList();
+			var parent = e.Parent;
+			if (parent.SafeName() == "stat" && siblings[0].Value == "if") {
+				return true;
+			}
+			if (parent.SafeName() == "stat" && siblings[0].Value == "while") {
+				return true;
+			}
+			if (parent.SafeName() == "stat" && siblings[0].Value == "repeat") {
+				return true;
+			}
+			var pppp = e.SafeParent().SafeParent().SafeParent().SafeParent();
+			if (pppp.Name() == "functioncall" && pppp.FirstElement().TokenText() == "print") {
+				return true;
+			}
+			return false;
+		}
+	}
+
 	public class LuaIfExperiment : BitLearningExperimentGroupingWithId {
 		protected override Processor Processor {
 			get { return LuaExperiment.Processor; }
@@ -178,6 +241,26 @@ namespace Occf.Learner.Core.Tests.Experiments {
 			var siblings = e.Siblings().ToList();
 			var parent = e.Parent;
 			if (parent.SafeName() == "stat" && siblings[0].Value == "repeat") {
+				return true;
+			}
+			return false;
+		}
+	}
+
+	public class LuaPrintExperiment : BitLearningExperimentGroupingWithId {
+		protected override Processor Processor {
+			get { return LuaExperiment.Processor; }
+		}
+
+		protected override bool IsInner {
+			get { return false; }
+		}
+
+		public LuaPrintExperiment() : base("exp") {}
+
+		protected override bool ProtectedIsAcceptedUsingOracle(XElement e) {
+			var pppp = e.SafeParent().SafeParent().SafeParent().SafeParent();
+			if (pppp.Name() == "functioncall" && pppp.FirstElement().TokenText() == "print") {
 				return true;
 			}
 			return false;

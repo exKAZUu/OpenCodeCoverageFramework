@@ -33,12 +33,14 @@ namespace Occf.Learner.Core.Tests.Experiments {
 		private readonly StreamWriter _writer = File.CreateText(@"C:\Users\exKAZUu\Desktop\java.txt");
 
 		public static Processor Processor =
-				new MemoryCachchProcessor(new FileCacheProcessor(ProcessorLoader.JavaUsingAntlr3));
+				new MemoryCacheProcessor(ProcessorLoader.JavaUsingAntlr3);
+				//new MemoryCacheProcessor(new FileCacheProcessor(ProcessorLoader.JavaUsingAntlr3));
 
 		private static IEnumerable<TestCaseData> TestCases {
 			get {
 				var exps = new BitLearningExperimentGroupingWithId[] {
 					new JavaComplexStatementExperiment(),
+					new JavaSuperComplexBranchExperiment(), 
 					new JavaComplexBranchExperiment(),
 					new JavaIfExperiment(),
 					new JavaWhileExperiment(),
