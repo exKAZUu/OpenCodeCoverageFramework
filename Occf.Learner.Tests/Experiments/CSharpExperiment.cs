@@ -71,8 +71,8 @@ namespace Occf.Learner.Core.Tests.Experiments {
 					Tuple.Create(
 							Fixture.GetInputProjectPath(langName, "NuGetGallery"),
 							new List<string> { Fixture.GetInputCodePath(langName, "Seed.cs"), }),
-					//Tuple.Create(Fixture.GetInputProjectPath(langName, "ServiceStack"),
-					//		new List<string> { Fixture.GetInputCodePath(langName, "Seed.cs"), }),
+					Tuple.Create(Fixture.GetInputProjectPath(langName, "ServiceStack"),
+							new List<string> { Fixture.GetInputCodePath(langName, "Seed.cs"), }),
 					Tuple.Create(
 							Fixture.GetInputProjectPath(langName, "SignalR"),
 							new List<string> { Fixture.GetInputCodePath(langName, "Seed.cs"), }),
@@ -82,8 +82,8 @@ namespace Occf.Learner.Core.Tests.Experiments {
 					Tuple.Create(
 							Fixture.GetInputProjectPath(langName, "moq4"),
 							new List<string> { Fixture.GetInputCodePath(langName, "Seed.cs"), }),
-					//Tuple.Create(Fixture.GetInputProjectPath(langName, "ravendb"),
-					//		new List<string> { Fixture.GetInputCodePath(langName, "Seed.cs"), }),
+					Tuple.Create(Fixture.GetInputProjectPath(langName, "ravendb"),
+							new List<string> { Fixture.GetInputCodePath(langName, "Seed.cs"), }),
 				};
 				foreach (var exp in exps) {
 					foreach (var learningSet in learningSets) {

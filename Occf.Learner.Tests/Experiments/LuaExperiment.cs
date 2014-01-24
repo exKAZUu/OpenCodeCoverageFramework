@@ -55,13 +55,13 @@ namespace Occf.Learner.Core.Tests.Experiments {
 				const string langName = "Lua";
 				var learningSets = new[] {
 					Tuple.Create(
+							Fixture.GetInputProjectPath(langName, "gin"),
+							new List<string> { Fixture.GetInputCodePath(langName, "Seed.Lua"), }),
+					Tuple.Create(
 							Fixture.GetInputProjectPath(langName, "koreader"),
 							new List<string> { Fixture.GetInputCodePath(langName, "Seed.Lua"), }),
 					Tuple.Create(
 							Fixture.GetInputProjectPath(langName, "lapis"),
-							new List<string> { Fixture.GetInputCodePath(langName, "Seed.Lua"), }),
-					Tuple.Create(
-							Fixture.GetInputProjectPath(langName, "lsyncd"),
 							new List<string> { Fixture.GetInputCodePath(langName, "Seed.Lua"), }),
 					Tuple.Create(
 							Fixture.GetInputProjectPath(langName, "luafun"),
