@@ -34,13 +34,14 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 		public static Processor Processor =
 				new MemoryCacheProcessor(ProcessorLoader.JavaUsingAntlr3);
-				//new MemoryCacheProcessor(new FileCacheProcessor(ProcessorLoader.JavaUsingAntlr3));
+
+		//new MemoryCacheProcessor(new FileCacheProcessor(ProcessorLoader.JavaUsingAntlr3));
 
 		private static IEnumerable<TestCaseData> TestCases {
 			get {
 				var exps = new BitLearningExperimentGroupingWithId[] {
 					new JavaComplexStatementExperiment(),
-					new JavaSuperComplexBranchExperiment(), 
+					new JavaSuperComplexBranchExperiment(),
 					new JavaComplexBranchExperiment(),
 					new JavaIfExperiment(),
 					new JavaWhileExperiment(),
@@ -98,7 +99,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 				BitLearningExperimentGroupingWithId exp, string projectPath, IList<string> seedPaths) {
 			var allPaths = Directory.GetFiles(projectPath, "*.java", SearchOption.AllDirectories)
 					.ToList();
-			exp.AutomaticallyLearnUntilBeStable(allPaths, seedPaths, _writer);
+			exp.AutomaticallyLearnUntilBeStable(allPaths, seedPaths, _writer, projectPath);
 			if (exp.WrongCount > 0) {
 				Console.WriteLine("--------------- WronglyAcceptedElements ---------------");
 				foreach (var we in exp.WronglyAcceptedElements) {

@@ -99,7 +99,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 				BitLearningExperimentGroupingWithId exp, string projectPath, IList<string> seedPaths) {
 			var allPaths = Directory.GetFiles(projectPath, "*.php", SearchOption.AllDirectories)
 					.ToList();
-			exp.AutomaticallyLearnUntilBeStable(allPaths, seedPaths, _writer);
+			exp.AutomaticallyLearnUntilBeStable(allPaths, seedPaths, _writer, projectPath);
 			Assert.That(exp.WrongCount, Is.EqualTo(0));
 		}
 

@@ -21,6 +21,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Xml.Linq;
 using Code2Xml.Core;
 using Paraiba.Collections.Generic;
@@ -161,27 +162,68 @@ namespace Occf.Learner.Core.Tests {
 		}
 
 		public void AutomaticallyLearnUntilBeStable(
-				ICollection<string> allPaths, ICollection<string> seedPaths, StreamWriter writer) {
-			var allAsts = allPaths.Select(path => Processor.GenerateXml(new FileInfo(path), null, true));
-			var seedAsts = seedPaths.Select(path => Processor.GenerateXml(new FileInfo(path), null, true))
-					.ToList();
-			_elementNames = _initialElementNames.ToHashSet();
-			foreach (var elementName in _elementNames) {
-				Console.WriteLine(elementName);
-			}
-			var seedAcceptedElements = seedAsts
-					.SelectMany(GetAllElements)
-					.Where(ProtectedIsAcceptedUsingOracle)
-					.ToList();
-			Console.WriteLine("Accepted elements: " + seedAcceptedElements.Count);
-			if (seedAcceptedElements.Count() == 0) {
-				var es = seedAsts.SelectMany(GetAllElements).ToList();
-				foreach (var e in es) {
-					var b = ProtectedIsAcceptedUsingOracle(e);
+				ICollection<string> allPaths, ICollection<string> seedPaths, StreamWriter writer,
+				string projectPath) {
+			var cacheFile = new FileInfo(Path.Combine(projectPath ?? "", GetType().Name + ".cache_data"));
+			if (string.IsNullOrEmpty(projectPath) || !cacheFile.Exists) {
+				var allAsts = allPaths.Select(path => Processor.GenerateXml(new FileInfo(path), null, true));
+				var seedAsts = seedPaths.Select(path => Processor.GenerateXml(new FileInfo(path), null, true))
+						.ToList();
+				_elementNames = _initialElementNames.ToHashSet();
+				foreach (var elementName in _elementNames) {
+					Console.WriteLine(elementName);
 				}
-				Console.WriteLine("buggy");
+				var seedAcceptedElements = seedAsts
+						.SelectMany(GetAllElements)
+						.Where(ProtectedIsAcceptedUsingOracle)
+						.ToList();
+				Console.WriteLine("Accepted elements: " + seedAcceptedElements.Count);
+				if (seedAcceptedElements.Count() == 0) {
+					var es = seedAsts.SelectMany(GetAllElements).ToList();
+					foreach (var e in es) {
+						var b = ProtectedIsAcceptedUsingOracle(e);
+					}
+					Console.WriteLine("buggy");
+				}
+				if (string.IsNullOrEmpty(projectPath) != null) {
+					LearnUntilBeStable(allAsts, seedAsts, seedAcceptedElements.ToList(), writer);
+					var formatter = new BinaryFormatter();
+					using (var stream = cacheFile.OpenWrite()) {
+						formatter.Serialize(stream, _elementNames);
+						formatter.Serialize(stream, _idealAccepted);
+						formatter.Serialize(stream, _idealRejected);
+						formatter.Serialize(stream, _acceptedTrainingSet);
+						formatter.Serialize(stream, _rejectedTrainingNodes);
+						//formatter.Serialize(stream, _feature2Element);
+						formatter.Serialize(stream, _masterPredicates);
+						formatter.Serialize(stream, _groupKeys);
+						formatter.Serialize(stream, _acceptingPredicatesCount);
+						formatter.Serialize(stream, _acceptingMask);
+						formatter.Serialize(stream, _rejectingMask);
+						formatter.Serialize(stream, _mask);
+						formatter.Serialize(stream, _acceptingPredicates);
+						formatter.Serialize(stream, _rejectingPredicates);
+					}
+				}
+			} else {
+				var formatter = new BinaryFormatter();
+				using (var stream = cacheFile.OpenRead()) {
+					_elementNames = (ISet<string>)formatter.Deserialize(stream);
+					_idealAccepted = (Dictionary<BigInteger, string>)formatter.Deserialize(stream);
+					_idealRejected = (Dictionary<BigInteger, string>)formatter.Deserialize(stream);
+					_acceptedTrainingSet = (Dictionary<BigInteger, string>)formatter.Deserialize(stream);
+					_rejectedTrainingNodes = (Dictionary<BigInteger, string>)formatter.Deserialize(stream);
+					//_feature2Element = (Dictionary<BigInteger, XElement>)formatter.Deserialize(stream);
+					_masterPredicates = (IDictionary<string, BigInteger>)formatter.Deserialize(stream);
+					_groupKeys = (List<string>)formatter.Deserialize(stream);
+					_acceptingPredicatesCount = (int)formatter.Deserialize(stream);
+					_acceptingMask = (BigInteger)formatter.Deserialize(stream);
+					_rejectingMask = (BigInteger)formatter.Deserialize(stream);
+					_mask = (BigInteger)formatter.Deserialize(stream);
+					_acceptingPredicates = (IList<BigInteger>)formatter.Deserialize(stream);
+					_rejectingPredicates = (IList<BigInteger>)formatter.Deserialize(stream);
+				}
 			}
-			LearnUntilBeStable(allAsts, seedAsts, seedAcceptedElements.ToList(), writer);
 
 			var count = 0;
 			var sumTime = Environment.TickCount;
@@ -349,7 +391,8 @@ namespace Occf.Learner.Core.Tests {
 				string groupKey = null;
 				int iGroupKey = 0;
 				var rejectingFunctions = LearnRejectingFunction();
-				groupKey = LearnAcceptingFunction(acceptingFunctions, rejectingFunctions, ref iGroupKey, ref failedClassifier);
+				groupKey = LearnAcceptingFunction(
+						acceptingFunctions, rejectingFunctions, ref iGroupKey, ref failedClassifier);
 				if (failedClassifier == null) {
 					_acceptingPredicates = acceptingFunctions;
 					_rejectingPredicates = rejectingFunctions;

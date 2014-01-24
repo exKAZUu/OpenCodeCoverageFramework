@@ -1,3 +1,21 @@
+#region License
+
+// Copyright (C) 2011-2014 Kazunori Sakamoto
+// 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#endregion
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -12,11 +30,13 @@ using ParserTests;
 namespace Occf.Learner.Core.Tests.Experiments {
 	[TestFixture]
 	public class JavaScriptExperiment {
-		private readonly StreamWriter _writer = File.CreateText(@"C:\Users\exKAZUu\Desktop\javascript.txt");
+		private readonly StreamWriter _writer = File.CreateText(
+				@"C:\Users\exKAZUu\Desktop\javascript.txt");
 
 		public static Processor Processor =
 				new MemoryCacheProcessor(ProcessorLoader.JavaScriptUsingAntlr3);
-				//new MemoryCacheProcessor(new FileCacheProcessor(ProcessorLoader.JavaScriptUsingAntlr3));
+
+		//new MemoryCacheProcessor(new FileCacheProcessor(ProcessorLoader.JavaScriptUsingAntlr3));
 
 		private static IEnumerable<TestCaseData> TestCases {
 			get {
@@ -36,25 +56,35 @@ namespace Occf.Learner.Core.Tests.Experiments {
 				};
 				const string langName = "JavaScript";
 				var learningSets = new[] {
-					Tuple.Create(Fixture.GetInputProjectPath(langName, "bootstrap"),
+					Tuple.Create(
+							Fixture.GetInputProjectPath(langName, "bootstrap"),
 							new List<string> { Fixture.GetInputCodePath(langName, "seed.js"), }),
-					Tuple.Create(Fixture.GetInputProjectPath(langName, "browser-sync"),
+					Tuple.Create(
+							Fixture.GetInputProjectPath(langName, "browser-sync"),
 							new List<string> { Fixture.GetInputCodePath(langName, "seed.js"), }),
-					Tuple.Create(Fixture.GetInputProjectPath(langName, "cheet.js"),
+					Tuple.Create(
+							Fixture.GetInputProjectPath(langName, "cheet.js"),
 							new List<string> { Fixture.GetInputCodePath(langName, "seed.js"), }),
-					Tuple.Create(Fixture.GetInputProjectPath(langName, "clmtrackr"),
+					Tuple.Create(
+							Fixture.GetInputProjectPath(langName, "clmtrackr"),
 							new List<string> { Fixture.GetInputCodePath(langName, "seed.js"), }),
-					Tuple.Create(Fixture.GetInputProjectPath(langName, "countUp.js"),
+					Tuple.Create(
+							Fixture.GetInputProjectPath(langName, "countUp.js"),
 							new List<string> { Fixture.GetInputCodePath(langName, "seed.js"), }),
-					Tuple.Create(Fixture.GetInputProjectPath(langName, "fit.js"),
+					Tuple.Create(
+							Fixture.GetInputProjectPath(langName, "fit.js"),
 							new List<string> { Fixture.GetInputCodePath(langName, "seed.js"), }),
-					Tuple.Create(Fixture.GetInputProjectPath(langName, "gulp"),
+					Tuple.Create(
+							Fixture.GetInputProjectPath(langName, "gulp"),
 							new List<string> { Fixture.GetInputCodePath(langName, "seed.js"), }),
-					Tuple.Create(Fixture.GetInputProjectPath(langName, "ionic"),
+					Tuple.Create(
+							Fixture.GetInputProjectPath(langName, "ionic"),
 							new List<string> { Fixture.GetInputCodePath(langName, "seed.js"), }),
-					Tuple.Create(Fixture.GetInputProjectPath(langName, "jQuery-File-Upload"),
+					Tuple.Create(
+							Fixture.GetInputProjectPath(langName, "jQuery-File-Upload"),
 							new List<string> { Fixture.GetInputCodePath(langName, "seed.js"), }),
-					Tuple.Create(Fixture.GetInputProjectPath(langName, "my-mind"),
+					Tuple.Create(
+							Fixture.GetInputProjectPath(langName, "my-mind"),
 							new List<string> { Fixture.GetInputCodePath(langName, "seed.js"), }),
 				};
 				foreach (var exp in exps) {
@@ -70,7 +100,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 				BitLearningExperimentGroupingWithId exp, string projectPath, IList<string> seedPaths) {
 			var allPaths = Directory.GetFiles(projectPath, "*.js", SearchOption.AllDirectories)
 					.ToList();
-			exp.AutomaticallyLearnUntilBeStable(allPaths, seedPaths, _writer);
+			exp.AutomaticallyLearnUntilBeStable(allPaths, seedPaths, _writer, projectPath);
 			Assert.That(exp.WrongCount, Is.EqualTo(0));
 		}
 	}

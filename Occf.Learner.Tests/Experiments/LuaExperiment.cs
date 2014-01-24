@@ -98,7 +98,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 				BitLearningExperimentGroupingWithId exp, string projectPath, IList<string> seedPaths) {
 			var allPaths = Directory.GetFiles(projectPath, "*.lua", SearchOption.AllDirectories)
 					.ToList();
-			exp.AutomaticallyLearnUntilBeStable(allPaths, seedPaths, _writer);
+			exp.AutomaticallyLearnUntilBeStable(allPaths, seedPaths, _writer, projectPath);
 			//if (exp.WrongCount > 0) {
 			//	Console.WriteLine("--------------- WronglyAcceptedElements ---------------");
 			//	foreach (var we in exp.WronglyAcceptedElements) {
