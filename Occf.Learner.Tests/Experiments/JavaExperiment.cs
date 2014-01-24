@@ -159,8 +159,8 @@ namespace Occf.Learner.Core.Tests.Experiments {
 		public IEnumerable<XElement> SelectBooleanExpressions(XElement e) {
 			var expressions = e.Descendants("expression")
 					.Where(
-							e_ => IsIfExpression(e_) || IsWhileExpression(e_) ||
-							      IsDoExpression(e_) || IsForExpression(e_) || IsPreconditionsCheckArgument(e_))
+							e_ => IsIf(e_) || IsWhile(e_) ||
+							      IsDoWhile(e_) || IsFor(e_) || IsCheckArgument(e_))
 					.Where(e_ => !IsChild(e_, IsCatchBlock));
 			return expressions;
 		}
@@ -174,35 +174,35 @@ namespace Occf.Learner.Core.Tests.Experiments {
 			return e.Ancestors().Any(isCatchBlock);
 		}
 
-		public bool IsIfExpression(XElement e) {
+		public bool IsIf(XElement e) {
 			// if (cond) { .. snip .. }
 			XElement p = e.Parent, pp = p.Parent;
 			return p.Name() == "parExpression" && pp.Name() == "statement"
 			       && pp.FirstElementOrDefault().TokenText() == "if";
 		}
 
-		public bool IsWhileExpression(XElement e) {
+		public bool IsWhile(XElement e) {
 			// while (cond) { .. snip .. }
 			XElement p = e.Parent, pp = p.Parent;
 			return p.Name() == "parExpression" && pp.Name() == "statement"
 			       && pp.FirstElementOrDefault().TokenText() == "while";
 		}
 
-		public bool IsDoExpression(XElement e) {
+		public bool IsDoWhile(XElement e) {
 			// do { .. snip .. } while (cond);
 			XElement p = e.Parent, pp = p.Parent;
 			return p.Name() == "parExpression" && pp.Name() == "statement"
 			       && pp.FirstElementOrDefault().TokenText() == "do";
 		}
 
-		public bool IsForExpression(XElement e) {
+		public bool IsFor(XElement e) {
 			// do { .. snip .. } while (cond);
 			var p = e.Parent;
 			return p.Name() == "forstatement"
 			       && p.Elements().Count(e_ => e_.TokenText() == ";") >= 2;
 		}
 
-		public bool IsPreconditionsCheckArgument(XElement e) {
+		public bool IsCheckArgument(XElement e) {
 			// Preconditions.checkArgument(cond, msg);
 			var primary = e.Parent.Parent.Parent.Parent;
 			return primary.Name() == "primary"
