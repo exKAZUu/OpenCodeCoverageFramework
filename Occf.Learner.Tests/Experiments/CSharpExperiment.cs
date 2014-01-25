@@ -309,7 +309,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 			}
 
 			// 空文を除外
-			if (e2 != null && e2.Element("empty_statement") != null) {
+			if (e.TokenText() == ";") {
 				return false;
 			}
 			return true;
@@ -386,8 +386,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 		protected override bool ProtectedIsAcceptedUsingOracle(XElement e) {
 			// 空文を除外
-			var e2 = e.Element("embedded_statement");
-			if (e2 != null && e2.Element("empty_statement") != null) {
+			if (e.TokenText() == ";") {
 				return true;
 			}
 			return false;
