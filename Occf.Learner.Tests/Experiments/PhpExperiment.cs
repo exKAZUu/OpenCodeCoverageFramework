@@ -32,8 +32,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 	public class PhpExperiment {
 		private readonly StreamWriter _writer = File.CreateText(@"C:\Users\exKAZUu\Desktop\php.txt");
 
-		public static Processor Processor =
-				new MemoryCacheProcessor(ProcessorLoader.PhpUsingAntlr3);
+		public static Processor Processor = ProcessorLoader.PhpUsingAntlr3;
 
 		//new MemoryCacheProcessor(new FileCacheProcessor(ProcessorLoader.PhpUsingAntlr3));
 
@@ -100,6 +99,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 			var allPaths = Directory.GetFiles(projectPath, "*.php", SearchOption.AllDirectories)
 					.ToList();
 			exp.AutomaticallyLearnUntilBeStable(allPaths, seedPaths, _writer, projectPath);
+			exp.Clear();
 			Assert.That(exp.WrongCount, Is.EqualTo(0));
 		}
 

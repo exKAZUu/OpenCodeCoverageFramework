@@ -33,8 +33,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 		private readonly StreamWriter _writer = File.CreateText(
 				@"C:\Users\exKAZUu\Desktop\javascript.txt");
 
-		public static Processor Processor =
-				new MemoryCacheProcessor(ProcessorLoader.JavaScriptUsingAntlr3);
+		public static Processor Processor = ProcessorLoader.JavaScriptUsingAntlr3;
 
 		//new MemoryCacheProcessor(new FileCacheProcessor(ProcessorLoader.JavaScriptUsingAntlr3));
 
@@ -101,6 +100,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 			var allPaths = Directory.GetFiles(projectPath, "*.js", SearchOption.AllDirectories)
 					.ToList();
 			exp.AutomaticallyLearnUntilBeStable(allPaths, seedPaths, _writer, projectPath);
+			exp.Clear();
 			Assert.That(exp.WrongCount, Is.EqualTo(0));
 		}
 	}

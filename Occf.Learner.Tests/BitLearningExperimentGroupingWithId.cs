@@ -96,6 +96,39 @@ namespace Occf.Learner.Core.Tests {
 			_initialElementNames = elementNames.ToHashSet();
 		}
 
+		public void Clear() {
+			_elementNames.Clear();
+			_idealAccepted.Clear();
+			_idealRejected.Clear();
+			_acceptedTrainingSet.Clear();
+			_rejectedTrainingNodes.Clear();
+			if (_feature2Element != null) {
+				_feature2Element.Clear();
+			}
+			_masterPredicates.Clear();
+			_groupKeys.Clear();
+			_acceptingPredicates.Clear();
+			_rejectingPredicates.Clear();
+			SuspiciousAcceptedInAccepting.Clear();
+			SuspiciousRejectedInAccepting.Clear();
+			SuspiciousRejectedInRejecting.Clear();
+			_wronglyAcceptedFeatures.Clear();
+			_wronglyRejectedFeatures.Clear();
+			_elementNames = null;
+			_idealAccepted = null;
+			_idealRejected = null;
+			_acceptedTrainingSet = null;
+			_rejectedTrainingNodes = null;
+			_feature2Element = null;
+			_masterPredicates = null;
+			_groupKeys = null;
+			_acceptingPredicates = null;
+			_rejectingPredicates = null;
+			SuspiciousAcceptedInAccepting = null;
+			SuspiciousRejectedInAccepting = null;
+			SuspiciousRejectedInRejecting = null;
+		}
+
 		private string CommonSuffix(string s1, string s2) {
 			int count = Math.Min(s1.Length, s2.Length);
 			var ret = "";

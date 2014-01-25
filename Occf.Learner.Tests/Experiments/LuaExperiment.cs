@@ -32,8 +32,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 	public class LuaExperiment {
 		private readonly StreamWriter _writer = File.CreateText(@"C:\Users\exKAZUu\Desktop\lua.txt");
 
-		public static Processor Processor =
-				new MemoryCacheProcessor(ProcessorLoader.LuaUsingAntlr3);
+		public static Processor Processor = ProcessorLoader.LuaUsingAntlr3;
 
 		//new MemoryCacheProcessor(new FileCacheProcessor(ProcessorLoader.LuaUsingAntlr3));
 
@@ -115,6 +114,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 			//		Console.WriteLine("---------------------------------------------");
 			//	}
 			//}
+			exp.Clear();
 			Assert.That(exp.WrongCount, Is.EqualTo(0));
 		}
 

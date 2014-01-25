@@ -22,7 +22,6 @@ using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 using Code2Xml.Core;
-using Code2Xml.Core.Processors;
 using NUnit.Framework;
 using Paraiba.Xml.Linq;
 using ParserTests;
@@ -32,8 +31,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 	public class JavaExperiment {
 		private readonly StreamWriter _writer = File.CreateText(@"C:\Users\exKAZUu\Desktop\java.txt");
 
-		public static Processor Processor =
-				new MemoryCacheProcessor(ProcessorLoader.JavaUsingAntlr3);
+		public static Processor Processor = ProcessorLoader.JavaUsingAntlr3;
 
 		//new MemoryCacheProcessor(new FileCacheProcessor(ProcessorLoader.JavaUsingAntlr3));
 
@@ -116,6 +114,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 					Console.WriteLine("---------------------------------------------");
 				}
 			}
+			exp.Clear();
 			Assert.That(exp.WrongCount, Is.EqualTo(0));
 		}
 

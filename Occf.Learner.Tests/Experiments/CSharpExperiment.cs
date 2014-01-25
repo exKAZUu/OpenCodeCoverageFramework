@@ -31,8 +31,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 	public class CSharpExperiment {
 		private readonly StreamWriter _writer = File.CreateText(@"C:\Users\exKAZUu\Desktop\cs.txt");
 
-		public static Processor Processor =
-				new MemoryCacheProcessor(ProcessorLoader.CSharpUsingAntlr3);
+		public static Processor Processor = ProcessorLoader.CSharpUsingAntlr3;
 
 		//new MemoryCacheProcessor(new FileCacheProcessor(ProcessorLoader.CSharpUsingAntlr3));
 
@@ -99,6 +98,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 			var allPaths = Directory.GetFiles(projectPath, "*.cs", SearchOption.AllDirectories)
 					.ToList();
 			exp.AutomaticallyLearnUntilBeStable(allPaths, seedPaths, _writer, projectPath);
+			exp.Clear();
 			Assert.That(exp.WrongCount, Is.EqualTo(0));
 		}
 
