@@ -197,7 +197,7 @@ namespace Occf.Learner.Core.Tests {
 		public void AutomaticallyLearnUntilBeStable(
 				ICollection<string> allPaths, ICollection<string> seedPaths, StreamWriter writer,
 				string projectPath) {
-			var cacheFile = new FileInfo(Path.Combine(projectPath ?? "", GetType().Name + ".cache_data"));
+			var cacheFile = new FileInfo(Path.Combine(projectPath ?? "", GetType().Name + ".occf_cache_data"));
 			if (string.IsNullOrEmpty(projectPath) || !cacheFile.Exists) {
 				var allAsts = allPaths.Select(path => Processor.GenerateXml(new FileInfo(path), null, true));
 				var seedAsts = seedPaths.Select(path => Processor.GenerateXml(new FileInfo(path), null, true))
