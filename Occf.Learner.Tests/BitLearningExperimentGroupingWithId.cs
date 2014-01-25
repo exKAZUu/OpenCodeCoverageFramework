@@ -534,7 +534,7 @@ namespace Occf.Learner.Core.Tests {
 						// AcceptedÇ∆ã§í çÄÇ™ëΩÇ¢Ç‡ÇÃÇë_Ç§
 						rejectedInAccepting[iClassifier].Add(
 								new SuspiciousTarget {
-									BitsCount = -CountAcceptingBits(feature),
+									BitsCount = -CountAcceptingBits(feature & acceptingPredicates[iClassifier]),
 									Feature = feature,
 									Classifier = classifier,
 								});
@@ -578,7 +578,7 @@ namespace Occf.Learner.Core.Tests {
 						// AcceptedÇ∆ã§í çÄÇ™ëΩÇ¢Ç‡ÇÃÇë_Ç§
 						rejectedInAccepting[iClassifier].Add(
 								new SuspiciousTarget {
-									BitsCount = -CountAcceptingBits(feature),
+									BitsCount = -CountAcceptingBits(feature & acceptingPredicates[iClassifier]),
 									Feature = feature,
 									Classifier = classifier,
 								});
@@ -634,16 +634,16 @@ namespace Occf.Learner.Core.Tests {
 				//		suspiciousRejectedListByRejecting, rejectingPredicates, _rejectingMask, _rejectingMask);
 				//suspiciousAcceptedInAccepting = FlattenSuspiciousTargetsList(acceptedInAccepting);
 				//suspiciousRejectedInAccepting = FlattenSuspiciousTargetsList(rejectedInAccepting);
-				SuspiciousRejectedInRejecting = FlattenSuspiciousTargetsList(rejectedInRejecting);
 				SuspiciousAcceptedInAccepting = SelectVariousElements(acceptedInAccepting, _acceptingMask);
 				SuspiciousRejectedInAccepting = SelectVariousElements(rejectedInAccepting, _acceptingMask);
-				//suspiciousRejectedInRejecting = SelectVariousElements(rejectedInRejecting, _rejectingMask);
+				SuspiciousRejectedInRejecting = FlattenSuspiciousTargetsList(rejectedInRejecting);
+				//SuspiciousRejectedInRejecting = SelectVariousElements(rejectedInRejecting, _rejectingMask);
 				break;
 			case 1:
 				SuspiciousAcceptedInAccepting = SelectSuspiciousElementsWithMask(
-						acceptedInAccepting, BigInteger.Zero, _acceptingMask);
+						acceptedInAccepting, BigInteger.Zero, _mask);
 				SuspiciousRejectedInAccepting = SelectSuspiciousElementsWithMask(
-						rejectedInAccepting, BigInteger.Zero, _acceptingMask);
+						rejectedInAccepting, _acceptingMask, _acceptingMask);
 				SuspiciousRejectedInRejecting = SelectSuspiciousElementsWithMask(
 						rejectedInRejecting, _rejectingMask, _rejectingMask);
 				//suspiciousAcceptedByAccepting = SelectSuspiciousElements(
@@ -652,6 +652,7 @@ namespace Occf.Learner.Core.Tests {
 				//		suspiciousRejectedListByAccepting, acceptingPredicates, BigInteger.Zero, BigInteger.Zero);
 				//suspiciousRejectedByRejecting = SelectSuspiciousElements(
 				//		suspiciousRejectedListByRejecting, rejectingPredicates, _rejectingMask, _rejectingMask);
+				return -1;
 				break;
 			case 2:
 				SuspiciousAcceptedInAccepting = SelectSuspiciousElementsWithMask(
