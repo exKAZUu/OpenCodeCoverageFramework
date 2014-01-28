@@ -849,11 +849,11 @@ namespace Occf.Learner.Core.Tests {
 			}
 		}
 
-		public static IEnumerable<XElement> Siblings(this XElement element, int length) {
-			foreach (var e in element.ElementsBeforeSelf().Reverse().Take(length).Reverse()) {
+		public static IEnumerable<XElement> Siblings(this XElement element, int eachLength) {
+			foreach (var e in element.ElementsBeforeSelf().Reverse().Take(eachLength).Reverse()) {
 				yield return e;
 			}
-			foreach (var e in element.ElementsAfterSelf().Take(length)) {
+			foreach (var e in element.ElementsAfterSelf().Take(eachLength)) {
 				yield return e;
 			}
 		}
