@@ -100,7 +100,7 @@ namespace Occf.Learner.Core.Tests {
 				Target = root.AncestorsAndSelf(-depth).Last();
 				Elements = Target.SiblingsAndSelf().ToList();
 			} else {
-				Elements = root.DescendantsElements(depth).Last();
+				Elements = root.Descendants(depth).Last();
 			}
 		}
 	}
@@ -553,16 +553,6 @@ namespace Occf.Learner.Core.Tests {
 			return ret;
 		}
 
-		public static string NameWithId(this XElement element) {
-			return element.Name() + element.Attribute("id").Value;
-		}
-
-		public static string NameOrTokenWithId(this XElement element) {
-			return element.IsTokenSet()
-					? element.Name() + element.Attribute("id").Value + element.TokenText()
-					: element.Name() + element.Attribute("id").Value;
-		}
-
 		public static HashSet<string> GetUnionKeys(
 				this IEnumerable<XElement> targets, int length, bool inner = true, bool outer = true) {
 			var commonKeys = new HashSet<string>();
@@ -839,58 +829,6 @@ namespace Occf.Learner.Core.Tests {
 			return ret;
 		}
 
-		public static IEnumerable<XElement> FirstDescendants(this XElement element) {
-			while (true) {
-				element = element.FirstElementOrDefault();
-				if (element == null) {
-					yield break;
-				}
-				yield return element;
-			}
-		}
-
-		public static IEnumerable<XElement> Siblings(this XElement element, int eachLength) {
-			foreach (var e in element.ElementsBeforeSelf().Reverse().Take(eachLength).Reverse()) {
-				yield return e;
-			}
-			foreach (var e in element.ElementsAfterSelf().Take(eachLength)) {
-				yield return e;
-			}
-		}
-
-		public static IEnumerable<XElement> Siblings(this XElement element) {
-			foreach (var e in element.ElementsBeforeSelf()) {
-				yield return e;
-			}
-			foreach (var e in element.ElementsAfterSelf()) {
-				yield return e;
-			}
-		}
-
-		public static IEnumerable<XElement> SiblingsAndSelf(this XElement element) {
-			var p = element.Parent;
-			if (p == null) {
-				return Enumerable.Repeat(element, 1);
-			}
-			return p.Elements();
-		}
-
-		public static IEnumerable<XElement> AncestorsAndSelf(this XElement element, int depthCount) {
-			for (int count = depthCount; count >= 0 && element != null; count--) {
-				yield return element;
-				element = element.Parent;
-			}
-		}
-
-		public static IEnumerable<List<XElement>> DescendantsElements(
-				this XElement element, int depthCount) {
-			var elements = new List<XElement> { element };
-			for (int count = depthCount - 1; count >= 0; count--) {
-				elements = elements.Where(e => !e.IsTokenSet()).Elements().ToList();
-				yield return elements;
-			}
-		}
-
 		public static IEnumerable<DepthBasedPredicate> InferDepthBasedPredicate(
 				XElement root, int depthCount) {
 			yield break;
@@ -920,7 +858,7 @@ namespace Occf.Learner.Core.Tests {
 			}
 
 			depth = 0;
-			foreach (var elements in root.DescendantsElements(depthCount)) {
+			foreach (var elements in root.Descendants(depthCount)) {
 				depth++;
 				foreach (var predicate in ContainingTokenTextPredicate.Create(depth, elements)) {
 					yield return predicate;

@@ -236,45 +236,5 @@ statement
 				yield return new MustNotHaveFilter<T>(elementName, deniedProperties, extractor);
 			}
 		}
-
-		public static string NameOrTokenText(this XElement element) {
-			return element.IsTokenSet() ? element.TokenText() : element.Name();
-		}
-
-		public static IEnumerable<XElement> AncestorsOfOnlyChildAndSelf(this XElement element) {
-			yield return element;
-			while (element.Parent != null && element.Parent.Elements().Count() == 1) {
-				element = element.Parent;
-				yield return element;
-			}
-		}
-
-		public static IEnumerable<XElement> AncestorsOfOnlyChild(this XElement element) {
-			while (element.Parent != null && element.Parent.Elements().Count() == 1) {
-				element = element.Parent;
-				yield return element;
-			}
-		}
-
-		public static IEnumerable<XElement> DescendantsOfOnlyChildAndSelf(this XElement element) {
-			yield return element;
-			while (element.Elements().Count() == 1) {
-				element = element.Elements().First();
-				if (element.IsTokenSet()) {
-					break;
-				}
-				yield return element;
-			}
-		}
-
-		public static IEnumerable<XElement> DescendantsOfOnlyChild(this XElement element) {
-			while (element.Elements().Count() == 1) {
-				element = element.Elements().First();
-				if (element.IsTokenSet()) {
-					break;
-				}
-				yield return element;
-			}
-		}
 	}
 }
