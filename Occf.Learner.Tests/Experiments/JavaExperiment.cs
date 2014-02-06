@@ -40,16 +40,16 @@ namespace Occf.Learner.Core.Tests.Experiments {
 				var exps = new BitLearningExperimentGroupingWithId[] {
 					new JavaComplexStatementExperiment(),
 					new JavaSuperComplexBranchExperiment(),
-					new JavaComplexBranchExperiment(),
-					new JavaIfExperiment(),
-					new JavaWhileExperiment(),
-					new JavaDoWhileExperiment(),
-					new JavaForExperiment(),
-					new JavaPreconditionsExperiment(),
-					new JavaStatementExperiment(),
-					new JavaBlockExperiment(),
-					new JavaLabeledStatementExperiment(),
-					new JavaEmptyStatementExperiment(),
+					//new JavaComplexBranchExperiment(),
+					//new JavaIfExperiment(),
+					//new JavaWhileExperiment(),
+					//new JavaDoWhileExperiment(),
+					//new JavaForExperiment(),
+					//new JavaPreconditionsExperiment(),
+					//new JavaStatementExperiment(),
+					//new JavaBlockExperiment(),
+					//new JavaLabeledStatementExperiment(),
+					//new JavaEmptyStatementExperiment(),
 				};
 				const string langName = "Java";
 				var learningSets = new[] {

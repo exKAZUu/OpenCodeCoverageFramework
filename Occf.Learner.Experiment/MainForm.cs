@@ -141,7 +141,7 @@ namespace Occf.Learner.Experiment {
 					menuItem.Checked = true;
 				};
 			}
-			menuItems[0].PerformClick();
+			menuItems[1].PerformClick();
 		}
 
 		private void btnInfer_Click(object sender, EventArgs e) {
@@ -501,12 +501,7 @@ namespace Occf.Learner.Experiment {
 
 			MessageBox.Show("測定対象と判断された要素を確認して下さい．", "", MessageBoxButtons.OK);
 			foreach (var featureAndElement in acceptedFeatureAndElements) {
-				var text = _activeExperiment.GetType().Name.Contains("Statement")
-						? featureAndElement.Item2.Text()
-						: featureAndElement.Item2.Text()
-						  + "\r\n------------------------------------------------------------------------\r\n" +
-						  (featureAndElement.Item2.AncestorsAndSelf().Skip(5).FirstOrDefault()
-						   ?? featureAndElement.Item2).Text();
+				var text = CreateText(featureAndElement);
 				var accepted = MessageBox.Show(text, "これは測定対象ですか？", MessageBoxButtons.YesNo) == DialogResult.Yes;
 				if (accepted) {
 					acceptedFeature.Add(featureAndElement.Item1);
@@ -517,12 +512,7 @@ namespace Occf.Learner.Experiment {
 			}
 			MessageBox.Show("測定対象ではないと判断された要素を確認して下さい．", "", MessageBoxButtons.OK);
 			foreach (var featureAndElement in rejectedFeatureAndElements) {
-				var text = _activeExperiment.GetType().Name.Contains("Statement")
-						? featureAndElement.Item2.Text()
-						: featureAndElement.Item2.Text()
-						  + "\r\n------------------------------------------------------------------------\r\n" +
-						  (featureAndElement.Item2.AncestorsAndSelf().Skip(5).FirstOrDefault()
-						   ?? featureAndElement.Item2).Text();
+				var text = CreateText(featureAndElement);
 				var accepted = MessageBox.Show(text, "これは測定対象ですか？", MessageBoxButtons.YesNo) == DialogResult.Yes;
 				if (accepted) {
 					acceptedFeature.Add(featureAndElement.Item1);
@@ -535,8 +525,28 @@ namespace Occf.Learner.Experiment {
 			return _activeExperiment.AddNewElements(acceptedFeature.ToHashSet());
 		}
 
-		private void btnGoToNext_click(object sender, EventArgs e) {
+		private string CreateText(Tuple<BigInteger, XElement> featureAndElement) {
+			var t = (featureAndElement.Item2.AncestorsAndSelf().Skip(2).FirstOrDefault()
+			         ?? featureAndElement.Item2).Text();
+			var tt = " ** " + t + " ** ";
+			var t2 = tt.Replace(
+					featureAndElement.Item2.Text(), " ***** " + featureAndElement.Item2.Text() + " ***** ");
+			var text = _activeExperiment.GetType().Name.Contains("Statement")
+					? featureAndElement.Item2.Text()
+					: featureAndElement.Item2.Text()
+					  + "\r\n------------------------------------------------------------------------\r\n" +
+					  (featureAndElement.Item2.AncestorsAndSelf().Skip(2).FirstOrDefault()
+					   ?? featureAndElement.Item2).Text().Replace(t, tt).Replace(tt, t2)
+					  + "\r\n------------------------------------------------------------------------\r\n" +
+					  (featureAndElement.Item2.AncestorsAndSelf().Skip(5).FirstOrDefault()
+					   ?? featureAndElement.Item2).Text().Replace(t, tt).Replace(tt, t2)
+					  + "\r\n------------------------------------------------------------------------\r\n" +
+					  (featureAndElement.Item2.AncestorsAndSelf().Skip(10).FirstOrDefault()
+					   ?? featureAndElement.Item2).Text().Replace(t, tt).Replace(tt, t2);
+			return text;
 		}
+
+		private void btnGoToNext_click(object sender, EventArgs e) {}
 
 		private void modeToolStripMenuItem_Click(object sender, EventArgs e) {}
 	}

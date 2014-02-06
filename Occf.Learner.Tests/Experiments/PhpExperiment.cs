@@ -41,16 +41,16 @@ namespace Occf.Learner.Core.Tests.Experiments {
 				var exps = new BitLearningExperimentGroupingWithId[] {
 					new PhpComplexStatementExperiment(),
 					new PhpSuperComplexBranchExperiment(),
-					new PhpComplexBranchExperiment(),
-					new PhpIfExperiment(),
-					new PhpWhileExperiment(),
-					new PhpDoWhileExperiment(),
-					new PhpForExperiment(),
-					new PhpEchoExperiment(),
-					new PhpStatementExperiment(),
-					new PhpBlockExperiment(),
-					new PhpLabeledStatementExperiment(),
-					new PhpEmptyStatementExperiment(),
+					//new PhpComplexBranchExperiment(),
+					//new PhpIfExperiment(),
+					//new PhpWhileExperiment(),
+					//new PhpDoWhileExperiment(),
+					//new PhpForExperiment(),
+					//new PhpEchoExperiment(),
+					//new PhpStatementExperiment(),
+					//new PhpBlockExperiment(),
+					//new PhpLabeledStatementExperiment(),
+					//new PhpEmptyStatementExperiment(),
 				};
 				const string langName = "Php";
 				var learningSets = new[] {

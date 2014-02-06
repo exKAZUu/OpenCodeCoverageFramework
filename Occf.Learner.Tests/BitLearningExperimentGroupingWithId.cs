@@ -197,7 +197,8 @@ namespace Occf.Learner.Core.Tests {
 		public void AutomaticallyLearnUntilBeStable(
 				ICollection<string> allPaths, ICollection<string> seedPaths, StreamWriter writer,
 				string projectPath) {
-			var cacheFile = new FileInfo(Path.Combine(projectPath ?? "", GetType().Name + ".occf_cache_data"));
+			var cacheFile = new FileInfo(
+					Path.Combine(projectPath ?? "", GetType().Name + ".occf_cache_data"));
 			if (string.IsNullOrEmpty(projectPath) || !cacheFile.Exists) {
 				var allAsts = allPaths.Select(path => Processor.GenerateXml(new FileInfo(path), null, true));
 				var seedAsts = seedPaths.Select(path => Processor.GenerateXml(new FileInfo(path), null, true))
@@ -219,7 +220,7 @@ namespace Occf.Learner.Core.Tests {
 					Console.WriteLine("buggy");
 				}
 				if (string.IsNullOrEmpty(projectPath) != null) {
-					LearnUntilBeStable(allAsts, seedAsts, seedAcceptedElements.ToList(), writer);
+					LearnUntilBeStable(allAsts, seedAsts, seedAcceptedElements.ToList());
 					var formatter = new BinaryFormatter();
 					using (var stream = cacheFile.OpenWrite()) {
 						formatter.Serialize(stream, _elementNames);
@@ -278,7 +279,10 @@ namespace Occf.Learner.Core.Tests {
 					"Required elements: " + (_acceptedTrainingSet.Count + _rejectedTrainingNodes.Count) + " / "
 					+ (_idealAccepted.Count + _idealRejected.Count));
 			if (writer != null) {
-				writer.WriteLine(_acceptedTrainingSet.Count + _rejectedTrainingNodes.Count);
+				writer.Write(
+						(_acceptedTrainingSet.Count + _rejectedTrainingNodes.Count) + " / "
+						+ (_idealAccepted.Count + _idealRejected.Count));
+				writer.Write(",");
 				writer.Flush();
 			}
 
@@ -288,12 +292,12 @@ namespace Occf.Learner.Core.Tests {
 		public void ManuallyLearnUntilBeStable(
 				IEnumerable<XElement> allAsts, IEnumerable<XElement> seedAsts,
 				IEnumerable<XElement> seedElements) {
-			LearnUntilBeStable(allAsts, seedAsts, seedElements.ToList(), null);
+			LearnUntilBeStable(allAsts, seedAsts, seedElements.ToList());
 		}
 
 		public void LearnUntilBeStable(
 				IEnumerable<XElement> allAsts, IEnumerable<XElement> seedAsts,
-				IList<XElement> seedElements, StreamWriter writer) {
+				IList<XElement> seedElements) {
 			var preparingTime = Environment.TickCount;
 
 			var seedAcceptedElements = GetMostOuterElements(seedElements).ToHashSet();

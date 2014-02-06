@@ -42,16 +42,16 @@ namespace Occf.Learner.Core.Tests.Experiments {
 				var exps = new BitLearningExperimentGroupingWithId[] {
 					new JavaScriptComplexStatementExperiment(),
 					new JavaScriptSuperComplexBranchExperiment(),
-					new JavaScriptComplexBranchExperiment(),
-					new JavaScriptIfExperiment(),
-					new JavaScriptWhileExperiment(),
-					new JavaScriptDoWhileExperiment(),
-					new JavaScriptForExperiment(),
-					new JavaScriptConsoleLogExperiment(),
-					new JavaScriptStatementExperiment(),
-					new JavaScriptBlockExperiment(),
-					new JavaScriptLabeledStatementExperiment(),
-					new JavaScriptEmptyStatementExperiment(),
+					//new JavaScriptComplexBranchExperiment(),
+					//new JavaScriptIfExperiment(),
+					//new JavaScriptWhileExperiment(),
+					//new JavaScriptDoWhileExperiment(),
+					//new JavaScriptForExperiment(),
+					//new JavaScriptConsoleLogExperiment(),
+					//new JavaScriptStatementExperiment(),
+					//new JavaScriptBlockExperiment(),
+					//new JavaScriptLabeledStatementExperiment(),
+					//new JavaScriptEmptyStatementExperiment(),
 				};
 				const string langName = "JavaScript";
 				var learningSets = new[] {

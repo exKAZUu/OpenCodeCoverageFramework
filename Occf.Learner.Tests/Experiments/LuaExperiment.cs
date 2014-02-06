@@ -41,15 +41,15 @@ namespace Occf.Learner.Core.Tests.Experiments {
 				var exps = new BitLearningExperimentGroupingWithId[] {
 					new LuaComplexStatementExperiment(),
 					new LuaSuperComplexBranchExperiment(),
-					new LuaComplexBranchExperiment(),
-					new LuaStatementExperiment(),
-					new LuaIfExperiment(),
-					new LuaWhileExperiment(),
-					new LuaDoWhileExperiment(),
-					new LuaPrintExperiment(),
-					new LuaStatementExperiment(),
-					new LuaLabeledStatementExperiment(),
-					new LuaEmptyStatementExperiment(),
+					//new LuaComplexBranchExperiment(),
+					//new LuaStatementExperiment(),
+					//new LuaIfExperiment(),
+					//new LuaWhileExperiment(),
+					//new LuaDoWhileExperiment(),
+					//new LuaPrintExperiment(),
+					//new LuaStatementExperiment(),
+					//new LuaLabeledStatementExperiment(),
+					//new LuaEmptyStatementExperiment(),
 				};
 				const string langName = "Lua";
 				var learningSets = new[] {

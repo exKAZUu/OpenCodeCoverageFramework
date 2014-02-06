@@ -40,16 +40,16 @@ namespace Occf.Learner.Core.Tests.Experiments {
 				var exps = new BitLearningExperimentGroupingWithId[] {
 					new CSharpComplexStatementExperiment(),
 					new CSharpSuperComplexBranchExperiment(),
-					new CSharpComplexBranchExperiment(),
-					new CSharpIfExperiment(),
-					new CSharpWhileExperiment(),
-					new CSharpDoWhileExperiment(),
-					new CSharpForExperiment(),
-					new CSharpPreconditionsExperiment(),
-					new CSharpStatementExperiment(), 
-					new CSharpBlockExperiment(),
-					new CSharpLabeledStatementExperiment(),
-					new CSharpEmptyStatementExperiment(),
+					//new CSharpComplexBranchExperiment(),
+					//new CSharpIfExperiment(),
+					//new CSharpWhileExperiment(),
+					//new CSharpDoWhileExperiment(),
+					//new CSharpForExperiment(),
+					//new CSharpPreconditionsExperiment(),
+					//new CSharpStatementExperiment(), 
+					//new CSharpBlockExperiment(),
+					//new CSharpLabeledStatementExperiment(),
+					//new CSharpEmptyStatementExperiment(),
 				};
 				const string langName = "CSharp";
 				var learningSets = new[] {
