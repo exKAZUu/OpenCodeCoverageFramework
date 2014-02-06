@@ -13,7 +13,7 @@
 
 int WritePredicate(int id, int type, int value)
 {
-	unsigned char v = (value + 1) | (type << 2);
+	unsigned char v = (((value ? 1 : 0) + 1) & 0x3) | (type << 2);
 	Write(id, v);
 	return value;
 }

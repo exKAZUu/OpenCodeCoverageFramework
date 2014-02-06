@@ -20,7 +20,7 @@ void Write(int id, unsigned char value)
 	unsigned char data[5] = {
 		((unsigned int)id >> 24) & 0xFF, ((unsigned int)id >> 16) & 0xFF,
 		((unsigned int)id >> 8)  & 0xFF, ((unsigned int)id >> 0)  & 0xFF,
-		value
+		value & 0xFF
 	};
 	if (gFile == NULL && !Initialize()) {
 		return;
