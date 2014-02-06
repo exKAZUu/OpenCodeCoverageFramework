@@ -22,7 +22,6 @@ using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 using Code2Xml.Core;
-using Code2Xml.Core.Processors;
 using NUnit.Framework;
 using ParserTests;
 
@@ -62,6 +61,9 @@ namespace Occf.Learner.Core.Tests.Experiments {
 							Fixture.GetInputProjectPath(langName, "MonoTouch.Dialog"),
 							new List<string> { Fixture.GetInputCodePath(langName, "Seed.cs"), }),
 					Tuple.Create(
+							Fixture.GetInputProjectPath(langName, "moq4"),
+							new List<string> { Fixture.GetInputCodePath(langName, "Seed.cs"), }),
+					Tuple.Create(
 							Fixture.GetInputProjectPath(langName, "Nancy"),
 							new List<string> { Fixture.GetInputCodePath(langName, "Seed.cs"), }),
 					Tuple.Create(
@@ -70,18 +72,17 @@ namespace Occf.Learner.Core.Tests.Experiments {
 					Tuple.Create(
 							Fixture.GetInputProjectPath(langName, "NuGetGallery"),
 							new List<string> { Fixture.GetInputCodePath(langName, "Seed.cs"), }),
-					Tuple.Create(Fixture.GetInputProjectPath(langName, "ServiceStack"),
+					Tuple.Create(
+							Fixture.GetInputProjectPath(langName, "ravendb"),
+							new List<string> { Fixture.GetInputCodePath(langName, "Seed.cs"), }),
+					Tuple.Create(
+							Fixture.GetInputProjectPath(langName, "ServiceStack"),
 							new List<string> { Fixture.GetInputCodePath(langName, "Seed.cs"), }),
 					Tuple.Create(
 							Fixture.GetInputProjectPath(langName, "SignalR"),
 							new List<string> { Fixture.GetInputCodePath(langName, "Seed.cs"), }),
 					Tuple.Create(
 							Fixture.GetInputProjectPath(langName, "StarryboundServer"),
-							new List<string> { Fixture.GetInputCodePath(langName, "Seed.cs"), }),
-					Tuple.Create(
-							Fixture.GetInputProjectPath(langName, "moq4"),
-							new List<string> { Fixture.GetInputCodePath(langName, "Seed.cs"), }),
-					Tuple.Create(Fixture.GetInputProjectPath(langName, "ravendb"),
 							new List<string> { Fixture.GetInputCodePath(langName, "Seed.cs"), }),
 				};
 				foreach (var exp in exps) {
