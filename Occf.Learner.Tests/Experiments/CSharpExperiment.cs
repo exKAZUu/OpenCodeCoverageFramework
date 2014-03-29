@@ -32,7 +32,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 		public static Processor Processor = ProcessorLoader.CSharpUsingAntlr3;
 
-		//new MemoryCacheProcessor(new FileCacheProcessor(ProcessorLoader.CSharpUsingAntlr3));
+		//new MemoryCacheCstGenerator(new FileCacheCstGenerator(ProcessorLoader.CSharpUsingAntlr3));
 
 		private static IEnumerable<TestCaseData> TestCases {
 			get {

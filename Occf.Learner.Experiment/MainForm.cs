@@ -115,7 +115,7 @@ namespace Occf.Learner.Experiment {
 					lvMarkedElements.Items.Clear();
 				};
 				// Set default processor
-				if (processor is JavaProcessorUsingAntlr3) {
+				if (processor is JavaCstGeneratorUsingAntlr3) {
 					menuItem.PerformClick();
 				}
 			}

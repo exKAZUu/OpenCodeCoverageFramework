@@ -34,7 +34,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 		public static Processor Processor = ProcessorLoader.PhpUsingAntlr3;
 
-		//new MemoryCacheProcessor(new FileCacheProcessor(ProcessorLoader.PhpUsingAntlr3));
+		//new MemoryCacheCstGenerator(new FileCacheCstGenerator(ProcessorLoader.PhpUsingAntlr3));
 
 		private static IEnumerable<TestCaseData> TestCases {
 			get {

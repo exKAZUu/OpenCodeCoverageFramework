@@ -35,7 +35,7 @@ namespace Occf.Learner.Core.Tests.Experiments {
 
 		public static Processor Processor = ProcessorLoader.JavaScriptUsingAntlr3;
 
-		//new MemoryCacheProcessor(new FileCacheProcessor(ProcessorLoader.JavaScriptUsingAntlr3));
+		//new MemoryCacheCstGenerator(new FileCacheCstGenerator(ProcessorLoader.JavaScriptUsingAntlr3));
 
 		private static IEnumerable<TestCaseData> TestCases {
 			get {

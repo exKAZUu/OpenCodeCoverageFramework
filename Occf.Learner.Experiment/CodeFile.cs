@@ -4,6 +4,7 @@ using System.Linq;
 using System.Xml.Linq;
 using Code2Xml.Core;
 using Code2Xml.Core.Location;
+using Code2Xml.Core.Processors;
 using Paraiba.Linq;
 using Paraiba.Text;
 
@@ -19,10 +20,10 @@ namespace Occf.Learner.Experiment {
 
 		public IDictionary<CodeRange, XElement> Range2Elements { get; set; }
 
-		public CodeFile(Processor processor, FileInfo info) {
+		public CodeFile(CstGenerator cstGenerator, FileInfo info) {
 			Info = info;
 			Code = GuessEncoding.ReadAllText(info.FullName);
-			Ast = processor.GenerateXml(Code);
+			Ast = cstGenerator.GenerateTree(Code);
 			Range2Elements = new Dictionary<CodeRange, XElement>();
 		}
 
