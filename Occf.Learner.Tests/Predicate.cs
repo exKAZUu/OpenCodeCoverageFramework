@@ -18,938 +18,397 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Numerics;
 using System.Xml.Linq;
 using Code2Xml.Core;
-using Paraiba.Linq;
-using Paraiba.Xml.Linq;
 
 namespace Occf.Learner.Core.Tests {
-	public class DepthInfo {
-		public XElement Target { get; private set; }
-		public IList<XElement> Elements { get; private set; }
-
-		private string _location;
-
-		public string Location {
-			get {
-				if (_location == null) {
-					_location = LocatingPredicate.Locate(Target);
-				}
-				return _location;
-			}
-		}
-
-		private ISet<string> _tokenTexts;
-
-		public ISet<string> TokenTexts {
-			get {
-				return _tokenTexts ?? (_tokenTexts = ContainingTokenTextPredicate.GetTokenTexts(Elements));
-			}
-		}
-
-		private ISet<string> _elementNames;
-
-		public ISet<string> ElementNames {
-			get {
-				return _elementNames ?? (_elementNames = ContainingTokenTextPredicate.GetTokenTexts(Elements));
-			}
-		}
-
-		private string _elementSequence;
-
-		public string ElementSequence {
-			get {
-				return _elementSequence
-				       ?? (_elementSequence = MatchingElementSequencePredicate.GetSequence(Elements));
-			}
-		}
-
-		private string _beforeElementSequence;
-
-		public string BeforeElementSequence {
-			get {
-				return _beforeElementSequence
-				       ?? (_beforeElementSequence = MatchingBeforeElementSequencePredicate.GetSequence(Target));
-			}
-		}
-
-		private string _afterElementSequence;
-
-		public string AfterElementSequence {
-			get {
-				return _afterElementSequence
-				       ?? (_afterElementSequence = MatchingAfterElementSequencePredicate.GetSequence(Target));
-			}
-		}
-
-		private string _elementAndTokenSequence;
-
-		public string ElementAndTokenSequence {
-			get {
-				return _elementAndTokenSequence
-				       ?? (_elementAndTokenSequence =
-						       MatchingElementAndTokenSequencePredicate.GetSequence(Elements));
-			}
-		}
-
-		public DepthInfo(XElement root, int depth) {
-			if (depth <= 0) {
-				Target = root.AncestorsAndSelf(-depth).Last();
-				Elements = Target.SiblingsAndSelf().ToList();
-			} else {
-				Elements = root.Descendants(depth).Last();
-			}
-		}
-	}
-
-	public abstract class Predicate {
-		public abstract bool Check(DepthInfo info);
-	}
-
-	public abstract class DepthBasedPredicate : Predicate {
-		public int Depth { get; private set; }
-
-		protected DepthBasedPredicate(int depth) {
-			Depth = depth;
-		}
-	}
-
-	public class LocatingPredicate : DepthBasedPredicate {
-		public string Location { get; private set; }
-
-		private LocatingPredicate(int depth, string location) : base(depth) {
-			Location = location;
-		}
-
-		public override bool Check(DepthInfo info) {
-			return info.Location == Location;
-		}
-
-		protected bool Equals(LocatingPredicate other) {
-			return Depth == other.Depth && Location == other.Location;
-		}
-
-		public override bool Equals(object obj) {
-			if (ReferenceEquals(null, obj)) {
-				return false;
-			}
-			if (ReferenceEquals(this, obj)) {
-				return true;
-			}
-			if (obj.GetType() != GetType()) {
-				return false;
-			}
-			return Equals((LocatingPredicate)obj);
-		}
-
-		public override int GetHashCode() {
-			unchecked {
-				return (Depth * 397) ^ Location.GetHashCode();
-			}
-		}
-
-		public static LocatingPredicate Create(int depth, XElement element) {
-			return new LocatingPredicate(depth, Locate(element));
-		}
-
-		public static string Locate(XElement target) {
-			return target.Attribute("id").Value;
-		}
-	}
-
-	public class SurroundingElementsPredicate {
-		public string Key { get; set; }
-		public string Value { get; private set; }
-
-		public SurroundingElementsPredicate(string key, string value) {
-			Contract.Requires(value != null);
-			Key = key;
-			Value = value;
-		}
-
-		public bool Check(Dictionary<string, CountingSet<string>> dict) {
-			CountingSet<string> values;
-			if (!dict.TryGetValue(Key, out values)) {
-				return false;
-			}
-			return values.Contains(Value);
-		}
-
-		public static IEnumerable<SurroundingElementsPredicate> Create(
-				XElement target, int length) {
-			return GetSurroundingElements(target, length)
-					.SelectMany(
-							kv => kv.Value.Select(
-									value =>
-											new SurroundingElementsPredicate(kv.Key, value)));
-		}
-
-		public static Dictionary<string, CountingSet<string>> GetSurroundingElements(
-				XElement target, int length) {
-			return GetSurroundingElements(Enumerable.Repeat(target, 1), length);
-		}
-
-		public static Dictionary<string, CountingSet<string>> GetSurroundingElements(
-				IEnumerable<XElement> targets, int length) {
-			var ret = new Dictionary<string, CountingSet<string>>();
-			foreach (var target in targets) {
-				var dict = target.SurroundingElementsWithSelf(length)
-						.Select(
-								kv => Tuple.Create(
-										kv.Key,
-										kv.Value.Select(e => e.NameOrTokenWithId()).ToHashSet().ToCountingSet()))
-						.ToDictionary(kv => kv.Item1, kv => kv.Item2);
-				foreach (var kv in dict) {
-					CountingSet<string> set;
-					if (ret.TryGetValue(kv.Key, out set)) {
-						set.UnionWith(kv.Value);
-					} else {
-						ret.Add(kv.Key, kv.Value);
-					}
-				}
-			}
-			return ret;
-		}
-
-		protected bool Equals(SurroundingElementsPredicate other) {
-			return string.Equals(Key, other.Key) && string.Equals(Value, other.Value);
-		}
-
-		public override bool Equals(object obj) {
-			if (ReferenceEquals(null, obj)) {
-				return false;
-			}
-			if (ReferenceEquals(this, obj)) {
-				return true;
-			}
-			if (obj.GetType() != GetType()) {
-				return false;
-			}
-			return Equals((SurroundingElementsPredicate)obj);
-		}
-
-		public override int GetHashCode() {
-			unchecked {
-				return ((Key != null ? Key.GetHashCode() : 0) * 397) ^ (Value != null ? Value.GetHashCode() : 0);
-			}
-		}
-
-		public override string ToString() {
-			return string.Format("Key: {0}, Value: {1}", Key, Value);
-		}
-	}
-
-	public class ContainingTokenTextPredicate : DepthBasedPredicate {
-		public string Text { get; private set; }
-
-		private ContainingTokenTextPredicate(int depth, string text) : base(depth) {
-			Contract.Requires(text != null);
-			Text = text;
-		}
-
-		public override bool Check(DepthInfo info) {
-			return info.TokenTexts.Contains(Text);
-		}
-
-		protected bool Equals(ContainingTokenTextPredicate other) {
-			return Depth == other.Depth && String.Equals(Text, other.Text);
-		}
-
-		public override bool Equals(object obj) {
-			if (ReferenceEquals(null, obj)) {
-				return false;
-			}
-			if (ReferenceEquals(this, obj)) {
-				return true;
-			}
-			if (obj.GetType() != GetType()) {
-				return false;
-			}
-			return Equals((ContainingTokenTextPredicate)obj);
-		}
-
-		public override int GetHashCode() {
-			unchecked {
-				return (Depth * 397) ^ (Text != null ? Text.GetHashCode() : 0);
-			}
-		}
-
-		public static IEnumerable<ContainingTokenTextPredicate> Create(
-				int depth, IList<XElement> elements) {
-			return GetTokenTexts(elements)
-					.Select(text => new ContainingTokenTextPredicate(depth, text));
-		}
-
-		public static HashSet<string> GetTokenTexts(IList<XElement> elements) {
-			return elements.Descendants()
-					.Where(e => e.IsTokenSet())
-					.Take(30)
-					.Select(e => e.TokenText())
-					.ToHashSet();
-		}
-	}
-
-	public class ContainingElementNamePredicate : DepthBasedPredicate {
-		public string Name { get; private set; }
-
-		private ContainingElementNamePredicate(int depth, string name) : base(depth) {
-			Contract.Requires(name != null);
-			Name = name;
-		}
-
-		public override bool Check(DepthInfo info) {
-			return info.ElementNames.Contains(Name);
-		}
-
-		protected bool Equals(ContainingElementNamePredicate other) {
-			return Depth == other.Depth && String.Equals(Name, other.Name);
-		}
-
-		public override bool Equals(object obj) {
-			if (ReferenceEquals(null, obj)) {
-				return false;
-			}
-			if (ReferenceEquals(this, obj)) {
-				return true;
-			}
-			if (obj.GetType() != GetType()) {
-				return false;
-			}
-			return Equals((ContainingElementNamePredicate)obj);
-		}
-
-		public override int GetHashCode() {
-			unchecked {
-				return (Depth * 397) ^ (Name != null ? Name.GetHashCode() : 0);
-			}
-		}
-
-		public static IEnumerable<ContainingElementNamePredicate> Create(
-				int depth, IList<XElement> elements) {
-			return GetElementNames(elements)
-					.Select(name => new ContainingElementNamePredicate(depth, name));
-		}
-
-		public static HashSet<string> GetElementNames(IList<XElement> elements) {
-			return elements.Select(e => e.Name())
-					.ToHashSet();
-		}
-	}
-
-	public class MatchingElementSequencePredicate : DepthBasedPredicate {
-		public string Sequence { get; private set; }
-
-		private MatchingElementSequencePredicate(int depth, string sequence) : base(depth) {
-			Contract.Requires(sequence != null);
-			Sequence = sequence;
-		}
-
-		public override bool Check(DepthInfo info) {
-			return info.ElementSequence == Sequence;
-		}
-
-		protected bool Equals(MatchingElementSequencePredicate other) {
-			return Depth == other.Depth && String.Equals(Sequence, other.Sequence);
-		}
-
-		public override bool Equals(object obj) {
-			if (ReferenceEquals(null, obj)) {
-				return false;
-			}
-			if (ReferenceEquals(this, obj)) {
-				return true;
-			}
-			if (obj.GetType() != GetType()) {
-				return false;
-			}
-			return Equals((MatchingElementSequencePredicate)obj);
-		}
-
-		public override int GetHashCode() {
-			unchecked {
-				return (Depth * 397) ^ (Sequence != null ? Sequence.GetHashCode() : 0);
-			}
-		}
-
-		public static MatchingElementSequencePredicate Create(int depth, IList<XElement> elements) {
-			return new MatchingElementSequencePredicate(depth, GetSequence(elements));
-		}
-
-		public static string GetSequence(IList<XElement> elements) {
-			return String.Join(
-					"/",
-					elements.Select(
-							e => e.Name() == Code2XmlConstants.TokenSetElementName ? e.TokenText() : e.Name()));
-		}
-	}
-
-	public class MatchingBeforeElementSequencePredicate : DepthBasedPredicate {
-		public string Sequence { get; private set; }
-
-		private MatchingBeforeElementSequencePredicate(int depth, string sequence) : base(depth) {
-			Contract.Requires(sequence != null);
-			Sequence = sequence;
-		}
-
-		public override bool Check(DepthInfo info) {
-			return info.BeforeElementSequence == Sequence;
-		}
-
-		protected bool Equals(MatchingBeforeElementSequencePredicate other) {
-			return Depth == other.Depth && String.Equals(Sequence, other.Sequence);
-		}
-
-		public override bool Equals(object obj) {
-			if (ReferenceEquals(null, obj)) {
-				return false;
-			}
-			if (ReferenceEquals(this, obj)) {
-				return true;
-			}
-			if (obj.GetType() != GetType()) {
-				return false;
-			}
-			return Equals((MatchingBeforeElementSequencePredicate)obj);
-		}
-
-		public override int GetHashCode() {
-			unchecked {
-				return (Depth * 397) ^ (Sequence != null ? Sequence.GetHashCode() : 0);
-			}
-		}
-
-		public static MatchingBeforeElementSequencePredicate Create(int depth, XElement element) {
-			return new MatchingBeforeElementSequencePredicate(depth, GetSequence(element));
-		}
-
-		public static string GetSequence(XElement element) {
-			return String.Join(
-					"/",
-					element.ElementsBeforeSelf().Select(
-							e => e.Name() == Code2XmlConstants.TokenSetElementName ? e.TokenText() : e.Name()));
-		}
-	}
-
-	public class MatchingAfterElementSequencePredicate : DepthBasedPredicate {
-		public string Sequence { get; private set; }
-
-		private MatchingAfterElementSequencePredicate(int depth, string sequence) : base(depth) {
-			Contract.Requires(sequence != null);
-			Sequence = sequence;
-		}
-
-		public override bool Check(DepthInfo info) {
-			return info.AfterElementSequence == Sequence;
-		}
-
-		protected bool Equals(MatchingAfterElementSequencePredicate other) {
-			return Depth == other.Depth && String.Equals(Sequence, other.Sequence);
-		}
-
-		public override bool Equals(object obj) {
-			if (ReferenceEquals(null, obj)) {
-				return false;
-			}
-			if (ReferenceEquals(this, obj)) {
-				return true;
-			}
-			if (obj.GetType() != GetType()) {
-				return false;
-			}
-			return Equals((MatchingAfterElementSequencePredicate)obj);
-		}
-
-		public override int GetHashCode() {
-			unchecked {
-				return (Depth * 397) ^ (Sequence != null ? Sequence.GetHashCode() : 0);
-			}
-		}
-
-		public static MatchingAfterElementSequencePredicate Create(int depth, XElement element) {
-			return new MatchingAfterElementSequencePredicate(depth, GetSequence(element));
-		}
-
-		public static string GetSequence(XElement element) {
-			return String.Join(
-					"/",
-					element.ElementsAfterSelf().Select(
-							e => e.Name() == Code2XmlConstants.TokenSetElementName ? e.TokenText() : e.Name()));
-		}
-	}
-
-	public class MatchingElementAndTokenSequencePredicate : DepthBasedPredicate {
-		public string Sequence { get; private set; }
-
-		private MatchingElementAndTokenSequencePredicate(int depth, string sequence) : base(depth) {
-			Contract.Requires(sequence != null);
-			Sequence = sequence;
-		}
-
-		public override bool Check(DepthInfo info) {
-			return info.ElementAndTokenSequence == Sequence;
-		}
-
-		protected bool Equals(MatchingElementAndTokenSequencePredicate other) {
-			return Depth == other.Depth && string.Equals(Sequence, other.Sequence);
-		}
-
-		public override bool Equals(object obj) {
-			if (ReferenceEquals(null, obj)) {
-				return false;
-			}
-			if (ReferenceEquals(this, obj)) {
-				return true;
-			}
-			if (obj.GetType() != GetType()) {
-				return false;
-			}
-			return Equals((MatchingElementAndTokenSequencePredicate)obj);
-		}
-
-		public override int GetHashCode() {
-			unchecked {
-				return (Depth * 397) ^ (Sequence != null ? Sequence.GetHashCode() : 0);
-			}
-		}
-
-		public static MatchingElementAndTokenSequencePredicate Create(int depth, IList<XElement> elements) {
-			return new MatchingElementAndTokenSequencePredicate(depth, GetSequence(elements));
-		}
-
-		public static string GetSequence(IList<XElement> elements) {
-			return String.Join("/", elements.Select(e => e.IsTokenSet() ? e.TokenText() : e.Name()));
-		}
-	}
-
-	public static class PredicateGenerator {
-		public static string BigIntegerToString(BigInteger i, int width) {
-			var ret = "";
-			while (i != BigInteger.Zero) {
-				if ((i & BigInteger.One) != BigInteger.Zero) {
-					ret = "1" + ret;
-				} else {
-					ret = "0" + ret;
-				}
-				width--;
-				i >>= 1;
-			}
-			while (--width >= 0) {
-				ret = "0" + ret;
-			}
-			return ret;
-		}
-
-		public static BigInteger StringToBigInteger(string s) {
-			var ret = BigInteger.Zero;
-			foreach (var ch in s) {
-				ret <<= 1;
-				if (ch == '1') {
-					ret |= BigInteger.One;
-				}
-			}
-			return ret;
-		}
-
-		public static HashSet<string> GetUnionKeys(
-				this IEnumerable<XElement> targets, int length, bool inner = true, bool outer = true) {
-			var commonKeys = new HashSet<string>();
-			foreach (var target in targets) {
-				var keys = target.GetSurroundingKeys(length, inner, outer);
-				commonKeys.UnionWith(keys);
-			}
-			return commonKeys;
-		}
-
-		public static HashSet<string> GetCommonKeys(
-				this IEnumerable<XElement> targets, int length, bool inner = true, bool outer = true) {
-			HashSet<string> commonKeys = null;
-			foreach (var target in targets) {
-				var keys = target.GetSurroundingKeys(length, inner, outer);
-				if (commonKeys == null) {
-					commonKeys = keys;
-				} else {
-					commonKeys.IntersectWith(keys);
-				}
-			}
-			return commonKeys;
-		}
-
-		public static HashSet<string> GetSurroundingKeys(
-				this XElement element, int length, bool inner = true, bool outer = true) {
-			//inner = outer = true;
-
-			var ret = new HashSet<string>();
-			var childElements = new List<Tuple<XElement, string>>();
-			if (inner) {
-				childElements.Add(Tuple.Create(element, element.Name()));
-				var ancestorStr = "";
-				foreach (var e in element.AncestorsOfOnlyChildAndSelf()) {
-					ancestorStr = ancestorStr + "<" + e.NameWithId();
-					ret.Add(ancestorStr);
-				}
-			}
-			var i = 1;
-			if (outer) {
-				var parentElement = Tuple.Create(element, element.Name());
-				var descendantStr = "";
-				foreach (var e in element.DescendantsOfOnlyChildAndSelf()) {
-					descendantStr = descendantStr + "<" + e.NameWithId();
-					ret.Add(descendantStr);
-				}
-				// 自分自身の位置による区別も考慮する
-				ret.Add(element.NameOrTokenWithId());
-				for (; i <= length; i++) {
-					var newChildElements = new List<Tuple<XElement, string>>();
-					foreach (var t in childElements.Where(t2 => !t2.Item1.IsTokenSet())) {
-						foreach (var e in t.Item1.Elements()) {
-							var key = t.Item2 + ">" + e.NameOrTokenWithId();
-							newChildElements.Add(Tuple.Create(e, key));
-							// トークンが存在するかチェックする弱い条件
-							// for Preconditions.checkArguments()
-							ret.Add(t.Item2 + ">'" + e.TokenText() + "'");
-						}
-						foreach (var e in t.Item1.Descendants().Where(e => e.IsTokenSet())) {
-							// トークンが存在するかチェックする弱い条件
-							//ret.Add(t.Item2 + ">>'" + e.TokenText() + "'");
-						}
-					}
-					foreach (var e in parentElement.Item1.Siblings(10)) {
-						var key = parentElement.Item2 + "-" + e.NameOrTokenWithId();
-						newChildElements.Add(Tuple.Create(e, key));
-						// トークンが存在するかチェックする弱い条件
-						// for Preconditions.checkArguments()
-						ret.Add(parentElement.Item2 + "-'" + e.TokenText() + "'");
-						//// 先祖に存在するかチェックする弱い条件
-						//var iLastName = parentElement.Item2.LastIndexOf("<");
-						//var weakKey = "<<" + parentElement.Item2.Substring(iLastName + 1) + "-" + e.NameOrTokenWithId();
-						//newChildElements.Add(Tuple.Create(e, weakKey));
-					}
-					ret.UnionWith(newChildElements.Select(t => t.Item2));
-					childElements = newChildElements;
-
-					var newParentElement = parentElement.Item1.Parent;
-					if (newParentElement == null) {
-						break;
-					}
-					parentElement = Tuple.Create(
-							newParentElement,
-							parentElement.Item2 + "<" + newParentElement.NameOrTokenWithId());
-					ret.Add(parentElement.Item2);
-				}
-			}
-			for (; i <= length; i++) {
-				var newChildElements = new List<Tuple<XElement, string>>();
-				foreach (var t in childElements.Where(t2 => !t2.Item1.IsTokenSet())) {
-					foreach (var e in t.Item1.Elements()) {
-						var key = t.Item2 + ">" + e.NameOrTokenWithId();
-						newChildElements.Add(Tuple.Create(e, key));
-						// トークンが存在するかチェックする弱い条件
-						// for Preconditions.checkArguments()
-						ret.Add(t.Item2 + ">'" + e.TokenText() + "'");
-					}
-				}
-				ret.UnionWith(newChildElements.Select(t => t.Item2));
-				childElements = newChildElements;
-			}
-			return ret;
-		}
-
-		public static BigInteger GetSurroundingBits(
-				this XElement element, int length, IDictionary<string, BigInteger> key2Bit, bool inner = true,
-				bool outer = true) {
-			//inner = outer = true;
-
-			var ret = BigInteger.Zero;
-			BigInteger bit;
-			var childElements = new List<Tuple<XElement, string>>();
-			if (inner) {
-				childElements.Add(Tuple.Create(element, element.Name()));
-				var parentStr = "";
-				foreach (var e in element.AncestorsOfOnlyChildAndSelf()) {
-					parentStr = parentStr + "<" + e.NameWithId();
-					if (key2Bit.TryGetValue(parentStr, out bit)) {
-						ret |= bit;
-					}
-				}
-			}
-			var i = 1;
-			if (outer) {
-				var parentElement = Tuple.Create(element, element.Name());
-				var descendantStr = "";
-				foreach (var e in element.DescendantsOfOnlyChildAndSelf()) {
-					descendantStr = descendantStr + "<" + e.NameWithId();
-					if (key2Bit.TryGetValue(descendantStr, out bit)) {
-						ret |= bit;
-					}
-				}
-				// 自分自身の位置による区別も考慮する
-				if (key2Bit.TryGetValue(element.NameOrTokenWithId(), out bit)) {
-					ret |= bit;
-				}
-				for (; i <= length; i++) {
-					var newChildElements = new List<Tuple<XElement, string>>();
-					foreach (var t in childElements.Where(t2 => !t2.Item1.IsTokenSet())) {
-						foreach (var e in t.Item1.Elements()) {
-							var key = t.Item2 + ">" + e.NameOrTokenWithId();
-							if (key2Bit.TryGetValue(key, out bit)) {
-								newChildElements.Add(Tuple.Create(e, key));
-								ret |= bit;
-							}
-							// トークンが存在するかチェックする弱い条件
-							// for Preconditions.checkArguments()
-							if (key2Bit.TryGetValue(t.Item2 + ">'" + e.TokenText() + "'", out bit)) {
-								ret |= bit;
-							}
-						}
-						foreach (var e in t.Item1.Descendants().Where(e => e.IsTokenSet())) {
-							// トークンが存在するかチェックする弱い条件
-							//ret.Add(t.Item2 + ">>'" + e.TokenText() + "'");
-						}
-					}
-					foreach (var e in parentElement.Item1.Siblings(10)) {
-						var key = parentElement.Item2 + "-" + e.NameOrTokenWithId();
-						if (key2Bit.TryGetValue(key, out bit)) {
-							newChildElements.Add(Tuple.Create(e, key));
-							ret |= bit;
-						}
-						// トークンが存在するかチェックする弱い条件
-						// for Preconditions.checkArguments()
-						if (key2Bit.TryGetValue(parentElement.Item2 + "-'" + e.TokenText() + "'", out bit)) {
-							ret |= bit;
-						}
-						//// 先祖に存在するかチェックする弱い条件
-						//var iLastName = parentElement.Item2.LastIndexOf("<");
-						//var weakKey = "<<" + parentElement.Item2.Substring(iLastName + 1) + "-" + e.NameOrTokenWithId();
-						//newChildElements.Add(Tuple.Create(e, weakKey));
-					}
-					childElements = newChildElements;
-
-					var newParentElement = parentElement.Item1.Parent;
-					if (newParentElement == null) {
-						break;
-					}
-					parentElement = Tuple.Create(
-							newParentElement,
-							parentElement.Item2 + "<" + newParentElement.NameOrTokenWithId());
-					if (key2Bit.TryGetValue(parentElement.Item2, out bit)) {
-						ret |= bit;
-					} else {
-						break;
-					}
-				}
-			}
-			for (; i <= length; i++) {
-				var newChildElements = new List<Tuple<XElement, string>>();
-				foreach (var t in childElements.Where(t2 => !t2.Item1.IsTokenSet())) {
-					foreach (var e in t.Item1.Elements()) {
-						var key = t.Item2 + ">" + e.NameOrTokenWithId();
-						if (key2Bit.TryGetValue(key, out bit)) {
-							newChildElements.Add(Tuple.Create(e, key));
-							ret |= bit;
-						}
-						// トークンが存在するかチェックする弱い条件
-						// for Preconditions.checkArguments()
-						if (key2Bit.TryGetValue(t.Item2 + ">'" + e.TokenText() + "'", out bit)) {
-							ret |= bit;
-						}
-					}
-				}
-				childElements = newChildElements;
-			}
-			return ret;
-		}
-
-		public static IEnumerable<string> test(
-				this XElement element, int length, IList<string> predicateKeys,
-				List<List<Tuple<XElement, string>>> descendants) {
-			var maxLevel = descendants.Count - 1;
-			for (int i = 1; i < maxLevel; i++) {
-				var tuples = descendants[i];
-				foreach (var t in tuples) {
-					yield return t.Item2;
-				}
-			}
-			for (int i = maxLevel; i < length; i++) {
-				var tuples = descendants[i];
-				foreach (var t in tuples) {
-					foreach (var e in t.Item1.Elements()) {
-						var key = t.Item2 + ">" + e.NameOrTokenWithId();
-						descendants[i + 1].Add(Tuple.Create(e, key));
-						yield return key;
-					}
-				}
-			}
-		}
-
-		public static Dictionary<string, List<XElement>> SurroundingElementsWithSelf(
-				this XElement element, int length) {
-			var ret = new Dictionary<string, List<XElement>>();
-			var childKeys = new List<string> { "" };
-			ret[""] = new List<XElement> { element };
-			var parentKey = "";
-			var parent = element;
-			var i = 1;
-			for (; i <= length; i++) {
-				var newChildKeys = new List<string>();
-				foreach (var childKey in childKeys) {
-					foreach (var e in ret[childKey].Where(e2 => !e2.IsTokenSet())) {
-						var key = childKey + e.NameWithId() + ">";
-						ret[key] = e.Elements().ToList();
-						newChildKeys.Add(key);
-					}
-				}
-				{
-					var key = parentKey + parent.NameWithId() + "-";
-					ret[key] = parent.Siblings(10).ToList();
-					newChildKeys.Add(key);
-				}
-				childKeys = newChildKeys;
-				parentKey += parent.NameWithId() + "<";
-				parent = parent.Parent;
-				if (parent == null) {
-					break;
-				}
-				ret[parentKey] = new List<XElement> { parent };
-			}
-			for (; i <= length; i++) {
-				var newChildKeys = new List<string>();
-				foreach (var childKey in childKeys) {
-					foreach (var e in ret[childKey].Where(e2 => !e2.IsTokenSet())) {
-						var key = childKey + e.NameWithId() + ">";
-						ret[key] = e.Elements().ToList();
-						newChildKeys.Add(key);
-					}
-				}
-				childKeys = newChildKeys;
-			}
-			ret.Remove("");
-			return ret;
-		}
-
-		public static IEnumerable<DepthBasedPredicate> InferDepthBasedPredicate(
-				XElement root, int depthCount) {
-			yield break;
-			var depth = 0;
-			//foreach (var element in root.AncestorsAndSelf(4)) {
-			//	var elements = element.SiblingsAndSelf();
-			//	foreach (var predicate in ContainingTokenTextPredicate.Create(depth, elements)) {
-			//		yield return predicate;
-			//	}
-			//	depth--;
-			//}
-			//depth = 0;
-			foreach (var element in root.AncestorsAndSelf(depthCount)) {
-				var elements = element.SiblingsAndSelf().ToList();
-				yield return LocatingPredicate.Create(depth, element);
-				//yield return MatchingBeforeElementSequencePredicate.Create(depth, element);
-				//yield return MatchingAfterElementSequencePredicate.Create(depth, element);
-				foreach (var predicate in ContainingTokenTextPredicate.Create(depth, elements)) {
-					yield return predicate;
-				}
-				foreach (var predicate in ContainingElementNamePredicate.Create(depth, elements)) {
-					yield return predicate;
-				}
-				//yield return MatchingElementSequencePredicate.Create(depth, elements);
-				//yield return MatchingElementAndTokenSequencePredicate.Create(depth, elements);
-				depth--;
-			}
-
-			depth = 0;
-			foreach (var elements in root.Descendants(depthCount)) {
-				depth++;
-				foreach (var predicate in ContainingTokenTextPredicate.Create(depth, elements)) {
-					yield return predicate;
-				}
-				foreach (var predicate in ContainingElementNamePredicate.Create(depth, elements)) {
-					yield return predicate;
-				}
-				//yield return MatchingElementSequencePredicate.Create(depth, elements);
-				//yield return MatchingElementAndTokenSequencePredicate.Create(depth, elements);
-			}
-		}
-
-		public static HashSet<string> GetSurroundingKeys2(
-				this XElement element, int length, bool inner = true, bool outer = true) {
-			//inner = outer = true;
-
-			var ret = new HashSet<string>();
-			var childElements = new List<Tuple<XElement, string>>();
-			if (inner) {
-				childElements.Add(Tuple.Create(element, element.Name()));
-				var ancestorStr = "";
-				foreach (var e in element.AncestorsOfOnlyChildAndSelf()) {
-					ancestorStr = ancestorStr + "<" + e.NameWithId();
-					ret.Add(ancestorStr);
-				}
-			}
-			var i = 1;
-			if (outer) {
-				var parentElement = Tuple.Create(element, element.Name());
-				var descendantStr = "";
-				foreach (var e in element.DescendantsOfOnlyChildAndSelf()) {
-					descendantStr = descendantStr + "<" + e.NameWithId();
-					ret.Add(descendantStr);
-				}
-				// 自分自身の位置による区別も考慮する
-				ret.Add(element.NameOrTokenWithId());
-				for (; i <= length; i++) {
-					var newChildElements = new List<Tuple<XElement, string>>();
-					foreach (var t in childElements.Where(t2 => !t2.Item1.IsTokenSet())) {
-						foreach (var e in t.Item1.Elements()) {
-							var key = t.Item2 + ">" + e.NameOrTokenWithId();
-							newChildElements.Add(Tuple.Create(e, key));
-							// トークンが存在するかチェックする弱い条件
-							// for Preconditions.checkArguments()
-							ret.Add(t.Item2 + ">'" + e.TokenText() + "'");
-						}
-						foreach (var e in t.Item1.Descendants().Where(e => e.IsTokenSet())) {
-							// トークンが存在するかチェックする弱い条件
-							//ret.Add(t.Item2 + ">>'" + e.TokenText() + "'");
-						}
-					}
-					foreach (var e in parentElement.Item1.Siblings(10)) {
-						var key = parentElement.Item2 + "-" + e.NameOrTokenWithId();
-						newChildElements.Add(Tuple.Create(e, key));
-						// トークンが存在するかチェックする弱い条件
-						// for Preconditions.checkArguments()
-						ret.Add(parentElement.Item2 + "-'" + e.TokenText() + "'");
-						//// 先祖に存在するかチェックする弱い条件
-						//var iLastName = parentElement.Item2.LastIndexOf("<");
-						//var weakKey = "<<" + parentElement.Item2.Substring(iLastName + 1) + "-" + e.NameOrTokenWithId();
-						//newChildElements.Add(Tuple.Create(e, weakKey));
-					}
-					ret.UnionWith(newChildElements.Select(t => t.Item2));
-					childElements = newChildElements;
-
-					var newParentElement = parentElement.Item1.Parent;
-					if (newParentElement == null) {
-						break;
-					}
-					parentElement = Tuple.Create(
-							newParentElement,
-							parentElement.Item2 + "<" + newParentElement.NameOrTokenWithId());
-					ret.Add(parentElement.Item2);
-				}
-			}
-			for (; i <= length; i++) {
-				var newChildElements = new List<Tuple<XElement, string>>();
-				foreach (var t in childElements.Where(t2 => !t2.Item1.IsTokenSet())) {
-					foreach (var e in t.Item1.Elements()) {
-						var key = t.Item2 + ">" + e.NameOrTokenWithId();
-						newChildElements.Add(Tuple.Create(e, key));
-						// トークンが存在するかチェックする弱い条件
-						// for Preconditions.checkArguments()
-						ret.Add(t.Item2 + ">'" + e.TokenText() + "'");
-					}
-				}
-				ret.UnionWith(newChildElements.Select(t => t.Item2));
-				childElements = newChildElements;
-			}
-			return ret;
-		}
-
-	}
+    public static class PredicateGenerator {
+        public static string BigIntegerToString(BigInteger i, int width) {
+            var ret = "";
+            while (i != BigInteger.Zero) {
+                if ((i & BigInteger.One) != BigInteger.Zero) {
+                    ret = "1" + ret;
+                } else {
+                    ret = "0" + ret;
+                }
+                width--;
+                i >>= 1;
+            }
+            while (--width >= 0) {
+                ret = "0" + ret;
+            }
+            return ret;
+        }
+
+        public static BigInteger StringToBigInteger(string s) {
+            var ret = BigInteger.Zero;
+            foreach (var ch in s) {
+                ret <<= 1;
+                if (ch == '1') {
+                    ret |= BigInteger.One;
+                }
+            }
+            return ret;
+        }
+
+        public static HashSet<string> GetUnionKeys(
+                this IEnumerable<XElement> targets, int length, bool inner = true, bool outer = true) {
+            var commonKeys = new HashSet<string>();
+            foreach (var target in targets) {
+                var keys = target.GetSurroundingKeys(length, inner, outer);
+                commonKeys.UnionWith(keys);
+            }
+            return commonKeys;
+        }
+
+        public static HashSet<string> GetCommonKeys(
+                this IEnumerable<XElement> targets, int length, bool inner = true, bool outer = true) {
+            HashSet<string> commonKeys = null;
+            foreach (var target in targets) {
+                var keys = target.GetSurroundingKeys(length, inner, outer);
+                if (commonKeys == null) {
+                    commonKeys = keys;
+                } else {
+                    commonKeys.IntersectWith(keys);
+                }
+            }
+            return commonKeys;
+        }
+
+        public static HashSet<string> GetSurroundingKeys(
+                this XElement element, int length, bool inner = true, bool outer = true) {
+            //inner = outer = true;
+
+            var ret = new HashSet<string>();
+            var childElements = new List<Tuple<XElement, string>>();
+            if (inner) {
+                childElements.Add(Tuple.Create(element, element.Name()));
+                var ancestorStr = "";
+                foreach (var e in element.AncestorsOfOnlyChildAndSelf()) {
+                    ancestorStr = ancestorStr + "<" + e.NameWithId();
+                    ret.Add(ancestorStr);
+                }
+            }
+            var i = 1;
+            if (outer) {
+                var parentElement = Tuple.Create(element, element.Name());
+                var descendantStr = "";
+                foreach (var e in element.DescendantsOfOnlyChildAndSelf()) {
+                    descendantStr = descendantStr + "<" + e.NameWithId();
+                    ret.Add(descendantStr);
+                }
+                // 自分自身の位置による区別も考慮する
+                ret.Add(element.NameOrTokenWithId());
+                for (; i <= length; i++) {
+                    var newChildElements = new List<Tuple<XElement, string>>();
+                    foreach (var t in childElements.Where(t2 => !t2.Item1.IsTokenSet())) {
+                        foreach (var e in t.Item1.Elements()) {
+                            var key = t.Item2 + ">" + e.NameOrTokenWithId();
+                            newChildElements.Add(Tuple.Create(e, key));
+                            // トークンが存在するかチェックする弱い条件
+                            // for Preconditions.checkArguments()
+                            ret.Add(t.Item2 + ">'" + e.TokenText() + "'");
+                        }
+                        foreach (var e in t.Item1.Descendants().Where(e => e.IsTokenSet())) {
+                            // トークンが存在するかチェックする弱い条件
+                            //ret.Add(t.Item2 + ">>'" + e.TokenText() + "'");
+                        }
+                    }
+                    foreach (var e in parentElement.Item1.Siblings(10)) {
+                        var key = parentElement.Item2 + "-" + e.NameOrTokenWithId();
+                        newChildElements.Add(Tuple.Create(e, key));
+                        // トークンが存在するかチェックする弱い条件
+                        // for Preconditions.checkArguments()
+                        ret.Add(parentElement.Item2 + "-'" + e.TokenText() + "'");
+                        //// 先祖に存在するかチェックする弱い条件
+                        //var iLastName = parentElement.Item2.LastIndexOf("<");
+                        //var weakKey = "<<" + parentElement.Item2.Substring(iLastName + 1) + "-" + e.NameOrTokenWithId();
+                        //newChildElements.Add(Tuple.Create(e, weakKey));
+                    }
+                    ret.UnionWith(newChildElements.Select(t => t.Item2));
+                    childElements = newChildElements;
+
+                    var newParentElement = parentElement.Item1.Parent;
+                    if (newParentElement == null) {
+                        break;
+                    }
+                    parentElement = Tuple.Create(
+                            newParentElement,
+                            parentElement.Item2 + "<" + newParentElement.NameOrTokenWithId());
+                    ret.Add(parentElement.Item2);
+                }
+            }
+            for (; i <= length; i++) {
+                var newChildElements = new List<Tuple<XElement, string>>();
+                foreach (var t in childElements.Where(t2 => !t2.Item1.IsTokenSet())) {
+                    foreach (var e in t.Item1.Elements()) {
+                        var key = t.Item2 + ">" + e.NameOrTokenWithId();
+                        newChildElements.Add(Tuple.Create(e, key));
+                        // トークンが存在するかチェックする弱い条件
+                        // for Preconditions.checkArguments()
+                        ret.Add(t.Item2 + ">'" + e.TokenText() + "'");
+                    }
+                }
+                ret.UnionWith(newChildElements.Select(t => t.Item2));
+                childElements = newChildElements;
+            }
+            return ret;
+        }
+
+        public static BigInteger GetSurroundingBits(
+                this XElement element, int length, IDictionary<string, BigInteger> key2Bit,
+                bool inner = true,
+                bool outer = true) {
+            //inner = outer = true;
+
+            var ret = BigInteger.Zero;
+            BigInteger bit;
+            var childElements = new List<Tuple<XElement, string>>();
+            if (inner) {
+                childElements.Add(Tuple.Create(element, element.Name()));
+                var parentStr = "";
+                foreach (var e in element.AncestorsOfOnlyChildAndSelf()) {
+                    parentStr = parentStr + "<" + e.NameWithId();
+                    if (key2Bit.TryGetValue(parentStr, out bit)) {
+                        ret |= bit;
+                    }
+                }
+            }
+            var i = 1;
+            if (outer) {
+                var parentElement = Tuple.Create(element, element.Name());
+                var descendantStr = "";
+                foreach (var e in element.DescendantsOfOnlyChildAndSelf()) {
+                    descendantStr = descendantStr + "<" + e.NameWithId();
+                    if (key2Bit.TryGetValue(descendantStr, out bit)) {
+                        ret |= bit;
+                    }
+                }
+                // 自分自身の位置による区別も考慮する
+                if (key2Bit.TryGetValue(element.NameOrTokenWithId(), out bit)) {
+                    ret |= bit;
+                }
+                for (; i <= length; i++) {
+                    var newChildElements = new List<Tuple<XElement, string>>();
+                    foreach (var t in childElements.Where(t2 => !t2.Item1.IsTokenSet())) {
+                        foreach (var e in t.Item1.Elements()) {
+                            var key = t.Item2 + ">" + e.NameOrTokenWithId();
+                            if (key2Bit.TryGetValue(key, out bit)) {
+                                newChildElements.Add(Tuple.Create(e, key));
+                                ret |= bit;
+                            }
+                            // トークンが存在するかチェックする弱い条件
+                            // for Preconditions.checkArguments()
+                            if (key2Bit.TryGetValue(t.Item2 + ">'" + e.TokenText() + "'", out bit)) {
+                                ret |= bit;
+                            }
+                        }
+                        foreach (var e in t.Item1.Descendants().Where(e => e.IsTokenSet())) {
+                            // トークンが存在するかチェックする弱い条件
+                            //ret.Add(t.Item2 + ">>'" + e.TokenText() + "'");
+                        }
+                    }
+                    foreach (var e in parentElement.Item1.Siblings(10)) {
+                        var key = parentElement.Item2 + "-" + e.NameOrTokenWithId();
+                        if (key2Bit.TryGetValue(key, out bit)) {
+                            newChildElements.Add(Tuple.Create(e, key));
+                            ret |= bit;
+                        }
+                        // トークンが存在するかチェックする弱い条件
+                        // for Preconditions.checkArguments()
+                        if (key2Bit.TryGetValue(
+                                parentElement.Item2 + "-'" + e.TokenText() + "'", out bit)) {
+                            ret |= bit;
+                        }
+                        //// 先祖に存在するかチェックする弱い条件
+                        //var iLastName = parentElement.Item2.LastIndexOf("<");
+                        //var weakKey = "<<" + parentElement.Item2.Substring(iLastName + 1) + "-" + e.NameOrTokenWithId();
+                        //newChildElements.Add(Tuple.Create(e, weakKey));
+                    }
+                    childElements = newChildElements;
+
+                    var newParentElement = parentElement.Item1.Parent;
+                    if (newParentElement == null) {
+                        break;
+                    }
+                    parentElement = Tuple.Create(
+                            newParentElement,
+                            parentElement.Item2 + "<" + newParentElement.NameOrTokenWithId());
+                    if (key2Bit.TryGetValue(parentElement.Item2, out bit)) {
+                        ret |= bit;
+                    } else {
+                        break;
+                    }
+                }
+            }
+            for (; i <= length; i++) {
+                var newChildElements = new List<Tuple<XElement, string>>();
+                foreach (var t in childElements.Where(t2 => !t2.Item1.IsTokenSet())) {
+                    foreach (var e in t.Item1.Elements()) {
+                        var key = t.Item2 + ">" + e.NameOrTokenWithId();
+                        if (key2Bit.TryGetValue(key, out bit)) {
+                            newChildElements.Add(Tuple.Create(e, key));
+                            ret |= bit;
+                        }
+                        // トークンが存在するかチェックする弱い条件
+                        // for Preconditions.checkArguments()
+                        if (key2Bit.TryGetValue(t.Item2 + ">'" + e.TokenText() + "'", out bit)) {
+                            ret |= bit;
+                        }
+                    }
+                }
+                childElements = newChildElements;
+            }
+            return ret;
+        }
+
+        public static IEnumerable<string> test(
+                this XElement element, int length, IList<string> predicateKeys,
+                List<List<Tuple<XElement, string>>> descendants) {
+            var maxLevel = descendants.Count - 1;
+            for (int i = 1; i < maxLevel; i++) {
+                var tuples = descendants[i];
+                foreach (var t in tuples) {
+                    yield return t.Item2;
+                }
+            }
+            for (int i = maxLevel; i < length; i++) {
+                var tuples = descendants[i];
+                foreach (var t in tuples) {
+                    foreach (var e in t.Item1.Elements()) {
+                        var key = t.Item2 + ">" + e.NameOrTokenWithId();
+                        descendants[i + 1].Add(Tuple.Create(e, key));
+                        yield return key;
+                    }
+                }
+            }
+        }
+
+        public static Dictionary<string, List<XElement>> SurroundingElementsWithSelf(
+                this XElement element, int length) {
+            var ret = new Dictionary<string, List<XElement>>();
+            var childKeys = new List<string> { "" };
+            ret[""] = new List<XElement> { element };
+            var parentKey = "";
+            var parent = element;
+            var i = 1;
+            for (; i <= length; i++) {
+                var newChildKeys = new List<string>();
+                foreach (var childKey in childKeys) {
+                    foreach (var e in ret[childKey].Where(e2 => !e2.IsTokenSet())) {
+                        var key = childKey + e.NameWithId() + ">";
+                        ret[key] = e.Elements().ToList();
+                        newChildKeys.Add(key);
+                    }
+                }
+                {
+                    var key = parentKey + parent.NameWithId() + "-";
+                    ret[key] = parent.Siblings(10).ToList();
+                    newChildKeys.Add(key);
+                }
+                childKeys = newChildKeys;
+                parentKey += parent.NameWithId() + "<";
+                parent = parent.Parent;
+                if (parent == null) {
+                    break;
+                }
+                ret[parentKey] = new List<XElement> { parent };
+            }
+            for (; i <= length; i++) {
+                var newChildKeys = new List<string>();
+                foreach (var childKey in childKeys) {
+                    foreach (var e in ret[childKey].Where(e2 => !e2.IsTokenSet())) {
+                        var key = childKey + e.NameWithId() + ">";
+                        ret[key] = e.Elements().ToList();
+                        newChildKeys.Add(key);
+                    }
+                }
+                childKeys = newChildKeys;
+            }
+            ret.Remove("");
+            return ret;
+        }
+
+        public static HashSet<string> GetSurroundingKeys2(
+                this XElement element, int length, bool inner = true, bool outer = true) {
+            //inner = outer = true;
+
+            var ret = new HashSet<string>();
+            var childElements = new List<Tuple<XElement, string>>();
+            if (inner) {
+                childElements.Add(Tuple.Create(element, element.Name()));
+                var ancestorStr = "";
+                foreach (var e in element.AncestorsOfOnlyChildAndSelf()) {
+                    ancestorStr = ancestorStr + "<" + e.NameWithId();
+                    ret.Add(ancestorStr);
+                }
+            }
+            var i = 1;
+            if (outer) {
+                var parentElement = Tuple.Create(element, element.Name());
+                var descendantStr = "";
+                foreach (var e in element.DescendantsOfOnlyChildAndSelf()) {
+                    descendantStr = descendantStr + "<" + e.NameWithId();
+                    ret.Add(descendantStr);
+                }
+                // 自分自身の位置による区別も考慮する
+                ret.Add(element.NameOrTokenWithId());
+                for (; i <= length; i++) {
+                    var newChildElements = new List<Tuple<XElement, string>>();
+                    foreach (var t in childElements.Where(t2 => !t2.Item1.IsTokenSet())) {
+                        foreach (var e in t.Item1.Elements()) {
+                            var key = t.Item2 + ">" + e.NameOrTokenWithId();
+                            newChildElements.Add(Tuple.Create(e, key));
+                            // トークンが存在するかチェックする弱い条件
+                            // for Preconditions.checkArguments()
+                            ret.Add(t.Item2 + ">'" + e.TokenText() + "'");
+                        }
+                        foreach (var e in t.Item1.Descendants().Where(e => e.IsTokenSet())) {
+                            // トークンが存在するかチェックする弱い条件
+                            //ret.Add(t.Item2 + ">>'" + e.TokenText() + "'");
+                        }
+                    }
+                    foreach (var e in parentElement.Item1.Siblings(10)) {
+                        var key = parentElement.Item2 + "-" + e.NameOrTokenWithId();
+                        newChildElements.Add(Tuple.Create(e, key));
+                        // トークンが存在するかチェックする弱い条件
+                        // for Preconditions.checkArguments()
+                        ret.Add(parentElement.Item2 + "-'" + e.TokenText() + "'");
+                        //// 先祖に存在するかチェックする弱い条件
+                        //var iLastName = parentElement.Item2.LastIndexOf("<");
+                        //var weakKey = "<<" + parentElement.Item2.Substring(iLastName + 1) + "-" + e.NameOrTokenWithId();
+                        //newChildElements.Add(Tuple.Create(e, weakKey));
+                    }
+                    ret.UnionWith(newChildElements.Select(t => t.Item2));
+                    childElements = newChildElements;
+
+                    var newParentElement = parentElement.Item1.Parent;
+                    if (newParentElement == null) {
+                        break;
+                    }
+                    parentElement = Tuple.Create(
+                            newParentElement,
+                            parentElement.Item2 + "<" + newParentElement.NameOrTokenWithId());
+                    ret.Add(parentElement.Item2);
+                }
+            }
+            for (; i <= length; i++) {
+                var newChildElements = new List<Tuple<XElement, string>>();
+                foreach (var t in childElements.Where(t2 => !t2.Item1.IsTokenSet())) {
+                    foreach (var e in t.Item1.Elements()) {
+                        var key = t.Item2 + ">" + e.NameOrTokenWithId();
+                        newChildElements.Add(Tuple.Create(e, key));
+                        // トークンが存在するかチェックする弱い条件
+                        // for Preconditions.checkArguments()
+                        ret.Add(t.Item2 + ">'" + e.TokenText() + "'");
+                    }
+                }
+                ret.UnionWith(newChildElements.Select(t => t.Item2));
+                childElements = newChildElements;
+            }
+            return ret;
+        }
+    }
 }
