@@ -199,7 +199,7 @@ namespace Occf.Learner.Core.Tests {
 				string projectPath) {
 			var cacheFile = new FileInfo(
 					Path.Combine(projectPath ?? "", GetType().Name + ".occf_cache_data"));
-			if (string.IsNullOrEmpty(projectPath) || !cacheFile.Exists) {
+			if (true || string.IsNullOrEmpty(projectPath) || !cacheFile.Exists) {
 				var allAsts = allPaths.Select(path => Processor.GenerateXml(new FileInfo(path), null, true));
 				var seedAsts = seedPaths.Select(path => Processor.GenerateXml(new FileInfo(path), null, true))
 						.ToList();
