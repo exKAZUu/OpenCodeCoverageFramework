@@ -94,13 +94,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ClassificationTest.cs" />
     <Compile Include="BitLearningExperimentGroupingWithId.cs" />
     <Compile Include="Experiments\PhpExperiment.cs" />
     <Compile Include="Experiments\CSharpExperiment.cs" />
     <Compile Include="Experiments\JavaScriptExperiment.cs" />
     <Compile Include="Experiments\LuaExperiment.cs" />
-    <Compile Include="CountingSet.cs" />
     <Compile Include="Experiments\JavaExperiment.cs" />
     <Compile Include="Predicate.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
